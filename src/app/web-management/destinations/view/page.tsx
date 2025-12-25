@@ -1,4 +1,4 @@
-import DestinationsViewPage from "@/pages/web-management/destinations/DestinationsViewPage";
+import DestinationsViewPage from "@/components/destinations-components/DestinationsViewPage";
 import React from "react";
 
 const page = () => {

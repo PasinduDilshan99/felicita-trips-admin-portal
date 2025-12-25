@@ -89,7 +89,7 @@ const NavBar = () => {
 
   return (
     <nav className="bg-[#5E35B1] text-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left side - Logo and Company Name */}
           <div className="flex items-center">

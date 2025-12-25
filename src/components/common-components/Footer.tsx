@@ -65,7 +65,7 @@ const Footer = () => {
   return (
     <footer className="bg-white border-t border-gray-200 mt-auto">
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           
           {/* Company Info Column */}
@@ -186,8 +186,8 @@ const Footer = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="bg-gray-50 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="bg-purple-50 border-t border-gray-200">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div className="text-sm text-gray-600 mb-4 md:mb-0">
               <p>© {currentYear} Business Manager. All rights reserved.</p>
