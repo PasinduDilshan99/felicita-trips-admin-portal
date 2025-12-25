@@ -8,7 +8,6 @@ const DestinationPage = () => {
   const destinationsData = webManagementSideBarData.find(
     (item) => item.name === "Destinations"
   );
-
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
     { label: "Web Management", href: WEB_MANAGEMENT_PATH },
