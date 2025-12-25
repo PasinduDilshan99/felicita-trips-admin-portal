@@ -1,10 +1,10 @@
-import LoginPage from "@/pages/LoginPage";
+import RequestAccessPage from "@/pages/RequestAccessPage";
 import React from "react";
 
 const page = () => {
   return (
     <div>
-      <LoginPage />
+      <RequestAccessPage />
     </div>
   );
 };

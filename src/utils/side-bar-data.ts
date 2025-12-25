@@ -1,4 +1,5 @@
 import { SideBarDataType } from "@/types/side-bar-types";
+import { WEB_MANAGEMENT_DESTINATION_PATH, WEB_MANAGEMENT_PATH } from "./constant";
 
 export const webManagementSideBarData: SideBarDataType[] = [
   {
@@ -6,31 +7,31 @@ export const webManagementSideBarData: SideBarDataType[] = [
     name: "Destinations",
     description: "Manage destination locations",
     color: "#3B82F6", // Blue
-    url: "/destinations",
+    url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
     subData: [
       {
         id: 101,
         name: "View Destinations",
         description: "View all destination locations",
-        url: "/destinations"
+        url:`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view`
       },
       {
         id: 102,
         name: "Add Destination",
         description: "Add a new destination location",
-        url: "/destinations/add"
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/add`
       },
       {
         id: 103,
         name: "Update Destination",
         description: "Update existing destination information",
-        url: "/destinations/update"
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/update`
       },
       {
         id: 104,
         name: "Remove Destination",
         description: "Delete destination locations",
-        url: "/destinations/remove"
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/remove`
       }
     ]
   },

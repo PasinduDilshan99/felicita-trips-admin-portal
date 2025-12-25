@@ -11,7 +11,7 @@ export const useAuthCheck = () => {
   useEffect(() => {
     const uniqueCode = sessionStorage.getItem(UNIQUE_CODE_NAME);
     const isLoginPage = pathname === "/login";
-    const isSignupPage = pathname === "/signup";
+    const isSignupPage = pathname === "/request-account";
     const isPublicPage = isLoginPage || isSignupPage;
 
     if (!uniqueCode && !isPublicPage) {
