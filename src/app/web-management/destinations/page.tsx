@@ -1,20 +1,12 @@
-import { useAuth } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import DestinationPage from "@/pages/web-management/destinations/DestinationPage";
-import { useRouter } from "next/navigation";
 import React from "react";
 
 const page = () => {
-  const router = useRouter();
-  const { hasPrivilege } = useAuth();
-
-  if (!hasPrivilege("DESTINATION_VIEW")) {
-    router.back();
-  }
-
   return (
-    <div>
+    <ProtectedRoute requiredPrivileges={["DESTINATION_VIEW"]}>
       <DestinationPage />
-    </div>
+    </ProtectedRoute>
   );
 };
 

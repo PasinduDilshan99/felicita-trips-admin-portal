@@ -38,7 +38,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 104,
         name: "Remove Destination",
         description: "Delete destination locations",
-        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/remove`,
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/terminate`,
         privilege: "DESTINATION_TERMINATE",
       },
     ],

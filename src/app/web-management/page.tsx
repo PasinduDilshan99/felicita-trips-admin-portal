@@ -1,11 +1,12 @@
+import ProtectedRoute from "@/components/ProtectedRoute";
 import WebManagementPage from "@/pages/web-management/WebManagementPage";
 import React from "react";
 
 const page = () => {
   return (
-    <div>
+    <ProtectedRoute requiredPrivileges={["WEB_MANAGEMENT"]}>
       <WebManagementPage />
-    </div>
+    </ProtectedRoute>
   );
 };
 

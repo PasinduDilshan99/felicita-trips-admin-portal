@@ -6,6 +6,8 @@ import {
   SingleDestinationApiResponse,
   AddDestinationRequest,
   AddDestinationApiResponse,
+  TerminateDestinationApiResponse,
+  DestinationsForTerminateResponse,
 } from "@/types/destination-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -126,6 +128,57 @@ export class DestinationService {
       return data;
     } catch (error) {
       console.error("Error adding destination:", error);
+      throw error;
+    }
+  }
+
+  static async getDestinationsForTerminate(): Promise<DestinationsForTerminateResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/v0/api/destination/destination-for-terminate`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: DestinationsForTerminateResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching destinations for terminate:", error);
+      throw error;
+    }
+  }
+
+  static async terminateDestination(
+    destinationId: number
+  ): Promise<TerminateDestinationApiResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/v0/api/destination/terminate-destination`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ destinationId }),
+        }
+      );
+      const data: TerminateDestinationApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to terminate destination");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error terminating destination:", error);
       throw error;
     }
   }

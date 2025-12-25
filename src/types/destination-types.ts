@@ -115,3 +115,32 @@ export interface AddDestinationApiResponse {
   data: AddDestinationResponse;
   timestamp: string;
 }
+
+export interface DestinationForTerminate {
+  destinationId: number;
+  destinationName: string;
+}
+
+export interface DestinationsForTerminateResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: DestinationForTerminate[];
+  timestamp: string;
+}
+
+export interface TerminateDestinationRequest {
+  destinationId: number;
+}
+
+export interface TerminateDestinationResponse {
+  message: string;
+}
+
+export interface TerminateDestinationApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TerminateDestinationResponse;
+  timestamp: string;
+}
