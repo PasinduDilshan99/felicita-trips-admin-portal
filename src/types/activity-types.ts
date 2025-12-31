@@ -70,6 +70,34 @@ export interface ActivityFilterParams {
   pageNumber: number;
 }
 
+export interface ActivityForTerminate {
+  activityId: number;
+  activityName: string;
+}
+export interface ActivitiesForTerminateResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: ActivityForTerminate[];
+  timestamp: string;
+}
+
+export interface TerminateActivityRequest {
+  activityId: number;
+}
+
+export interface TerminateActivityResponse {
+  message: string;
+}
+
+export interface TerminateActivityApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TerminateActivityResponse;
+  timestamp: string;
+}
+
 // API Response Types
 export interface ActivityResponse {
   activityCount: number;

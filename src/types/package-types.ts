@@ -178,3 +178,34 @@ export interface UpdatePackageRequest {
   removeFeatures: number[];
   newFeatures: FeatureRequest[];
 }
+
+// Add these interfaces to your existing package-types.ts file
+
+export interface PackageForTerminate {
+  packageId: number;
+  packageName: string;
+}
+
+export interface PackagesForTerminateResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: PackageForTerminate[];
+  timestamp: string;
+}
+
+export interface TerminatePackageRequest {
+  packageId: number;
+}
+
+export interface TerminatePackageResponse {
+  message: string;
+}
+
+export interface TerminatePackageApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TerminatePackageResponse;
+  timestamp: string;
+}

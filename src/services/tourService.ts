@@ -6,7 +6,9 @@ import {
   AddTourRequest,
   UpdateTourRequest,
   Tour,
-  Schedule
+  Schedule,
+  ToursForTerminateResponse,
+  TerminateTourApiResponse
 } from "@/types/tour-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -207,28 +209,57 @@ export class TourService {
   }
 
   // Delete/terminate tour
-  static async deleteTour(
-    tourId: number
-  ): Promise<any> {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/tour/delete-tour/${tourId}`,
-        {
-          method: "DELETE",
-          headers: this.getAuthHeaders(),
-        }
-      );
+  // Update your existing tourService.ts with these methods
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+// Get tours for termination
+static async getToursForTerminate(): Promise<ToursForTerminateResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/felicita/v0/api/tour/tour-for-terminate`,
+      {
+        method: "GET",
+        headers: this.getAuthHeaders(),
       }
+    );
 
-      return await response.json();
-    } catch (error) {
-      console.error("Error deleting tour:", error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const data: ToursForTerminateResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching tours for terminate:", error);
+    throw error;
   }
+}
+
+// Terminate tour
+static async terminateTour(
+  tourId: number
+): Promise<TerminateTourApiResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/felicita/v0/api/tour/terminate-tour`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ tourId }),
+      }
+    );
+
+    const data: TerminateTourApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to terminate tour");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error terminating tour:", error);
+    throw error;
+  }
+}
 
   // Get upcoming schedules (optional)
   static getUpcomingSchedules(tour: Tour): Schedule[] {

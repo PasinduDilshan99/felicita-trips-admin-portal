@@ -4,7 +4,9 @@ import {
   ApiResponse,
   SingleActivityApiResponse,
   AddActivityRequest,
-  UpdateActivityRequest
+  UpdateActivityRequest,
+  ActivitiesForTerminateResponse,
+  TerminateActivityApiResponse,
 } from "@/types/activity-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -57,9 +59,7 @@ export class ActivityService {
   }
 
   // Get single activity by ID
-  static async getActivityById(
-    id: number
-  ): Promise<SingleActivityApiResponse> {
+  static async getActivityById(id: number): Promise<SingleActivityApiResponse> {
     try {
       const response = await fetch(
         `${API_BASE_URL}/felicita/api/v0/activities/${id}`,
@@ -74,9 +74,9 @@ export class ActivityService {
       }
 
       const data: SingleActivityApiResponse = await response.json();
-      console.log('===============data=====================');
+      console.log("===============data=====================");
       console.log(data);
-      console.log('====================================');
+      console.log("====================================");
       return data;
     } catch (error) {
       console.error("Error fetching activity:", error);
@@ -121,9 +121,7 @@ export class ActivityService {
   }
 
   // Add new activity
-  static async addActivity(
-    activityData: AddActivityRequest
-  ): Promise<any> {
+  static async addActivity(activityData: AddActivityRequest): Promise<any> {
     try {
       const response = await fetch(
         `${API_BASE_URL}/felicita/v0/api/activities/add-activity`,
@@ -170,15 +168,13 @@ export class ActivityService {
     }
   }
 
-  // Delete/terminate activity
-  static async deleteActivity(
-    activityId: number
-  ): Promise<any> {
+  // Get activities for termination
+  static async getActivitiesForTerminate(): Promise<ActivitiesForTerminateResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/activities/delete-activity/${activityId}`,
+        `${API_BASE_URL}/felicita/api/v0/activities/activity-for-terminate`,
         {
-          method: "DELETE",
+          method: "GET",
           headers: this.getAuthHeaders(),
         }
       );
@@ -187,9 +183,41 @@ export class ActivityService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const data: ActivitiesForTerminateResponse = await response.json();
+      return data;
     } catch (error) {
-      console.error("Error deleting activity:", error);
+      console.error("Error fetching activities for terminate:", error);
+      throw error;
+    }
+  }
+
+  // Terminate activity
+  static async terminateActivity(
+    activityId: number
+  ): Promise<TerminateActivityApiResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/api/v0/activities/terminate-activity`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ activityId }),
+        }
+      );
+
+      const data: TerminateActivityApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to terminate activity");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error terminating activity:", error);
       throw error;
     }
   }

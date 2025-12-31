@@ -6,7 +6,9 @@ import {
   AddPackageRequest,
   UpdatePackageRequest,
   TourPackage,
-  PackageSchedule
+  PackageSchedule,
+  PackagesForTerminateResponse,
+  TerminatePackageApiResponse
 } from "@/types/package-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -208,29 +210,57 @@ export class PackageService {
     }
   }
 
-  // Delete/terminate package
-  static async deletePackage(
-    packageId: number
-  ): Promise<any> {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/package/delete-package/${packageId}`,
-        {
-          method: "DELETE",
-          headers: this.getAuthHeaders(),
-        }
-      );
+// Update your existing packageService.ts with these methods
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+// Get packages for termination
+static async getPackagesForTerminate(): Promise<PackagesForTerminateResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/felicita/v0/api/package/package-for-terminate`,
+      {
+        method: "GET",
+        headers: this.getAuthHeaders(),
       }
+    );
 
-      return await response.json();
-    } catch (error) {
-      console.error("Error deleting package:", error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const data: PackagesForTerminateResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching packages for terminate:", error);
+    throw error;
   }
+}
+
+// Terminate package
+static async terminatePackage(
+  packageId: number
+): Promise<TerminatePackageApiResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/felicita/v0/api/package/terminate-package`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ packageId }),
+      }
+    );
+
+    const data: TerminatePackageApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to terminate package");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error terminating package:", error);
+    throw error;
+  }
+}
 
   // Calculate savings amount
   static calculateSavings(totalPrice: number, discountPercentage: number): number {

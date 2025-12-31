@@ -136,3 +136,34 @@ export interface UpdateTourRequest {
   removeSchedules: number[];
   newSchedules: ScheduleRequest[];
 }
+
+// Add these interfaces to your existing tour-types.ts file
+
+export interface TourForTerminate {
+  tourId: number;
+  tourName: string;
+}
+
+export interface ToursForTerminateResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TourForTerminate[];
+  timestamp: string;
+}
+
+export interface TerminateTourRequest {
+  tourId: number;
+}
+
+export interface TerminateTourResponse {
+  message: string;
+}
+
+export interface TerminateTourApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TerminateTourResponse;
+  timestamp: string;
+}
