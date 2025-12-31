@@ -41,7 +41,7 @@ import { Loader2 } from "lucide-react";
 const DestinationDetailsPage = () => {
   const params = useParams();
   const router = useRouter();
-  const destinationId = parseInt(params.destinationId as string);
+  const destinationId = parseInt(params?.destinationId as string);
 
   const [destination, setDestination] = useState<SingleDestinationResponse | null>(null);
   const [loading, setLoading] = useState(true);

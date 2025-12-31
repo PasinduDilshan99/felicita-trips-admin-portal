@@ -57,7 +57,6 @@ const TestPage = () => {
       }
     } catch (error) {
       console.error("Test error:", error);
-      alert("Test failed: " + error.message);
     }
   };
 

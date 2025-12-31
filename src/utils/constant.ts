@@ -4,3 +4,4 @@ export const UNIQUE_CODE_NAME = "uniqueCode";
 
 export const WEB_MANAGEMENT_PATH = "/web-management";
 export const WEB_MANAGEMENT_DESTINATION_PATH = "/destinations";
+export const WEB_MANAGEMENT_ACTIVITIES_PATH = "/destinations";

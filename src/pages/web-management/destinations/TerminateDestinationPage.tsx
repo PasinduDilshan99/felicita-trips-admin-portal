@@ -39,8 +39,8 @@ const TerminateDestinationPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const initialDestinationName = searchParams.get("destination-name") || "";
-  const initialDestinationId = searchParams.get("destination-id") || "";
+  const initialDestinationName = searchParams?.get("destination-name") || "";
+  const initialDestinationId = searchParams?.get("destination-id") || "";
 
   // State for destinations list
   const [destinations, setDestinations] = useState<DestinationForTerminate[]>([]);
