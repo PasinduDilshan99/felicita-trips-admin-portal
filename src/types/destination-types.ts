@@ -74,6 +74,8 @@ export interface SingleDestinationResponse {
   statusName: string;
   activities: Activity[];
   images: Image[];
+  extraPrice?: number;
+  extraPriceNote?: string;
 }
 
 export interface SingleDestinationApiResponse {
@@ -142,5 +144,60 @@ export interface TerminateDestinationApiResponse {
   status: string;
   message: string;
   data: TerminateDestinationResponse;
+  timestamp: string;
+}
+
+export interface NewActivityRequest {
+  name: string;
+  description: string;
+  activityCategory: string;
+  durationHover: number;
+  availableFrom: string;
+  availableTo: string;
+  priceLocal: number;
+  priceForeigners: number;
+  minParticipate: number;
+  maxParticipate: number;
+  seasons: string[];
+  status: 'ACTIVE' | 'INACTIVE';
+  activityImages: NewImageRequest[];
+}
+
+// For new images to be added
+export interface NewImageRequest {
+  name: string;
+  description: string;
+  imageUrl: string;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+// Update destination request
+export interface UpdateDestinationRequest {
+  destinationId: number;
+  name: string;
+  description: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  destinationCategory: string;
+  location: string;
+  latitude: number;
+  longitude: number;
+  extraPrice?: number;
+  extraPriceNote?: string;
+  removeImages: number[];
+  newImages: NewImageRequest[];
+  removeActivities: number[];
+  newActivities: NewActivityRequest[];
+}
+
+export interface UpdateDestinationResponse {
+  message: string;
+  id: number;
+}
+
+export interface UpdateDestinationApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: UpdateDestinationResponse;
   timestamp: string;
 }

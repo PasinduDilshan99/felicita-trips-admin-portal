@@ -181,7 +181,7 @@ const WebManagementPage = () => {
   }
 
   return (
-    <div className="bg-slate-100 min-h-screen">
+    <div className="bg-slate-100">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header Section with Breadcrumb */}
         <PageHeader

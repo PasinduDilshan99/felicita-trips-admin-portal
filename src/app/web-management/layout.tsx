@@ -9,7 +9,7 @@ export default function TravelManagementLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#F1F5F9]">
+    <div className=" bg-[#F1F5F9]">
       <div className="flex">
         <Sidebar data={webManagementSideBarData} title="Web Management" />
         <main className="flex-1 w-full lg:ml-0">

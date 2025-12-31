@@ -103,7 +103,7 @@ const NavBar = () => {
                   Felicita Travels
                 </h1>
                 <p className="text-xs text-white/80 hidden sm:block">
-                  Make your journey
+                  Turning Journeys into Happy Memories.
                 </p>
               </div>
             </div>

@@ -8,6 +8,8 @@ import {
   AddDestinationApiResponse,
   TerminateDestinationApiResponse,
   DestinationsForTerminateResponse,
+  UpdateDestinationRequest,
+  UpdateDestinationApiResponse,
 } from "@/types/destination-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -181,6 +183,58 @@ export class DestinationService {
       console.error("Error terminating destination:", error);
       throw error;
     }
+  }
+
+  static async updateDestination(
+    destinationData: UpdateDestinationRequest
+  ): Promise<UpdateDestinationApiResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/v0/api/destination/update-destination`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(destinationData),
+        }
+      );
+
+      const data: UpdateDestinationApiResponse = await response.json();
+      console.log('=================response===================');
+      console.log(data);
+      console.log('====================================');
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to update destination");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error updating destination:", error);
+      throw error;
+    }
+  }
+
+  // Get available activity categories
+  static async getActivityCategories(): Promise<string[]> {
+    // Implement based on your API
+    return [
+      "Adventure",
+      "Hiking",
+      "Cultural",
+      "Wildlife",
+      "Water Sports",
+      "Photography",
+      "Food & Dining",
+    ];
+  }
+
+  // Get available seasons
+  static getSeasons(): string[] {
+    return ["Summer", "Winter", "Spring", "Monsoon"];
   }
 
   static async getCategories(): Promise<string[]> {
