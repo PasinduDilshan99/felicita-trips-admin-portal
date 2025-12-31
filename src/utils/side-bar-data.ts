@@ -1,7 +1,10 @@
 import { SideBarDataType } from "@/types/side-bar-types";
 import {
+  WEB_MANAGEMENT_ACTIVITIES_PATH,
   WEB_MANAGEMENT_DESTINATION_PATH,
+  WEB_MANAGEMENT_PACKAGES_PATH,
   WEB_MANAGEMENT_PATH,
+  WEB_MANAGEMENT_TOURS_PATH,
 } from "./constant";
 
 export const webManagementSideBarData: SideBarDataType[] = [
@@ -48,35 +51,35 @@ export const webManagementSideBarData: SideBarDataType[] = [
     name: "Activities",
     description: "Manage tour activities",
     color: "#10B981", // Green
-    url: "/activities",
+    url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}`,
     privilege: "ACTIVITY_VIEW",
     subData: [
       {
         id: 201,
         name: "View Activities",
         description: "View all available activities",
-        url: "/activities",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/view`,
         privilege: "ACTIVITY_VIEW",
       },
       {
         id: 202,
         name: "Add Activity",
         description: "Add a new activity",
-        url: "/activities/add",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/add-new`,
         privilege: "ACTIVITY_CREATE",
       },
       {
         id: 203,
         name: "Update Activity",
         description: "Update existing activity information",
-        url: "/activities/update",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/update`,
         privilege: "ACTIVITY_UPDATE",
       },
       {
         id: 204,
         name: "Remove Activity",
         description: "Delete activities",
-        url: "/activities/remove",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/terminate`,
         privilege: "ACTIVITY_TERMINATE",
       },
     ],
@@ -86,35 +89,35 @@ export const webManagementSideBarData: SideBarDataType[] = [
     name: "Tours",
     description: "Manage tour packages",
     color: "#F59E0B", // Amber
-    url: "/tours",
+    url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}`,
     privilege: "TOUR_VIEW",
     subData: [
       {
         id: 301,
         name: "View Tours",
         description: "View all tour packages",
-        url: "/tours",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/view`,
         privilege: "TOUR_VIEW",
       },
       {
         id: 302,
         name: "Add Tour",
         description: "Create a new tour package",
-        url: "/tours/add",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/add-new`,
         privilege: "TOUR_CREATE",
       },
       {
         id: 303,
         name: "Update Tour",
         description: "Update existing tour information",
-        url: "/tours/update",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/update`,
         privilege: "TOUR_UPDATE",
       },
       {
         id: 304,
         name: "Remove Tour",
         description: "Delete tour packages",
-        url: "/tours/remove",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/terminate`,
         privilege: "TOUR_TERMINATE",
       },
     ],
@@ -124,35 +127,35 @@ export const webManagementSideBarData: SideBarDataType[] = [
     name: "Packages",
     description: "Manage holiday packages",
     color: "#8B5CF6", // Violet
-    url: "/packages",
+    url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}`,
     privilege: "PACKAGE_VIEW",
     subData: [
       {
         id: 401,
         name: "View Packages",
         description: "View all holiday packages",
-        url: "/packages",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/view`,
         privilege: "PACKAGE_VIEW",
       },
       {
         id: 402,
         name: "Add Package",
         description: "Create a new holiday package",
-        url: "/packages/add",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/add-new`,
         privilege: "PACKAGE_CREATE",
       },
       {
         id: 403,
         name: "Update Package",
         description: "Update existing package information",
-        url: "/packages/update",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/update`,
         privilege: "PACKAGE_UPDATE",
       },
       {
         id: 404,
         name: "Remove Package",
         description: "Delete holiday packages",
-        url: "/packages/remove",
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/terminate`,
         privilege: "PACKAGE_TERMINATE",
       },
     ],
