@@ -1,11 +1,12 @@
-import DestinationsViewPage from "@/pages/web-management/destinations/DestinationsViewPage";
+import DestinationsViewPage from "@/components/destinations-components/DestinationsViewPage";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import React from "react";
 
 const page = () => {
   return (
-    <div>
+    <ProtectedRoute requiredPrivileges={["DESTINATION_VIEW"]}>
       <DestinationsViewPage />
-    </div>
+    </ProtectedRoute>
   );
 };
 

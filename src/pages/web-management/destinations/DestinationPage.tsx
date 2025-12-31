@@ -8,7 +8,6 @@ const DestinationPage = () => {
   const destinationsData = webManagementSideBarData.find(
     (item) => item.name === "Destinations"
   );
-
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
     { label: "Web Management", href: WEB_MANAGEMENT_PATH },
@@ -113,8 +112,8 @@ const DestinationPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="bg-slate-100">
+      <div className="mx-auto">
         {/* Header with Breadcrumb */}
         <PageHeader
           title="Destinations"

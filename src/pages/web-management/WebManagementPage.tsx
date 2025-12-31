@@ -1,9 +1,14 @@
+"use client"
 import React from "react";
 import { webManagementSideBarData } from "@/utils/side-bar-data";
 import { PageHeader } from "@/components/common-components/Breadcrumb";
 import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
+import { useAuth } from "@/contexts/AuthContext";
+import Link from "next/link";
 
 const WebManagementPage = () => {
+  const { hasPrivilege, loading } = useAuth();
+
   // Function to get icon based on category
   const getIcon = (name: string) => {
     switch (name.toLowerCase()) {
@@ -101,9 +106,83 @@ const WebManagementPage = () => {
     { label: "Web Management", href: WEB_MANAGEMENT_PATH },
   ];
 
+  // Filter categories based on privileges
+  const filteredCategories = React.useMemo(() => {
+    return webManagementSideBarData.filter(category => {
+      // Check if user has access to the main category
+      const hasMainPrivilege = hasPrivilege(category.privilege);
+      
+      // Check if user has access to any sub item
+      const hasAnySubPrivilege = category.subData.some(subItem => 
+        hasPrivilege(subItem.privilege)
+      );
+      
+      // Show category if user has either:
+      // 1. Access to main category OR
+      // 2. Access to any sub item
+      return hasMainPrivilege || hasAnySubPrivilege;
+    });
+  }, [hasPrivilege]);
+
+  // Get accessible count for each category
+  const getAccessibleSubItemsCount = (category: typeof webManagementSideBarData[0]) => {
+    return category.subData.filter(subItem => 
+      hasPrivilege(subItem.privilege)
+    ).length;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If no accessible categories
+  if (filteredCategories.length === 0) {
+    return (
+      <div className="bg-slate-100 min-h-screen">
+        <div className="max-w-7xl mx-auto p-6">
+          <PageHeader
+            title="Web Management"
+            description="Manage your website content and settings"
+            breadcrumbItems={breadcrumbItems}
+          />
+          
+          <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Access Restricted
+            </h3>
+            <p className="text-gray-600 mb-4">
+              You don't have permission to access any web management features.
+            </p>
+            <Link
+              href="/"
+              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="bg-slate-100">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Header Section with Breadcrumb */}
         <PageHeader
           title="Web Management"
@@ -113,60 +192,71 @@ const WebManagementPage = () => {
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {webManagementSideBarData.map((category) => (
-            <a key={category.id} href={category.url} className="group block">
-              <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-purple-300 overflow-hidden h-full">
-                {/* Color Bar */}
-                <div
-                  className="h-1.5 w-full"
-                  style={{ backgroundColor: category.color }}
-                />
+          {filteredCategories.map((category) => {
+            const accessibleSubItemsCount = getAccessibleSubItemsCount(category);
+            const hasFullAccess = hasPrivilege(category.privilege);
+            
+            return (
+              <Link 
+                key={category.id} 
+                href={category.url} 
+                className="group block"
+              >
+                <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-purple-300 overflow-hidden h-full relative">
+                  {/* Color Bar */}
+                  <div
+                    className="h-1.5 w-full"
+                    style={{ backgroundColor: category.color }}
+                  />
 
-                <div className="p-6">
-                  <div className="flex flex-col items-center text-center">
-                    {/* Icon Container */}
-                    <div
-                      className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110"
-                      style={{
-                        backgroundColor: `${category.color}15`,
-                        color: category.color,
-                      }}
-                    >
-                      {getIcon(category.name)}
-                    </div>
-
-                    {/* Category Name */}
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
-                      {category.name}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-sm text-gray-500 mb-4">
-                      Manage {category.name.toLowerCase()}
-                    </p>
-
-                    {/* Arrow Icon */}
-                    <div className="flex items-center text-sm font-medium text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="mr-1">Manage</span>
-                      <svg
-                        className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                  <div className="p-6">
+                    <div className="flex flex-col items-center text-center">
+                      {/* Icon Container */}
+                      <div
+                        className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110"
+                        style={{
+                          backgroundColor: `${category.color}15`,
+                          color: category.color,
+                        }}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
+                        {getIcon(category.name)}
+                      </div>
+
+                      {/* Category Name */}
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
+                        {category.name}
+                      </h3>
+
+                      {/* Description */}
+                      <p className="text-sm text-gray-500 mb-2">
+                        {category.description}
+                      </p>
+
+                      {/* Arrow Icon */}
+                      <div className="flex items-center text-sm font-medium text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="mr-1">
+                          {hasFullAccess ? "Manage All" : "View Accessible"}
+                        </span>
+                        <svg
+                          className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </a>
-          ))}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Quick Tip Section */}
@@ -192,8 +282,8 @@ const WebManagementPage = () => {
                 Quick Tip
               </h3>
               <p className="text-sm text-gray-600">
-                Select a category above to view and manage your website content.
-                Changes will be reflected on your live website after publishing.
+                You can only access modules and features based on your assigned privileges. 
+                Contact your administrator if you need additional access to manage other website content.
               </p>
             </div>
           </div>

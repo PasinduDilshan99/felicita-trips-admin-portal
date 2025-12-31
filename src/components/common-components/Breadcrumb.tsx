@@ -28,11 +28,11 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     if (customItems) return customItems;
     if (items) return items;
 
-    const paths = pathname.split("/").filter((path) => path);
+    const paths = pathname?.split("/").filter((path) => path) || null;
     const breadcrumbs: BreadcrumbItem[] = [{ label: "Dashboard", href: "/" }];
 
     let currentPath = "";
-    paths.forEach((path) => {
+    paths?.forEach((path) => {
       currentPath += `/${path}`;
       const label = path
         .split("-")
