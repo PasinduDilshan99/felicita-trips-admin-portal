@@ -125,7 +125,6 @@ export interface SingleActivityApiResponse {
   timestamp: string;
 }
 
-// For adding/updating activities
 export interface ActivityImageRequest {
   name: string;
   description: string;
@@ -133,63 +132,64 @@ export interface ActivityImageRequest {
   status: 'ACTIVE' | 'INACTIVE';
 }
 
-export interface ScheduleRequest {
-  name: string;
-  description: string;
-  assume_start_date: string;
-  assume_end_date: string;
-  duration_hours_start: number;
-  duration_hours_end: number;
-  special_note: string;
-  status: number;
-}
-
-export interface RequirementRequest {
+export interface ActivityRequirementRequest {
   name: string;
   value: string;
   description: string;
   color: string;
-  status: number;
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface AddActivityRequest {
+  destinationId: number;
   name: string;
   description: string;
+  activitiesCategory: string;
+  durationHours: number;
+  availableFrom: string;
+  availableTo: string;
+  priceLocal: number;
+  priceForeigners: number;
+  minParticipate: number;
+  maxParticipate: number;
   season: string;
   status: 'ACTIVE' | 'INACTIVE';
-  destination_id: number;
-  activities_category: string;
-  duration_hours: number;
-  available_from: string;
-  available_to: string;
-  price_local: number;
-  price_foreigners: number;
-  min_participate: number;
-  max_participate: number;
   images: ActivityImageRequest[];
-  schedules: ScheduleRequest[];
-  requirements: RequirementRequest[];
+  requirements: ActivityRequirementRequest[];
 }
 
-export interface UpdateActivityRequest {
-  id: number;
+export interface AddActivityResponse {
+  message: string;
+}
+
+export interface AddActivityApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: AddActivityResponse;
+  timestamp: string;
+}
+
+export interface AddActivityFormData {
+  destinationId: number | null;
   name: string;
   description: string;
+  activitiesCategory: string;
+  durationHours: number | null;
+  availableFrom: string;
+  availableTo: string;
+  priceLocal: number | null;
+  priceForeigners: number | null;
+  minParticipate: number | null;
+  maxParticipate: number | null;
   season: string;
   status: 'ACTIVE' | 'INACTIVE';
-  destination_id: number;
-  activities_category: string;
-  duration_hours: number;
-  available_from: string;
-  available_to: string;
-  price_local: number;
-  price_foreigners: number;
-  min_participate: number;
-  max_participate: number;
-  removeImages: number[];
-  newImages: ActivityImageRequest[];
-  removeSchedules: number[];
-  newSchedules: ScheduleRequest[];
-  removeRequirements: number[];
-  newRequirements: RequirementRequest[];
+  images: ActivityImageRequest[];
+  requirements: ActivityRequirementRequest[];
+}
+
+// Destination option for dropdown
+export interface DestinationOption {
+  destinationId: number;
+  destinationName: string;
 }

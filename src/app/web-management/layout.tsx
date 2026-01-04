@@ -1,6 +1,6 @@
 // app/travel-management/layout.tsx
 import Sidebar from "@/components/common-components/SideBar";
-import { webManagementSideBarData } from "@/utils/side-bar-data";
+import { webManagementSideBarData } from "@/data/side-bar-data";
 import React from "react";
 
 export default function TravelManagementLayout({

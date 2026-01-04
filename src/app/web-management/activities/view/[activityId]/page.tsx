@@ -150,7 +150,7 @@ const ActivityDetailsPage = () => {
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this activity?")) {
       try {
-        await ActivityService.deleteActivity(activityId);
+        await ActivityService.terminateActivity(activityId);
         router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/view`);
       } catch (error) {
         console.error("Error deleting activity:", error);

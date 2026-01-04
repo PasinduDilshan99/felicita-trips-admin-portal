@@ -1,10 +1,10 @@
 "use client"
 import React from "react";
-import { webManagementSideBarData } from "@/utils/side-bar-data";
 import { PageHeader } from "@/components/common-components/Breadcrumb";
 import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
+import { webManagementSideBarData } from "@/data/side-bar-data";
 
 const WebManagementPage = () => {
   const { hasPrivilege, loading } = useAuth();
