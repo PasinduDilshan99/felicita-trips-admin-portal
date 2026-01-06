@@ -1,7 +1,7 @@
 import React from "react";
 import { PageHeader } from "@/components/common-components/Breadcrumb";
-import { webManagementSideBarData } from "@/utils/side-bar-data";
 import { WEB_MANAGEMENT_DESTINATION_PATH, WEB_MANAGEMENT_PATH } from "@/utils/constant";
+import { webManagementSideBarData } from "@/data/side-bar-data";
 
 const DestinationPage = () => {
   // Get destinations data from sidebar data

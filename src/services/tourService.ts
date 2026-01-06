@@ -3,12 +3,15 @@ import {
   TourFilterParams,
   ApiResponse,
   SingleTourApiResponse,
-  AddTourRequest,
-  UpdateTourRequest,
   Tour,
   Schedule,
   ToursForTerminateResponse,
-  TerminateTourApiResponse
+  TerminateTourApiResponse,
+  AddTourRequest,
+  DestinationDetailsResponse,
+  AddTourApiResponse,
+  EmployeeAssignResponse,
+  DestinationsForTourResponse,
 } from "@/types/tour-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -25,9 +28,7 @@ export class TourService {
   }
 
   // Fetch tours with filters
-  static async getTours(
-    params: TourFilterParams
-  ): Promise<ApiResponse> {
+  static async getTours(params: TourFilterParams): Promise<ApiResponse> {
     try {
       const response = await fetch(
         `${API_BASE_URL}/felicita/v0/api/tour/tours`,
@@ -62,16 +63,17 @@ export class TourService {
   }
 
   // Get single tour by ID
-  static async getTourById(
-    id: number
-  ): Promise<SingleTourApiResponse> {
+  static async getTourById(id: number): Promise<SingleTourApiResponse> {
     try {
       const response = await fetch(
         `${API_BASE_URL}/felicita/v0/api/tour/${id}`,
         {
           method: "GET",
-          headers: this.getAuthHeaders(),
-        }
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",        }
       );
 
       if (!response.ok) {
@@ -158,17 +160,77 @@ export class TourService {
     ];
   }
 
-  // Add new tour
-  static async addTour(
-    tourData: AddTourRequest
-  ): Promise<any> {
+  // Get tours for termination
+  static async getToursForTerminate(): Promise<ToursForTerminateResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/tour/add-tour`,
+        `${API_BASE_URL}/felicita/v0/api/tour/tour-for-terminate`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ToursForTerminateResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching tours for terminate:", error);
+      throw error;
+    }
+  }
+
+  // Terminate tour
+  static async terminateTour(
+    tourId: number
+  ): Promise<TerminateTourApiResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/v0/api/tour/terminate-tour`,
         {
           method: "POST",
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify(tourData),
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ tourId }),
+        }
+      );
+
+      const data: TerminateTourApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to terminate tour");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error terminating tour:", error);
+      throw error;
+    }
+  }
+
+  // services/tourService.ts - Add these methods to your existing TourService class
+
+  // Get employees for tour assignment
+  static async getEmployeesForTourAssignment(): Promise<EmployeeAssignResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/api/v0/employee/employee-details-for-assign-tour`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
         }
       );
 
@@ -176,95 +238,103 @@ export class TourService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const data: EmployeeAssignResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching employees for tour assignment:", error);
+      throw error;
+    }
+  }
+
+  // Get destination names for tour creation
+  static async getDestinationNames(): Promise<DestinationsForTourResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/v0/api/destination/destination-names`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: DestinationsForTourResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching destination names:", error);
+      throw error;
+    }
+  }
+
+  // Get destination details with activities
+  static async getDestinationDetails(
+    destinationId: number
+  ): Promise<DestinationDetailsResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/v0/api/destination/${destinationId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: DestinationDetailsResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching destination details:", error);
+      throw error;
+    }
+  }
+
+  // Add new tour
+  static async addTour(tourData: AddTourRequest): Promise<AddTourApiResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/v0/api/tour/add-tour`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(tourData),
+        }
+      );
+
+      const data: AddTourApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to add tour");
+      }
+
+      return data;
     } catch (error) {
       console.error("Error adding tour:", error);
       throw error;
     }
   }
 
-  // Update tour
-  static async updateTour(
-    tourData: UpdateTourRequest
-  ): Promise<any> {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/tour/update-tour`,
-        {
-          method: "POST",
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify(tourData),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Error updating tour:", error);
-      throw error;
-    }
-  }
-
-  // Delete/terminate tour
-  // Update your existing tourService.ts with these methods
-
-// Get tours for termination
-static async getToursForTerminate(): Promise<ToursForTerminateResponse> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/felicita/v0/api/tour/tour-for-terminate`,
-      {
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: ToursForTerminateResponse = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching tours for terminate:", error);
-    throw error;
-  }
-}
-
-// Terminate tour
-static async terminateTour(
-  tourId: number
-): Promise<TerminateTourApiResponse> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/felicita/v0/api/tour/terminate-tour`,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ tourId }),
-      }
-    );
-
-    const data: TerminateTourApiResponse = await response.json();
-
-    if (data.code !== 200) {
-      throw new Error(data.message || "Failed to terminate tour");
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error terminating tour:", error);
-    throw error;
-  }
-}
-
   // Get upcoming schedules (optional)
   static getUpcomingSchedules(tour: Tour): Schedule[] {
     const today = new Date();
-    return tour.schedules.filter(schedule => {
+    return tour.schedules.filter((schedule) => {
       const endDate = new Date(schedule.assumeEndDate);
       return endDate >= today;
     });
@@ -275,8 +345,8 @@ static async terminateTour(
     const today = new Date();
     const futureDate = new Date();
     futureDate.setMonth(today.getMonth() + months);
-    
-    return tour.schedules.filter(schedule => {
+
+    return tour.schedules.filter((schedule) => {
       const startDate = new Date(schedule.assumeStartDate);
       return startDate <= futureDate;
     }).length;
