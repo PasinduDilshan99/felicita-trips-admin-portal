@@ -343,9 +343,9 @@ const AddNewTourPage = () => {
       setSuccess("Tour created successfully!");
 
       // Reset form after success
-      setTimeout(() => {
-        router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/view`);
-      }, 2000);
+    //   setTimeout(() => {
+    //     router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/view`);
+    //   }, 2000);
     } catch (err: any) {
       setError(err.message || "Failed to create tour");
     } finally {
@@ -368,7 +368,7 @@ const AddNewTourPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       {/* Header with Breadcrumb */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+      <div className=" top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title="Add New Tour"
@@ -402,7 +402,8 @@ const AddNewTourPage = () => {
               <X className="w-8 h-8 text-red-600 flex-shrink-0" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Error</h3>
-                <p className="text-red-600 mt-1">{error}</p>
+                <p className="text-red-600 mt-1">Please contact admin</p>
+                {/* <p className="text-red-600 mt-1">{error}</p> */}
               </div>
             </div>
           </div>
@@ -426,7 +427,7 @@ const AddNewTourPage = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                   placeholder="e.g., Sri Lanka Highlights Tour"
                   required
                 />
@@ -444,7 +445,7 @@ const AddNewTourPage = () => {
                   onChange={(e) =>
                     handleInputChange("duration", parseInt(e.target.value) || 1)
                   }
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                   required
                 />
               </div>
@@ -460,7 +461,7 @@ const AddNewTourPage = () => {
                   onChange={(e) =>
                     handleInputChange("startLocation", e.target.value)
                   }
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                   placeholder="e.g., Colombo"
                   required
                 />
@@ -477,7 +478,7 @@ const AddNewTourPage = () => {
                   onChange={(e) =>
                     handleInputChange("endLocation", e.target.value)
                   }
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                   placeholder="e.g., Galle"
                   required
                 />
@@ -493,7 +494,7 @@ const AddNewTourPage = () => {
                   onChange={(e) =>
                     handleInputChange("tourType", parseInt(e.target.value))
                   }
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white"
                   required
                 >
                   <option value="1">Adventure</option>
@@ -515,7 +516,7 @@ const AddNewTourPage = () => {
                   onChange={(e) =>
                     handleInputChange("tourCategory", parseInt(e.target.value))
                   }
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white"
                   required
                 >
                   <option value="1">Solo</option>
@@ -537,7 +538,7 @@ const AddNewTourPage = () => {
                   onChange={(e) =>
                     handleInputChange("season", parseInt(e.target.value))
                   }
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white"
                   required
                 >
                   <option value="1">Summer</option>
@@ -557,7 +558,7 @@ const AddNewTourPage = () => {
                 <select
                   value={formData.status}
                   onChange={(e) => handleInputChange("status", e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white"
                   required
                 >
                   <option value="ACTIVE">Active</option>
@@ -580,7 +581,7 @@ const AddNewTourPage = () => {
                       parseFloat(e.target.value) || 0
                     )
                   }
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                   placeholder="e.g., 6.927079"
                 />
               </div>
@@ -600,7 +601,7 @@ const AddNewTourPage = () => {
                       parseFloat(e.target.value) || 0
                     )
                   }
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                   placeholder="e.g., 79.861244"
                 />
               </div>
@@ -616,7 +617,7 @@ const AddNewTourPage = () => {
                     handleInputChange("description", e.target.value)
                   }
                   rows={4}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 resize-none"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 resize-none"
                   placeholder="Describe the tour package..."
                   required
                 />
@@ -648,7 +649,7 @@ const AddNewTourPage = () => {
                     }}
                     onFocus={() => setShowEmployeeDropdown(true)}
                     placeholder="Search employee by name or email..."
-                    className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                    className="text-gray-600 flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                   />
                 </div>
 
@@ -798,629 +799,7 @@ const AddNewTourPage = () => {
               {/* Assign Message */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Assignment Message *{/* Destinations & Activities */}
-<div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-    <MapPin className="w-6 h-6 text-emerald-600" />
-    Tour Itinerary - Destinations & Activities
-  </h2>
-
-  <div className="space-y-8">
-    {/* Current Working Day */}
-    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-1">
-            Current Working Day
-          </h3>
-          <p className="text-gray-600 text-sm">
-            You're currently adding destinations for:
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <select
-              value={currentDay}
-              onChange={(e) => {
-                const newDay = parseInt(e.target.value);
-                setCurrentDay(newDay);
-                setCurrentDestination(null);
-                setDestinationSearch("");
-              }}
-              className="appearance-none px-6 py-2.5 bg-white text-gray-900 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 font-medium pr-10"
-            >
-              {Array.from({ length: formData.duration }, (_, i) => i + 1).map((day) => (
-                <option key={day} value={day}>
-                  Day {day}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
-          </div>
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-        </div>
-      </div>
-    </div>
-
-    {/* All Days Quick Navigation */}
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <label className="text-sm font-medium text-gray-700">
-          Quick Navigation - Click to switch day:
-        </label>
-        <span className="text-xs text-gray-500">
-          {formData.destinations.filter(d => d.dayNumber === currentDay).length} activities on Day {currentDay}
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {Array.from({ length: formData.duration }, (_, i) => i + 1).map((day) => {
-          const dayActivityCount = formData.destinations.filter(d => d.dayNumber === day).length;
-          return (
-            <button
-              key={day}
-              type="button"
-              onClick={() => {
-                setCurrentDay(day);
-                setCurrentDestination(null);
-                setDestinationSearch("");
-              }}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
-                currentDay === day
-                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg"
-                  : dayActivityCount > 0
-                  ? "bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border border-amber-200 hover:border-amber-300"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Day {day}
-              {dayActivityCount > 0 && (
-                <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                  currentDay === day
-                    ? "bg-white/30"
-                    : "bg-amber-100 text-amber-800"
-                }`}>
-                  {dayActivityCount}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-
-    {/* Destination Search and Selection */}
-    <div className="space-y-4">
-      {/* Destination Day Selection */}
-      <div className="bg-gradient-to-r from-gray-50 to-emerald-50 p-4 rounded-xl border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-1">
-              Destination Details
-            </h3>
-            <p className="text-xs text-gray-500">
-              You can change the day number for this destination
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">Add to:</span>
-            <div className="relative">
-              <select
-                value={currentDay}
-                onChange={(e) => setCurrentDay(parseInt(e.target.value))}
-                className="appearance-none px-4 py-2 bg-white text-gray-900 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 text-sm font-medium pr-8"
-                disabled={!currentDestination}
-              >
-                {Array.from({ length: formData.duration }, (_, i) => i + 1).map((day) => (
-                  <option key={day} value={day}>
-                    Day {day}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Search Destination for Day {currentDay}
-        </label>
-        <div className="flex items-center gap-3">
-          <Search className="w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            value={destinationSearch}
-            onChange={(e) => {
-              setDestinationSearch(e.target.value);
-              setShowDestinationDropdown(true);
-            }}
-            onFocus={() => setShowDestinationDropdown(true)}
-            placeholder="Search destination by name..."
-            className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              setCurrentDestination(null);
-              setDestinationSearch("");
-            }}
-            className="px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200"
-          >
-            Clear
-          </button>
-        </div>
-
-        {/* Destination Dropdown */}
-        {showDestinationDropdown && (
-          <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-lg border border-gray-200 max-h-96 overflow-y-auto">
-            {loadingDestinations ? (
-              <div className="p-8 text-center">
-                <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto mb-3" />
-                <p className="text-gray-600">Loading destinations...</p>
-              </div>
-            ) : filteredDestinations.length === 0 ? (
-              <div className="p-8 text-center">
-                <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600">No destinations found</p>
-              </div>
-            ) : (
-              filteredDestinations.map((dest) => (
-                <button
-                  key={dest.destinationId}
-                  type="button"
-                  onClick={() => handleSelectDestination(dest)}
-                  className="w-full px-6 py-4 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-gray-900">
-                        {dest.destinationName}
-                      </h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        ID: {dest.destinationId}
-                      </p>
-                    </div>
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
-                  </div>
-                </button>
-              ))
-            )}
-          </div>
-        )}
-
-        {/* Click outside to close dropdown */}
-        {showDestinationDropdown && (
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setShowDestinationDropdown(false)}
-          />
-        )}
-      </div>
-
-      {/* Selected Destination Details & Activities */}
-      {currentDestination && destinationDetailsData && (
-        <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-xl border border-gray-200">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="px-3 py-1 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 rounded-full text-sm font-medium flex items-center gap-2">
-                  <Calendar className="w-3 h-3" />
-                  Day {currentDay}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">
-                  {destinationDetailsData.destinationName}
-                </h3>
-              </div>
-              <p className="text-gray-600 mb-3">{destinationDetailsData.destinationDescription}</p>
-              <div className="flex flex-wrap gap-3">
-                <span className="flex items-center gap-1 text-sm text-gray-600 bg-white px-3 py-1 rounded-full border border-gray-200">
-                  <MapPin className="w-3 h-3" />
-                  {destinationDetailsData.location}
-                </span>
-                <span className="flex items-center gap-1 text-sm text-gray-600 bg-white px-3 py-1 rounded-full border border-gray-200">
-                  <Tag className="w-3 h-3" />
-                  {destinationDetailsData.categoryName}
-                </span>
-                <span className="flex items-center gap-1 text-sm text-gray-600 bg-white px-3 py-1 rounded-full border border-gray-200">
-                  <ActivityIcon className="w-3 h-3" />
-                  {destinationDetailsData.activities.length} activities available
-                </span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setCurrentDestination(null);
-                setDestinationSearch("");
-              }}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Activities Selection */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-lg font-semibold text-gray-800">
-                Select Activities for Day {currentDay}
-              </h4>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">
-                  Selected: {currentDestination.activities.length} of {destinationDetailsData.activities.length}
-                </span>
-              </div>
-            </div>
-            
-            {/* Select All / Deselect All */}
-            {destinationDetailsData.activities.length > 1 && (
-              <div className="mb-4 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const allActivityIds = destinationDetailsData.activities.map(a => a.activityId);
-                    setCurrentDestination(prev => ({
-                      ...prev!,
-                      activities: allActivityIds
-                    }));
-                  }}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg border border-blue-100 hover:border-blue-300 text-sm font-medium transition-all duration-200"
-                >
-                  Select All Activities
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCurrentDestination(prev => ({
-                      ...prev!,
-                      activities: []
-                    }));
-                  }}
-                  className="px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-lg border border-gray-200 hover:border-gray-300 text-sm font-medium transition-all duration-200"
-                >
-                  Clear Selection
-                </button>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              {destinationDetailsData.activities.map((activity) => (
-                <label
-                  key={activity.activityId}
-                  className={`flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                    currentDestination.activities.includes(activity.activityId)
-                      ? "border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50"
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={currentDestination.activities.includes(activity.activityId)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setCurrentDestination(prev => ({
-                          ...prev!,
-                          activities: [...prev!.activities, activity.activityId]
-                        }));
-                      } else {
-                        setCurrentDestination(prev => ({
-                          ...prev!,
-                          activities: prev!.activities.filter(id => id !== activity.activityId)
-                        }));
-                      }
-                    }}
-                    className="mt-1 mr-3 h-5 w-5 text-emerald-600 rounded focus:ring-emerald-500"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h5 className="font-medium text-gray-900">{activity.activityName}</h5>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{activity.activityDescription}</p>
-                      </div>
-                      <div className="text-right ml-4">
-                        <div className="text-lg font-bold text-gray-900">
-                          LKR {activity.priceLocal.toLocaleString()}
-                        </div>
-                        <div className="text-sm text-gray-500">Local Price</div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700">{activity.durationHours} hours</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700">
-                          {activity.minParticipate}-{activity.maxParticipate}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700 line-clamp-1">{activity.season}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Target className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700">{activity.activitiesCategory}</span>
-                      </div>
-                    </div>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Add Destination Button */}
-          <div className="mt-6 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">Add to:</span>
-              <div className="relative">
-                <select
-                  value={currentDay}
-                  onChange={(e) => setCurrentDay(parseInt(e.target.value))}
-                  className="appearance-none px-4 py-2 bg-white text-gray-900 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 text-sm font-medium pr-8"
-                >
-                  {Array.from({ length: formData.duration }, (_, i) => i + 1).map((day) => (
-                    <option key={day} value={day}>
-                      Day {day}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setCurrentDestination(null);
-                  setDestinationSearch("");
-                }}
-                className="px-6 py-3 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200 font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleAddDestination}
-                disabled={currentDestination.activities.length === 0}
-                className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Add to Day {currentDay} Itinerary
-                {currentDestination.activities.length > 0 && (
-                  <span className="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">
-                    {currentDestination.activities.length} selected
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Loading State for Destination Details */}
-      {currentDestination && !destinationDetailsData && loadingDestinationDetails === currentDestination.destinationId && (
-        <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-12 rounded-xl border border-gray-200 text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading destination details...</p>
-        </div>
-      )}
-    </div>
-
-    {/* Selected Destinations Preview - Grouped by Day */}
-    {formData.destinations.length > 0 && (
-      <div className="bg-gradient-to-r from-gray-50 to-amber-50 p-6 rounded-xl border border-gray-200">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-800">
-            Tour Itinerary Preview ({formData.destinations.length} activities)
-          </h3>
-          <div className="flex items-center gap-2">
-            <span className="px-4 py-2 bg-white text-amber-700 rounded-full text-sm font-medium border border-amber-200">
-              {new Set(formData.destinations.map(d => d.dayNumber)).size} days
-            </span>
-            <span className="px-4 py-2 bg-white text-amber-700 rounded-full text-sm font-medium border border-amber-200">
-              {new Set(formData.destinations.map(d => d.destinationId)).size} destinations
-            </span>
-          </div>
-        </div>
-
-        {/* Group destinations by day */}
-        {(() => {
-          const destinationsByDay: { [day: number]: TourDestinationInput[] } = {};
-          formData.destinations.forEach(dest => {
-            if (!destinationsByDay[dest.dayNumber]) {
-              destinationsByDay[dest.dayNumber] = [];
-            }
-            destinationsByDay[dest.dayNumber].push(dest);
-          });
-
-          return Object.entries(destinationsByDay)
-            .sort(([a], [b]) => parseInt(a) - parseInt(b))
-            .map(([day, destinations]) => (
-              <div key={day} className="mb-6 last:mb-0">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 flex items-center justify-center">
-                      <span className="font-bold text-amber-700">{day}</span>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900">Day {day} Itinerary</h4>
-                      <p className="text-sm text-gray-500">
-                        {destinations.length} activity{destinations.length > 1 ? 's' : ''} • {
-                          new Set(destinations.map(d => d.destinationId)).size
-                        } destination{new Set(destinations.map(d => d.destinationId)).size > 1 ? 's' : ''}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrentDay(parseInt(day));
-                      setCurrentDestination(null);
-                      setDestinationSearch("");
-                    }}
-                    className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg border border-blue-100 hover:border-blue-300 text-sm font-medium transition-all duration-200"
-                  >
-                    Add More to Day {day}
-                  </button>
-                </div>
-                
-                <div className="space-y-3">
-                  {(() => {
-                    // Group by destination
-                    const destGroups: { [destId: number]: TourDestinationInput[] } = {};
-                    destinations.forEach(dest => {
-                      if (!destGroups[dest.destinationId]) {
-                        destGroups[dest.destinationId] = [];
-                      }
-                      destGroups[dest.destinationId].push(dest);
-                    });
-
-                    return Object.entries(destGroups).map(([destId, destGroup]) => {
-                      const destDetails = destinationDetails[parseInt(destId)];
-                      
-                      return (
-                        <div key={destId} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                          {/* Destination Header */}
-                          <div className="p-4 bg-gradient-to-r from-gray-50 to-blue-50 border-b border-gray-200">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center">
-                                  <MapPin className="w-4 h-4 text-blue-600" />
-                                </div>
-                                <div>
-                                  <h5 className="font-medium text-gray-900">
-                                    {destDetails?.destinationName || `Destination ${destId}`}
-                                  </h5>
-                                  <p className="text-sm text-gray-600 mt-1">
-                                    {destGroup.length} activity{destGroup.length > 1 ? 's' : ''} • Day {day}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    // Edit this destination - move to this day and show details
-                                    setCurrentDay(parseInt(day));
-                                    fetchDestinationDetails(parseInt(destId));
-                                    setCurrentDestination({
-                                      destinationId: parseInt(destId),
-                                      destinationName: destDetails?.destinationName || `Destination ${destId}`,
-                                      activities: destGroup.map(d => d.activityId)
-                                    });
-                                    setDestinationSearch(destDetails?.destinationName || "");
-                                  }}
-                                  className="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg border border-blue-100 hover:border-blue-300 text-xs font-medium transition-all duration-200"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    // Remove all activities for this destination on this day
-                                    const newDestinations = formData.destinations.filter(d => 
-                                      !(parseInt(d.dayNumber.toString()) === parseInt(day) && d.destinationId === parseInt(destId))
-                                    );
-                                    handleInputChange("destinations", newDestinations);
-                                  }}
-                                  className="px-3 py-1.5 bg-gradient-to-r from-red-50 to-rose-50 text-red-700 rounded-lg border border-red-100 hover:border-red-300 text-xs font-medium transition-all duration-200"
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Activities List */}
-                          <div className="divide-y divide-gray-100">
-                            {destGroup.map((groupDest, groupIndex) => {
-                              const groupActivity = destDetails?.activities.find(a => a.activityId === groupDest.activityId);
-                              return (
-                                <div key={groupIndex} className="p-4 flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-100 to-teal-100 flex items-center justify-center">
-                                      <ActivityIcon className="w-3 h-3 text-emerald-600" />
-                                    </div>
-                                    <div>
-                                      <span className="font-medium text-gray-900">
-                                        {groupActivity?.activityName || `Activity ${groupDest.activityId}`}
-                                      </span>
-                                      {groupActivity && (
-                                        <div className="flex items-center gap-3 mt-1">
-                                          <span className="text-xs text-gray-500">
-                                            Duration: {groupActivity.durationHours}h
-                                          </span>
-                                          <span className="text-xs text-gray-500">
-                                            Price: LKR {groupActivity.priceLocal.toLocaleString()}
-                                          </span>
-                                          <span className="text-xs text-gray-500">
-                                            Group: {groupActivity.minParticipate}-{groupActivity.maxParticipate}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveDestination(
-                                      formData.destinations.findIndex(d => 
-                                        d.dayNumber === groupDest.dayNumber && 
-                                        d.destinationId === groupDest.destinationId && 
-                                        d.activityId === groupDest.activityId
-                                      )
-                                    )}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Remove this activity"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-              </div>
-            ));
-        })()}
-      </div>
-    )}
-
-    {/* Empty State */}
-    {formData.destinations.length === 0 && (
-      <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-12 rounded-xl border border-gray-200 text-center">
-        <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">No Destinations Added Yet</h3>
-        <p className="text-gray-600 mb-4">
-          Start building your tour itinerary by selecting a day above and adding destinations with activities.
-        </p>
-        <div className="flex items-center justify-center gap-3 mt-4">
-          <div className="text-sm text-gray-500">Start with:</div>
-          {[1, 2, 3].slice(0, formData.duration).map((day) => (
-            <button
-              key={day}
-              type="button"
-              onClick={() => {
-                setCurrentDay(day);
-                setCurrentDestination(null);
-                setDestinationSearch("");
-              }}
-              className="px-4 py-2 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 rounded-lg border border-emerald-200 hover:border-emerald-300 text-sm font-medium transition-all duration-200"
-            >
-              Day {day}
-            </button>
-          ))}
-        </div>
-      </div>
-    )}
-  </div>
-</div>
+                  Assignment Message *
                 </label>
                 <textarea
                   value={formData.assignMessage}
@@ -1428,15 +807,809 @@ const AddNewTourPage = () => {
                     handleInputChange("assignMessage", e.target.value)
                   }
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 resize-none"
+                  className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 resize-none"
                   placeholder="Enter assignment instructions or message..."
                   required
                 />
               </div>
+              {/* Destinations & Activities */}
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                  <MapPin className="w-6 h-6 text-emerald-600" />
+                  Tour Itinerary - Destinations & Activities
+                </h2>
+
+                <div className="space-y-8">
+                  {/* Current Working Day */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                          Current Working Day
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                          You're currently adding destinations for:
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <select
+                            value={currentDay}
+                            onChange={(e) => {
+                              const newDay = parseInt(e.target.value);
+                              setCurrentDay(newDay);
+                              setCurrentDestination(null);
+                              setDestinationSearch("");
+                            }}
+                            className="appearance-none px-6 py-2.5 bg-white text-gray-900 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 font-medium pr-10"
+                          >
+                            {Array.from(
+                              { length: formData.duration },
+                              (_, i) => i + 1
+                            ).map((day) => (
+                              <option key={day} value={day}>
+                                Day {day}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+                        </div>
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* All Days Quick Navigation */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-sm font-medium text-gray-700">
+                        Quick Navigation - Click to switch day:
+                      </label>
+                      <span className="text-xs text-gray-500">
+                        {
+                          formData.destinations.filter(
+                            (d) => d.dayNumber === currentDay
+                          ).length
+                        }{" "}
+                        activities on Day {currentDay}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.from(
+                        { length: formData.duration },
+                        (_, i) => i + 1
+                      ).map((day) => {
+                        const dayActivityCount = formData.destinations.filter(
+                          (d) => d.dayNumber === day
+                        ).length;
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => {
+                              setCurrentDay(day);
+                              setCurrentDestination(null);
+                              setDestinationSearch("");
+                            }}
+                            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
+                              currentDay === day
+                                ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg"
+                                : dayActivityCount > 0
+                                ? "bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border border-amber-200 hover:border-amber-300"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                          >
+                            Day {day}
+                            {dayActivityCount > 0 && (
+                              <span
+                                className={`px-1.5 py-0.5 rounded-full text-xs ${
+                                  currentDay === day
+                                    ? "bg-white/30"
+                                    : "bg-amber-100 text-amber-800"
+                                }`}
+                              >
+                                {dayActivityCount}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Destination Search and Selection */}
+                  <div className="space-y-4">
+                    {/* Destination Day Selection */}
+                    <div className="bg-gradient-to-r from-gray-50 to-emerald-50 p-4 rounded-xl border border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                            Destination Details
+                          </h3>
+                          <p className="text-xs text-gray-500">
+                            You can change the day number for this destination
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm text-gray-600">Add to:</span>
+                          <div className="relative">
+                            <select
+                              value={currentDay}
+                              onChange={(e) =>
+                                setCurrentDay(parseInt(e.target.value))
+                              }
+                              className="appearance-none px-4 py-2 bg-white text-gray-900 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 text-sm font-medium pr-8"
+                              disabled={!currentDestination}
+                            >
+                              {Array.from(
+                                { length: formData.duration },
+                                (_, i) => i + 1
+                              ).map((day) => (
+                                <option key={day} value={day}>
+                                  Day {day}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Search Destination for Day {currentDay}
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <Search className="w-5 h-5 text-gray-400" />
+                        <input
+                          type="text"
+                          value={destinationSearch}
+                          onChange={(e) => {
+                            setDestinationSearch(e.target.value);
+                            setShowDestinationDropdown(true);
+                          }}
+                          onFocus={() => setShowDestinationDropdown(true)}
+                          placeholder="Search destination by name..."
+                          className="text-gray-600 flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCurrentDestination(null);
+                            setDestinationSearch("");
+                          }}
+                          className="px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200"
+                        >
+                          Clear
+                        </button>
+                      </div>
+
+                      {/* Destination Dropdown */}
+                      {showDestinationDropdown && (
+                        <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-lg border border-gray-200 max-h-96 overflow-y-auto">
+                          {loadingDestinations ? (
+                            <div className="p-8 text-center">
+                              <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto mb-3" />
+                              <p className="text-gray-600">
+                                Loading destinations...
+                              </p>
+                            </div>
+                          ) : filteredDestinations.length === 0 ? (
+                            <div className="p-8 text-center">
+                              <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                              <p className="text-gray-600">
+                                No destinations found
+                              </p>
+                            </div>
+                          ) : (
+                            filteredDestinations.map((dest) => (
+                              <button
+                                key={dest.destinationId}
+                                type="button"
+                                onClick={() => handleSelectDestination(dest)}
+                                className="w-full px-6 py-4 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <h3 className="font-medium text-gray-900">
+                                      {dest.destinationName}
+                                    </h3>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                      ID: {dest.destinationId}
+                                    </p>
+                                  </div>
+                                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                                </div>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      )}
+
+                      {/* Click outside to close dropdown */}
+                      {showDestinationDropdown && (
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowDestinationDropdown(false)}
+                        />
+                      )}
+                    </div>
+
+                    {/* Selected Destination Details & Activities */}
+                    {currentDestination && destinationDetailsData && (
+                      <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-xl border border-gray-200">
+                        <div className="flex items-start justify-between mb-6">
+                          <div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="px-3 py-1 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 rounded-full text-sm font-medium flex items-center gap-2">
+                                <Calendar className="w-3 h-3" />
+                                Day {currentDay}
+                              </div>
+                              <h3 className="text-xl font-bold text-gray-900">
+                                {destinationDetailsData.destinationName}
+                              </h3>
+                            </div>
+                            <p className="text-gray-600 mb-3">
+                              {destinationDetailsData.destinationDescription}
+                            </p>
+                            <div className="flex flex-wrap gap-3">
+                              <span className="flex items-center gap-1 text-sm text-gray-600 bg-white px-3 py-1 rounded-full border border-gray-200">
+                                <MapPin className="w-3 h-3" />
+                                {destinationDetailsData.location}
+                              </span>
+                              <span className="flex items-center gap-1 text-sm text-gray-600 bg-white px-3 py-1 rounded-full border border-gray-200">
+                                <Tag className="w-3 h-3" />
+                                {destinationDetailsData.categoryName}
+                              </span>
+                              <span className="flex items-center gap-1 text-sm text-gray-600 bg-white px-3 py-1 rounded-full border border-gray-200">
+                                <ActivityIcon className="w-3 h-3" />
+                                {destinationDetailsData.activities.length}{" "}
+                                activities available
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCurrentDestination(null);
+                              setDestinationSearch("");
+                            }}
+                            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+
+                        {/* Activities Selection */}
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-lg font-semibold text-gray-800">
+                              Select Activities for Day {currentDay}
+                            </h4>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500">
+                                Selected: {currentDestination.activities.length}{" "}
+                                of {destinationDetailsData.activities.length}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Select All / Deselect All */}
+                          {destinationDetailsData.activities.length > 1 && (
+                            <div className="mb-4 flex gap-3">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const allActivityIds =
+                                    destinationDetailsData.activities.map(
+                                      (a) => a.activityId
+                                    );
+                                  setCurrentDestination((prev) => ({
+                                    ...prev!,
+                                    activities: allActivityIds,
+                                  }));
+                                }}
+                                className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg border border-blue-100 hover:border-blue-300 text-sm font-medium transition-all duration-200"
+                              >
+                                Select All Activities
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCurrentDestination((prev) => ({
+                                    ...prev!,
+                                    activities: [],
+                                  }));
+                                }}
+                                className="px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-lg border border-gray-200 hover:border-gray-300 text-sm font-medium transition-all duration-200"
+                              >
+                                Clear Selection
+                              </button>
+                            </div>
+                          )}
+
+                          <div className="space-y-4">
+                            {destinationDetailsData.activities.map(
+                              (activity) => (
+                                <label
+                                  key={activity.activityId}
+                                  className={`flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                                    currentDestination.activities.includes(
+                                      activity.activityId
+                                    )
+                                      ? "border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50"
+                                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={currentDestination.activities.includes(
+                                      activity.activityId
+                                    )}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setCurrentDestination((prev) => ({
+                                          ...prev!,
+                                          activities: [
+                                            ...prev!.activities,
+                                            activity.activityId,
+                                          ],
+                                        }));
+                                      } else {
+                                        setCurrentDestination((prev) => ({
+                                          ...prev!,
+                                          activities: prev!.activities.filter(
+                                            (id) => id !== activity.activityId
+                                          ),
+                                        }));
+                                      }
+                                    }}
+                                    className="mt-1 mr-3 h-5 w-5 text-emerald-600 rounded focus:ring-emerald-500"
+                                  />
+                                  <div className="flex-1">
+                                    <div className="flex items-start justify-between">
+                                      <div>
+                                        <h5 className="font-medium text-gray-900">
+                                          {activity.activityName}
+                                        </h5>
+                                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                          {activity.activityDescription}
+                                        </p>
+                                      </div>
+                                      <div className="text-right ml-4">
+                                        <div className="text-lg font-bold text-gray-900">
+                                          LKR{" "}
+                                          {activity.priceLocal.toLocaleString()}
+                                        </div>
+                                        <div className="text-sm text-gray-500">
+                                          Local Price
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                                      <div className="flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-gray-500" />
+                                        <span className="text-sm text-gray-700">
+                                          {activity.durationHours} hours
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Users className="w-4 h-4 text-gray-500" />
+                                        <span className="text-sm text-gray-700">
+                                          {activity.minParticipate}-
+                                          {activity.maxParticipate}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Calendar className="w-4 h-4 text-gray-500" />
+                                        <span className="text-sm text-gray-700 line-clamp-1">
+                                          {activity.season}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Target className="w-4 h-4 text-gray-500" />
+                                        <span className="text-sm text-gray-700">
+                                          {activity.activitiesCategory}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </label>
+                              )
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Add Destination Button */}
+                        <div className="mt-6 flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-600">
+                              Add to:
+                            </span>
+                            <div className="relative">
+                              <select
+                                value={currentDay}
+                                onChange={(e) =>
+                                  setCurrentDay(parseInt(e.target.value))
+                                }
+                                className="appearance-none px-4 py-2 bg-white text-gray-900 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 text-sm font-medium pr-8"
+                              >
+                                {Array.from(
+                                  { length: formData.duration },
+                                  (_, i) => i + 1
+                                ).map((day) => (
+                                  <option key={day} value={day}>
+                                    Day {day}
+                                  </option>
+                                ))}
+                              </select>
+                              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                            </div>
+                          </div>
+                          <div className="flex gap-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCurrentDestination(null);
+                                setDestinationSearch("");
+                              }}
+                              className="px-6 py-3 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200 font-medium"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleAddDestination}
+                              disabled={
+                                currentDestination.activities.length === 0
+                              }
+                              className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                              <Plus className="w-5 h-5" />
+                              Add to Day {currentDay} Itinerary
+                              {currentDestination.activities.length > 0 && (
+                                <span className="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">
+                                  {currentDestination.activities.length}{" "}
+                                  selected
+                                </span>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Loading State for Destination Details */}
+                    {currentDestination &&
+                      !destinationDetailsData &&
+                      loadingDestinationDetails ===
+                        currentDestination.destinationId && (
+                        <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-12 rounded-xl border border-gray-200 text-center">
+                          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+                          <p className="text-gray-600">
+                            Loading destination details...
+                          </p>
+                        </div>
+                      )}
+                  </div>
+
+                  {/* Selected Destinations Preview - Grouped by Day */}
+                  {formData.destinations.length > 0 && (
+                    <div className="bg-gradient-to-r from-gray-50 to-amber-50 p-6 rounded-xl border border-gray-200">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          Tour Itinerary Preview ({formData.destinations.length}{" "}
+                          activities)
+                        </h3>
+                        <div className="flex items-center gap-2">
+                          <span className="px-4 py-2 bg-white text-amber-700 rounded-full text-sm font-medium border border-amber-200">
+                            {
+                              new Set(
+                                formData.destinations.map((d) => d.dayNumber)
+                              ).size
+                            }{" "}
+                            days
+                          </span>
+                          <span className="px-4 py-2 bg-white text-amber-700 rounded-full text-sm font-medium border border-amber-200">
+                            {
+                              new Set(
+                                formData.destinations.map(
+                                  (d) => d.destinationId
+                                )
+                              ).size
+                            }{" "}
+                            destinations
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Group destinations by day */}
+                      {(() => {
+                        const destinationsByDay: {
+                          [day: number]: TourDestinationInput[];
+                        } = {};
+                        formData.destinations.forEach((dest) => {
+                          if (!destinationsByDay[dest.dayNumber]) {
+                            destinationsByDay[dest.dayNumber] = [];
+                          }
+                          destinationsByDay[dest.dayNumber].push(dest);
+                        });
+
+                        return Object.entries(destinationsByDay)
+                          .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                          .map(([day, destinations]) => (
+                            <div key={day} className="mb-6 last:mb-0">
+                              <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 flex items-center justify-center">
+                                    <span className="font-bold text-amber-700">
+                                      {day}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <h4 className="text-lg font-semibold text-gray-900">
+                                      Day {day} Itinerary
+                                    </h4>
+                                    <p className="text-sm text-gray-500">
+                                      {destinations.length} activity
+                                      {destinations.length > 1
+                                        ? "s"
+                                        : ""} •{" "}
+                                      {
+                                        new Set(
+                                          destinations.map(
+                                            (d) => d.destinationId
+                                          )
+                                        ).size
+                                      }{" "}
+                                      destination
+                                      {new Set(
+                                        destinations.map((d) => d.destinationId)
+                                      ).size > 1
+                                        ? "s"
+                                        : ""}
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setCurrentDay(parseInt(day));
+                                    setCurrentDestination(null);
+                                    setDestinationSearch("");
+                                  }}
+                                  className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg border border-blue-100 hover:border-blue-300 text-sm font-medium transition-all duration-200"
+                                >
+                                  Add More to Day {day}
+                                </button>
+                              </div>
+
+                              <div className="space-y-3">
+                                {(() => {
+                                  // Group by destination
+                                  const destGroups: {
+                                    [destId: number]: TourDestinationInput[];
+                                  } = {};
+                                  destinations.forEach((dest) => {
+                                    if (!destGroups[dest.destinationId]) {
+                                      destGroups[dest.destinationId] = [];
+                                    }
+                                    destGroups[dest.destinationId].push(dest);
+                                  });
+
+                                  return Object.entries(destGroups).map(
+                                    ([destId, destGroup]) => {
+                                      const destDetails =
+                                        destinationDetails[parseInt(destId)];
+
+                                      return (
+                                        <div
+                                          key={destId}
+                                          className="bg-white rounded-xl border border-gray-200 overflow-hidden"
+                                        >
+                                          {/* Destination Header */}
+                                          <div className="p-4 bg-gradient-to-r from-gray-50 to-blue-50 border-b border-gray-200">
+                                            <div className="flex items-center justify-between">
+                                              <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center">
+                                                  <MapPin className="w-4 h-4 text-blue-600" />
+                                                </div>
+                                                <div>
+                                                  <h5 className="font-medium text-gray-900">
+                                                    {destDetails?.destinationName ||
+                                                      `Destination ${destId}`}
+                                                  </h5>
+                                                  <p className="text-sm text-gray-600 mt-1">
+                                                    {destGroup.length} activity
+                                                    {destGroup.length > 1
+                                                      ? "s"
+                                                      : ""}{" "}
+                                                    • Day {day}
+                                                  </p>
+                                                </div>
+                                              </div>
+                                              <div className="flex gap-2">
+                                                <button
+                                                  type="button"
+                                                  onClick={() => {
+                                                    // Edit this destination - move to this day and show details
+                                                    setCurrentDay(
+                                                      parseInt(day)
+                                                    );
+                                                    fetchDestinationDetails(
+                                                      parseInt(destId)
+                                                    );
+                                                    setCurrentDestination({
+                                                      destinationId:
+                                                        parseInt(destId),
+                                                      destinationName:
+                                                        destDetails?.destinationName ||
+                                                        `Destination ${destId}`,
+                                                      activities: destGroup.map(
+                                                        (d) => d.activityId
+                                                      ),
+                                                    });
+                                                    setDestinationSearch(
+                                                      destDetails?.destinationName ||
+                                                        ""
+                                                    );
+                                                  }}
+                                                  className="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg border border-blue-100 hover:border-blue-300 text-xs font-medium transition-all duration-200"
+                                                >
+                                                  Edit
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => {
+                                                    // Remove all activities for this destination on this day
+                                                    const newDestinations =
+                                                      formData.destinations.filter(
+                                                        (d) =>
+                                                          !(
+                                                            parseInt(
+                                                              d.dayNumber.toString()
+                                                            ) ===
+                                                              parseInt(day) &&
+                                                            d.destinationId ===
+                                                              parseInt(destId)
+                                                          )
+                                                      );
+                                                    handleInputChange(
+                                                      "destinations",
+                                                      newDestinations
+                                                    );
+                                                  }}
+                                                  className="px-3 py-1.5 bg-gradient-to-r from-red-50 to-rose-50 text-red-700 rounded-lg border border-red-100 hover:border-red-300 text-xs font-medium transition-all duration-200"
+                                                >
+                                                  Remove
+                                                </button>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          {/* Activities List */}
+                                          <div className="divide-y divide-gray-100">
+                                            {destGroup.map(
+                                              (groupDest, groupIndex) => {
+                                                const groupActivity =
+                                                  destDetails?.activities.find(
+                                                    (a) =>
+                                                      a.activityId ===
+                                                      groupDest.activityId
+                                                  );
+                                                return (
+                                                  <div
+                                                    key={groupIndex}
+                                                    className="p-4 flex items-center justify-between"
+                                                  >
+                                                    <div className="flex items-center gap-3">
+                                                      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-100 to-teal-100 flex items-center justify-center">
+                                                        <ActivityIcon className="w-3 h-3 text-emerald-600" />
+                                                      </div>
+                                                      <div>
+                                                        <span className="font-medium text-gray-900">
+                                                          {groupActivity?.activityName ||
+                                                            `Activity ${groupDest.activityId}`}
+                                                        </span>
+                                                        {groupActivity && (
+                                                          <div className="flex items-center gap-3 mt-1">
+                                                            <span className="text-xs text-gray-500">
+                                                              Duration:{" "}
+                                                              {
+                                                                groupActivity.durationHours
+                                                              }
+                                                              h
+                                                            </span>
+                                                            <span className="text-xs text-gray-500">
+                                                              Price: LKR{" "}
+                                                              {groupActivity.priceLocal.toLocaleString()}
+                                                            </span>
+                                                            <span className="text-xs text-gray-500">
+                                                              Group:{" "}
+                                                              {
+                                                                groupActivity.minParticipate
+                                                              }
+                                                              -
+                                                              {
+                                                                groupActivity.maxParticipate
+                                                              }
+                                                            </span>
+                                                          </div>
+                                                        )}
+                                                      </div>
+                                                    </div>
+                                                    <button
+                                                      type="button"
+                                                      onClick={() =>
+                                                        handleRemoveDestination(
+                                                          formData.destinations.findIndex(
+                                                            (d) =>
+                                                              d.dayNumber ===
+                                                                groupDest.dayNumber &&
+                                                              d.destinationId ===
+                                                                groupDest.destinationId &&
+                                                              d.activityId ===
+                                                                groupDest.activityId
+                                                          )
+                                                        )
+                                                      }
+                                                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                      title="Remove this activity"
+                                                    >
+                                                      <X className="w-4 h-4" />
+                                                    </button>
+                                                  </div>
+                                                );
+                                              }
+                                            )}
+                                          </div>
+                                        </div>
+                                      );
+                                    }
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                          ));
+                      })()}
+                    </div>
+                  )}
+
+                  {/* Empty State */}
+                  {formData.destinations.length === 0 && (
+                    <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-12 rounded-xl border border-gray-200 text-center">
+                      <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                        No Destinations Added Yet
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        Start building your tour itinerary by selecting a day
+                        above and adding destinations with activities.
+                      </p>
+                      <div className="flex items-center justify-center gap-3 mt-4">
+                        <div className="text-sm text-gray-500">Start with:</div>
+                        {[1, 2, 3].slice(0, formData.duration).map((day) => (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => {
+                              setCurrentDay(day);
+                              setCurrentDestination(null);
+                              setDestinationSearch("");
+                            }}
+                            className="px-4 py-2 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 rounded-lg border border-emerald-200 hover:border-emerald-300 text-sm font-medium transition-all duration-200"
+                          >
+                            Day {day}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-
-          
 
           {/* Tour Images */}
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
@@ -1488,7 +1661,7 @@ const AddNewTourPage = () => {
                           newImages[index].name = e.target.value;
                           handleInputChange("images", newImages);
                         }}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                        className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                         placeholder="e.g., Sigiriya Rock View"
                       />
                     </div>
@@ -1505,7 +1678,7 @@ const AddNewTourPage = () => {
                             newImages[index].imageUrl = e.target.value;
                             handleInputChange("images", newImages);
                           }}
-                          className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                          className="text-gray-600 flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                           placeholder="/images/tours/example.jpg"
                         />
                         <button
@@ -1529,7 +1702,7 @@ const AddNewTourPage = () => {
                           handleInputChange("images", newImages);
                         }}
                         rows={2}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 resize-none"
+                        className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 resize-none"
                         placeholder="Describe the image..."
                       />
                     </div>
@@ -1546,7 +1719,7 @@ const AddNewTourPage = () => {
                             | "INACTIVE";
                           handleInputChange("images", newImages);
                         }}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white"
+                        className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white"
                       >
                         <option value="ACTIVE">Active</option>
                         <option value="INACTIVE">Inactive</option>
@@ -1591,7 +1764,7 @@ const AddNewTourPage = () => {
                       newInclusions[index].inclusionText = e.target.value;
                       handleInputChange("inclusions", newInclusions);
                     }}
-                    className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                    className="text-gray-600 flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                     placeholder="e.g., Hotel accommodation"
                   />
                   <button
@@ -1645,7 +1818,7 @@ const AddNewTourPage = () => {
                       newExclusions[index].exclusionText = e.target.value;
                       handleInputChange("exclusions", newExclusions);
                     }}
-                    className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                    className="text-gray-600 flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                     placeholder="e.g., International airfare"
                   />
                   <button
@@ -1699,7 +1872,7 @@ const AddNewTourPage = () => {
                       newConditions[index].conditionText = e.target.value;
                       handleInputChange("conditions", newConditions);
                     }}
-                    className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                    className="text-gray-600 flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                     placeholder="e.g., Valid passport required"
                   />
                   <button
@@ -1774,7 +1947,7 @@ const AddNewTourPage = () => {
                           newTips[index].tipTitle = e.target.value;
                           handleInputChange("travelTips", newTips);
                         }}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                        className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                         placeholder="e.g., Footwear"
                       />
                     </div>
@@ -1790,7 +1963,7 @@ const AddNewTourPage = () => {
                           handleInputChange("travelTips", newTips);
                         }}
                         rows={2}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 resize-none"
+                        className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 resize-none"
                         placeholder="e.g., Wear comfortable walking shoes"
                       />
                     </div>

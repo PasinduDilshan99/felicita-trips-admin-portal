@@ -3,12 +3,14 @@ import {
   PackageFilterParams,
   ApiResponse,
   SinglePackageApiResponse,
-  AddPackageRequest,
-  UpdatePackageRequest,
   TourPackage,
   PackageSchedule,
   PackagesForTerminateResponse,
-  TerminatePackageApiResponse
+  TerminatePackageApiResponse,
+  AddPackageApiResponse,
+  AddPackageRequest,
+  TourDetailsResponse,
+  TourIdNameResponse,
 } from "@/types/package-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -25,9 +27,7 @@ export class PackageService {
   }
 
   // Fetch packages with filters
-  static async getPackages(
-    params: PackageFilterParams
-  ): Promise<ApiResponse> {
+  static async getPackages(params: PackageFilterParams): Promise<ApiResponse> {
     try {
       const response = await fetch(
         `${API_BASE_URL}/felicita/v0/api/package/packages`,
@@ -64,9 +64,7 @@ export class PackageService {
   }
 
   // Get single package by ID
-  static async getPackageById(
-    id: number
-  ): Promise<SinglePackageApiResponse> {
+  static async getPackageById(id: number): Promise<SinglePackageApiResponse> {
     try {
       const response = await fetch(
         `${API_BASE_URL}/felicita/v0/api/package/${id}`,
@@ -109,20 +107,30 @@ export class PackageService {
   }
 
   // Calculate discounted price
-  static calculateDiscountedPrice(totalPrice: number, discountPercentage: number): number {
-    return totalPrice - (totalPrice * discountPercentage / 100);
+  static calculateDiscountedPrice(
+    totalPrice: number,
+    discountPercentage: number
+  ): number {
+    return totalPrice - (totalPrice * discountPercentage) / 100;
   }
 
   // Calculate per person price after discount
-  static calculatePerPersonPrice(totalPrice: number, discountPercentage: number, groupSize: number): number {
-    const discountedPrice = this.calculateDiscountedPrice(totalPrice, discountPercentage);
+  static calculatePerPersonPrice(
+    totalPrice: number,
+    discountPercentage: number,
+    groupSize: number
+  ): number {
+    const discountedPrice = this.calculateDiscountedPrice(
+      totalPrice,
+      discountPercentage
+    );
     return discountedPrice / groupSize;
   }
 
   // Get upcoming schedules
   static getUpcomingSchedules(pkg: TourPackage): PackageSchedule[] {
     const today = new Date();
-    return pkg.schedules.filter(schedule => {
+    return pkg.schedules.filter((schedule) => {
       const endDate = new Date(schedule.assumeEndDate);
       return endDate >= today;
     });
@@ -132,7 +140,7 @@ export class PackageService {
   static getActiveDates(pkg: TourPackage): { from: Date; to: Date } {
     return {
       from: new Date(pkg.startDate),
-      to: new Date(pkg.endDate)
+      to: new Date(pkg.endDate),
     };
   }
 
@@ -141,7 +149,9 @@ export class PackageService {
     const today = new Date();
     const startDate = new Date(pkg.startDate);
     const endDate = new Date(pkg.endDate);
-    return pkg.packageStatus === 'ACTIVE' && today >= startDate && today <= endDate;
+    return (
+      pkg.packageStatus === "ACTIVE" && today >= startDate && today <= endDate
+    );
   }
 
   // Get available package types (static list or from API)
@@ -160,17 +170,14 @@ export class PackageService {
     ];
   }
 
-  // Add new package
-  static async addPackage(
-    packageData: AddPackageRequest
-  ): Promise<any> {
+  // Get packages for termination
+  static async getPackagesForTerminate(): Promise<PackagesForTerminateResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/package/add-package`,
+        `${API_BASE_URL}/felicita/v0/api/package/package-for-terminate`,
         {
-          method: "POST",
+          method: "GET",
           headers: this.getAuthHeaders(),
-          body: JSON.stringify(packageData),
         }
       );
 
@@ -178,106 +185,146 @@ export class PackageService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const data: PackagesForTerminateResponse = await response.json();
+      return data;
     } catch (error) {
-      console.error("Error adding package:", error);
+      console.error("Error fetching packages for terminate:", error);
       throw error;
     }
   }
 
-  // Update package
-  static async updatePackage(
-    packageData: UpdatePackageRequest
-  ): Promise<any> {
+  // Terminate package
+  static async terminatePackage(
+    packageId: number
+  ): Promise<TerminatePackageApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/package/update-package`,
+        `${API_BASE_URL}/felicita/v0/api/package/terminate-package`,
         {
           method: "POST",
           headers: this.getAuthHeaders(),
-          body: JSON.stringify(packageData),
+          body: JSON.stringify({ packageId }),
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const data: TerminatePackageApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to terminate package");
       }
 
-      return await response.json();
+      return data;
     } catch (error) {
-      console.error("Error updating package:", error);
+      console.error("Error terminating package:", error);
       throw error;
     }
   }
-
-// Update your existing packageService.ts with these methods
-
-// Get packages for termination
-static async getPackagesForTerminate(): Promise<PackagesForTerminateResponse> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/felicita/v0/api/package/package-for-terminate`,
-      {
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: PackagesForTerminateResponse = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching packages for terminate:", error);
-    throw error;
-  }
-}
-
-// Terminate package
-static async terminatePackage(
-  packageId: number
-): Promise<TerminatePackageApiResponse> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/felicita/v0/api/package/terminate-package`,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ packageId }),
-      }
-    );
-
-    const data: TerminatePackageApiResponse = await response.json();
-
-    if (data.code !== 200) {
-      throw new Error(data.message || "Failed to terminate package");
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error terminating package:", error);
-    throw error;
-  }
-}
 
   // Calculate savings amount
-  static calculateSavings(totalPrice: number, discountPercentage: number): number {
-    return totalPrice * discountPercentage / 100;
+  static calculateSavings(
+    totalPrice: number,
+    discountPercentage: number
+  ): number {
+    return (totalPrice * discountPercentage) / 100;
   }
 
   // Format price with currency
   static formatPrice(amount: number): string {
-    return `LKR ${amount.toLocaleString('en-US', {
+    return `LKR ${amount.toLocaleString("en-US", {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     })}`;
   }
 
   // Get package rating (placeholder - could be from reviews)
   static getPackageRating(pkg: TourPackage): number {
     // This is a placeholder - you'd normally get this from reviews
-    return 4.5 + (pkg.discountPercentage / 50); // Higher discount = better rating
+    return 4.5 + pkg.discountPercentage / 50; // Higher discount = better rating
+  }
+
+  static async getAllTours(): Promise<TourIdNameResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/v0/api/tour/tourId-and-tourName`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TourIdNameResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching tours:", error);
+      throw error;
+    }
+  }
+
+  // Get tour details for add package
+  static async getTourDetailsForPackage(
+    tourId: number
+  ): Promise<TourDetailsResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/v0/api/tour/tour-details-for-add-package/${tourId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TourDetailsResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching tour details:", error);
+      throw error;
+    }
+  }
+
+  // Add new package
+  static async addPackage(
+    request: AddPackageRequest
+  ): Promise<AddPackageApiResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/v0/api/package/add-package`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(request),
+        }
+      );
+
+      const data: AddPackageApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to add package");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error adding package:", error);
+      throw error;
+    }
   }
 }

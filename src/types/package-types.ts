@@ -1,6 +1,4 @@
 // types/package-types.ts
-
-// Schedule Interface
 export interface PackageSchedule {
   scheduleId: number;
   scheduleName: string;
@@ -109,77 +107,6 @@ export interface SinglePackageApiResponse {
   timestamp: string;
 }
 
-// For adding/updating packages
-export interface PackageImageRequest {
-  name: string;
-  description: string;
-  imageUrl: string;
-  color: string;
-}
-
-export interface FeatureRequest {
-  featureName: string;
-  featureValue: string;
-  featureDescription: string;
-  color: string;
-  specialNote: string;
-}
-
-export interface ScheduleRequest {
-  scheduleName: string;
-  assumeStartDate: string;
-  assumeEndDate: string;
-  durationStart: number;
-  durationEnd: number;
-  specialNote: string;
-  scheduleDescription: string;
-}
-
-export interface AddPackageRequest {
-  packageName: string;
-  packageDescription: string;
-  totalPrice: number;
-  discountPercentage: number;
-  startDate: string;
-  endDate: string;
-  color: string;
-  hoverColor: string;
-  minPersonCount: number;
-  maxPersonCount: number;
-  pricePerPerson: number;
-  packageStatus: 'ACTIVE' | 'INACTIVE';
-  packageTypeName: string;
-  tourId: number;
-  schedules: ScheduleRequest[];
-  features: FeatureRequest[];
-  images: PackageImageRequest[];
-}
-
-export interface UpdatePackageRequest {
-  packageId: number;
-  packageName: string;
-  packageDescription: string;
-  totalPrice: number;
-  discountPercentage: number;
-  startDate: string;
-  endDate: string;
-  color: string;
-  hoverColor: string;
-  minPersonCount: number;
-  maxPersonCount: number;
-  pricePerPerson: number;
-  packageStatus: 'ACTIVE' | 'INACTIVE';
-  packageTypeName: string;
-  tourId: number;
-  removeImages: number[];
-  newImages: PackageImageRequest[];
-  removeSchedules: number[];
-  newSchedules: ScheduleRequest[];
-  removeFeatures: number[];
-  newFeatures: FeatureRequest[];
-}
-
-// Add these interfaces to your existing package-types.ts file
 
 export interface PackageForTerminate {
   packageId: number;
@@ -207,5 +134,173 @@ export interface TerminatePackageApiResponse {
   status: string;
   message: string;
   data: TerminatePackageResponse;
+  timestamp: string;
+}
+
+// Add these new interfaces to your existing types/package-types.ts
+
+// Tour Types for Add Package
+export interface TourIdName {
+  tourId: number;
+  tourName: string;
+}
+
+export interface TourIdNameResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TourIdName[];
+  timestamp: string;
+}
+
+// Activity Interface
+export interface Activity {
+  activityId: number;
+  name: string;
+  description: string;
+}
+
+// Destination Interface
+export interface Destination {
+  destinationId: number;
+  name: string;
+  description: string;
+  activities: Activity[];
+}
+
+// Day Interface
+export interface TourDay {
+  day: number;
+  destinations: Destination[];
+}
+
+// Travel Tip Interface
+export interface TravelTip {
+  tipTitle: string;
+  tipDescription: string;
+}
+
+// Assigned User Interface
+export interface AssignedUser {
+  userId: number;
+  firstName: string;
+  lastName: string;
+  username: string;
+}
+
+// Tour Details for Add Package
+export interface TourDetailsForPackage {
+  tourId: number;
+  name: string;
+  description: string;
+  tourType: string;
+  tourCategory: string;
+  startLocation: string;
+  endLocation: string;
+  status: string;
+  season: string;
+  assignedUser: AssignedUser;
+  assignMessage: string;
+  days: TourDay[];
+  inclusions: string[];
+  exclusions: string[];
+  conditions: string[];
+  travelTips: TravelTip[];
+}
+
+export interface TourDetailsResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TourDetailsForPackage;
+  timestamp: string;
+}
+
+// Add Package Request Types
+export interface PackageImageRequest {
+  name: string;
+  description: string;
+  status: string;
+  imageUrl: string;
+  color: string;
+  createdBy: number;
+}
+
+export interface DayAccommodation {
+  dayNumber: number;
+  breakfast: boolean;
+  breakfastDescription: string | null;
+  lunch: boolean;
+  lunchDescription: string | null;
+  dinner: boolean;
+  dinnerDescription: string | null;
+  morningTea: boolean;
+  morningTeaDescription: string | null;
+  eveningTea: boolean;
+  eveningTeaDescription: string | null;
+  snacks: boolean;
+  snackNote: string | null;
+  hotelId: number;
+  transportId: number;
+  otherNotes: string | null;
+}
+
+export interface Inclusion {
+  inclusionText: string;
+  displayOrder: number;
+  status: string;
+}
+
+export interface Exclusion {
+  exclusionText: string;
+  displayOrder: number;
+  status: string;
+}
+
+export interface Condition {
+  conditionText: string;
+  displayOrder: number;
+  status: string;
+}
+
+export interface TravelTipRequest {
+  tipTitle: string;
+  tipDescription: string;
+  displayOrder: number;
+  status: string;
+}
+
+export interface AddPackageRequest {
+  packageType: number;
+  tourId: number;
+  name: string;
+  description: string;
+  totalPrice: number;
+  discountPercentage: number;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  color: string;
+  status: string;
+  hoverColor: string;
+  minPersonCount: number;
+  maxPersonCount: number;
+  pricePerPerson: number;
+  images: PackageImageRequest[];
+  dayAccommodations: DayAccommodation[];
+  inclusions: Inclusion[];
+  exclusions: Exclusion[];
+  conditions: Condition[];
+  travelTips: TravelTipRequest[];
+}
+
+export interface AddPackageResponse {
+  message: string;
+}
+
+export interface AddPackageApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: AddPackageResponse;
   timestamp: string;
 }

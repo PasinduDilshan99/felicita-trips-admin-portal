@@ -203,9 +203,6 @@ export class DestinationService {
       );
 
       const data: UpdateDestinationApiResponse = await response.json();
-      console.log('=================response===================');
-      console.log(data);
-      console.log('====================================');
 
       if (data.code !== 200) {
         throw new Error(data.message || "Failed to update destination");
