@@ -7,6 +7,9 @@ import {
   TerminateActivityApiResponse,
   AddActivityRequest,
   AddActivityApiResponse,
+  ActivityIdNameResponse,
+  UpdateActivityRequest,
+  UpdateActivityApiResponse,
 } from "@/types/activity-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -201,6 +204,62 @@ export class ActivityService {
       return data;
     } catch (error) {
       console.error("Error adding activity:", error);
+      throw error;
+    }
+  }
+
+    // Get activity IDs and names for search dropdown
+  static async getActivityIdsAndNames(): Promise<ActivityIdNameResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/api/v0/activities/activityId-and-activityName`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ActivityIdNameResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching activity IDs and names:", error);
+      throw error;
+    }
+  }
+
+  // Update activity
+  static async updateActivity(
+    activityData: UpdateActivityRequest
+  ): Promise<UpdateActivityApiResponse> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/felicita/api/v0/activities/update-activity`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",          body: JSON.stringify(activityData),
+        }
+      );
+
+      const data: UpdateActivityApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to update activity");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error updating activity:", error);
       throw error;
     }
   }

@@ -193,3 +193,75 @@ export interface DestinationOption {
   destinationId: number;
   destinationName: string;
 }
+
+// Add these new types for update functionality
+
+// Activity ID and Name for dropdown
+export interface ActivityIdName {
+  activityId: number;
+  activityName: string;
+}
+
+export interface ActivityIdNameResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: ActivityIdName[];
+  timestamp: string;
+}
+
+// Update Activity Types
+export interface UpdateImageRequest {
+  imageId?: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateRequirementRequest {
+  requirementId?: number;
+  name: string;
+  value: string;
+  description: string;
+  color: string;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateActivityRequest {
+  activityId: number;
+  destinationId: number;
+  name: string;
+  description: string;
+  activitiesCategory: string;
+  durationHours: number;
+  availableFrom: string;
+  availableTo: string;
+  priceLocal: number;
+  priceForeigners: number;
+  minParticipate: number;
+  maxParticipate: number;
+  season: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  
+  removeImagesIds: number[];
+  addImages: UpdateImageRequest[];
+  updatedImages: UpdateImageRequest[];
+  
+  removeRequirementsIds: number[];
+  addRequirements: UpdateRequirementRequest[];
+  updatedRequirements: UpdateRequirementRequest[];
+}
+
+export interface UpdateActivityResponse {
+  message: string;
+  id: number;
+}
+
+export interface UpdateActivityApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: UpdateActivityResponse;
+  timestamp: string;
+}
