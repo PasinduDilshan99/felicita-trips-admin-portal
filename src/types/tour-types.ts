@@ -261,3 +261,229 @@ export interface AddTourApiResponse {
   data: AddTourResponse;
   timestamp: string;
 }
+
+// Add to your existing tour-types.ts
+
+// Tour Name and ID for search
+export interface TourNameId {
+  tourId: number;
+  tourName: string;
+}
+
+export interface TourNameIdResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TourNameId[];
+  timestamp: string;
+}
+
+// Tour details response
+export interface DayToDayDestinationActivity {
+  activityId: number;
+  destinationId: number;
+  activityName: string;
+  activityDescription: string;
+  activitiesCategory: string;
+  durationHours: number;
+  availableFrom: string;
+  availableTo: string;
+  minParticipate: number;
+  maxParticipate: number;
+  season: string;
+  categoryName: string;
+  images: {
+    imageId: number;
+    imageName: string;
+    imageDescription: string;
+    image_url: string;
+  }[];
+}
+
+export interface DayToDayDestination {
+  destination: {
+    destinationId: number;
+    destinationName: string;
+    destinationDescription: string;
+    category: string;
+    location: string;
+    latitude: number;
+    longitude: number;
+    images: {
+      imageId: number;
+      imageName: string;
+      imageDescription: string;
+      imageUrl: string;
+      imageStatus: string | null;
+    }[];
+  };
+  activities: DayToDayDestinationActivity[];
+}
+
+export interface DayToDayResponse {
+  dayNumber: number;
+  destinations: DayToDayDestination[];
+}
+
+export interface Inclusion {
+  id: number;
+  description: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface Exclusion {
+  id: number;
+  description: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface Condition {
+  id: number;
+  description: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface TravelTip {
+  id: number;
+  title: string;
+  description: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface TourAllDetails {
+  tourId: number;
+  tourName: string;
+  tourDescription: string;
+  duration: number;
+  latitude: number;
+  longitude: number;
+  startLocation: string;
+  endLocation: string;
+  tourTypeName: string;
+  tourTypeDescription: string;
+  tourCategoryName: string;
+  tourCategoryDescription: string;
+  seasonName: string;
+  seasonDescription: string;
+  statusName: 'ACTIVE' | 'INACTIVE';
+  assignTo: number;
+  assignToName: string;
+  assignMessage: string;
+  schedules: Schedule[];
+  images: TourImage[];
+  inclusions: Inclusion[];
+  exclusions: Exclusion[];
+  conditions: Condition[];
+  travelTips: TravelTip[];
+  dayToDayResponses: DayToDayResponse[];
+}
+
+export interface TourAllDetailsResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TourAllDetails;
+  timestamp: string;
+}
+
+// Update tour interfaces
+export interface TourBasicDetails {
+  tourName: string;
+  tourDescription: string;
+  tourType: number;
+  tourCategory: number;
+  duration: number;
+  latitude: number;
+  longitude: number;
+  startLocation: string;
+  endLocation: string;
+  season: number;
+  status: 'ACTIVE' | 'INACTIVE';
+  assignTo: number;
+  assignMessage: string;
+}
+
+export interface UpdateDestinationInput {
+  tourDestinationId: number;
+  destinationId: number;
+  activityId: number;
+  dayNumber: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateImageInput {
+  imageId: number;
+  name: string;
+  imageDescription: string;
+  imageUrl: string;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateInclusionInput {
+  inclusionId: number;
+  inclusionText: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateExclusionInput {
+  exclusionId: number;
+  exclusionText: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateConditionInput {
+  conditionId: number;
+  conditionText: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateTravelTipInput {
+  travelTipId: number;
+  tipTitle: string;
+  tipDescription: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateTourRequest {
+  tourId: number;
+  tourBasicDetails: TourBasicDetails;
+  addDestinations: TourDestinationInput[];
+  removeDestinations: number[];
+  updateDestinations: UpdateDestinationInput[];
+  addImages: TourImageInput[];
+  removeImages: number[];
+  updateImages: UpdateImageInput[];
+  addInclusions: InclusionInput[];
+  removeInclusions: number[];
+  updateInclusions: UpdateInclusionInput[];
+  addExclusions: ExclusionInput[];
+  removeExclusions: number[];
+  updateExclusions: UpdateExclusionInput[];
+  addConditions: ConditionInput[];
+  removeConditions: number[];
+  updateConditions: UpdateConditionInput[];
+  addTravelTips: TravelTipInput[];
+  removeTravelTips: number[];
+  updateTravelTips: UpdateTravelTipInput[];
+}
+
+export interface UpdateTourResponse {
+  message: string;
+  id: number;
+}
+
+export interface UpdateTourApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: UpdateTourResponse;
+  timestamp: string;
+}

@@ -12,6 +12,10 @@ import {
   AddTourApiResponse,
   EmployeeAssignResponse,
   DestinationsForTourResponse,
+  TourAllDetailsResponse,
+  UpdateTourRequest,
+  UpdateTourApiResponse,
+  TourNameIdResponse,
 } from "@/types/tour-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -351,4 +355,94 @@ export class TourService {
       return startDate <= futureDate;
     }).length;
   }
+
+  // Add these methods to your existing TourService class
+
+// Get all tour names and IDs for search
+static async getAllTourNames(): Promise<TourNameIdResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/felicita/v0/api/tour/tourId-and-tourName`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: TourNameIdResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching tour names:', error);
+    throw error;
+  }
+}
+
+// Get all tour details by ID
+static async getTourAllDetails(id: number): Promise<TourAllDetailsResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/felicita/v0/api/tour/tout-all-details/${id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: TourAllDetailsResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching tour all details:', error);
+    throw error;
+  }
+}
+
+// Update tour
+static async updateTour(tourData: UpdateTourRequest): Promise<UpdateTourApiResponse> {
+  try {
+    console.log('===================tourData=================');
+    console.log(tourData);
+    console.log('====================================');
+    const response = await fetch(
+      `${API_BASE_URL}/felicita/v0/api/tour/update-tour`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(tourData),
+      }
+    );
+
+    const data: UpdateTourApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || 'Failed to update tour');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error updating tour:', error);
+    throw error;
+  }
+}
+
+
 }
