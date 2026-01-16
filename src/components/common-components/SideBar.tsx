@@ -20,13 +20,13 @@ export interface SideBarDataType {
   description: string;
   color: string;
   url: string;
-  privilege: string; // Added privilege field for main items
+  privilege: string;
   subData: {
     id: number;
     name: string;
     description: string;
     url: string;
-    privilege: string; // Added privilege field for sub items
+    privilege: string;
   }[];
 }
 
@@ -52,17 +52,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   const filteredData = useMemo(() => {
     return data
       .filter((item) => {
-        // Check if user has privilege for the main item
         const hasMainPrivilege = hasPrivilege(item.privilege);
-
-        // Filter subData based on privileges
         const filteredSubData = item.subData.filter((subItem) =>
           hasPrivilege(subItem.privilege)
         );
 
-        // Show main item if:
-        // 1. User has privilege for main item OR
-        // 2. Main item has sub items and user has privilege for any sub item
         return (
           hasMainPrivilege ||
           (item.subData.length > 0 && filteredSubData.length > 0)
@@ -106,10 +100,34 @@ const Sidebar: React.FC<SidebarProps> = ({
     setExpandedItems(expanded);
   }, [pathname, filteredData]);
 
-  const toggleItem = (id: number) => {
-    setExpandedItems((prev) =>
-      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
-    );
+  const handleParentClick = (item: SideBarDataType) => {
+    const hasSubItems = item.subData && item.subData.length > 0;
+    const hasMainItemAccess = hasPrivilege(item.privilege);
+    
+    if (!hasMainItemAccess && !hasSubItems) {
+      return; // Do nothing if no access
+    }
+
+    // Toggle expansion for parent item
+    if (hasSubItems) {
+      setExpandedItems((prev) =>
+        prev.includes(item.id)
+          ? prev.filter((itemId) => itemId !== item.id)
+          : [...prev, item.id]
+      );
+    }
+
+    // Navigate to parent URL (if user has access to parent)
+    if (hasMainItemAccess) {
+      router.push(item.url);
+      
+      // Close sidebar on mobile after navigation
+      if (isMobileView) {
+        setTimeout(() => {
+          setIsSidebarOpen(false);
+        }, 300);
+      }
+    }
   };
 
   const toggleSidebar = () => {
@@ -125,7 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       />
     ) : null;
 
-  // If no accessible items, show minimal sidebar or nothing
+  // If no accessible items, show minimal sidebar
   if (filteredData.length === 0) {
     return (
       <aside className="fixed lg:sticky top-0 left-0 h-screen bg-white border-r border-gray-200 shadow-lg w-20 flex flex-col items-center justify-center">
@@ -256,20 +274,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                 pathname.startsWith(item.url) ||
                 item.subData.some((sub) => pathname.startsWith(sub.url));
 
-              // Check if main item is accessible
               const hasMainItemAccess = hasPrivilege(item.privilege);
 
               return (
                 <div key={item.id} className="mb-2">
                   {/* Main Item */}
                   <button
-                    onClick={() => {
-                      if (hasSubItems) {
-                        toggleItem(item.id);
-                      } else if (hasMainItemAccess) {
-                        router.push(item.url);
-                      }
-                    }}
+                    onClick={() => handleParentClick(item)}
                     className={`flex items-center w-full px-3 py-3 rounded-lg transition-all duration-300 ease-in-out smooth-hover ${
                       isActive
                         ? "bg-purple-50 border-l-4 shadow-sm"
@@ -278,7 +289,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       !hasMainItemAccess && !hasSubItems
                         ? "opacity-50 cursor-not-allowed hover:bg-transparent"
                         : ""
-                    }`}
+                    } ${hasMainItemAccess ? "cursor-pointer" : ""}`}
                     style={{
                       borderLeftColor: isActive ? item.color : "transparent",
                     }}
@@ -299,7 +310,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             } ${!hasMainItemAccess ? "opacity-60" : ""}`}
                           >
                             {item.name}
-                            {!hasMainItemAccess && (
+                            {!hasMainItemAccess && hasSubItems && (
                               <span className="text-xs text-gray-400 ml-2">
                                 (Sub items only)
                               </span>
@@ -394,7 +405,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </nav>
         </div>
 
-        {/* Footer with user info (optional) */}
+        {/* Footer with user info */}
         {isSidebarOpen && (
           <div className="p-4 border-t border-gray-200 mt-auto">
             <div className="text-xs text-gray-500 text-center">

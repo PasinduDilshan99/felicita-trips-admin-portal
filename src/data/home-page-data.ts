@@ -1,4 +1,6 @@
 import { HomeCardType } from "@/types/home-page-data-types";
+import { ERP_SYSTEM_PRIVILEGE, HOTEL_MANAGEMENT_PRIVILEGE, TRAVEL_MANAGEMENT_PRIVILEGE, VEHICLE_MANAGEMENT_PRIVILEGE, WEB_MANAGEMENT_PRIVILEGE } from "@/utils/privileges";
+import { TRAVEL_MANAGEMENT_URL, VEHICLE_MANAGEMENT_URL, WEB_MANAGEMENT_URL } from "@/utils/urls";
 
 export const homeCardData: HomeCardType[] = [
     {
@@ -10,9 +12,9 @@ export const homeCardData: HomeCardType[] = [
       color: "#3B82F6",
       hoverColor: "#2563EB",
       bgColor: "bg-purple-50",
-      linkTo: "/web-management",
+      linkTo: WEB_MANAGEMENT_URL,
       iconUrl: "https://cdn-icons-png.flaticon.com/512/826/826070.png",
-      privilege: "WEB_MANAGEMENT",
+      privilege: WEB_MANAGEMENT_PRIVILEGE,
     },
     {
       id: 2,
@@ -23,9 +25,9 @@ export const homeCardData: HomeCardType[] = [
       color: "#3B82F6",
       hoverColor: "#2563EB",
       bgColor: "bg-blue-50",
-      linkTo: "/travel-management",
+      linkTo: TRAVEL_MANAGEMENT_URL,
       iconUrl: "https://cdn-icons-png.flaticon.com/512/826/826070.png",
-      privilege: "TRAVEL_MANAGEMENT",
+      privilege: TRAVEL_MANAGEMENT_PRIVILEGE,
     },
     {
       id: 3,
@@ -42,16 +44,16 @@ export const homeCardData: HomeCardType[] = [
     },
     {
       id: 4,
-      name: "Hotels Management",
+      name: "Hotel Management",
       label: "Hotels",
       description:
         "Manage hotel bookings, room allocations, guest services, and hospitality operations",
       color: "#F59E0B",
       hoverColor: "#D97706",
       bgColor: "bg-yellow-50",
-      linkTo: "/hotels-management",
+      linkTo: HOTEL_MANAGEMENT_PRIVILEGE,
       iconUrl: "https://cdn-icons-png.flaticon.com/512/1179/1179968.png",
-      privilege: "HOTEL_MANAGEMENT",
+      privilege: HOTEL_MANAGEMENT_PRIVILEGE,
     },
     {
       id: 5,
@@ -62,9 +64,9 @@ export const homeCardData: HomeCardType[] = [
       color: "#EF4444",
       hoverColor: "#DC2626",
       bgColor: "bg-red-50",
-      linkTo: "/vehicle-management",
+      linkTo: VEHICLE_MANAGEMENT_URL,
       iconUrl: "https://cdn-icons-png.flaticon.com/512/744/744465.png",
-      privilege: "VEHICLE_MANAGEMENT",
+      privilege: VEHICLE_MANAGEMENT_PRIVILEGE,
     },
     {
       id: 6,
@@ -75,8 +77,8 @@ export const homeCardData: HomeCardType[] = [
       color: "#8B5CF6",
       hoverColor: "#7C3AED",
       bgColor: "bg-purple-50",
-      linkTo: "/erp-system",
+      linkTo: ERP_SYSTEM_PRIVILEGE,
       iconUrl: "https://cdn-icons-png.flaticon.com/512/1006/1006771.png",
-      privilege: "ERP_SYSTEM",
+      privilege: ERP_SYSTEM_PRIVILEGE,
     },
   ];

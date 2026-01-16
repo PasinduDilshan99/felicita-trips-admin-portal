@@ -31,7 +31,7 @@ const HomePage = () => {
   }
 
   const getGridColumnsClass = () => {
-    const count = filteredCards.length;
+    const count = filteredCards.length; 
     if (count === 1) return "grid-cols-1";
     if (count === 2) return "grid-cols-1 sm:grid-cols-2";
     if (count === 3) return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
