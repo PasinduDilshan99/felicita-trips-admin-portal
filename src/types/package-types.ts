@@ -304,3 +304,301 @@ export interface AddPackageApiResponse {
   data: AddPackageResponse;
   timestamp: string;
 }
+
+// Add these interfaces to your existing package-types.ts
+
+// Package Name and ID for search
+export interface PackageNameId {
+  packageId: number;
+  packageName: string;
+}
+
+export interface PackageNameIdResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: PackageNameId[];
+  timestamp: string;
+}
+
+// Package details response interfaces
+export interface PackageFeatureResponse {
+  featureId: number;
+  featureName: string;
+  featureValue: string;
+  featureDescription: string;
+  color: string;
+  specialNote: string;
+}
+
+export interface PackageImageResponse {
+  imageId: number;
+  imageName: string;
+  imageDescription: string;
+  imageUrl: string;
+  color: string;
+}
+
+export interface PackageInclusionResponse {
+  id: number;
+  description: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface PackageExclusionResponse {
+  id: number;
+  description: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface PackageConditionResponse {
+  id: number;
+  description: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface PackageTravelTipResponse {
+  id: number;
+  title: string;
+  description: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface DayAccommodationResponse {
+  packageDayAccommodationId: number;
+  dayNumber: number;
+  breakfast: boolean;
+  breakfastDescription: string | null;
+  lunch: boolean;
+  lunchDescription: string | null;
+  dinner: boolean;
+  dinnerDescription: string | null;
+  morningTea: boolean;
+  morningTeaDescription: string | null;
+  eveningTea: boolean;
+  eveningTeaDescription: string | null;
+  snacks: boolean;
+  snackNote: string | null;
+  otherNotes: string | null;
+  hotelId: number;
+  hotelName: string;
+  hotelDescription: string;
+  hotelWebsite: string;
+  hotelCategory: number;
+  hotelType: string;
+  hotelLocation: string;
+  hotelLatitude: number;
+  hotelLongitude: number;
+  transportId: number;
+  vehicleRegistrationNumber: string;
+  vehicleTypeName: string;
+  vehicleModel: string;
+  seatCapacity: number;
+  airCondition: boolean;
+}
+
+export interface DayAccommodationListResponse {
+  packageId: number;
+  packageName: string;
+  packageDescription: string;
+  totalPrice: number;
+  pricePerPerson: number;
+  discount: number;
+  color: string;
+  hoverColor: string;
+  packageDayByDayDtoList: DayAccommodationResponse[];
+}
+
+export interface PackageAllDetails {
+  packageId: number;
+  packageName: string;
+  packageDescription: string;
+  totalPrice: number;
+  discountPercentage: number;
+  startDate: string;
+  endDate: string;
+  color: string;
+  hoverColor: string;
+  minPersonCount: number;
+  maxPersonCount: number;
+  pricePerPerson: number;
+  packageStatus: 'ACTIVE' | 'INACTIVE';
+  packageTypeName: string;
+  tourId: number;
+  tourName: string;
+  packageFeatures: PackageFeatureResponse[];
+  packageImages: PackageImageResponse[];
+  inclusions: PackageInclusionResponse[];
+  exclusions: PackageExclusionResponse[];
+  conditions: PackageConditionResponse[];
+  travelTips: PackageTravelTipResponse[];
+  dayAccommodationResponses: DayAccommodationListResponse;
+}
+
+export interface PackageAllDetailsResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: PackageAllDetails;
+  timestamp: string;
+}
+
+// Update package request interfaces
+export interface PackageBasicDetails {
+  packageType: number;
+  tourId: number;
+  name: string;
+  description: string;
+  totalPrice: number;
+  discountPercentage: number;
+  startDate: string;
+  endDate: string;
+  color: string;
+  hoverColor: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  minPersonCount: number;
+  maxPersonCount: number;
+  pricePerPerson: number;
+}
+
+export interface UpdateImageRequest {
+  imageId: number;
+  imageName: string;
+  imageDescription: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  imageUrl: string;
+  color: string;
+}
+
+export interface AddFeatureRequest {
+  featureName: string;
+  featureValue: string;
+  featureDescription: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  color: string;
+  hoverColor: string;
+  specialNote: string;
+}
+
+export interface UpdateFeatureRequest {
+  featureId: number;
+  featureName: string;
+  featureValue: string;
+  featureDescription: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  color: string;
+  hoverColor: string;
+  specialNote: string;
+}
+
+export interface UpdateDayAccommodationRequest {
+  packageDayAccommodationId: number;
+  dayNumber: number;
+  breakfast: boolean;
+  breakfastDescription: string | null;
+  lunch: boolean;
+  lunchDescription: string | null;
+  dinner: boolean;
+  dinnerDescription: string | null;
+  morningTea: boolean;
+  morningTeaDescription: string | null;
+  eveningTea: boolean;
+  eveningTeaDescription: string | null;
+  snacks: boolean;
+  snackNote: string | null;
+  hotelId: number;
+  transportId: number;
+  otherNotes: string | null;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface AddDayAccommodationRequest {
+  dayNumber: number;
+  breakfast: boolean;
+  breakfastDescription: string | null;
+  lunch: boolean;
+  lunchDescription: string | null;
+  dinner: boolean;
+  dinnerDescription: string | null;
+  morningTea: boolean;
+  morningTeaDescription: string | null;
+  eveningTea: boolean;
+  eveningTeaDescription: string | null;
+  snacks: boolean;
+  snackNote: string | null;
+  hotelId: number;
+  transportId: number;
+  otherNotes: string | null;
+}
+
+export interface UpdateInclusionRequest {
+  packageInclusionId: number;
+  inclusionText: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateExclusionRequest {
+  packageExclusionId: number;
+  exclusionText: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateConditionRequest {
+  packageConditionId: number;
+  conditionText: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdateTravelTipRequest {
+  packageTipId: number;
+  tipTitle: string;
+  tipDescription: string;
+  displayOrder: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UpdatePackageRequest {
+  packageId: number;
+  packageBasicDetails: PackageBasicDetails;
+  removedImageIds: number[];
+  addImages: PackageImageRequest[];
+  updatedImages: UpdateImageRequest[];
+  addFeatures: AddFeatureRequest[];
+  removeFeatureIds: number[];
+  updatedFeatures: UpdateFeatureRequest[];
+  addDayAccommodations: AddDayAccommodationRequest[];
+  removeDayAccommodationIds: number[];
+  updatedDayAccommodations: UpdateDayAccommodationRequest[];
+  addInclusions: Inclusion[];
+  removeInclusionIds: number[];
+  updatedInclusions: UpdateInclusionRequest[];
+  addExclusions: Exclusion[];
+  removeExclusionIds: number[];
+  updatedExclusions: UpdateExclusionRequest[];
+  addConditions: Condition[];
+  removeConditionIds: number[];
+  updatedConditions: UpdateConditionRequest[];
+  addTravelTips: TravelTipRequest[];
+  removeTravelTipIds: number[];
+  updatedTravelTips: UpdateTravelTipRequest[];
+}
+
+export interface UpdatePackageResponse {
+  message: string;
+  id: number;
+}
+
+export interface UpdatePackageApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: UpdatePackageResponse;
+  timestamp: string;
+}

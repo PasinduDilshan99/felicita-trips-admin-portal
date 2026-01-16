@@ -11,6 +11,10 @@ import {
   AddPackageRequest,
   TourDetailsResponse,
   TourIdNameResponse,
+  UpdatePackageRequest,
+  UpdatePackageApiResponse,
+  PackageNameIdResponse,
+  PackageAllDetailsResponse,
 } from "@/types/package-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -327,4 +331,92 @@ export class PackageService {
       throw error;
     }
   }
+
+// Add these methods to your existing PackageService class
+
+// Get all package names and IDs for search
+static async getAllPackageNames(): Promise<PackageNameIdResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/felicita/v0/api/package/packageId-and-packageName`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: PackageNameIdResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching package names:', error);
+    throw error;
+  }
+}
+
+// Get all package details by ID
+static async getPackageAllDetails(id: number): Promise<PackageAllDetailsResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/felicita/v0/api/package/package-all-details/${id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: PackageAllDetailsResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching package all details:', error);
+    throw error;
+  }
+}
+
+// Update package
+static async updatePackage(packageData: UpdatePackageRequest): Promise<UpdatePackageApiResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/felicita/v0/api/package/update-package`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(packageData),
+      }
+    );
+
+    const data: UpdatePackageApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || 'Failed to update package');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error updating package:', error);
+    throw error;
+  }
+}
+
+
+
 }
