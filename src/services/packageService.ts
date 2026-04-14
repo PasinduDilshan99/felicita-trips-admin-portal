@@ -34,7 +34,7 @@ export class PackageService {
   static async getPackages(params: PackageFilterParams): Promise<ApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/package/packages`,
+        `${API_BASE_URL}/felicita/api/v0/package/packages`,
         {
           method: "POST",
           headers: this.getAuthHeaders(),
@@ -71,7 +71,7 @@ export class PackageService {
   static async getPackageById(id: number): Promise<SinglePackageApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/package/${id}`,
+        `${API_BASE_URL}/felicita/api/v0/package/${id}`,
         {
           method: "GET",
           headers: this.getAuthHeaders(),
@@ -178,7 +178,7 @@ export class PackageService {
   static async getPackagesForTerminate(): Promise<PackagesForTerminateResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/package/package-for-terminate`,
+        `${API_BASE_URL}/felicita/api/v0/package/package-for-terminate`,
         {
           method: "GET",
           headers: this.getAuthHeaders(),
@@ -203,7 +203,7 @@ export class PackageService {
   ): Promise<TerminatePackageApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/package/terminate-package`,
+        `${API_BASE_URL}/felicita/api/v0/package/terminate-package`,
         {
           method: "POST",
           headers: this.getAuthHeaders(),
@@ -249,7 +249,7 @@ export class PackageService {
   static async getAllTours(): Promise<TourIdNameResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/tour/tourId-and-tourName`,
+        `${API_BASE_URL}/felicita/api/v0/tour/tourId-and-tourName`,
         {
           method: "GET",
           headers: {
@@ -278,7 +278,7 @@ export class PackageService {
   ): Promise<TourDetailsResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/tour/tour-details-for-add-package/${tourId}`,
+        `${API_BASE_URL}/felicita/api/v0/tour/tour-details-for-add-package/${tourId}`,
         {
           method: "GET",
           headers: {
@@ -307,7 +307,7 @@ export class PackageService {
   ): Promise<AddPackageApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/package/add-package`,
+        `${API_BASE_URL}/felicita/api/v0/package/add-package`,
         {
           method: "POST",
           headers: {
@@ -338,7 +338,7 @@ export class PackageService {
 static async getAllPackageNames(): Promise<PackageNameIdResponse> {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/felicita/v0/api/package/packageId-and-packageName`,
+      `${API_BASE_URL}/felicita/api/v0/package/packageId-and-packageName`,
       {
         method: 'GET',
         headers: {
@@ -365,7 +365,7 @@ static async getAllPackageNames(): Promise<PackageNameIdResponse> {
 static async getPackageAllDetails(id: number): Promise<PackageAllDetailsResponse> {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/felicita/v0/api/package/package-all-details/${id}`,
+      `${API_BASE_URL}/felicita/api/v0/package/package-all-details/${id}`,
       {
         method: 'GET',
         headers: {
@@ -392,7 +392,7 @@ static async getPackageAllDetails(id: number): Promise<PackageAllDetailsResponse
 static async updatePackage(packageData: UpdatePackageRequest): Promise<UpdatePackageApiResponse> {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/felicita/v0/api/package/update-package`,
+      `${API_BASE_URL}/felicita/api/v0/package/update-package`,
       {
         method: 'POST',
         headers: {

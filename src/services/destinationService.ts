@@ -32,7 +32,7 @@ export class DestinationService {
   ): Promise<ApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/destination/destinations`,
+        `${API_BASE_URL}/felicita/api/v0/destination/destinations`,
         {
           method: "POST",
           headers: this.getAuthHeaders(),
@@ -85,7 +85,7 @@ export class DestinationService {
   ): Promise<SingleDestinationApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/destination/${id}`,
+        `${API_BASE_URL}/felicita/api/v0/destination/${id}`,
         {
           method: "GET",
           headers: this.getAuthHeaders(),
@@ -109,7 +109,7 @@ export class DestinationService {
   ): Promise<AddDestinationApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/destination/add-destination`,
+        `${API_BASE_URL}/felicita/api/v0/destination/add-destination`,
         {
           method: "POST",
           headers: {
@@ -137,7 +137,7 @@ export class DestinationService {
   static async getDestinationsForTerminate(): Promise<DestinationsForTerminateResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/destination/destination-for-terminate`,
+        `${API_BASE_URL}/felicita/api/v0/destination/destination-for-terminate`,
         {
           method: "GET",
           credentials: "include",
@@ -161,7 +161,7 @@ export class DestinationService {
   ): Promise<TerminateDestinationApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/destination/terminate-destination`,
+        `${API_BASE_URL}/felicita/api/v0/destination/terminate-destination`,
         {
           method: "POST",
           headers: {
@@ -190,7 +190,7 @@ export class DestinationService {
   ): Promise<UpdateDestinationApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/destination/update-destination`,
+        `${API_BASE_URL}/felicita/api/v0/destination/update-destination`,
         {
           method: "POST",
           headers: {
