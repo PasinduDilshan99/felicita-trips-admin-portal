@@ -35,7 +35,7 @@ export class TourService {
   static async getTours(params: TourFilterParams): Promise<ApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/tour/tours`,
+        `${API_BASE_URL}/felicita/api/v0/tour/tours`,
         {
           method: "POST",
           headers: this.getAuthHeaders(),
@@ -70,7 +70,7 @@ export class TourService {
   static async getTourById(id: number): Promise<SingleTourApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/tour/${id}`,
+        `${API_BASE_URL}/felicita/api/v0/tour/${id}`,
         {
           method: "GET",
           headers: {
@@ -168,7 +168,7 @@ export class TourService {
   static async getToursForTerminate(): Promise<ToursForTerminateResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/tour/tour-for-terminate`,
+        `${API_BASE_URL}/felicita/api/v0/tour/tour-for-terminate`,
         {
           method: "GET",
           headers: {
@@ -196,7 +196,7 @@ export class TourService {
   ): Promise<TerminateTourApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/tour/terminate-tour`,
+        `${API_BASE_URL}/felicita/api/v0/tour/terminate-tour`,
         {
           method: "POST",
           headers: {
@@ -254,7 +254,7 @@ export class TourService {
   static async getDestinationNames(): Promise<DestinationsForTourResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/destination/destination-names`,
+        `${API_BASE_URL}/felicita/api/v0/destination/destination-names`,
         {
           method: "GET",
           headers: {
@@ -283,7 +283,7 @@ export class TourService {
   ): Promise<DestinationDetailsResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/destination/${destinationId}`,
+        `${API_BASE_URL}/felicita/api/v0/destination/${destinationId}`,
         {
           method: "GET",
           headers: {
@@ -310,7 +310,7 @@ export class TourService {
   static async addTour(tourData: AddTourRequest): Promise<AddTourApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/v0/api/tour/add-tour`,
+        `${API_BASE_URL}/felicita/api/v0/tour/add-tour`,
         {
           method: "POST",
           headers: {
@@ -362,7 +362,7 @@ export class TourService {
 static async getAllTourNames(): Promise<TourNameIdResponse> {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/felicita/v0/api/tour/tourId-and-tourName`,
+      `${API_BASE_URL}/felicita/api/v0/tour/tourId-and-tourName`,
       {
         method: 'GET',
         headers: {
@@ -389,7 +389,7 @@ static async getAllTourNames(): Promise<TourNameIdResponse> {
 static async getTourAllDetails(id: number): Promise<TourAllDetailsResponse> {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/felicita/v0/api/tour/tout-all-details/${id}`,
+      `${API_BASE_URL}/felicita/api/v0/tour/tout-all-details/${id}`,
       {
         method: 'GET',
         headers: {
@@ -419,7 +419,7 @@ static async updateTour(tourData: UpdateTourRequest): Promise<UpdateTourApiRespo
     console.log(tourData);
     console.log('====================================');
     const response = await fetch(
-      `${API_BASE_URL}/felicita/v0/api/tour/update-tour`,
+      `${API_BASE_URL}/felicita/api/v0/tour/update-tour`,
       {
         method: 'POST',
         headers: {

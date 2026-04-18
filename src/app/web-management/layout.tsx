@@ -3,7 +3,7 @@ import Sidebar from "@/components/common-components/SideBar";
 import { webManagementSideBarData } from "@/data/side-bar-data";
 import React from "react";
 
-export default function TravelManagementLayout({
+export default function WebManagementLayout({
   children,
 }: {
   children: React.ReactNode;

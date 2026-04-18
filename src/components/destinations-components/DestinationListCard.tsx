@@ -1,7 +1,7 @@
 // components/destinations-components/DestinationListCard.tsx
 import React, { useState, useEffect } from 'react';
 import { Destination } from '@/types/destination-types';
-import { MapPin, Tag, Clock, Users, Image as ImageIcon, Activity, Star, ChevronLeft, ChevronRight, Check, Camera, Eye, ArrowRight } from 'lucide-react';
+import { MapPin, Tag, Clock, Users, Image as ImageIcon, Activity, Star, ChevronLeft, ChevronRight, Check, Camera, Eye, ArrowRight, Layers } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { WEB_MANAGEMENT_PATH, WEB_MANAGEMENT_DESTINATION_PATH } from '@/utils/constant';
 
@@ -25,6 +25,13 @@ const DestinationListCard: React.FC<DestinationListCardProps> = ({ destination }
   const avgDuration = destination.activities.length > 0
     ? Math.round(destination.activities.reduce((sum, a) => sum + a.durationHours, 0) / destination.activities.length)
     : 0;
+
+  // Get primary category and all categories
+  const primaryCategory = destination.destinationCategoryDetailsDtos.find(
+    (cat) => cat.isPrimary === true
+  );
+  const allCategories = destination.destinationCategoryDetailsDtos;
+  const hasMultipleCategories = allCategories.length > 1;
 
   // Auto-rotate images every 5 seconds
   useEffect(() => {
@@ -234,15 +241,36 @@ const DestinationListCard: React.FC<DestinationListCardProps> = ({ destination }
             {destination.destinationDescription}
           </p>
 
-          {/* Stats Grid */}
+          {/* Stats Grid - Updated Categories Section */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-5 border-y border-gray-100 mb-6">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 flex items-center justify-center mr-3">
+            {/* Categories Section - Now shows primary category and count */}
+            <div className="flex items-start">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 flex items-center justify-center mr-3 flex-shrink-0">
                 <Tag className="w-5 h-5 text-emerald-600" />
               </div>
-              <div>
-                <div className="text-xs text-gray-500">Category</div>
-                <div className="text-sm font-semibold text-emerald-700">{destination.categoryName}</div>
+              <div className="flex-1">
+                <div className="text-xs text-gray-500">Categories</div>
+                {primaryCategory && (
+                  <div className="text-sm font-semibold text-emerald-700 mb-1">
+                    {primaryCategory.name}
+                    {primaryCategory.isPrimary && (
+                      <Star className="w-3 h-3 inline-block ml-1 text-amber-500" />
+                    )}
+                  </div>
+                )}
+                {hasMultipleCategories && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <Layers className="w-3 h-3 text-blue-600" />
+                    <span className="text-xs text-blue-600 font-medium">
+                      +{allCategories.length - 1} more categories
+                    </span>
+                  </div>
+                )}
+                {!primaryCategory && allCategories.length > 0 && (
+                  <div className="text-sm font-semibold text-emerald-700">
+                    {allCategories[0]?.name}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -276,6 +304,38 @@ const DestinationListCard: React.FC<DestinationListCardProps> = ({ destination }
               </div>
             </div>
           </div>
+
+          {/* All Categories Chips Section (Optional) */}
+          {hasMultipleCategories && (
+            <div className="mb-6">
+              <div className="flex items-center mb-2">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-center mr-2">
+                  <Layers className="w-3 h-3 text-blue-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-600">All Categories:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {allCategories.slice(0, 4).map((category) => (
+                  <span
+                    key={category.id}
+                    className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
+                      category.isPrimary
+                        ? "bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 border border-emerald-200"
+                        : "bg-gray-100 text-gray-600 border border-gray-200"
+                    }`}
+                  >
+                    {category.isPrimary && <Star className="w-2.5 h-2.5 mr-1 fill-emerald-500" />}
+                    {category.name}
+                  </span>
+                ))}
+                {allCategories.length > 4 && (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
+                    +{allCategories.length - 4} more
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Activities Preview and View Button */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

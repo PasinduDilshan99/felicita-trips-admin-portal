@@ -86,17 +86,47 @@ const Sidebar: React.FC<SidebarProps> = ({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Set expanded items based on current path
+  // Set expanded items based on current path - FIXED VERSION
   useEffect(() => {
     const expanded: number[] = [];
+    
     filteredData.forEach((item) => {
-      if (
-        pathname.startsWith(item.url) ||
-        item.subData.some((sub) => pathname.startsWith(sub.url))
-      ) {
+      let shouldExpand = false;
+      
+      // 1. Exact match for parent URL
+      if (pathname === item.url) {
+        shouldExpand = true;
+      }
+      
+      // 2. Check if we're on any subitem URL (exact match or deeper path)
+      const hasMatchingSubItem = item.subData.some((sub) => 
+        pathname === sub.url || 
+        pathname.startsWith(sub.url + '/')
+      );
+      
+      if (hasMatchingSubItem) {
+        shouldExpand = true;
+      }
+      
+      // 3. Check if we're in parent's directory but NOT matching a sibling
+      if (pathname.startsWith(item.url + '/')) {
+        // Check if there's a sibling item that also matches this path
+        const siblingMatch = filteredData.some(otherItem => 
+          otherItem.id !== item.id && 
+          pathname.startsWith(otherItem.url + '/')
+        );
+        
+        // Only expand if no sibling matches better
+        if (!siblingMatch) {
+          shouldExpand = true;
+        }
+      }
+      
+      if (shouldExpand && !expanded.includes(item.id)) {
         expanded.push(item.id);
       }
     });
+    
     setExpandedItems(expanded);
   }, [pathname, filteredData]);
 
@@ -271,8 +301,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               const isExpanded = expandedItems.includes(item.id);
               const hasSubItems = item.subData && item.subData.length > 0;
               const isActive =
-                pathname.startsWith(item.url) ||
-                item.subData.some((sub) => pathname.startsWith(sub.url));
+                pathname === item.url ||
+                item.subData.some((sub) => 
+                  pathname === sub.url || pathname.startsWith(sub.url + '/')
+                );
 
               const hasMainItemAccess = hasPrivilege(item.privilege);
 
@@ -345,7 +377,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                   {isSidebarOpen && hasSubItems && isExpanded && (
                     <div className="ml-8 mt-1 space-y-1 pl-3 border-l border-gray-200 animate-slideDown overflow-hidden">
                       {item.subData.map((subItem, index) => {
-                        const isSubActive = pathname === subItem.url;
+                        const isSubActive = 
+                          pathname === subItem.url || 
+                          pathname.startsWith(subItem.url + '/');
                         const hasSubItemAccess = hasPrivilege(
                           subItem.privilege
                         );

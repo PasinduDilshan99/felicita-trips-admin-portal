@@ -1,10 +1,11 @@
+import { LOGIN } from "@/utils/backEndConstant";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
 
-    const backendResponse = await fetch("http://localhost:8080/felicita/api/v0/auth/login", {
+    const backendResponse = await fetch(LOGIN, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -14,11 +15,11 @@ export async function POST(request: Request) {
     });
 
     const data = await backendResponse.json();
-
-    // Forward backend cookies to browser
+    console.log("=================log===================");
+    console.log(data);
+    console.log("====================================");
     const res = NextResponse.json(data);
 
-    // ⏬ Copy Set-Cookie headers from Spring Boot to Next.js response
     const cookies = backendResponse.headers.getSetCookie();
     if (cookies) {
       cookies.forEach((cookie: string) => {
