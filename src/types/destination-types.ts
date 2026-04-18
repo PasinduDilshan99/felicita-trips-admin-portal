@@ -29,11 +29,19 @@ export interface Destination {
   location: string;
   latitude: number;
   longitude: number;
-  categoryName: string;
-  categoryDescription: string;
+  wish:boolean;
+  rating:number;
+  destinationCategoryDetailsDtos: DestinationCategoryDetailsDtos[];
   statusName: string;
   activities: Activity[];
   images: Image[];
+}
+
+export interface DestinationCategoryDetailsDtos{
+  id:number;
+  name:string;
+  description:string;
+  isPrimary:boolean;
 }
 
 export interface DestinationFilterParams {
@@ -53,7 +61,7 @@ export interface DestinationResponse {
   destinationResponseDtos: Destination[];
 }
 
-export interface ApiResponse {
+export interface DestinationApiResponse {
   code: number;
   status: string;
   message: string;

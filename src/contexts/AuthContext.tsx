@@ -1,4 +1,10 @@
 "use client";
+import {
+  GET_USER_DETAILS_FOR_LOGIN_DATA_FE,
+  LOGIN_FE,
+  LOGOUT_FE,
+  SIGNUP_FE,
+} from "@/utils/frontEndConstant";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type User = {
@@ -10,6 +16,7 @@ export type User = {
   lastName: string;
   email: string;
   mobileNumber1: string;
+  imageUrl: string;
 };
 
 // Signup types
@@ -74,9 +81,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // SIGNUP
   // -----------------------
   const signup = async (signupData: SignupData): Promise<string> => {
-    const res = await fetch("http://localhost:8080/felicita/api/v0/auth/signup", {
+    const res = await fetch(SIGNUP_FE, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(signupData),
@@ -94,8 +101,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // -----------------------
   // LOGIN
   // -----------------------
-  const login = async (username: string, password: string): Promise<LoginResponseData> => {
-    const res = await fetch("/api/login", {
+  const login = async (
+    username: string,
+    password: string,
+  ): Promise<LoginResponseData> => {
+    const res = await fetch(LOGIN_FE, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -112,6 +122,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Save uniqueCode in session
     sessionStorage.setItem("uniqueCode", data.uniqueCode);
+    document.cookie = `uniqueCode=${data.uniqueCode}; path=/; SameSite=Lax`;
 
     // Fetch user details
     await fetchMe();
@@ -131,7 +142,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const res = await fetch("http://localhost:8080/felicita/api/v0/auth/me", {
+      const res = await fetch(GET_USER_DETAILS_FOR_LOGIN_DATA_FE, {
         method: "GET",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -150,8 +161,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           lastName: data.lastName,
           email: data.email,
           mobileNumber1: data.mobileNumber1,
+          imageUrl: data.imageUrl,
         });
-
       } else {
         setUser(null);
         sessionStorage.removeItem("uniqueCode");
@@ -171,7 +182,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // -----------------------
   const logout = async (): Promise<void> => {
     try {
-      await fetch("http://localhost:8080/felicita/api/v0/auth/logout", {
+      await fetch(LOGOUT_FE, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -189,11 +200,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const hasRole = (role: string) => user?.roles?.includes(role) ?? false;
-  const hasPrivilege = (priv: string) => user?.privileges?.includes(priv) ?? false;
+  const hasPrivilege = (priv: string) =>
+    user?.privileges?.includes(priv) ?? false;
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, signup, logout, hasRole, hasPrivilege, fetchMe }}
+      value={{
+        user,
+        loading,
+        login,
+        signup,
+        logout,
+        hasRole,
+        hasPrivilege,
+        fetchMe,
+      }}
     >
       {children}
     </AuthContext.Provider>

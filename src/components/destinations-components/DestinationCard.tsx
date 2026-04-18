@@ -13,6 +13,7 @@ import {
   Check,
   Eye,
   ArrowRight,
+  Layers,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
@@ -37,6 +38,13 @@ const DestinationCard: React.FC<DestinationCardProps> = ({ destination }) => {
     destination.activities.length > 0
       ? Math.min(...destination.activities.map((a) => a.priceLocal))
       : 0;
+
+  // Get primary category and all categories
+  const primaryCategory = destination.destinationCategoryDetailsDtos.find(
+    (cat) => cat.isPrimary === true
+  );
+  const allCategories = destination.destinationCategoryDetailsDtos;
+  const hasMultipleCategories = allCategories.length > 1;
 
   // Auto-rotate images every 5 seconds
   useEffect(() => {
@@ -252,19 +260,60 @@ const DestinationCard: React.FC<DestinationCardProps> = ({ destination }) => {
           {destination.destinationDescription}
         </p>
 
-        {/* Category and Pricing */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 flex items-center justify-center mr-2">
-              <Tag className="w-4 h-4 text-emerald-600" />
+        {/* Categories Section - Updated for multiple categories */}
+        <div className="mb-6">
+          {/* Primary Category Badge */}
+          {primaryCategory && (
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 flex items-center justify-center mr-2">
+                  <Tag className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Primary Category</div>
+                  <div className="text-sm font-semibold text-emerald-700">
+                    {primaryCategory.name}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Category Count Badge */}
+              {hasMultipleCategories && (
+                <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded-lg">
+                  <Layers className="w-3 h-3 text-blue-600" />
+                  <span className="text-xs font-medium text-blue-700">
+                    +{allCategories.length - 1} more
+                  </span>
+                </div>
+              )}
             </div>
-            <div>
-              <div className="text-xs text-gray-500">Category</div>
-              <div className="text-sm font-semibold text-emerald-700">
-                {destination.categoryName}
+          )}
+
+          {/* All Categories (collapsible or chip view) */}
+          {hasMultipleCategories && (
+            <div className="mt-2">
+              <div className="flex flex-wrap gap-2">
+                {allCategories.slice(0, 3).map((category) => (
+                  <span
+                    key={category.id}
+                    className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                      category.isPrimary
+                        ? "bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 border border-emerald-200"
+                        : "bg-gray-100 text-gray-600 border border-gray-200"
+                    }`}
+                  >
+                    {category.isPrimary && <Star className="w-2.5 h-2.5 mr-1" />}
+                    {category.name}
+                  </span>
+                ))}
+                {allCategories.length > 3 && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
+                    +{allCategories.length - 3} more
+                  </span>
+                )}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Stats */}

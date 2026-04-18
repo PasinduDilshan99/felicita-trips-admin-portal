@@ -50,6 +50,22 @@ const DestinationPagination: React.FC<PaginationProps> = ({
       for (let i = startPage; i <= endPage; i++) {
         pageNumbers.push(i);
       }
+
+      // Add ellipsis and last page if needed
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          pageNumbers.push(-1); // Ellipsis indicator
+        }
+        pageNumbers.push(totalPages);
+      }
+
+      // Add first page and ellipsis if needed
+      if (startPage > 1) {
+        pageNumbers.unshift(1);
+        if (startPage > 2) {
+          pageNumbers.splice(1, 0, -2); // Ellipsis indicator
+        }
+      }
     }
 
     return pageNumbers;
@@ -112,19 +128,32 @@ const DestinationPagination: React.FC<PaginationProps> = ({
               <ChevronLeft className="h-5 w-5" />
             </button>
 
-            {getPageNumbers().map((page) => (
-              <button
-                key={page}
-                onClick={() => onPageChange(page)}
-                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
-                  currentPage === page
-                    ? 'z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
-                    : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+            {getPageNumbers().map((page, index) => {
+              if (page === -1 || page === -2) {
+                return (
+                  <span
+                    key={`ellipsis-${index}`}
+                    className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300"
+                  >
+                    ...
+                  </span>
+                );
+              }
+              
+              return (
+                <button
+                  key={page}
+                  onClick={() => onPageChange(page)}
+                  className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                    currentPage === page
+                      ? 'z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
+                      : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
 
             <button
               onClick={handleNext}

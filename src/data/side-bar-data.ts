@@ -8,6 +8,8 @@ import {
   WEB_MANAGEMENT_ACTIVITIES_SCHEDULES_PATH,
   WEB_MANAGEMENT_PACKAGES_SCHEDULES_PATH,
   WEB_MANAGEMENT_TOURS_SCHEDULES_PATH,
+  TRAVEL_MANAGEMENT_PATH,
+  TRAVEL_MANAGEMENT_BOOKINGS_PATH,
 } from "@/utils/constant";
 import {
   ACTIVITY_CREATE_PRIVILEGE,
@@ -312,6 +314,47 @@ export const webManagementSideBarData: SideBarDataType[] = [
         description: "Delete holiday packages schedules",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/terminate`,
         privilege: PACKAGE_SCHEDULE_TERMINATE_PRIVILEGE,
+      },
+    ],
+  },
+];
+
+export const travelManagementSideBarData: SideBarDataType[] = [
+  {
+    id: 1,
+    name: "Bookings",
+    description: "Manage destination locations",
+    color: "#3B82F6", // Blue
+    url: `${TRAVEL_MANAGEMENT_PATH}${TRAVEL_MANAGEMENT_BOOKINGS_PATH}`,
+    privilege: DESTINATION_PRIVILEGE,
+    subData: [
+      {
+        id: 101,
+        name: "View Bookings",
+        description: "View all destination locations",
+        url: `${TRAVEL_MANAGEMENT_PATH}${TRAVEL_MANAGEMENT_BOOKINGS_PATH}/view`,
+        privilege: DESTINATION_VIEW_PRIVILEGE,
+      },
+      {
+        id: 102,
+        name: "Add Booking",
+        description: "Add a new destination location",
+        url: `${TRAVEL_MANAGEMENT_PATH}${TRAVEL_MANAGEMENT_BOOKINGS_PATH}/add-new`,
+        privilege: DESTINATION_CREATE_PRIVILEGE,
+      },
+      {
+        id: 103,
+        name: "Update Booking",
+        description: "Update existing destination information",
+        url: `${TRAVEL_MANAGEMENT_PATH}${TRAVEL_MANAGEMENT_BOOKINGS_PATH}/update`,
+        privilege: DESTINATION_UPDATE_PRIVILEGE,
+      },
+      {
+        id: 104,
+        name: "Remove Booking",
+        description: "Delete destination locations",
+        url: `${TRAVEL_MANAGEMENT_PATH}${TRAVEL_MANAGEMENT_BOOKINGS_PATH}/terminate`,
+        privilege: DESTINATION_TERMINATE_PRIVILEGE,
       },
     ],
   },

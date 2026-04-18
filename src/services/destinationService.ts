@@ -1,7 +1,7 @@
 // services/destinationService.ts
 import {
   DestinationFilterParams,
-  ApiResponse,
+  DestinationApiResponse,
   Destination,
   SingleDestinationApiResponse,
   AddDestinationRequest,
@@ -16,8 +16,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export class DestinationService {
   private static getAuthHeaders(): HeadersInit {
-    // Get token from localStorage or cookies
-    // This is a simplified version - you should implement your auth logic here
     const token =
       typeof window !== "undefined" ? localStorage.getItem("auth-token") : null;
 
@@ -29,7 +27,7 @@ export class DestinationService {
 
   static async getDestinations(
     params: DestinationFilterParams
-  ): Promise<ApiResponse> {
+  ): Promise<DestinationApiResponse> {
     try {
       const response = await fetch(
         `${API_BASE_URL}/felicita/api/v0/destination/destinations`,
@@ -54,7 +52,7 @@ export class DestinationService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: ApiResponse = await response.json();
+      const data: DestinationApiResponse = await response.json();
       return data;
     } catch (error) {
       console.error("Error fetching destinations:", error);
@@ -63,10 +61,10 @@ export class DestinationService {
   }
 
   // Helper method to get unique categories from destinations
-  static extractCategories(destinations: Destination[]): string[] {
-    const categories = destinations.map((dest) => dest.categoryName);
-    return Array.from(new Set(categories));
-  }
+  // static extractCategories(destinations: Destination[]): string[] {
+  //   const categories = destinations.map((dest) => dest.categoryName);
+  //   return Array.from(new Set(categories));
+  // }
 
   // Helper method to get unique seasons from activities
   static extractSeasons(destinations: Destination[]): string[] {

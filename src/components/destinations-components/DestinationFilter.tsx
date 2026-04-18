@@ -6,6 +6,8 @@ interface DestinationFilterProps {
   filters: DestinationFilterParams;
   onFilterChange: (filters: DestinationFilterParams) => void;
   onSearch: () => void;
+  onReset: () => void;
+  onPageSizeChange: (pageSize: number) => void;
   availableCategories: string[];
   availableSeasons: string[];
 }
@@ -14,6 +16,8 @@ const DestinationFilter: React.FC<DestinationFilterProps> = ({
   filters,
   onFilterChange,
   onSearch,
+  onReset,
+  onPageSizeChange,
   availableCategories,
   availableSeasons,
 }) => {
@@ -26,25 +30,13 @@ const DestinationFilter: React.FC<DestinationFilterProps> = ({
 
   const handlePageSizeChange = (value: string) => {
     const pageSize = parseInt(value, 10);
-    onFilterChange({
-      ...filters,
-      pageSize,
-      pageNumber: 1, // Reset to first page when page size changes
-    });
+    onPageSizeChange(pageSize);
   };
 
-  const handleReset = () => {
-    onFilterChange({
-      name: null,
-      minPrice: null,
-      maxPrice: null,
-      duration: null,
-      destinationCategory: null,
-      season: null,
-      status: null,
-      pageSize: 6,
-      pageNumber: 1,
-    });
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      onSearch();
+    }
   };
 
   return (
@@ -53,7 +45,7 @@ const DestinationFilter: React.FC<DestinationFilterProps> = ({
         <h2 className="text-xl font-semibold text-gray-800">Filter Destinations</h2>
         <div className="flex gap-3">
           <button
-            onClick={handleReset}
+            onClick={onReset}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Reset
@@ -67,7 +59,7 @@ const DestinationFilter: React.FC<DestinationFilterProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-gray-600">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600">
         {/* Name Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -77,37 +69,9 @@ const DestinationFilter: React.FC<DestinationFilterProps> = ({
             type="text"
             value={filters.name || ''}
             onChange={(e) => handleInputChange('name', e.target.value)}
+            onKeyPress={handleKeyPress}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Search by name..."
-          />
-        </div>
-
-        {/* Price Range */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Min Price
-          </label>
-          <input
-            type="number"
-            value={filters.minPrice || ''}
-            onChange={(e) => handleInputChange('minPrice', parseFloat(e.target.value) || null)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Min price"
-            min="0"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Max Price
-          </label>
-          <input
-            type="number"
-            value={filters.maxPrice || ''}
-            onChange={(e) => handleInputChange('maxPrice', parseFloat(e.target.value) || null)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Max price"
-            min="0"
           />
         </div>
 
@@ -119,14 +83,15 @@ const DestinationFilter: React.FC<DestinationFilterProps> = ({
           <input
             type="number"
             value={filters.duration || ''}
-            onChange={(e) => handleInputChange('duration', parseFloat(e.target.value) || null)}
+            onChange={(e) => handleInputChange('duration', e.target.value ? parseFloat(e.target.value) : null)}
+            onKeyPress={handleKeyPress}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Duration in hours"
             min="0"
           />
         </div>
 
-        {/* Category */}
+        {/* Category - Now using categories from CommonContext */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Category
@@ -196,6 +161,11 @@ const DestinationFilter: React.FC<DestinationFilterProps> = ({
             <option value="24">24 per page</option>
           </select>
         </div>
+      </div>
+      
+      {/* Note about price filters being removed */}
+      <div className="mt-4 text-xs text-gray-500 italic">
+        Note: Price filters are currently disabled
       </div>
     </div>
   );
