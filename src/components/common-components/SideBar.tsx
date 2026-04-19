@@ -13,6 +13,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export interface SideBarDataType {
   id: number;
@@ -36,6 +37,15 @@ interface SidebarProps {
   logo?: string;
 }
 
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, opacity: number): string => {
+  hex = hex.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
 const Sidebar: React.FC<SidebarProps> = ({
   data,
   title = "Management System",
@@ -45,6 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
   const { hasPrivilege } = useAuth();
+  const { theme, isDarkMode } = useTheme();
   const pathname = usePathname() || "";
   const router = useRouter();
 
@@ -168,7 +179,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const MobileOverlay = () =>
     isSidebarOpen && isMobileView ? (
       <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-md z-40 transition-all duration-500 ease-out"
+        className="fixed inset-0 backdrop-blur-md z-40 transition-all duration-500 ease-out"
+        style={{ backgroundColor: hexToRgba(theme.background, 0.3) }}
         onClick={() => setIsSidebarOpen(false)}
       />
     ) : null;
@@ -176,12 +188,21 @@ const Sidebar: React.FC<SidebarProps> = ({
   // If no accessible items, show minimal sidebar
   if (filteredData.length === 0) {
     return (
-      <aside className="fixed lg:sticky top-0 left-0 h-screen bg-white border-r border-gray-200 shadow-lg w-20 flex flex-col items-center justify-center">
+      <aside 
+        className="fixed lg:sticky top-0 left-0 h-screen border-r shadow-lg w-20 flex flex-col items-center justify-center transition-colors duration-300"
+        style={{ 
+          backgroundColor: theme.surface,
+          borderColor: theme.border
+        }}
+      >
         <div className="text-center p-4">
-          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center mb-2">
+          <div 
+            className="h-10 w-10 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2"
+            style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }}
+          >
             <Building className="text-white" size={20} />
           </div>
-          <p className="text-xs text-gray-500 mt-2">No Access</p>
+          <p className="text-xs mt-2" style={{ color: theme.textSecondary }}>No Access</p>
         </div>
       </aside>
     );
@@ -191,9 +212,10 @@ const Sidebar: React.FC<SidebarProps> = ({
     return (
       <button
         onClick={toggleSidebar}
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-30 lg:flex hidden h-12 w-6 bg-purple-600 hover:bg-purple-700 text-white rounded-r-lg items-center justify-center shadow-lg transition-all duration-300 hover:w-8 hover:shadow-xl"
+        className="fixed left-0 top-1/2 -translate-y-1/2 z-30 lg:flex hidden h-12 w-6 rounded-r-lg items-center justify-center shadow-lg transition-all duration-300 hover:w-8 hover:shadow-xl"
+        style={{ backgroundColor: theme.primary }}
       >
-        <ChevronRight size={20} className="transition-transform duration-300" />
+        <ChevronRight size={20} className="text-white transition-transform duration-300" />
       </button>
     );
 
@@ -247,7 +269,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Toggle Button */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 lg:hidden z-50 h-10 w-10 bg-purple-600 text-white rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 ease-in-out hover:scale-110 hover:bg-purple-700 active:scale-95"
+        className="fixed top-4 left-4 lg:hidden z-50 h-10 w-10 text-white rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 ease-in-out hover:scale-110 active:scale-95"
+        style={{ backgroundColor: theme.primary }}
         aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
       >
         <div className="transition-transform duration-300 ease-in-out">
@@ -257,14 +280,18 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen bg-white border-r border-gray-200 shadow-lg transition-all duration-500 ease-in-out flex flex-col ${
+        className={`fixed lg:sticky top-0 left-0 h-screen border-r shadow-lg transition-all duration-500 ease-in-out flex flex-col ${
           isSidebarOpen ? "translate-x-0 z-50" : "-translate-x-full z-50"
         } ${isSidebarOpen ? "w-80" : "w-80"} lg:translate-x-0 lg:z-auto ${
           !isSidebarOpen && !isMobileView ? "lg:w-20" : "lg:w-80"
         }`}
+        style={{ 
+          backgroundColor: theme.surface,
+          borderColor: theme.border
+        }}
       >
         {/* Sidebar Header */}
-        <div className="p-6 border-b border-gray-200 transition-all duration-500 ease-in-out">
+        <div className="p-6 border-b transition-colors duration-500 ease-in-out" style={{ borderColor: theme.border }}>
           {isSidebarOpen ? (
             <div className="flex items-center space-x-3 animate-fadeIn">
               {logo ? (
@@ -274,20 +301,26 @@ const Sidebar: React.FC<SidebarProps> = ({
                   className="h-10 w-10 rounded-lg transition-transform duration-300 hover:scale-110"
                 />
               ) : (
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center transition-transform duration-300 hover:scale-110 hover:rotate-3">
+                <div 
+                  className="h-10 w-10 rounded-lg flex items-center justify-center transition-transform duration-300 hover:scale-110 hover:rotate-3"
+                  style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }}
+                >
                   <Building className="text-white" size={20} />
                 </div>
               )}
               <div className="transition-opacity duration-500">
-                <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-                <p className="text-sm text-gray-600">
+                <h1 className="text-xl font-bold" style={{ color: theme.text }}>{title}</h1>
+                <p className="text-sm" style={{ color: theme.textSecondary }}>
                   {filteredData.length} accessible modules
                 </p>
               </div>
             </div>
           ) : (
             <div className="flex justify-center animate-fadeIn">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center transition-transform duration-300 hover:scale-110 hover:rotate-3">
+              <div 
+                className="h-10 w-10 rounded-lg flex items-center justify-center transition-transform duration-300 hover:scale-110 hover:rotate-3"
+                style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }}
+              >
                 <Building className="text-white" size={20} />
               </div>
             </div>
@@ -315,8 +348,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => handleParentClick(item)}
                     className={`flex items-center w-full px-3 py-3 rounded-lg transition-all duration-300 ease-in-out smooth-hover ${
                       isActive
-                        ? "bg-purple-50 border-l-4 shadow-sm"
-                        : "hover:bg-gray-50 border-l-4 border-transparent hover:shadow-sm"
+                        ? "border-l-4 shadow-sm"
+                        : "border-l-4 border-transparent hover:shadow-sm"
                     } ${
                       !hasMainItemAccess && !hasSubItems
                         ? "opacity-50 cursor-not-allowed hover:bg-transparent"
@@ -324,8 +357,19 @@ const Sidebar: React.FC<SidebarProps> = ({
                     } ${hasMainItemAccess ? "cursor-pointer" : ""}`}
                     style={{
                       borderLeftColor: isActive ? item.color : "transparent",
+                      backgroundColor: isActive ? hexToRgba(theme.primary, 0.1) : "transparent",
                     }}
                     disabled={!hasMainItemAccess && !hasSubItems}
+                    onMouseEnter={(e) => {
+                      if (!isActive && !(!hasMainItemAccess && !hasSubItems)) {
+                        e.currentTarget.style.backgroundColor = hexToRgba(theme.primary, 0.05);
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive && !(!hasMainItemAccess && !hasSubItems)) {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }
+                    }}
                   >
                     {/* Color Indicator */}
                     <div
@@ -338,17 +382,18 @@ const Sidebar: React.FC<SidebarProps> = ({
                         <div className="ml-3 text-left flex-1 transition-all duration-300">
                           <span
                             className={`font-medium block transition-colors duration-200 ${
-                              isActive ? "text-gray-900" : "text-gray-700"
+                              isActive ? "font-semibold" : ""
                             } ${!hasMainItemAccess ? "opacity-60" : ""}`}
+                            style={{ color: isActive ? theme.primary : theme.text }}
                           >
                             {item.name}
                             {!hasMainItemAccess && hasSubItems && (
-                              <span className="text-xs text-gray-400 ml-2">
+                              <span className="text-xs ml-2" style={{ color: theme.textSecondary }}>
                                 (Sub items only)
                               </span>
                             )}
                           </span>
-                          <span className="text-xs text-gray-500 block mt-0.5 transition-opacity duration-200">
+                          <span className="text-xs block mt-0.5 transition-opacity duration-200" style={{ color: theme.textSecondary }}>
                             {item.description}
                           </span>
                         </div>
@@ -356,9 +401,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                         {hasSubItems && (
                           <ChevronDown
                             size={16}
-                            className={`text-gray-400 transition-all duration-300 ease-in-out ${
+                            className={`transition-all duration-300 ease-in-out ${
                               isExpanded ? "rotate-180" : "rotate-0"
                             }`}
+                            style={{ color: theme.textSecondary }}
                           />
                         )}
                       </>
@@ -366,7 +412,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                     {!isSidebarOpen && (
                       <div className="ml-2 transition-all duration-300">
-                        <div className="text-xs font-medium text-gray-700 truncate">
+                        <div className="text-xs font-medium truncate" style={{ color: theme.textSecondary }}>
                           {item.name.charAt(0)}
                         </div>
                       </div>
@@ -375,7 +421,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                   {/* Sub Items - Only show when expanded and sidebar is open */}
                   {isSidebarOpen && hasSubItems && isExpanded && (
-                    <div className="ml-8 mt-1 space-y-1 pl-3 border-l border-gray-200 animate-slideDown overflow-hidden">
+                    <div className="ml-8 mt-1 space-y-1 pl-3 border-l animate-slideDown overflow-hidden" style={{ borderColor: theme.border }}>
                       {item.subData.map((subItem, index) => {
                         const isSubActive = 
                           pathname === subItem.url || 
@@ -390,8 +436,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                             href={hasSubItemAccess ? subItem.url : "#"}
                             className={`flex items-center w-full px-3 py-2 rounded-lg text-sm transition-all duration-300 ease-in-out smooth-hover ${
                               isSubActive
-                                ? "bg-purple-100 text-purple-700 font-medium shadow-sm"
-                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm"
+                                ? "font-medium shadow-sm"
+                                : ""
                             } ${
                               !hasSubItemAccess
                                 ? "opacity-50 cursor-not-allowed pointer-events-none"
@@ -399,10 +445,24 @@ const Sidebar: React.FC<SidebarProps> = ({
                             }`}
                             style={{
                               animationDelay: `${index * 50}ms`,
+                              backgroundColor: isSubActive ? hexToRgba(theme.primary, 0.15) : "transparent",
+                              color: isSubActive ? theme.primary : theme.textSecondary,
                             }}
                             onClick={() =>
                               isMobileView && setIsSidebarOpen(false)
                             }
+                            onMouseEnter={(e) => {
+                              if (!isSubActive && hasSubItemAccess) {
+                                e.currentTarget.style.backgroundColor = hexToRgba(theme.primary, 0.05);
+                                e.currentTarget.style.color = theme.text;
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isSubActive && hasSubItemAccess) {
+                                e.currentTarget.style.backgroundColor = "transparent";
+                                e.currentTarget.style.color = theme.textSecondary;
+                              }
+                            }}
                           >
                             <div
                               className="h-2 w-2 rounded-full mr-3 flex-shrink-0 transition-all duration-300 hover:scale-125"
@@ -412,20 +472,20 @@ const Sidebar: React.FC<SidebarProps> = ({
                               <span className="transition-all duration-200">
                                 {subItem.name}
                                 {!hasSubItemAccess && (
-                                  <span className="text-xs text-gray-400 ml-1">
+                                  <span className="text-xs ml-1" style={{ color: theme.textSecondary }}>
                                     (no access)
                                   </span>
                                 )}
                               </span>
                               {isSidebarOpen && subItem.description && (
-                                <span className="text-xs text-gray-500 block mt-0.5 truncate transition-opacity duration-200">
+                                <span className="text-xs block mt-0.5 truncate transition-opacity duration-200" style={{ color: theme.textSecondary }}>
                                   {subItem.description}
                                 </span>
                               )}
                             </div>
                             {isSubActive && (
                               <div className="ml-2 animate-fadeIn">
-                                <div className="h-2 w-2 rounded-full bg-purple-600 transition-all duration-300 hover:scale-125"></div>
+                                <div className="h-2 w-2 rounded-full transition-all duration-300 hover:scale-125" style={{ backgroundColor: theme.primary }}></div>
                               </div>
                             )}
                           </Link>
@@ -441,8 +501,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Footer with user info */}
         {isSidebarOpen && (
-          <div className="p-4 border-t border-gray-200 mt-auto">
-            <div className="text-xs text-gray-500 text-center">
+          <div className="p-4 border-t mt-auto transition-colors duration-300" style={{ borderColor: theme.border }}>
+            <div className="text-xs text-center" style={{ color: theme.textSecondary }}>
               <p>
                 Showing {filteredData.length} of {data.length} modules
               </p>

@@ -112,17 +112,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   action,
 }) => {
   return (
-    <div className="mb-8">
+    <div className="mb-2">
       <Breadcrumb customItems={breadcrumbItems} />
-      <hr className="h-0.5 bg-purple-500"/>
-      <div className="flex items-center justify-between mt-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-          {description && <p className="text-gray-600">{description}</p>}
-        </div>
-
-        {action && <div className="hidden md:block">{action}</div>}
-      </div>
+      <hr className="h-0.5 bg-purple-500" />
     </div>
   );
 };

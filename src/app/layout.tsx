@@ -6,6 +6,9 @@ import "./globals.css";
 import NavBar from "@/components/common-components/NavBar";
 import Footer from "@/components/common-components/Footer";
 import { CommonProvider } from "@/contexts/CommonContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import GlobalGradientScrollbar from "@/components/common-components/GlobalGradientScrollbar";
+import ThemePicker from "@/components/common-components/ThemePicker";
 
 export default function RootLayout({
   children,
@@ -20,9 +23,13 @@ export default function RootLayout({
       <body className="">
         <CommonProvider>
           <AuthProvider>
-            <NavBar />
-            <div>{children}</div>
-            <Footer />
+            <ThemeProvider>
+              <GlobalGradientScrollbar />
+              <ThemePicker />
+              <NavBar />
+              <div>{children}</div>
+              <Footer />
+            </ThemeProvider>
           </AuthProvider>
         </CommonProvider>
       </body>

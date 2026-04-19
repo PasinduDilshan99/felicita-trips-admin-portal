@@ -1,27 +1,48 @@
 "use client";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { homeCardData } from "@/data/home-page-data";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { useTheme } from "@/contexts/ThemeContext";
+
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, opacity: number): string => {
+  hex = hex.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
 const HomePage = () => {
   const router = useRouter();
   const { hasPrivilege } = useAuth();
+  const { theme, isDarkMode } = useTheme();
 
-    const filteredCards = homeCardData.filter((card) => hasPrivilege(card.privilege));
+  const filteredCards = homeCardData.filter((card) => hasPrivilege(card.privilege));
 
   if (filteredCards.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+      <div 
+        className="min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-300"
+        style={{ backgroundColor: theme.background }}
+      >
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl font-bold mb-4 transition-colors duration-300" style={{ color: theme.text }}>
             Access Restricted
           </h1>
-          <p className="text-lg text-gray-600 mb-6">
+          <p className="text-lg mb-6 transition-colors duration-300" style={{ color: theme.textSecondary }}>
             You don't have access to any management modules. Please contact your administrator.
           </p>
-          <div className="p-8 border-2 border-dashed border-gray-300 rounded-xl bg-white">
-            <p className="text-gray-500">
+          <div 
+            className="p-8 border-2 border-dashed rounded-xl transition-colors duration-300"
+            style={{ 
+              borderColor: theme.border,
+              backgroundColor: theme.surface
+            }}
+          >
+            <p className="transition-colors duration-300" style={{ color: theme.textSecondary }}>
               No accessible modules found for your user role.
             </p>
           </div>
@@ -40,12 +61,21 @@ const HomePage = () => {
   };
 
   return (
-    <div className="bg-gray-50 p-6 py-24 ">
+    <div 
+      className="p-6 py-24 transition-colors duration-300 min-h-screen"
+      style={{ backgroundColor: theme.background }}
+    >
       <div className="mx-auto mb-12 text-center">
-        <h1 className="text-3xl md:text-4xl lg:text-6xl xl:text-7xl 2xl:text-7xl font-bold text-gray-900 mb-4 text-center">
+        <h1 
+          className="text-3xl md:text-4xl lg:text-6xl xl:text-7xl 2xl:text-7xl font-bold mb-4 text-center transition-colors duration-300"
+          style={{ color: theme.text }}
+        >
           Business Management Dashboard
         </h1>
-        <p className="text-lg text-gray-600 text-center ">
+        <p 
+          className="text-lg text-center transition-colors duration-300"
+          style={{ color: theme.textSecondary }}
+        >
           Centralized platform to manage all your business operations including
           travel, employees, hotels, vehicles, and enterprise resource planning
           systems.
@@ -63,15 +93,27 @@ const HomePage = () => {
               }}
             >
               <div
-                className="h-full border-2 border-gray-200 rounded-xl p-6 transition-all duration-300 group-hover:border-gray-300 group-hover:shadow-lg bg-white"
-                style={{ border: `2px solid ${card.color}70` }}
+                className="h-full border-2 rounded-xl p-6 transition-all duration-300 group-hover:shadow-lg hover:-translate-y-1"
+                style={{ 
+                  borderColor: hexToRgba(card.color, 0.4),
+                  backgroundColor: theme.surface,
+                  boxShadow: isDarkMode ? `0 4px 12px ${hexToRgba(card.color, 0.1)}` : undefined,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = card.color;
+                  e.currentTarget.style.boxShadow = `0 8px 24px ${hexToRgba(card.color, 0.15)}`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = hexToRgba(card.color, 0.4);
+                  e.currentTarget.style.boxShadow = isDarkMode ? `0 4px 12px ${hexToRgba(card.color, 0.1)}` : "none";
+                }}
               >
                 <div className="flex justify-center mb-4">
                   <div
                     className="p-4 rounded-lg transition-all duration-300 group-hover:scale-110"
                     style={{
-                      backgroundColor: `${card.color}15`,
-                      border: `2px solid ${card.color}40`,
+                      backgroundColor: hexToRgba(card.color, 0.15),
+                      border: `2px solid ${hexToRgba(card.color, 0.3)}`,
                     }}
                   >
                     <img
@@ -79,19 +121,27 @@ const HomePage = () => {
                       alt={card.name}
                       className="w-12 h-12 object-contain"
                       style={{
-                        filter: `drop-shadow(0 2px 4px ${card.color}40)`,
+                        filter: `drop-shadow(0 2px 4px ${hexToRgba(card.color, 0.3)})`,
                       }}
                     />
                   </div>
                 </div>
 
                 <h3
-                  className="text-center text-lg font-semibold text-gray-800 mb-2"
-                  style={{ color: `${card.color}` }}
+                  className="text-center text-lg font-semibold mb-2 transition-colors duration-300"
+                  style={{ color: card.color }}
                 >
                   {card.name}
                 </h3>
                 
+                {card.description && (
+                  <p 
+                    className="text-center text-sm transition-colors duration-300"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    {card.description}
+                  </p>
+                )}
               </div>
             </div>
           ))}

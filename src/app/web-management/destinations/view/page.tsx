@@ -1,4 +1,4 @@
-import DestinationsViewPage from "@/components/destinations-components/DestinationsViewPage";
+import DestinationsViewPage from "@/pages/web-management/destinations/DestinationsViewPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { DESTINATION_VIEW_PRIVILEGE } from "@/utils/privileges";
 import React from "react";

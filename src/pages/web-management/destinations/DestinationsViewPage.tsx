@@ -13,9 +13,15 @@ import DestinationListCard from "@/components/destinations-components/Destinatio
 import Pagination from "@/components/destinations-components/DestinationPagination";
 import { DestinationService } from "@/services/destinationService";
 import { DestinationFilterParams, Destination } from "@/types/destination-types";
-import { Loader2, Grid, List, LayoutDashboard, X, Filter } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCommon } from "@/contexts/CommonContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { LoadingState } from "@/components/destinations-components/view-destinations-components/LoadingState";
+import { ActiveFilters } from "@/components/destinations-components/view-destinations-components/ActiveFilters";
+import { ResultsHeader } from "@/components/destinations-components/view-destinations-components/ResultsHeader";
+import { EmptyState } from "@/components/destinations-components/view-destinations-components/EmptyState";
+
 
 // Utility functions for URL params management
 const filtersToUrlParams = (filters: DestinationFilterParams): URLSearchParams => {
@@ -46,99 +52,12 @@ const urlParamsToFilters = (params: URLSearchParams): DestinationFilterParams =>
   };
 };
 
-// Component to display active filters
-// Update the ActiveFilters component to properly type the filter keys
-
-// Component to display active filters
-const ActiveFilters = ({ 
-  filters, 
-  onRemoveFilter, 
-  onClearAll,
-  availableCategories,
-  availableSeasons 
-}: { 
-  filters: DestinationFilterParams;
-  onRemoveFilter: (key: keyof DestinationFilterParams) => void;
-  onClearAll: () => void;
-  availableCategories: string[];
-  availableSeasons: string[];
-}) => {
-  // Define the type for active filter items
-  interface ActiveFilterItem {
-    key: keyof DestinationFilterParams;
-    label: string;
-    value: string;
-  }
-
-  const activeFilters: ActiveFilterItem[] = [];
-  
-  // Check each filter and add to array if active
-  if (filters.name) {
-    activeFilters.push({ key: 'name', label: 'Name', value: filters.name });
-  }
-  
-  if (filters.destinationCategory) {
-    activeFilters.push({ key: 'destinationCategory', label: 'Category', value: filters.destinationCategory });
-  }
-  
-  if (filters.season) {
-    activeFilters.push({ key: 'season', label: 'Season', value: filters.season });
-  }
-  
-  if (filters.status) {
-    activeFilters.push({ key: 'status', label: 'Status', value: filters.status });
-  }
-  
-  if (filters.duration) {
-    activeFilters.push({ key: 'duration', label: 'Duration', value: `${filters.duration} hours` });
-  }
-
-  if (activeFilters.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-blue-600" />
-          <span className="text-sm font-medium text-gray-700">Active Filters:</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {activeFilters.map((filter) => (
-            <div
-              key={filter.key}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm"
-            >
-              <span className="font-medium text-blue-700">{filter.label}:</span>
-              <span className="text-gray-700">{filter.value}</span>
-              <button
-                onClick={() => onRemoveFilter(filter.key)}
-                className="ml-1 text-blue-600 hover:text-blue-800 transition-colors"
-                aria-label={`Remove ${filter.label} filter`}
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={onClearAll}
-          className="text-sm text-red-600 hover:text-red-800 transition-colors flex items-center gap-1"
-        >
-          <X className="w-3.5 h-3.5" />
-          Clear all
-        </button>
-      </div>
-    </div>
-  );
-};
-
 // Main component wrapped with Suspense for useSearchParams
 const DestinationsViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { categories, loading: categoriesLoading } = useCommon();
+  const { theme } = useTheme();
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
@@ -153,7 +72,6 @@ const DestinationsViewContent = () => {
     },
   ];
 
-  // Initialize filters from URL params - handle null case
   const [filters, setFilters] = useState<DestinationFilterParams>(() => 
     urlParamsToFilters(searchParams || new URLSearchParams())
   );
@@ -269,7 +187,6 @@ const DestinationsViewContent = () => {
     fetchDestinations(resetFilters);
   };
 
-  // Handle removing a single filter
   const handleRemoveFilter = (key: keyof DestinationFilterParams) => {
     const updatedFilters = { ...filters, [key]: null, pageNumber: 1 };
     setFilters(updatedFilters);
@@ -281,21 +198,27 @@ const DestinationsViewContent = () => {
     setViewMode(mode);
   };
 
+  const currentStart = destinations.length > 0 ? ((filters.pageNumber - 1) * filters.pageSize) + 1 : 0;
+  const currentEnd = Math.min(filters.pageNumber * filters.pageSize, totalItems);
+
   if (categoriesLoading) {
     return (
-      <div className="bg-gradient-to-b from-slate-50 to-slate-100">
+      <div 
+        className="min-h-screen transition-colors duration-300"
+        style={{ backgroundColor: theme.background }}
+      >
         <div className="mx-auto px-2 sm:px-4 lg:px-6 py-6">
-          <div className="flex flex-col justify-center items-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
-            <span className="mt-4 text-lg font-medium text-gray-700">Loading categories...</span>
-          </div>
+          <LoadingState message="Loading categories..." subMessage="Please wait while we fetch available categories" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-b from-slate-50 to-slate-100">
+    <div 
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
       <div className="mx-auto px-2 sm:px-4 lg:px-6 py-6">
         {/* Header with Breadcrumb */}
         <div className="mb-8">
@@ -328,90 +251,23 @@ const DestinationsViewContent = () => {
           availableSeasons={availableSeasons}
         />
 
-        {/* Results Header with View Controls */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">
-                Destination Results
-              </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Showing <span className="font-semibold text-blue-600">
-                  {destinations.length > 0 ? ((filters.pageNumber - 1) * filters.pageSize) + 1 : 0}
-                </span> to{' '}
-                <span className="font-semibold text-blue-600">
-                  {Math.min(filters.pageNumber * filters.pageSize, totalItems)}
-                </span> of{' '}
-                <span className="font-semibold text-blue-600">{totalItems}</span> destinations
-              </p>
-            </div>
-            
-            {/* View Mode Toggle */}
-            <div className="flex items-center space-x-4">
-              <div className="hidden sm:block text-sm text-gray-600 font-medium">
-                View as:
-              </div>
-              <div className="flex bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-1">
-                <button
-                  onClick={() => toggleViewMode('grid')}
-                  className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
-                    viewMode === 'grid'
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                      : 'text-gray-600 hover:bg-white hover:text-blue-600'
-                  }`}
-                  title="Grid View"
-                >
-                  <Grid className="w-4 h-4 mr-2" />
-                  <span className="text-sm font-medium">Grid</span>
-                </button>
-                <button
-                  onClick={() => toggleViewMode('list')}
-                  className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
-                    viewMode === 'list'
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                      : 'text-gray-600 hover:bg-white hover:text-blue-600'
-                  }`}
-                  title="List View"
-                >
-                  <List className="w-4 h-4 mr-2" />
-                  <span className="text-sm font-medium">List</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Results Header */}
+        <ResultsHeader
+          currentStart={currentStart}
+          currentEnd={currentEnd}
+          totalItems={totalItems}
+          viewMode={viewMode}
+          onViewModeChange={toggleViewMode}
+        />
 
         {/* Loading State */}
-        {loading && (
-          <div className="flex flex-col justify-center items-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="relative">
-              <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full"></div>
-              </div>
-            </div>
-            <span className="mt-4 text-lg font-medium text-gray-700">Loading destinations...</span>
-            <p className="mt-2 text-gray-500">Fetching the latest travel experiences</p>
-          </div>
-        )}
+        {loading && <LoadingState message="Loading destinations..." subMessage="Fetching the latest travel experiences" />}
 
         {/* Destinations Grid/List */}
         {!loading && (
           <>
             {destinations.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-16 text-center">
-                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-                  <LayoutDashboard className="w-12 h-12 text-gray-400" />
-                </div>
-                <div className="text-2xl font-semibold text-gray-700 mb-2">No destinations found</div>
-                <p className="text-gray-500 mb-6">Try adjusting your search filters or explore different categories</p>
-                <button
-                  onClick={handleReset}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
-                >
-                  Clear Filters
-                </button>
-              </div>
+              <EmptyState onClearFilters={handleReset} />
             ) : (
               <>
                 {/* Grid View */}
@@ -458,11 +314,19 @@ const DestinationsViewContent = () => {
 
 // Wrap with Suspense for useSearchParams
 const DestinationsViewPage = () => {
+  const { theme } = useTheme();
+  
   return (
     <Suspense fallback={
-      <div className="flex flex-col justify-center items-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
-        <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
-        <span className="mt-4 text-lg font-medium text-gray-700">Loading...</span>
+      <div 
+        className="flex flex-col justify-center items-center py-16 rounded-xl shadow-sm border"
+        style={{ 
+          backgroundColor: theme.surface,
+          borderColor: theme.border 
+        }}
+      >
+        <Loader2 className="w-12 h-12 animate-spin" style={{ color: theme.primary }} />
+        <span className="mt-4 text-lg font-medium" style={{ color: theme.text }}>Loading...</span>
       </div>
     }>
       <DestinationsViewContent />

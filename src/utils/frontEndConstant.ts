@@ -135,6 +135,11 @@ export const GET_DESTINATIONS_DETAILS_BY_REQUEST_DATA_FE = `${API}${DESTINATIONS
 export const GET_DESTINATIONS_HISTORY_DETAILS_DATA_FE = `${API}${DESTINATIONS}/history-details`;
 export const GET_DESTINATIONS_HISTORY_IMAGES_DETAILS_DATA_FE = `${API}${DESTINATIONS}/history-images`;
 export const GET_DESTINATIONS_REVIEWS_DETAILS_DATA_FE = `${API}${DESTINATIONS}/reviews`;
+export const ADD_DESTINATION_DETAILS_DATA_FE = `${API}${DESTINATIONS}/add-destination`;
+export const UPDATE_DESTINATION_DETAILS_DATA_FE = `${API}${DESTINATIONS}/update-destination`;
+export const GET_DESTINATION_DETAILS_FOR_TERMINATE_DATA_FE = `${API}${DESTINATIONS}/destination-for-terminate`;
+export const TERMINATE_DESTINATION_DATA_FE = `${API}${DESTINATIONS}/terminate-destination`;
+export const GET_DESTINATION_STATISTICS_DATA_FE = `${API}${DESTINATIONS}/destination-statistics`;
 
 // Tours
 export const GET_TOUR_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}`;

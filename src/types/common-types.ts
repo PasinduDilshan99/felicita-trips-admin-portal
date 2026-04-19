@@ -60,6 +60,18 @@ export interface TourType {
   tourTypeHoverColor: string | null;
 }
 
+export interface SeasonType {
+  seasonId: number;
+  seasonName: string;
+  seasonStandardName: string;
+  seasonDescription: string;
+  startMonth: number;
+  endMonth: number;
+  isPeak: boolean;
+  seasonImages: Image[];
+}
+
+
 /* ================= FULL RESPONSE DATA ================= */
 
 export interface AllCategoriesData {
@@ -68,6 +80,7 @@ export interface AllCategoriesData {
   tourCategoryList: TourCategory[];
   packageCategoryList: PackageCategory[];
   tourTypeList: TourType[];
+  seasonsList: SeasonType[];
 }
 
 /* ================= API WRAPPER RESPONSE ================= */

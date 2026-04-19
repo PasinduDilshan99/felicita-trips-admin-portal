@@ -161,6 +161,12 @@ export const GET_DESTINATIONS_DETAILS_BY_REQUEST_DATA = `${BASE_PATH}${API}${VER
 export const GET_DESTINATIONS_HISTORY_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/history`;
 export const GET_DESTINATIONS_HISTORY_IMAGES_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/history-images`;
 export const GET_DESTINATIONS_REVIEWS_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/reviews`;
+export const ADD_DESTINATION_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/add-destination`;
+export const UPDATE_DESTINATION_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/update-destination`;
+export const GET_DESTINATION_DETAILS_FOR_TERMINATE_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/destination-for-terminate`;
+export const TERMINATE_DESTINATION_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/terminate-destination`;
+export const GET_DESTINATION_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/destination-statistics`;
+
 
 // Tours
 export const GET_TOUR_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}`;
@@ -261,7 +267,7 @@ export const GET_ALL_CATEGORIES_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/al
 // Others
 export const UPLOAD_IMAGE_TO_CLOUDINARY =
   "https://api.cloudinary.com/v1_1/dtzrivqye/image/upload";
-  export const WHETHER_DETAILS = `${BASE_PATH}${API}${VERSION}${COMMON}/weather`
+export const WHETHER_DETAILS = `${BASE_PATH}${API}${VERSION}${COMMON}/weather`;
 
 // Vehicles
 export const GET_VEHICLE_SPECIFICATION_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${VEHICLES}/specification`;
@@ -273,9 +279,6 @@ export const GET_VEHICLE_TYPES_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION
 // Seasons
 export const GET_ACTIVE_SEASONS_BASIC_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${SEASONS}/basic-details`;
 export const GET_SEASONS_DETAILS_BY_SEASON_ID_DATA = `${BASE_PATH}${API}${VERSION}${SEASONS}`;
-
-
-  
 
 export const GET_TOUR_DETAILS_BY_ID_BE = `${BASE_PATH}${VERSION}${API}${TOUR}`;
 

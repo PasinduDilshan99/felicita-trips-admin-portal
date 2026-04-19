@@ -1,13 +1,25 @@
-"use client"
+"use client";
+
 import React from "react";
 import { PageHeader } from "@/components/common-components/Breadcrumb";
 import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import Link from "next/link";
 import { webManagementSideBarData } from "@/data/side-bar-data";
 
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, opacity: number): string => {
+  hex = hex.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
 const WebManagementPage = () => {
   const { hasPrivilege, loading } = useAuth();
+  const { theme, isDarkMode } = useTheme();
 
   // Function to get icon based on category
   const getIcon = (name: string) => {
@@ -133,10 +145,16 @@ const WebManagementPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+      <div 
+        className="min-h-screen flex items-center justify-center transition-colors duration-300"
+        style={{ backgroundColor: theme.background }}
+      >
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading permissions...</p>
+          <div 
+            className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto"
+            style={{ borderBottomColor: theme.primary }}
+          ></div>
+          <p className="mt-4" style={{ color: theme.textSecondary }}>Loading permissions...</p>
         </div>
       </div>
     );
@@ -145,7 +163,10 @@ const WebManagementPage = () => {
   // If no accessible categories
   if (filteredCategories.length === 0) {
     return (
-      <div className="bg-slate-100 min-h-screen">
+      <div 
+        className="min-h-screen transition-colors duration-300"
+        style={{ backgroundColor: theme.background }}
+      >
         <div className="max-w-7xl mx-auto p-6">
           <PageHeader
             title="Web Management"
@@ -153,21 +174,31 @@ const WebManagementPage = () => {
             breadcrumbItems={breadcrumbItems}
           />
           
-          <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div 
+            className="mt-8 rounded-lg shadow-sm border p-8 text-center transition-colors duration-300"
+            style={{ 
+              backgroundColor: theme.surface,
+              borderColor: theme.border
+            }}
+          >
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300"
+              style={{ backgroundColor: hexToRgba(theme.textSecondary, 0.1) }}
+            >
+              <svg className="w-8 h-8" style={{ color: theme.textSecondary }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold mb-2" style={{ color: theme.text }}>
               Access Restricted
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="mb-4" style={{ color: theme.textSecondary }}>
               You don't have permission to access any web management features.
             </p>
             <Link
               href="/"
-              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors hover:opacity-90"
+              style={{ backgroundColor: theme.primary }}
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -181,7 +212,10 @@ const WebManagementPage = () => {
   }
 
   return (
-    <div className="bg-slate-100">
+    <div 
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
       <div className="max-w-7xl mx-auto p-6">
         {/* Header Section with Breadcrumb */}
         <PageHeader
@@ -202,10 +236,22 @@ const WebManagementPage = () => {
                 href={category.url} 
                 className="group block"
               >
-                <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-purple-300 overflow-hidden h-full relative">
+                <div 
+                  className="rounded-lg shadow-sm transition-all duration-300 hover:shadow-md overflow-hidden h-full relative"
+                  style={{ 
+                    backgroundColor: theme.surface,
+                    border: `1px solid ${theme.border}`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = category.color;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = theme.border;
+                  }}
+                >
                   {/* Color Bar */}
                   <div
-                    className="h-1.5 w-full"
+                    className="h-1.5 w-full transition-all duration-300 group-hover:h-2"
                     style={{ backgroundColor: category.color }}
                   />
 
@@ -213,9 +259,9 @@ const WebManagementPage = () => {
                     <div className="flex flex-col items-center text-center">
                       {/* Icon Container */}
                       <div
-                        className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110"
+                        className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110"
                         style={{
-                          backgroundColor: `${category.color}15`,
+                          backgroundColor: hexToRgba(category.color, 0.15),
                           color: category.color,
                         }}
                       >
@@ -223,17 +269,36 @@ const WebManagementPage = () => {
                       </div>
 
                       {/* Category Name */}
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
+                      <h3 
+                        className="text-lg font-semibold mb-2 transition-colors duration-300 group-hover:text-purple-600"
+                        style={{ color: theme.text }}
+                      >
                         {category.name}
                       </h3>
 
                       {/* Description */}
-                      <p className="text-sm text-gray-500 mb-2">
+                      <p className="text-sm mb-2" style={{ color: theme.textSecondary }}>
                         {category.description}
                       </p>
 
+                      {/* Access Badge */}
+                      {!hasFullAccess && accessibleSubItemsCount > 0 && (
+                        <span 
+                          className="text-xs px-2 py-1 rounded-full mb-2"
+                          style={{ 
+                            backgroundColor: hexToRgba(category.color, 0.1),
+                            color: category.color
+                          }}
+                        >
+                          {accessibleSubItemsCount} accessible {accessibleSubItemsCount === 1 ? 'item' : 'items'}
+                        </span>
+                      )}
+
                       {/* Arrow Icon */}
-                      <div className="flex items-center text-sm font-medium text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div 
+                        className="flex items-center text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300"
+                        style={{ color: category.color }}
+                      >
                         <span className="mr-1">
                           {hasFullAccess ? "Manage All" : "View Accessible"}
                         </span>
@@ -260,11 +325,18 @@ const WebManagementPage = () => {
         </div>
 
         {/* Quick Tip Section */}
-        <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div 
+          className="mt-8 rounded-lg shadow-sm border p-6 transition-colors duration-300"
+          style={{ 
+            backgroundColor: theme.surface,
+            borderColor: theme.border
+          }}
+        >
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               <svg
-                className="w-6 h-6 text-purple-600"
+                className="w-6 h-6"
+                style={{ color: theme.primary }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -278,10 +350,10 @@ const WebManagementPage = () => {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">
+              <h3 className="text-sm font-semibold mb-1" style={{ color: theme.text }}>
                 Quick Tip
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm" style={{ color: theme.textSecondary }}>
                 You can only access modules and features based on your assigned privileges. 
                 Contact your administrator if you need additional access to manage other website content.
               </p>

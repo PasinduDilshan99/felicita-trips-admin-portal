@@ -1,10 +1,9 @@
 // types/destination.ts
-
 export interface Activity {
   activityId: number;
   activityName: string;
   activityDescription: string;
-  activitiesCategory: string;
+  activityCategories: string[];
   durationHours: number;
   availableFrom: string;
   availableTo: string;
@@ -29,19 +28,19 @@ export interface Destination {
   location: string;
   latitude: number;
   longitude: number;
-  wish:boolean;
-  rating:number;
+  wish: boolean;
+  rating: number;
   destinationCategoryDetailsDtos: DestinationCategoryDetailsDtos[];
   statusName: string;
   activities: Activity[];
   images: Image[];
 }
 
-export interface DestinationCategoryDetailsDtos{
-  id:number;
-  name:string;
-  description:string;
-  isPrimary:boolean;
+export interface DestinationCategoryDetailsDtos {
+  id: number;
+  name: string;
+  description: string;
+  isPrimary: boolean;
 }
 
 export interface DestinationFilterParams {
@@ -69,7 +68,6 @@ export interface DestinationApiResponse {
   timestamp: string;
 }
 
-
 export interface SingleDestinationResponse {
   destinationId: number;
   destinationName: string;
@@ -77,8 +75,8 @@ export interface SingleDestinationResponse {
   location: string;
   latitude: number;
   longitude: number;
-  categoryName: string;
-  categoryDescription: string;
+  wish:boolean;
+  destinationCategoryDetailsDtos: DestinationCategoryDetailsDtos[];
   statusName: string;
   activities: Activity[];
   images: Image[];
@@ -98,13 +96,13 @@ export interface DestinationImageRequest {
   name: string;
   description: string;
   imageUrl: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface AddDestinationRequest {
   name: string;
   description: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
   destinationCategory: string;
   location: string;
   latitude: number;
@@ -167,7 +165,7 @@ export interface NewActivityRequest {
   minParticipate: number;
   maxParticipate: number;
   seasons: string[];
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
   activityImages: NewImageRequest[];
 }
 
@@ -176,7 +174,7 @@ export interface NewImageRequest {
   name: string;
   description: string;
   imageUrl: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 // Update destination request
@@ -184,7 +182,7 @@ export interface UpdateDestinationRequest {
   destinationId: number;
   name: string;
   description: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
   destinationCategory: string;
   location: string;
   latitude: number;
@@ -207,5 +205,39 @@ export interface UpdateDestinationApiResponse {
   status: string;
   message: string;
   data: UpdateDestinationResponse;
+  timestamp: string;
+}
+
+export interface DestinationDetails {
+  totalDestinationCount: number;
+  activeDestinations: number;
+  inActiveDestinations: number;
+  hiddenDestinations: number;
+  recentlyUpdateDestinations: number;
+  recentlyAddedDestinations: number;
+}
+
+export interface WishDetails {
+  wishListCount: number;
+  notWishListCount: number;
+}
+
+export interface CategoryDetail {
+  categoryId: number;
+  categoryName: string;
+  count: number;
+}
+
+export interface DestinationStatisticsData {
+  destinationDetails: DestinationDetails;
+  wishDetails: WishDetails;
+  categoryDetails: CategoryDetail[];
+}
+
+export interface DestinationStatisticsApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: DestinationStatisticsData;
   timestamp: string;
 }

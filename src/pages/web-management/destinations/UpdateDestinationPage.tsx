@@ -31,17 +31,30 @@ import {
 import DestinationSearch from "@/components/destinations-components/update-destinations-components/DestinationSearch";
 import DestinationDetailsForm from "@/components/destinations-components/update-destinations-components/DestinationDetailsForm";
 import UpdateConfirmationModal from "@/components/destinations-components/update-destinations-components/UpdateConfirmationModal";
+import {
+  ActivityCategory,
+  DestinationCategory,
+  SeasonType,
+} from "@/types/common-types";
+import { useCommon } from "@/contexts/CommonContext";
 
 const UpdateDestinationPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Use the common context
+  const {
+    categories,
+    loading: commonLoading,
+    error: commonError,
+  } = useCommon();
 
   const initialDestinationName = searchParams?.get("destination-name") || "";
   const initialDestinationId = searchParams?.get("destination-id") || "";
 
   // State for destinations list
   const [destinations, setDestinations] = useState<DestinationForTerminate[]>(
-    []
+    [],
   );
 
   // State for selected destination
@@ -52,7 +65,7 @@ const UpdateDestinationPage = () => {
             destinationId: parseInt(initialDestinationId),
             destinationName: initialDestinationName,
           }
-        : null
+        : null,
     );
 
   // State for original destination details
@@ -78,6 +91,8 @@ const UpdateDestinationPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Derive available categories from context
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [availableActivityCategories, setAvailableActivityCategories] =
     useState<string[]>([]);
@@ -96,12 +111,34 @@ const UpdateDestinationPage = () => {
     },
   ];
 
+  // Extract categories from context data
+  useEffect(() => {
+    if (categories) {
+      // Extract destination category names
+      const destCategories = categories.destinationCategoryList.map(
+        (cat: DestinationCategory) => cat.destinationCategoryName,
+      );
+      setAvailableCategories(destCategories);
+
+      // Extract activity category names
+      const actCategories = categories.activityCategoryList.map(
+        (cat: ActivityCategory) => cat.activityCategoryName,
+      );
+      setAvailableActivityCategories(actCategories);
+
+      // Extract season names
+      const seasons = categories.seasonsList.map(
+        (season: SeasonType) => season.seasonName,
+      );
+      setAvailableSeasons(seasons);
+    }
+  }, [categories]);
+
   // Fetch destinations list on initial load
   useEffect(() => {
     if (!selectedDestination) {
       fetchDestinations();
     }
-    loadLookupData();
   }, []);
 
   // If initialDestinationId is provided, fetch details
@@ -109,24 +146,10 @@ const UpdateDestinationPage = () => {
     if (initialDestinationId && !originalDestination) {
       handleSelectDestination(
         parseInt(initialDestinationId),
-        initialDestinationName
+        initialDestinationName,
       );
     }
   }, [initialDestinationId, initialDestinationName]);
-
-  const loadLookupData = async () => {
-    try {
-      const [categories, activityCategories] = await Promise.all([
-        DestinationService.getCategories(),
-        DestinationService.getActivityCategories(),
-      ]);
-      setAvailableCategories(categories);
-      setAvailableActivityCategories(activityCategories);
-      setAvailableSeasons(DestinationService.getSeasons());
-    } catch (err) {
-      console.error("Error loading lookup data:", err);
-    }
-  };
 
   const fetchDestinations = async () => {
     setLoading(true);
@@ -203,7 +226,7 @@ const UpdateDestinationPage = () => {
     setEditedDestination({
       ...editedDestination,
       activities: editedDestination.activities.filter(
-        (act) => act.activityId !== activityId
+        (act) => act.activityId !== activityId,
       ),
     });
   };
@@ -225,7 +248,7 @@ const UpdateDestinationPage = () => {
     setEditedDestination({
       ...editedDestination,
       activities: editedDestination.activities.map((act) =>
-        act.activityId === updatedActivity.activityId ? updatedActivity : act
+        act.activityId === updatedActivity.activityId ? updatedActivity : act,
       ),
     });
   };
@@ -237,7 +260,7 @@ const UpdateDestinationPage = () => {
     setEditedDestination({
       ...editedDestination,
       images: editedDestination.images.map((img) =>
-        img.imageId === updatedImage.imageId ? updatedImage : img
+        img.imageId === updatedImage.imageId ? updatedImage : img,
       ),
     });
   };
@@ -410,6 +433,39 @@ const UpdateDestinationPage = () => {
 
     return changes;
   };
+
+  // Show loading state if common data is loading
+  if (commonLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading categories...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if common data failed to load
+  if (commonError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6 bg-white rounded-2xl shadow-lg">
+          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Failed to Load Categories
+          </h3>
+          <p className="text-gray-600 mb-4">{commonError}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
