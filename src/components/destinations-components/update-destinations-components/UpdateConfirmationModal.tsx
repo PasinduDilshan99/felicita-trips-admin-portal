@@ -8,6 +8,9 @@ import {
   Loader2,
   ChevronDown,
   ChevronUp,
+  Tag,
+  Image as ImageIcon,
+  Activity,
 } from "lucide-react";
 
 interface UpdateConfirmationModalProps {
@@ -26,6 +29,8 @@ interface UpdateConfirmationModalProps {
   newImages: any[];
   removedActivities: number[];
   newActivities: any[];
+  removedCategoryIds: number[];
+  addedCategoryIds: number[];
 }
 
 const UpdateConfirmationModal: React.FC<UpdateConfirmationModalProps> = ({
@@ -40,6 +45,8 @@ const UpdateConfirmationModal: React.FC<UpdateConfirmationModalProps> = ({
   newImages,
   removedActivities,
   newActivities,
+  removedCategoryIds,
+  addedCategoryIds,
 }) => {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
@@ -53,10 +60,30 @@ const UpdateConfirmationModal: React.FC<UpdateConfirmationModalProps> = ({
     );
   };
 
+  // Helper to format value for display
+  const formatValue = (value: any): string => {
+    if (value === null || value === undefined) return "Not set";
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    if (typeof value === "number") return value.toString();
+    if (typeof value === "string") return value;
+    if (Array.isArray(value)) return value.length > 0 ? value.join(", ") : "None";
+    if (typeof value === "object") return JSON.stringify(value);
+    return String(value);
+  };
+
+  // Get category names from IDs
+  const getCategoryNames = (categoryIds: number[], categories: any[]): string => {
+    const names = categoryIds.map(id => {
+      const category = categories.find(cat => cat.destinationCategoryId === id);
+      return category?.destinationCategoryName || `Category ${id}`;
+    });
+    return names.join(", ");
+  };
+
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={onClose} />
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -77,46 +104,55 @@ const UpdateConfirmationModal: React.FC<UpdateConfirmationModalProps> = ({
               </div>
             </div>
 
-            {/* Summary */}
+            {/* Summary Stats */}
             <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div>
-                  <div className="text-sm text-gray-500">Changes Made</div>
+                  <div className="text-sm text-gray-500">Field Changes</div>
                   <div className="text-lg font-bold text-gray-900">
                     {changedFields.length}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-500">Images to Remove</div>
+                  <div className="text-sm text-gray-500">Category Changes</div>
                   <div className="text-lg font-bold text-gray-900">
+                    {removedCategoryIds.length + addedCategoryIds.length}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Images to Remove</div>
+                  <div className="text-lg font-bold text-red-600">
                     {removedImages.length}
                   </div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500">New Images</div>
-                  <div className="text-lg font-bold text-gray-900">
+                  <div className="text-lg font-bold text-green-600">
                     {newImages.length}
                   </div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500">New Activities</div>
-                  <div className="text-lg font-bold text-gray-900">
+                  <div className="text-lg font-bold text-purple-600">
                     {newActivities.length}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Changed Fields */}
+            {/* Field Changes */}
             {changedFields.length > 0 && (
               <div className="mb-6">
                 <button
                   onClick={() => toggleSection("fields")}
                   className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-gray-100 hover:to-gray-200 transition-all duration-200"
                 >
-                  <h4 className="text-lg font-semibold text-gray-800">
-                    Field Changes ({changedFields.length})
-                  </h4>
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-5 h-5 text-gray-600" />
+                    <h4 className="text-lg font-semibold text-gray-800">
+                      Field Changes ({changedFields.length})
+                    </h4>
+                  </div>
                   {expandedSections.includes("fields") ? (
                     <ChevronUp className="w-5 h-5 text-gray-500" />
                   ) : (
@@ -145,20 +181,16 @@ const UpdateConfirmationModal: React.FC<UpdateConfirmationModalProps> = ({
                           {changedFields.map((change, index) => (
                             <tr
                               key={index}
-                              className="border-b border-gray-100 last:border-b-0"
+                              className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
                             >
                               <td className="py-3 text-sm font-medium text-gray-900">
                                 {change.field}
                               </td>
                               <td className="py-3 text-sm text-gray-600">
-                                {typeof change.oldValue === "string"
-                                  ? change.oldValue
-                                  : JSON.stringify(change.oldValue)}
+                                {formatValue(change.oldValue)}
                               </td>
                               <td className="py-3 text-sm text-blue-600 font-medium">
-                                {typeof change.newValue === "string"
-                                  ? change.newValue
-                                  : JSON.stringify(change.newValue)}
+                                {formatValue(change.newValue)}
                               </td>
                             </tr>
                           ))}
@@ -170,48 +202,54 @@ const UpdateConfirmationModal: React.FC<UpdateConfirmationModalProps> = ({
               </div>
             )}
 
-            {/* Images Summary */}
-            {(removedImages.length > 0 || newImages.length > 0) && (
+            {/* Category Changes */}
+            {(removedCategoryIds.length > 0 || addedCategoryIds.length > 0) && (
               <div className="mb-6">
                 <button
-                  onClick={() => toggleSection("images")}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl hover:from-rose-100 hover:to-pink-100 transition-all duration-200"
+                  onClick={() => toggleSection("categories")}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl hover:from-emerald-100 hover:to-teal-100 transition-all duration-200"
                 >
-                  <h4 className="text-lg font-semibold text-gray-800">
-                    Images Changes
-                  </h4>
-                  {expandedSections.includes("images") ? (
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-5 h-5 text-emerald-600" />
+                    <h4 className="text-lg font-semibold text-gray-800">
+                      Category Changes
+                    </h4>
+                  </div>
+                  {expandedSections.includes("categories") ? (
                     <ChevronUp className="w-5 h-5 text-gray-500" />
                   ) : (
                     <ChevronDown className="w-5 h-5 text-gray-500" />
                   )}
                 </button>
 
-                {expandedSections.includes("images") && (
+                {expandedSections.includes("categories") && (
                   <div className="mt-4 p-4 border border-gray-200 rounded-xl">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {removedImages.length > 0 && (
-                        <div>
-                          <h5 className="text-sm font-medium text-red-700 mb-2">
-                            Images to Remove ({removedImages.length})
+                      {removedCategoryIds.length > 0 && (
+                        <div className="p-3 bg-red-50 rounded-lg">
+                          <h5 className="text-sm font-medium text-red-700 mb-2 flex items-center gap-1">
+                            <XCircle className="w-4 h-4" />
+                            Categories to Remove ({removedCategoryIds.length})
                           </h5>
-                          <div className="text-sm text-gray-600">
-                            {removedImages.join(", ")}
+                          <div className="space-y-1">
+                            {removedCategoryIds.map((categoryId, idx) => (
+                              <div key={idx} className="text-sm text-red-600">
+                                • Category ID: {categoryId}
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}
-                      {newImages.length > 0 && (
-                        <div>
-                          <h5 className="text-sm font-medium text-green-700 mb-2">
-                            New Images ({newImages.length})
+                      {addedCategoryIds.length > 0 && (
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <h5 className="text-sm font-medium text-green-700 mb-2 flex items-center gap-1">
+                            <CheckCircle className="w-4 h-4" />
+                            Categories to Add ({addedCategoryIds.length})
                           </h5>
-                          <div className="space-y-2">
-                            {newImages.map((image, index) => (
-                              <div
-                                key={index}
-                                className="text-sm text-gray-600"
-                              >
-                                {image.name}
+                          <div className="space-y-1">
+                            {addedCategoryIds.map((categoryId, idx) => (
+                              <div key={idx} className="text-sm text-green-600">
+                                • Category ID: {categoryId}
                               </div>
                             ))}
                           </div>
@@ -223,16 +261,79 @@ const UpdateConfirmationModal: React.FC<UpdateConfirmationModalProps> = ({
               </div>
             )}
 
-            {/* Activities Summary */}
+            {/* Images Changes */}
+            {(removedImages.length > 0 || newImages.length > 0) && (
+              <div className="mb-6">
+                <button
+                  onClick={() => toggleSection("images")}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl hover:from-rose-100 hover:to-pink-100 transition-all duration-200"
+                >
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-rose-600" />
+                    <h4 className="text-lg font-semibold text-gray-800">
+                      Images Changes
+                    </h4>
+                  </div>
+                  {expandedSections.includes("images") ? (
+                    <ChevronUp className="w-5 h-5 text-gray-500" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-gray-500" />
+                  )}
+                </button>
+
+                {expandedSections.includes("images") && (
+                  <div className="mt-4 p-4 border border-gray-200 rounded-xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {removedImages.length > 0 && (
+                        <div className="p-3 bg-red-50 rounded-lg">
+                          <h5 className="text-sm font-medium text-red-700 mb-2">
+                            Images to Remove ({removedImages.length})
+                          </h5>
+                          <div className="space-y-1">
+                            {removedImages.map((imageId, index) => (
+                              <div key={index} className="text-sm text-red-600">
+                                • Image ID: {imageId}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {newImages.length > 0 && (
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <h5 className="text-sm font-medium text-green-700 mb-2">
+                            New Images ({newImages.length})
+                          </h5>
+                          <div className="space-y-2">
+                            {newImages.map((image, index) => (
+                              <div key={index} className="text-sm text-green-600">
+                                <div className="font-medium">{image.name}</div>
+                                <div className="text-xs text-gray-500 truncate">
+                                  {image.imageUrl}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Activities Changes */}
             {(removedActivities.length > 0 || newActivities.length > 0) && (
               <div className="mb-6">
                 <button
                   onClick={() => toggleSection("activities")}
                   className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl hover:from-purple-100 hover:to-violet-100 transition-all duration-200"
                 >
-                  <h4 className="text-lg font-semibold text-gray-800">
-                    Activities Changes
-                  </h4>
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-purple-600" />
+                    <h4 className="text-lg font-semibold text-gray-800">
+                      Activities Changes
+                    </h4>
+                  </div>
                   {expandedSections.includes("activities") ? (
                     <ChevronUp className="w-5 h-5 text-gray-500" />
                   ) : (
@@ -244,27 +345,38 @@ const UpdateConfirmationModal: React.FC<UpdateConfirmationModalProps> = ({
                   <div className="mt-4 p-4 border border-gray-200 rounded-xl">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {removedActivities.length > 0 && (
-                        <div>
+                        <div className="p-3 bg-red-50 rounded-lg">
                           <h5 className="text-sm font-medium text-red-700 mb-2">
                             Activities to Remove ({removedActivities.length})
                           </h5>
-                          <div className="text-sm text-gray-600">
-                            {removedActivities.join(", ")}
+                          <div className="space-y-1">
+                            {removedActivities.map((activityId, index) => (
+                              <div key={index} className="text-sm text-red-600">
+                                • Activity ID: {activityId}
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}
                       {newActivities.length > 0 && (
-                        <div>
+                        <div className="p-3 bg-green-50 rounded-lg">
                           <h5 className="text-sm font-medium text-green-700 mb-2">
                             New Activities ({newActivities.length})
                           </h5>
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             {newActivities.map((activity, index) => (
-                              <div
-                                key={index}
-                                className="text-sm text-gray-600"
-                              >
-                                {activity.name}
+                              <div key={index} className="text-sm text-green-600 border-b border-green-100 last:border-0 pb-2 last:pb-0">
+                                <div className="font-medium">{activity.name}</div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Duration: {activity.durationHover} hours | 
+                                  Price: LKR {activity.priceLocal.toLocaleString()} (Local) / 
+                                  LKR {activity.priceForeigners.toLocaleString()} (Foreigners)
+                                </div>
+                                {activity.addActivityCategoriesId?.length > 0 && (
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    Categories: {activity.addActivityCategoriesId.join(", ")}
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -280,10 +392,13 @@ const UpdateConfirmationModal: React.FC<UpdateConfirmationModalProps> = ({
             <div className="mb-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-700">
-                  Please review all changes carefully. Once confirmed, these
-                  changes will be permanent and cannot be undone.
-                </p>
+                <div className="text-sm text-amber-700">
+                  <p className="font-medium mb-1">Please review all changes carefully!</p>
+                  <p>
+                    Once confirmed, these changes will be permanent and cannot be undone.
+                    Make sure all information is correct before proceeding.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -292,22 +407,25 @@ const UpdateConfirmationModal: React.FC<UpdateConfirmationModalProps> = ({
               <button
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:from-gray-100 hover:to-gray-200 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 onClick={onConfirm}
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Updating...
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Updating Destination...
                   </>
                 ) : (
-                  "Confirm Update"
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Confirm Update
+                  </>
                 )}
               </button>
             </div>

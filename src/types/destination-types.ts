@@ -102,8 +102,8 @@ export interface DestinationImageRequest {
 export interface AddDestinationRequest {
   name: string;
   description: string;
-  status: "ACTIVE" | "INACTIVE";
-  destinationCategory: string;
+  status: string;
+  destinationCategoriesIdList: number[];
   location: string;
   latitude: number;
   longitude: number;
@@ -156,7 +156,8 @@ export interface TerminateDestinationApiResponse {
 export interface NewActivityRequest {
   name: string;
   description: string;
-  activityCategory: string;
+  addActivityCategoriesId: number[];
+  removeActivityCategoriesId: number[];
   durationHover: number;
   availableFrom: string;
   availableTo: string;
@@ -164,8 +165,8 @@ export interface NewActivityRequest {
   priceForeigners: number;
   minParticipate: number;
   maxParticipate: number;
-  seasons: string[];
-  status: "ACTIVE" | "INACTIVE";
+  seasonId: number;
+  status: string;
   activityImages: NewImageRequest[];
 }
 
@@ -182,8 +183,9 @@ export interface UpdateDestinationRequest {
   destinationId: number;
   name: string;
   description: string;
-  status: "ACTIVE" | "INACTIVE";
-  destinationCategory: string;
+  status: string;
+  removedestinationCategoriesIdList: number[];
+  adddestinationCategoriesIdList: number[];
   location: string;
   latitude: number;
   longitude: number;

@@ -5,6 +5,16 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UNIQUE_CODE_NAME } from "@/utils/constant";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, opacity: number): string => {
+  hex = hex.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -33,6 +43,7 @@ export default function ProtectedRoute({
 }: ProtectedRouteProps) {
   const router = useRouter();
   const { hasPrivilege, loading: authLoading } = useAuth();
+  const { theme, isDarkMode } = useTheme();
   const [isChecking, setIsChecking] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
 
@@ -74,13 +85,37 @@ export default function ProtectedRoute({
   if (authLoading || isChecking) {
     if (showLoading) {
       return (
-        <div className="min-h-screen flex items-center justify-center">
+        <div 
+          className="min-h-screen flex items-center justify-center transition-colors duration-300"
+          style={{ backgroundColor: theme.background }}
+        >
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">
+            {/* Spinner */}
+            <div 
+              className="inline-block animate-spin rounded-full h-12 w-12 border-4"
+              style={{ 
+                borderColor: hexToRgba(theme.primary, 0.2),
+                borderTopColor: theme.primary,
+                borderRightColor: theme.primary,
+              }}
+            />
+            
+            {/* Loading Text */}
+            <p 
+              className="mt-4 text-sm font-medium transition-colors duration-300"
+              style={{ color: theme.textSecondary }}
+            >
               {requiredPrivileges.length > 0
                 ? "Checking permissions..."
                 : "Verifying access..."}
+            </p>
+            
+            {/* Optional: Subtle loading hint */}
+            <p 
+              className="mt-2 text-xs transition-colors duration-300"
+              style={{ color: hexToRgba(theme.textSecondary, 0.7) }}
+            >
+              Please wait while we verify your credentials
             </p>
           </div>
         </div>

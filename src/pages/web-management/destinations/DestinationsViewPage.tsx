@@ -12,7 +12,10 @@ import DestinationCard from "@/components/destinations-components/DestinationCar
 import DestinationListCard from "@/components/destinations-components/DestinationListCard";
 import Pagination from "@/components/destinations-components/DestinationPagination";
 import { DestinationService } from "@/services/destinationService";
-import { DestinationFilterParams, Destination } from "@/types/destination-types";
+import {
+  DestinationFilterParams,
+  Destination,
+} from "@/types/destination-types";
 import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCommon } from "@/contexts/CommonContext";
@@ -22,33 +25,42 @@ import { ActiveFilters } from "@/components/destinations-components/view-destina
 import { ResultsHeader } from "@/components/destinations-components/view-destinations-components/ResultsHeader";
 import { EmptyState } from "@/components/destinations-components/view-destinations-components/EmptyState";
 
-
 // Utility functions for URL params management
-const filtersToUrlParams = (filters: DestinationFilterParams): URLSearchParams => {
+const filtersToUrlParams = (
+  filters: DestinationFilterParams,
+): URLSearchParams => {
   const params = new URLSearchParams();
 
   if (filters.name) params.set("name", filters.name);
-  if (filters.destinationCategory) params.set("destinationCategory", filters.destinationCategory);
+  if (filters.destinationCategory)
+    params.set("destinationCategory", filters.destinationCategory);
   if (filters.season) params.set("season", filters.season);
   if (filters.status) params.set("status", filters.status);
   if (filters.duration) params.set("duration", filters.duration.toString());
   if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1) params.set("pageNumber", filters.pageNumber.toString());
-  
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+
   return params;
 };
 
-const urlParamsToFilters = (params: URLSearchParams): DestinationFilterParams => {
+const urlParamsToFilters = (
+  params: URLSearchParams,
+): DestinationFilterParams => {
   return {
     name: params.get("name") || null,
     minPrice: null,
     maxPrice: null,
-    duration: params.get("duration") ? parseFloat(params.get("duration")!) : null,
+    duration: params.get("duration")
+      ? parseFloat(params.get("duration")!)
+      : null,
     destinationCategory: params.get("destinationCategory") || null,
     season: params.get("season") || null,
-    status: (params.get("status") as 'ACTIVE' | 'INACTIVE' | null) || null,
+    status: (params.get("status") as "ACTIVE" | "INACTIVE" | null) || null,
     pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
-    pageNumber: params.get("pageNumber") ? parseInt(params.get("pageNumber")!) : 1,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
   };
 };
 
@@ -72,66 +84,76 @@ const DestinationsViewContent = () => {
     },
   ];
 
-  const [filters, setFilters] = useState<DestinationFilterParams>(() => 
-    urlParamsToFilters(searchParams || new URLSearchParams())
+  const [filters, setFilters] = useState<DestinationFilterParams>(() =>
+    urlParamsToFilters(searchParams || new URLSearchParams()),
   );
-  
+
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [availableSeasons, setAvailableSeasons] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Get destination categories from CommonContext
   const getDestinationCategories = useCallback((): string[] => {
     if (categories && categories.destinationCategoryList) {
       return categories.destinationCategoryList.map(
-        (cat) => cat.destinationCategoryName
+        (cat) => cat.destinationCategoryName,
       );
     }
     return [];
   }, [categories]);
 
   // Update URL with current filters
-  const updateURL = useCallback((newFilters: DestinationFilterParams) => {
-    const params = filtersToUrlParams(newFilters);
-    const queryString = params.toString();
-    const newURL = queryString 
-      ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view?${queryString}`
-      : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view`;
-    
-    router.replace(newURL, { scroll: false });
-  }, [router]);
+  const updateURL = useCallback(
+    (newFilters: DestinationFilterParams) => {
+      const params = filtersToUrlParams(newFilters);
+      const queryString = params.toString();
+      const newURL = queryString
+        ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view?${queryString}`
+        : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view`;
 
-  const fetchDestinations = useCallback(async (currentFilters: DestinationFilterParams) => {
-    setLoading(true);
-    try {
-      const apiFilters = {
-        ...currentFilters,
-        minPrice: null,
-        maxPrice: null,
-      };
-      
-      const response = await DestinationService.getDestinations(apiFilters);
-      const data = response.data;
-      
-      setDestinations(data.destinationResponseDtos);
-      setTotalItems(data.destinationCount);
+      router.replace(newURL, { scroll: false });
+    },
+    [router],
+  );
 
-      const seasons = DestinationService.extractSeasons(data.destinationResponseDtos);
-      setAvailableSeasons(seasons);
-    } catch (error) {
-      console.error("Error fetching destinations:", error);
-    } finally {
-      setLoading(false);
-      setIsInitialLoad(false);
-    }
-  }, []);
+  const fetchDestinations = useCallback(
+    async (currentFilters: DestinationFilterParams) => {
+      setLoading(true);
+      try {
+        const apiFilters = {
+          ...currentFilters,
+          minPrice: null,
+          maxPrice: null,
+        };
+
+        const response = await DestinationService.getDestinations(apiFilters);
+        const data = response.data;
+
+        setDestinations(data.destinationResponseDtos);
+        setTotalItems(data.destinationCount);
+
+        const seasons = DestinationService.extractSeasons(
+          data.destinationResponseDtos,
+        );
+        setAvailableSeasons(seasons);
+      } catch (error) {
+        console.error("Error fetching destinations:", error);
+      } finally {
+        setLoading(false);
+        setIsInitialLoad(false);
+      }
+    },
+    [],
+  );
 
   // Initial load from URL params
   useEffect(() => {
-    const initialFilters = urlParamsToFilters(searchParams || new URLSearchParams());
+    const initialFilters = urlParamsToFilters(
+      searchParams || new URLSearchParams(),
+    );
     setFilters(initialFilters);
     fetchDestinations(initialFilters);
   }, []);
@@ -139,7 +161,9 @@ const DestinationsViewContent = () => {
   // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(searchParams || new URLSearchParams());
+      const urlFilters = urlParamsToFilters(
+        searchParams || new URLSearchParams(),
+      );
       setFilters(urlFilters);
       fetchDestinations(urlFilters);
     }
@@ -194,41 +218,56 @@ const DestinationsViewContent = () => {
     fetchDestinations(updatedFilters);
   };
 
-  const toggleViewMode = (mode: 'grid' | 'list') => {
+  const toggleViewMode = (mode: "grid" | "list") => {
     setViewMode(mode);
   };
 
-  const currentStart = destinations.length > 0 ? ((filters.pageNumber - 1) * filters.pageSize) + 1 : 0;
-  const currentEnd = Math.min(filters.pageNumber * filters.pageSize, totalItems);
+  const currentStart =
+    destinations.length > 0
+      ? (filters.pageNumber - 1) * filters.pageSize + 1
+      : 0;
+  const currentEnd = Math.min(
+    filters.pageNumber * filters.pageSize,
+    totalItems,
+  );
 
   if (categoriesLoading) {
     return (
-      <div 
+      <div
         className="min-h-screen transition-colors duration-300"
         style={{ backgroundColor: theme.background }}
       >
         <div className="mx-auto px-2 sm:px-4 lg:px-6 py-6">
-          <LoadingState message="Loading categories..." subMessage="Please wait while we fetch available categories" />
+          <LoadingState
+            message="Loading categories..."
+            subMessage="Please wait while we fetch available categories"
+          />
         </div>
       </div>
     );
   }
 
   return (
-    <div 
+    <div
       className="min-h-screen transition-colors duration-300"
       style={{ backgroundColor: theme.background }}
     >
-      <div className="mx-auto px-2 sm:px-4 lg:px-6 py-6">
-        {/* Header with Breadcrumb */}
-        <div className="mb-8">
+      <div
+        className="sticky top-0 z-50 backdrop-blur-sm border-b transition-colors duration-300"
+        style={{
+          backgroundColor: `${theme.surface}CC`,
+          borderColor: theme.border,
+        }}
+      >
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title="Destinations View"
             description="Explore and manage travel destinations with rich visual experience"
             breadcrumbItems={breadcrumbItems}
           />
         </div>
-
+      </div>
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filter Section */}
         <div className="mb-8">
           <DestinationFilter
@@ -261,7 +300,12 @@ const DestinationsViewContent = () => {
         />
 
         {/* Loading State */}
-        {loading && <LoadingState message="Loading destinations..." subMessage="Fetching the latest travel experiences" />}
+        {loading && (
+          <LoadingState
+            message="Loading destinations..."
+            subMessage="Fetching the latest travel experiences"
+          />
+        )}
 
         {/* Destinations Grid/List */}
         {!loading && (
@@ -271,7 +315,7 @@ const DestinationsViewContent = () => {
             ) : (
               <>
                 {/* Grid View */}
-                {viewMode === 'grid' && (
+                {viewMode === "grid" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     {destinations.map((destination) => (
                       <DestinationCard
@@ -283,7 +327,7 @@ const DestinationsViewContent = () => {
                 )}
 
                 {/* List View */}
-                {viewMode === 'list' && (
+                {viewMode === "list" && (
                   <div className="space-y-6 mb-8">
                     {destinations.map((destination) => (
                       <DestinationListCard
@@ -315,20 +359,30 @@ const DestinationsViewContent = () => {
 // Wrap with Suspense for useSearchParams
 const DestinationsViewPage = () => {
   const { theme } = useTheme();
-  
+
   return (
-    <Suspense fallback={
-      <div 
-        className="flex flex-col justify-center items-center py-16 rounded-xl shadow-sm border"
-        style={{ 
-          backgroundColor: theme.surface,
-          borderColor: theme.border 
-        }}
-      >
-        <Loader2 className="w-12 h-12 animate-spin" style={{ color: theme.primary }} />
-        <span className="mt-4 text-lg font-medium" style={{ color: theme.text }}>Loading...</span>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div
+          className="flex flex-col justify-center items-center py-16 rounded-xl shadow-sm border"
+          style={{
+            backgroundColor: theme.surface,
+            borderColor: theme.border,
+          }}
+        >
+          <Loader2
+            className="w-12 h-12 animate-spin"
+            style={{ color: theme.primary }}
+          />
+          <span
+            className="mt-4 text-lg font-medium"
+            style={{ color: theme.text }}
+          >
+            Loading...
+          </span>
+        </div>
+      }
+    >
       <DestinationsViewContent />
     </Suspense>
   );

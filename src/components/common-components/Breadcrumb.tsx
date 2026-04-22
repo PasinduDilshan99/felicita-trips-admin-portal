@@ -2,6 +2,16 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "@/contexts/ThemeContext";
+
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, opacity: number): string => {
+  hex = hex.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
 // Types
 interface BreadcrumbItem {
@@ -22,6 +32,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   customItems,
 }) => {
   const pathname = usePathname();
+  const { theme } = useTheme();
 
   // Generate breadcrumbs from URL if no custom items provided
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
@@ -47,8 +58,18 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   const breadcrumbs = generateBreadcrumbs();
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-2">
-      <Link href="/" className="hover:text-purple-600 transition-colors">
+    <nav className="flex items-center space-x-2 text-sm mb-2 transition-colors duration-300">
+      <Link
+        href="/"
+        className="transition-all duration-200 hover:scale-105"
+        style={{ color: theme.textSecondary }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = theme.primary;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = theme.textSecondary;
+        }}
+      >
         <svg
           className="w-4 h-4"
           fill="none"
@@ -67,7 +88,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
       {breadcrumbs.map((crumb, index) => (
         <React.Fragment key={crumb.href}>
           <svg
-            className="w-4 h-4 text-gray-400"
+            className="w-4 h-4 transition-colors duration-300"
+            style={{ color: theme.textSecondary }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -80,11 +102,23 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
             />
           </svg>
           {index === breadcrumbs.length - 1 ? (
-            <span className="text-gray-900 font-medium">{crumb.label}</span>
+            <span
+              className="font-semibold transition-colors duration-300"
+              style={{ color: theme.text }}
+            >
+              {crumb.label}
+            </span>
           ) : (
             <Link
               href={crumb.href}
-              className="hover:text-purple-600 transition-colors"
+              className="transition-all duration-200 hover:scale-105"
+              style={{ color: theme.textSecondary }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = theme.primary;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = theme.textSecondary;
+              }}
             >
               {crumb.label}
             </Link>
@@ -111,10 +145,43 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   breadcrumbItems,
   action,
 }) => {
+  const { theme } = useTheme();
+
   return (
     <div className="mb-2">
       <Breadcrumb customItems={breadcrumbItems} />
-      <hr className="h-0.5 bg-purple-500" />
+      <hr
+        className="h-0.5 transition-colors duration-300"
+        style={{
+          backgroundColor: theme.primary,
+          boxShadow: `0 0 8px ${hexToRgba(theme.primary, 0.5)}`,
+        }}
+      />
+
+      {/* Optional: Add title and description section */}
+      {/* {(title || description || action) && (
+        <div className="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            {title && (
+              <h1
+                className="text-2xl md:text-3xl font-bold transition-colors duration-300"
+                style={{ color: theme.text }}
+              >
+                {title}
+              </h1>
+            )}
+            {description && (
+              <p
+                className="mt-1 text-sm transition-colors duration-300"
+                style={{ color: theme.textSecondary }}
+              >
+                {description}
+              </p>
+            )}
+          </div>
+          {action && <div className="flex-shrink-0">{action}</div>}
+        </div>
+      )} */}
     </div>
   );
 };

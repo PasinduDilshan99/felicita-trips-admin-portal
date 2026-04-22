@@ -41,7 +41,7 @@ export default function WebManagementLayout({
       <div className="flex">
         <Sidebar data={webManagementSideBarData} title="Web Management" />
         <main className="flex-1 w-full lg:ml-0">
-          <div className="p-2 sm:p-4 lg:p-6 pt-12 lg:pt-4">
+          <div className="">
             <div className="mx-auto">{children}</div>
           </div>
         </main>

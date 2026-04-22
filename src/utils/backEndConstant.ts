@@ -266,7 +266,7 @@ export const GET_ALL_CATEGORIES_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/al
 
 // Others
 export const UPLOAD_IMAGE_TO_CLOUDINARY =
-  "https://api.cloudinary.com/v1_1/dtzrivqye/image/upload";
+  "https://api.cloudinary.com/v1_1/dnsenutq2/image/upload";
 export const WHETHER_DETAILS = `${BASE_PATH}${API}${VERSION}${COMMON}/weather`;
 
 // Vehicles
