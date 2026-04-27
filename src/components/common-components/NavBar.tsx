@@ -1,3 +1,6 @@
+// Updated NavBar component with NotificationBell integration
+// Replace the existing NavBar with this updated version
+
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
@@ -14,7 +17,12 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
-import { COMPANY_LOGO_IMAGE, COMPANY_NAME, COMPANY_THEME } from "@/utils/constant";
+import {
+  COMPANY_LOGO_IMAGE,
+  COMPANY_NAME,
+  COMPANY_THEME,
+} from "@/utils/constant";
+import NotificationBell from "./NotificationBell";
 
 // User type (if not imported from elsewhere)
 export type User = {
@@ -144,14 +152,9 @@ const NavBar = () => {
 
           {/* Right side - User Profile and Notifications */}
           <div className="flex items-center space-x-4">
-            {/* Notifications Bell - Desktop */}
-            <div className="hidden md:block relative">
-              <button className="p-2 rounded-full hover:bg-white/10 transition-colors relative text-white">
-                <Bell size={20} />
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-amber-500 text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
-              </button>
+            {/* Notifications Bell - Desktop - Using the new component */}
+            <div className="hidden md:block">
+              <NotificationBell />
             </div>
 
             {/* User Profile Section */}
@@ -419,7 +422,7 @@ const NavBar = () => {
 
             {/* Mobile Notifications */}
             <button
-              className="flex items-center w-full px-4 py-3 rounded-lg transition-colors"
+              className="flex items-center w-full px-4 py-3 rounded-lg transition-colors justify-between"
               style={{ color: theme.textSecondary }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = hexToRgba(
@@ -432,16 +435,24 @@ const NavBar = () => {
                 e.currentTarget.style.backgroundColor = "transparent";
                 e.currentTarget.style.color = theme.textSecondary;
               }}
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                // You can also open the notification panel programmatically here
+                // For now, we'll just use the bell component
+              }}
             >
-              <Bell
-                size={18}
-                className="mr-3"
-                style={{ color: theme.textSecondary }}
-              />
-              Notifications
-              <span className="ml-auto h-6 w-6 bg-amber-500 text-xs text-white rounded-full flex items-center justify-center">
-                3
-              </span>
+              <div className="flex items-center">
+                <div className="relative">
+                  {/* This would be the NotificationBell for mobile, but for simplicity */}
+                  <Bell
+                    size={18}
+                    className="mr-3"
+                    style={{ color: theme.textSecondary }}
+                  />
+                </div>
+                Notifications
+              </div>
+              {/* You'd need to integrate the notification count here */}
             </button>
 
             <button

@@ -36,9 +36,9 @@ const BOOKING = "/booking";
 const BROWSER_HISTORY = "/browser-history";
 const OTHERS = "/others";
 const COMMON = "/common";
+const NOTIFICATIONS = "/notifications";
 const VEHICLES = "/vehicles";
 const SEASONS = "/seasons";
-
 
 // Auth
 export const LOGIN_FE = `${API}${AUTH}/login`;
@@ -126,6 +126,7 @@ export const GET_ACTIVE_OUR_SERVICES_DATA_FE = `${API}${OUR_SERVICES}`;
 export const GET_DESTINATIONS_DETAILS_BY_ID_DATA_FE = `${API}${DESTINATIONS}`;
 export const GET_ACTIVE_DESTINATIONS_DATA_FE = `${API}${DESTINATIONS}/active-destinations`;
 export const GET_ACTIVE_DESTINATIONS_CATEGORIES_FE = `${API}${DESTINATIONS}${CATEGORIES}`;
+export const GET_DESTINATION_CATEGORY_DETAILS_BY_ID_FE = `${API}${DESTINATIONS}/category-details-by-id`;
 export const GET_POPULAR_DESTINATIONS_DATA_FE = `${API}${DESTINATIONS}/popular-destinations`;
 export const GET_NEW_DESTINATIONS_DATA_FE = `${API}${DESTINATIONS}/new-destinations`;
 export const GET_TRENDING_DESTINATIONS_DATA_FE = `${API}${DESTINATIONS}/trending-destinations`;
@@ -140,6 +141,10 @@ export const UPDATE_DESTINATION_DETAILS_DATA_FE = `${API}${DESTINATIONS}/update-
 export const GET_DESTINATION_DETAILS_FOR_TERMINATE_DATA_FE = `${API}${DESTINATIONS}/destination-for-terminate`;
 export const TERMINATE_DESTINATION_DATA_FE = `${API}${DESTINATIONS}/terminate-destination`;
 export const GET_DESTINATION_STATISTICS_DATA_FE = `${API}${DESTINATIONS}/destination-statistics`;
+export const GET_DESTINATION_CATEGORIES_STATISTICS_DATA_FE = `${API}${DESTINATIONS}/destination-categories-statistics`;
+export const ADD_DESTINATION_CATEGORY_FE = `${API}${DESTINATIONS}/add-destination-category`;
+export const UPDATE_DESTINATION_CATEGORY_FE = `${API}${DESTINATIONS}/update-destination-category`;
+export const TERMINATE_DESTINATION_CATEGORY_FE = `${API}${DESTINATIONS}/terminate-destination-category`;
 
 // Tours
 export const GET_TOUR_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}`;
@@ -235,6 +240,10 @@ export const ADD_BROWSER_HISTORY_REQUEST_DATA_FE = `${API}${BROWSER_HISTORY}/add
 
 // Common
 export const GET_ALL_CATEGORIES_DATA_FE = `${API}${COMMON}/all-categories`;
+export const GET_NOTIFICATIONS_DATA_FE = `${API}${NOTIFICATIONS}`;
+export const UPDATE_NOTIFICATIONS_READ_DATA_FE = `${API}${NOTIFICATIONS}/notifications-read`;
+export const GET_ALL_UNREAD_NOTIFICATION_COUNT_DATA_FE = `${API}${NOTIFICATIONS}/unread-notification-count`;
+export const UPDATE_ALL_UNREAD_NOTIFICATIONS_READ_DATA_FE = `${API}${NOTIFICATIONS}/read-all-unread-notifications`;
 
 // Others
 export const UPLOAD_IMAGE_TO_CLOUDINARY_FE = `${API}${OTHERS}/save-images`;
@@ -250,7 +259,6 @@ export const GET_VEHICLE_DETAILS_BY_ID_DATA_FE = `${API}${VEHICLES}/vehicle-deta
 // Seasons
 export const GET_ACTIVE_SEASONS_BASIC_DETAILS_DATA_FE = `${API}${SEASONS}/basic-details`;
 export const GET_SEASONS_DETAILS_BY_SEASON_ID_DATA_FE = `${API}${SEASONS}`;
-
 
 export const GET_TOUR_DETAILS_BY_ID_FE = `${API}${TOUR}/details-by-id`;
 

@@ -17,6 +17,7 @@ export const UNIQUE_CODE_NAME = "uniqueCode";
 // Web Manage
 export const WEB_MANAGEMENT_PATH = "/web-management";
 export const WEB_MANAGEMENT_DESTINATION_PATH = "/destinations";
+export const WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH = "/destinations/categories";
 export const WEB_MANAGEMENT_ACTIVITIES_PATH = "/activities";
 export const WEB_MANAGEMENT_ACTIVITIES_SCHEDULES_PATH = "/activities-schedules";
 export const WEB_MANAGEMENT_TOURS_PATH = "/tours";

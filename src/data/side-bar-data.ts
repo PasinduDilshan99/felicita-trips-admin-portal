@@ -10,6 +10,7 @@ import {
   WEB_MANAGEMENT_TOURS_SCHEDULES_PATH,
   TRAVEL_MANAGEMENT_PATH,
   TRAVEL_MANAGEMENT_BOOKINGS_PATH,
+  WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH,
 } from "@/utils/constant";
 import {
   ACTIVITY_CREATE_PRIVILEGE,
@@ -22,6 +23,11 @@ import {
   ACTIVITY_TERMINATE_PRIVILEGE,
   ACTIVITY_UPDATE_PRIVILEGE,
   ACTIVITY_VIEW_PRIVILEGE,
+  DESTINATION_CATEGORY_CREATE_PRIVILEGE,
+  DESTINATION_CATEGORY_PRIVILEGE,
+  DESTINATION_CATEGORY_TERMINATE_PRIVILEGE,
+  DESTINATION_CATEGORY_UPDATE_PRIVILEGE,
+  DESTINATION_CATEGORY_VIEW_PRIVILEGE,
   DESTINATION_CREATE_PRIVILEGE,
   DESTINATION_PRIVILEGE,
   DESTINATION_TERMINATE_PRIVILEGE,
@@ -54,7 +60,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
     id: 1,
     name: "Destinations",
     description: "Manage destination locations",
-    color: "#3B82F6", // Blue
+    color: "#3B82F6", // Blue - Primary
     url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
     privilege: DESTINATION_PRIVILEGE,
     subData: [
@@ -62,6 +68,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 101,
         name: "View Destinations",
         description: "View all destination locations",
+        color: "#60A5FA", // Light Blue
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view`,
         privilege: DESTINATION_VIEW_PRIVILEGE,
       },
@@ -69,6 +76,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 102,
         name: "Add Destination",
         description: "Add a new destination location",
+        color: "#34D399", // Green
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/add-new`,
         privilege: DESTINATION_CREATE_PRIVILEGE,
       },
@@ -76,6 +84,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 103,
         name: "Update Destination",
         description: "Update existing destination information",
+        color: "#FBBF24", // Amber
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/update`,
         privilege: DESTINATION_UPDATE_PRIVILEGE,
       },
@@ -83,12 +92,54 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 104,
         name: "Remove Destination",
         description: "Delete destination locations",
+        color: "#EF4444", // Red
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/terminate`,
         privilege: DESTINATION_TERMINATE_PRIVILEGE,
       },
+      {
+        id: 105,
+        name: "Destination Categories",
+        description: "Manage destination categories",
+        color: "#8B5CF6", // Purple
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}`,
+        privilege: DESTINATION_CATEGORY_PRIVILEGE,
+        grandSubData: [
+          {
+            id: 1051,
+            name: "View Categories",
+            description: "View all destination categories",
+            color: "#A78BFA", // Light Purple
+            url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}/view`,
+            privilege: DESTINATION_CATEGORY_VIEW_PRIVILEGE,
+          },
+          {
+            id: 1052,
+            name: "Add Category",
+            description: "Add a new destination category",
+            color: "#6EE7B7", // Mint Green
+            url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}/add-new`,
+            privilege: DESTINATION_CATEGORY_CREATE_PRIVILEGE,
+          },
+          {
+            id: 1053,
+            name: "Update Category",
+            description: "Update existing destination category",
+            color: "#FCD34D", // Yellow
+            url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}/update`,
+            privilege: DESTINATION_CATEGORY_UPDATE_PRIVILEGE,
+          },
+          {
+            id: 1054,
+            name: "Remove Category",
+            description: "Delete destination categories",
+            color: "#F87171", // Light Red
+            url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}/terminate`,
+            privilege: DESTINATION_CATEGORY_TERMINATE_PRIVILEGE,
+          },
+        ],
+      },
     ],
   },
-
   {
     id: 2,
     name: "Activities",

@@ -11,14 +11,28 @@ import {
   UpdateDestinationRequest,
   UpdateDestinationApiResponse,
   DestinationStatisticsApiResponse,
+  DestinationCategoriesStatisticsApiResponse,
+  ActiveCategoriesApiResponse,
+  CategoryDetailsByIdApiResponse,
+  AddDestinationCategoryRequest,
+  AddDestinationCategoryApiResponse,
+  UpdateDestinationCategoryRequest,
+  UpdateDestinationCategoryApiResponse,
+  TerminateDestinationCategoryApiResponse,
 } from "@/types/destination-types";
 import {
+  ADD_DESTINATION_CATEGORY_FE,
   ADD_DESTINATION_DETAILS_DATA_FE,
+  GET_ACTIVE_DESTINATIONS_CATEGORIES_FE,
+  GET_DESTINATION_CATEGORIES_STATISTICS_DATA_FE,
+  GET_DESTINATION_CATEGORY_DETAILS_BY_ID_FE,
   GET_DESTINATION_DETAILS_FOR_TERMINATE_DATA_FE,
   GET_DESTINATION_STATISTICS_DATA_FE,
   GET_DESTINATIONS_DETAILS_BY_ID_DATA_FE,
   GET_DESTINATIONS_DETAILS_BY_REQUEST_DATA_FE,
+  TERMINATE_DESTINATION_CATEGORY_FE,
   TERMINATE_DESTINATION_DATA_FE,
+  UPDATE_DESTINATION_CATEGORY_FE,
   UPDATE_DESTINATION_DETAILS_DATA_FE,
 } from "@/utils/frontEndConstant";
 
@@ -239,6 +253,197 @@ export class DestinationService {
       return data;
     } catch (error) {
       console.error("Error fetching destination statistics:", error);
+      throw error;
+    }
+  }
+
+  static async getDestinationCategoriesStatistics(): Promise<DestinationCategoriesStatisticsApiResponse> {
+    try {
+      const response = await fetch(
+        GET_DESTINATION_CATEGORIES_STATISTICS_DATA_FE,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: DestinationCategoriesStatisticsApiResponse =
+        await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch destination categories statistics",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching destination categories statistics:", error);
+      throw error;
+    }
+  }
+
+  static async getActiveCategories(): Promise<ActiveCategoriesApiResponse> {
+    try {
+      const response = await fetch(GET_ACTIVE_DESTINATIONS_CATEGORIES_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ActiveCategoriesApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to fetch active categories");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching active categories:", error);
+      throw error;
+    }
+  }
+
+  static async getCategoryDetailsById(
+    categoryId: number,
+  ): Promise<CategoryDetailsByIdApiResponse> {
+    try {
+      const response = await fetch(GET_DESTINATION_CATEGORY_DETAILS_BY_ID_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ destinationCategoryId: categoryId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: CategoryDetailsByIdApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to fetch category details");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching category details by ID:", error);
+      throw error;
+    }
+  }
+
+  static async addDestinationCategory(
+    categoryData: AddDestinationCategoryRequest,
+  ): Promise<AddDestinationCategoryApiResponse> {
+    try {
+      const response = await fetch(ADD_DESTINATION_CATEGORY_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(categoryData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: AddDestinationCategoryApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to add destination category");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error adding destination category:", error);
+      throw error;
+    }
+  }
+
+  static async updateDestinationCategory(
+    categoryData: UpdateDestinationCategoryRequest,
+  ): Promise<UpdateDestinationCategoryApiResponse> {
+    try {
+      const response = await fetch(UPDATE_DESTINATION_CATEGORY_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(categoryData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: UpdateDestinationCategoryApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to update destination category",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error updating destination category:", error);
+      throw error;
+    }
+  }
+
+  static async terminateDestinationCategory(
+    destinationCategoryId: number,
+  ): Promise<TerminateDestinationCategoryApiResponse> {
+    try {
+      const response = await fetch(TERMINATE_DESTINATION_CATEGORY_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ destinationCategoryId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TerminateDestinationCategoryApiResponse =
+        await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to terminate destination category",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error terminating destination category:", error);
       throw error;
     }
   }

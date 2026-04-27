@@ -152,6 +152,7 @@ export const GET_ACTIVE_OUR_SERVICES_DATA = `${BASE_PATH}${API}${VERSION}${OUR_S
 export const GET_DESTINATIONS_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}`;
 export const GET_ACTIVE_DESTINATIONS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/active-destinations`;
 export const GET_ACTIVE_DESTINATIONS_CATEGORIES_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/active-categories`;
+export const GET_DESTINATION_CATEGORY_DETAILS_BY_ID = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/category-details-by-id`;
 export const GET_POPULAR_DESTINATIONS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/popular-destinations`;
 export const GET_NEW_DESTINATIONS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/new-destinations`;
 export const GET_TRENDING_DESTINATIONS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/trending-destinations`;
@@ -166,7 +167,10 @@ export const UPDATE_DESTINATION_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DE
 export const GET_DESTINATION_DETAILS_FOR_TERMINATE_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/destination-for-terminate`;
 export const TERMINATE_DESTINATION_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/terminate-destination`;
 export const GET_DESTINATION_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/destination-statistics`;
-
+export const GET_DESTINATION_CATEGORIES_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/destination-categories-statistics`;
+export const ADD_DESTINATION_CATEGORY = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/add-destination-category`;
+export const UPDATE_DESTINATION_CATEGORY = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/update-destination-category`;
+export const TERMINATE_DESTINATION_CATEGORY = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/terminate-destination-category`;
 
 // Tours
 export const GET_TOUR_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}`;
@@ -263,6 +267,10 @@ export const ADD_BROWSER_HISTORY_REQUEST_DATA = `${BASE_PATH}${API}${VERSION}${B
 
 // Common
 export const GET_ALL_CATEGORIES_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/all-categories`;
+export const GET_NOTIFICATIONS_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/notifications`;
+export const UPDATE_NOTIFICATIONS_READ_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/notifications-read`;
+export const GET_ALL_UNREAD_NOTIFICATION_COUNT_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/unread-notification-count`;
+export const UPDATE_ALL_UNREAD_NOTIFICATIONS_READ_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/read-all-unread-notifications`;
 
 // Others
 export const UPLOAD_IMAGE_TO_CLOUDINARY =

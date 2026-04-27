@@ -9,6 +9,7 @@ import { CommonProvider } from "@/contexts/CommonContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import GlobalGradientScrollbar from "@/components/common-components/GlobalGradientScrollbar";
 import ThemePicker from "@/components/common-components/ThemePicker";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 
 export default function RootLayout({
   children,
@@ -23,13 +24,15 @@ export default function RootLayout({
       <body className="">
         <CommonProvider>
           <AuthProvider>
-            <ThemeProvider>
-              <GlobalGradientScrollbar />
-              <ThemePicker />
-              <NavBar />
-              <div>{children}</div>
-              <Footer />
-            </ThemeProvider>
+            <NotificationProvider>
+              <ThemeProvider>
+                <GlobalGradientScrollbar />
+                <ThemePicker />
+                <NavBar />
+                <div>{children}</div>
+                <Footer />
+              </ThemeProvider>
+            </NotificationProvider>
           </AuthProvider>
         </CommonProvider>
       </body>

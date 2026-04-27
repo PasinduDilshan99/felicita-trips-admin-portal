@@ -35,37 +35,66 @@ const hexToRgba = (hex: string, opacity: number): string => {
 };
 
 /* ─────────────────────────────────────────────
-   Animated Counter
+   Animated Counter  — eases out, starts from 0
 ───────────────────────────────────────────── */
-const AnimatedCount = ({ value, duration = 1000 }: { value: number; duration?: number }) => {
+const AnimatedCount = ({
+  value,
+  duration = 1100,
+  decimals = 0,
+}: {
+  value: number;
+  duration?: number;
+  decimals?: number;
+}) => {
   const [display, setDisplay] = useState(0);
   const rafRef = useRef<number | null>(null);
+  const startRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const start = performance.now();
-    const animate = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      // Ease-out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(eased * value));
-      if (progress < 1) rafRef.current = requestAnimationFrame(animate);
+    startRef.current = null;
+    const animate = (ts: number) => {
+      if (!startRef.current) startRef.current = ts;
+      const elapsed = ts - startRef.current;
+      const t = Math.min(elapsed / duration, 1);
+      // Expo ease-out for a snappier feel
+      const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+      const current = eased * value;
+      setDisplay(decimals ? parseFloat(current.toFixed(decimals)) : Math.round(current));
+      if (t < 1) rafRef.current = requestAnimationFrame(animate);
     };
     rafRef.current = requestAnimationFrame(animate);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [value, duration]);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [value, duration, decimals]);
 
   return <>{display.toLocaleString()}</>;
 };
 
 /* ─────────────────────────────────────────────
-   Skeleton
+   Skeleton Card
 ───────────────────────────────────────────── */
-const StatCardSkeleton = () => (
-  <div className="dp-stat-card dp-skeleton-card">
+const StatCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
+  <div className="dp-stat-card dp-skeleton-card" style={{ animationDelay: `${delay}s` }}>
     <div className="dp-skel dp-skel--icon" />
     <div className="dp-skel dp-skel--val" />
     <div className="dp-skel dp-skel--label" />
+  </div>
+);
+
+const ActionCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
+  <div className="dp-action-card dp-skeleton-card" style={{ animationDelay: `${delay}s`, pointerEvents: "none" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: ".875rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div className="dp-skel" style={{ width: 46, height: 46, borderRadius: 12 }} />
+        <div className="dp-skel" style={{ width: 56, height: 22, borderRadius: 999 }} />
+      </div>
+      <div>
+        <div className="dp-skel" style={{ width: "70%", height: 14, marginBottom: 8 }} />
+        <div className="dp-skel" style={{ width: "90%", height: 11 }} />
+        <div className="dp-skel" style={{ width: "60%", height: 11, marginTop: 5 }} />
+      </div>
+    </div>
   </div>
 );
 
@@ -158,16 +187,18 @@ const CustomPieTooltip = ({ active, payload }: any) => {
 };
 
 /* ─────────────────────────────────────────────
-   Section Header Component
+   Section Header
 ───────────────────────────────────────────── */
 const SectionHeader = ({
   title,
   subtitle,
   badge,
+  live,
 }: {
   title: string;
   subtitle?: string;
   badge?: string;
+  live?: boolean;
 }) => (
   <div className="dp-section-header">
     <div className="dp-section-header__left">
@@ -175,13 +206,61 @@ const SectionHeader = ({
       <div>
         <div className="dp-section-header__title-row">
           <h2 className="dp-section-header__title">{title}</h2>
-          {badge && <span className="dp-section-badge">{badge}</span>}
+          {badge && (
+            <span className={`dp-section-badge${live ? " dp-section-badge--live" : ""}`}>
+              {live && <span className="dp-live-dot" />}
+              {badge}
+            </span>
+          )}
         </div>
         {subtitle && <p className="dp-section-header__subtitle">{subtitle}</p>}
       </div>
     </div>
   </div>
 );
+
+/* ─────────────────────────────────────────────
+   Staggered Reveal Wrapper
+───────────────────────────────────────────── */
+const Reveal = ({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) => {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => setVisible(true), delay);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.06 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(20px)",
+        transition: "opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1)",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
 /* ─────────────────────────────────────────────
    Main Page
@@ -191,8 +270,6 @@ const DestinationPage = () => {
   const [statistics, setStatistics] = useState<DestinationStatisticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [visibleCards, setVisibleCards] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
 
   const destinationsData = webManagementSideBarData.find(
     (item) => item.name === "Destinations"
@@ -201,29 +278,18 @@ const DestinationPage = () => {
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
     { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
+    { label: "Destinations", href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}` },
   ];
 
   useEffect(() => {
     fetchStatistics();
   }, []);
 
-  // Trigger card entrance animation
-  useEffect(() => {
-    if (!loading) {
-      const t = setTimeout(() => setVisibleCards(true), 80);
-      return () => clearTimeout(t);
-    }
-  }, [loading]);
-
   const fetchStatistics = async () => {
     try {
       setLoading(true);
       setError(null);
-      setVisibleCards(false);
+      setStatistics(null);
       const response = await DestinationService.getDestinationStatistics();
       if (response.data) setStatistics(response.data);
     } catch {
@@ -249,18 +315,12 @@ const DestinationPage = () => {
     })) || [];
 
   /* ── Stat cards ── */
-  type StatCard = {
-    title: string;
-    value: number;
-    icon: JSX.Element;
-    accent: string;
-    trend?: string;
-  };
+  type StatCard = { title: string; value: number; icon: JSX.Element; accent: string };
 
   const statCards: StatCard[] = statistics
     ? [
         {
-          title: "Total Destinations",
+          title: "Total",
           value: statistics.destinationDetails.totalDestinationCount,
           accent: "blue",
           icon: (
@@ -292,7 +352,7 @@ const DestinationPage = () => {
           ),
         },
         {
-          title: "Hidden",
+          title: "Terminated",
           value: statistics.destinationDetails.hiddenDestinations,
           accent: "violet",
           icon: (
@@ -339,33 +399,33 @@ const DestinationPage = () => {
   const errColor = theme.error ?? "#ef4444";
   const successColor = theme.success ?? "#10b981";
 
-  /* ─────── Render ─────── */
+  /* ──────────────────── Render ──────────────────── */
   return (
     <>
       <style>{`
         /* ── Base tokens ── */
         .dp-root {
-          --p: ${p};
-          --acc: ${acc};
+          --p:    ${p};
+          --acc:  ${acc};
           --surf: ${surf};
-          --bg: ${bg};
+          --bg:   ${bg};
           --border: ${border};
           --text: ${textPrimary};
           --muted: ${textSecondary};
-          --err: ${errColor};
-          --ok: ${successColor};
+          --err:  ${errColor};
+          --ok:   ${successColor};
 
-          /* Accent palette */
-          --blue-bg: #dbeafe;   --blue-fg: #1d4ed8;   --blue-mid: #3b82f6;
-          --em-bg: #d1fae5;     --em-fg: #065f46;     --em-mid: #10b981;
-          --am-bg: #fef3c7;     --am-fg: #92400e;     --am-mid: #f59e0b;
-          --ro-bg: #ffe4e6;     --ro-fg: #9f1239;     --ro-mid: #f43f5e;
-          --vi-bg: #ede9fe;     --vi-fg: #5b21b6;     --vi-mid: #8b5cf6;
-          --tl-bg: #ccfbf1;     --tl-fg: #134e4a;     --tl-mid: #14b8a6;
+          --blue-bg: #dbeafe;  --blue-fg: #1d4ed8;  --blue-mid: #3b82f6;  --blue-border: #93c5fd;
+          --em-bg:   #d1fae5;  --em-fg:   #065f46;  --em-mid:   #10b981;  --em-border:   #6ee7b7;
+          --am-bg:   #fef3c7;  --am-fg:   #92400e;  --am-mid:   #f59e0b;  --am-border:   #fcd34d;
+          --ro-bg:   #ffe4e6;  --ro-fg:   #9f1239;  --ro-mid:   #f43f5e;  --ro-border:   #fda4af;
+          --vi-bg:   #ede9fe;  --vi-fg:   #5b21b6;  --vi-mid:   #8b5cf6;  --vi-border:   #c4b5fd;
+          --tl-bg:   #ccfbf1;  --tl-fg:   #134e4a;  --tl-mid:   #14b8a6;  --tl-border:   #5eead4;
 
           background: var(--bg);
           min-height: 100vh;
-          padding-bottom: 4rem;
+          padding-bottom: 5rem;
+          transition: background 0.3s ease;
         }
 
         .dp-wrap {
@@ -376,24 +436,29 @@ const DestinationPage = () => {
 
         /* ── Keyframes ── */
         @keyframes dp-shimmer {
-          0%   { background-position: -600px 0; }
-          100% { background-position: 600px 0; }
-        }
-        @keyframes dp-fadeUp {
-          from { opacity: 0; transform: translateY(18px); }
-          to   { opacity: 1; transform: translateY(0); }
+          0%   { background-position: -700px 0; }
+          100% { background-position: 700px 0; }
         }
         @keyframes dp-spin {
           to { transform: rotate(360deg); }
         }
         @keyframes dp-pulse-ring {
-          0%   { box-shadow: 0 0 0 0 ${hexToRgba(p, 0.35)}; }
+          0%   { box-shadow: 0 0 0 0   ${hexToRgba(p, 0.4)}; }
           70%  { box-shadow: 0 0 0 10px ${hexToRgba(p, 0)}; }
-          100% { box-shadow: 0 0 0 0 ${hexToRgba(p, 0)}; }
+          100% { box-shadow: 0 0 0 0   ${hexToRgba(p, 0)}; }
         }
-        @keyframes dp-bar-grow {
-          from { transform: scaleY(0); transform-origin: bottom; }
-          to   { transform: scaleY(1); transform-origin: bottom; }
+        @keyframes dp-live-blink {
+          0%,100% { opacity: 1; }
+          50%     { opacity: 0.25; }
+        }
+        @keyframes dp-icon-pop {
+          0%   { transform: scale(1) rotate(0); }
+          40%  { transform: scale(1.18) rotate(-6deg); }
+          100% { transform: scale(1) rotate(0); }
+        }
+        @keyframes dp-bar-shimmer {
+          from { transform: translateX(-120%) skewX(-12deg); }
+          to   { transform: translateX(260%)  skewX(-12deg); }
         }
 
         /* ── Loading ── */
@@ -402,42 +467,46 @@ const DestinationPage = () => {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          min-height: 58vh;
-          gap: 1.25rem;
+          min-height: 55vh;
+          gap: 1.5rem;
         }
         .dp-spinner-wrap {
           position: relative;
-          width: 52px;
-          height: 52px;
+          width: 56px;
+          height: 56px;
         }
         .dp-spinner {
-          width: 52px;
-          height: 52px;
+          width: 56px; height: 56px;
           border: 3px solid var(--border);
           border-top-color: var(--p);
           border-radius: 50%;
-          animation: dp-spin .75s linear infinite;
+          animation: dp-spin .7s linear infinite;
         }
-        .dp-spinner-dot {
+        .dp-spinner-center {
           position: absolute;
           inset: 0;
           display: flex;
           align-items: center;
           justify-content: center;
         }
-        .dp-spinner-dot::after {
+        .dp-spinner-center::after {
           content: '';
-          width: 8px;
-          height: 8px;
+          width: 9px; height: 9px;
           background: var(--p);
           border-radius: 50%;
-          animation: dp-pulse-ring 1.4s ease-out infinite;
+          animation: dp-pulse-ring 1.5s ease-out infinite;
         }
         .dp-loading-text {
           font-size: .875rem;
           color: var(--muted);
           font-weight: 500;
-          letter-spacing: .02em;
+          letter-spacing: .025em;
+        }
+        .dp-loading-sub {
+          font-size: .75rem;
+          color: var(--muted);
+          opacity: .6;
+          margin-top: -.75rem;
         }
 
         /* ── Section header ── */
@@ -454,45 +523,61 @@ const DestinationPage = () => {
         }
         .dp-section-header__bar {
           width: 4px;
-          height: 100%;
-          min-height: 36px;
+          min-height: 40px;
           border-radius: 2px;
           background: linear-gradient(180deg, var(--p) 0%, var(--acc) 100%);
           flex-shrink: 0;
+          align-self: stretch;
         }
         .dp-section-header__title-row {
           display: flex;
           align-items: center;
           gap: .625rem;
+          flex-wrap: wrap;
         }
         .dp-section-header__title {
           font-size: 1rem;
           font-weight: 700;
           color: var(--text);
           margin: 0;
-          letter-spacing: -.015em;
+          letter-spacing: -.018em;
         }
         .dp-section-header__subtitle {
           font-size: .8125rem;
           color: var(--muted);
           margin: .2rem 0 0;
           font-weight: 400;
+          line-height: 1.5;
         }
         .dp-section-badge {
           display: inline-flex;
           align-items: center;
-          font-size: .6875rem;
+          gap: 5px;
+          font-size: .675rem;
           font-weight: 700;
-          letter-spacing: .06em;
+          letter-spacing: .065em;
           text-transform: uppercase;
           padding: 3px 9px;
           border-radius: 999px;
-          background: ${hexToRgba(p, 0.1)};
+          background: ${hexToRgba(p, 0.09)};
           color: var(--p);
           border: 1px solid ${hexToRgba(p, 0.18)};
         }
+        .dp-section-badge--live {
+          background: ${hexToRgba(successColor, 0.09)};
+          color: ${successColor};
+          border-color: ${hexToRgba(successColor, 0.25)};
+        }
+        .dp-live-dot {
+          display: inline-block;
+          width: 6px; height: 6px;
+          border-radius: 50%;
+          background: ${successColor};
+          animation: dp-live-blink 1.4s ease-in-out infinite;
+          flex-shrink: 0;
+        }
 
-        /* ── Action cards ── */
+        /* ── Action cards grid ── */
         .dp-actions-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
@@ -501,6 +586,7 @@ const DestinationPage = () => {
         @media (max-width: 1100px) { .dp-actions-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 580px)  { .dp-actions-grid { grid-template-columns: 1fr; } }
 
+        /* ── Action card ── */
         .dp-action-card {
           display: block;
           text-decoration: none;
@@ -510,11 +596,23 @@ const DestinationPage = () => {
           padding: 1.375rem 1.25rem 1.125rem;
           position: relative;
           overflow: hidden;
-          transition: transform .24s cubic-bezier(0.22,1,0.36,1),
-                      box-shadow .24s cubic-bezier(0.22,1,0.36,1),
-                      border-color .24s ease;
-          box-shadow: 0 1px 3px rgba(15,23,42,.05), 0 1px 2px rgba(15,23,42,.03);
+          cursor: pointer;
+          transition:
+            transform .28s cubic-bezier(0.22,1,0.36,1),
+            box-shadow .28s cubic-bezier(0.22,1,0.36,1),
+            border-color .22s ease;
         }
+        .dp-action-card:hover {
+          transform: translateY(-5px) scale(1.01);
+          box-shadow: 0 18px 42px rgba(15,23,42,.11), 0 4px 10px rgba(15,23,42,.06);
+        }
+
+        /* Per-accent hover border */
+        .dp-action-card--blue:hover    { border-color: var(--blue-border); }
+        .dp-action-card--emerald:hover { border-color: var(--em-border); }
+        .dp-action-card--amber:hover   { border-color: var(--am-border); }
+        .dp-action-card--rose:hover    { border-color: var(--ro-border); }
+        .dp-action-card--violet:hover  { border-color: var(--vi-border); }
 
         /* Gradient tint layer */
         .dp-action-card::before {
@@ -522,38 +620,33 @@ const DestinationPage = () => {
           position: absolute;
           inset: 0;
           opacity: 0;
-          transition: opacity .28s ease;
+          transition: opacity .3s ease;
           border-radius: inherit;
           pointer-events: none;
         }
-        /* Glow border on hover */
+        .dp-action-card:hover::before { opacity: 1; }
+        .dp-action-card--blue::before    { background: linear-gradient(145deg, #eff6ff 0%, ${hexToRgba("#dbeafe", 0.7)} 100%); }
+        .dp-action-card--emerald::before { background: linear-gradient(145deg, #f0fdf4 0%, ${hexToRgba("#d1fae5", 0.7)} 100%); }
+        .dp-action-card--amber::before   { background: linear-gradient(145deg, #fffbeb 0%, ${hexToRgba("#fef3c7", 0.7)} 100%); }
+        .dp-action-card--rose::before    { background: linear-gradient(145deg, #fff1f2 0%, ${hexToRgba("#ffe4e6", 0.7)} 100%); }
+        .dp-action-card--violet::before  { background: linear-gradient(145deg, #f5f3ff 0%, ${hexToRgba("#ede9fe", 0.7)} 100%); }
+
+        /* Shimmer on hover */
         .dp-action-card::after {
           content: '';
           position: absolute;
-          inset: -1px;
-          border-radius: 17px;
-          opacity: 0;
-          transition: opacity .28s ease;
+          top: 0; bottom: 0;
+          width: 60%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+          transform: translateX(-120%) skewX(-12deg);
           pointer-events: none;
+          opacity: 0;
+          transition: opacity .1s ease;
         }
-
-        .dp-action-card:hover {
-          transform: translateY(-4px) scale(1.01);
-          box-shadow: 0 16px 40px rgba(15,23,42,.12), 0 4px 12px rgba(15,23,42,.06);
+        .dp-action-card:hover::after {
+          opacity: 1;
+          animation: dp-bar-shimmer .65s ease-out forwards;
         }
-        .dp-action-card:hover::before { opacity: 1; }
-        .dp-action-card:hover::after  { opacity: 1; }
-
-        .dp-action-card--blue::before   { background: linear-gradient(145deg, #eff6ff, #dbeafe99); }
-        .dp-action-card--blue::after    { border: 1.5px solid #93c5fd; }
-        .dp-action-card--emerald::before{ background: linear-gradient(145deg, #f0fdf4, #d1fae599); }
-        .dp-action-card--emerald::after { border: 1.5px solid #6ee7b7; }
-        .dp-action-card--amber::before  { background: linear-gradient(145deg, #fffbeb, #fef3c799); }
-        .dp-action-card--amber::after   { border: 1.5px solid #fcd34d; }
-        .dp-action-card--rose::before   { background: linear-gradient(145deg, #fff1f2, #ffe4e699); }
-        .dp-action-card--rose::after    { border: 1.5px solid #fda4af; }
-        .dp-action-card--violet::before { background: linear-gradient(145deg, #f5f3ff, #ede9fe99); }
-        .dp-action-card--violet::after  { border: 1.5px solid #c4b5fd; }
 
         .dp-action-card__inner {
           position: relative;
@@ -562,7 +655,6 @@ const DestinationPage = () => {
           flex-direction: column;
           gap: .875rem;
         }
-
         .dp-action-card__top {
           display: flex;
           align-items: center;
@@ -570,8 +662,7 @@ const DestinationPage = () => {
         }
 
         .dp-icon-wrap {
-          width: 46px;
-          height: 46px;
+          width: 46px; height: 46px;
           border-radius: 12px;
           display: flex;
           align-items: center;
@@ -579,9 +670,10 @@ const DestinationPage = () => {
           flex-shrink: 0;
           transition: transform .22s cubic-bezier(0.22,1,0.36,1);
         }
-        .dp-action-card:hover .dp-icon-wrap { transform: scale(1.1) rotate(-4deg); }
+        .dp-action-card:hover .dp-icon-wrap {
+          animation: dp-icon-pop .35s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
         .dp-icon-wrap svg { width: 21px; height: 21px; }
-
         .dp-icon-wrap--blue    { background: var(--blue-bg); color: var(--blue-fg); }
         .dp-icon-wrap--emerald { background: var(--em-bg);   color: var(--em-fg); }
         .dp-icon-wrap--amber   { background: var(--am-bg);   color: var(--am-fg); }
@@ -595,49 +687,78 @@ const DestinationPage = () => {
           text-transform: uppercase;
           padding: 3px 9px;
           border-radius: 999px;
+          border: 1px solid transparent;
         }
-        .dp-pill--blue    { background: var(--blue-bg); color: var(--blue-fg); }
-        .dp-pill--emerald { background: var(--em-bg);   color: var(--em-fg); }
-        .dp-pill--amber   { background: var(--am-bg);   color: var(--am-fg); }
-        .dp-pill--rose    { background: var(--ro-bg);   color: var(--ro-fg); }
-        .dp-pill--violet  { background: var(--vi-bg);   color: var(--vi-fg); }
+        .dp-pill--blue    { background: var(--blue-bg); color: var(--blue-fg); border-color: var(--blue-border); }
+        .dp-pill--emerald { background: var(--em-bg);   color: var(--em-fg);   border-color: var(--em-border); }
+        .dp-pill--amber   { background: var(--am-bg);   color: var(--am-fg);   border-color: var(--am-border); }
+        .dp-pill--rose    { background: var(--ro-bg);   color: var(--ro-fg);   border-color: var(--ro-border); }
+        .dp-pill--violet  { background: var(--vi-bg);   color: var(--vi-fg);   border-color: var(--vi-border); }
 
         .dp-action-card__name {
           font-size: .9375rem;
           font-weight: 700;
           color: var(--text);
           margin: 0 0 .2rem;
-          letter-spacing: -.01em;
+          letter-spacing: -.012em;
+          transition: color .2s ease;
         }
+        .dp-action-card--blue:hover    .dp-action-card__name { color: var(--blue-fg); }
+        .dp-action-card--emerald:hover .dp-action-card__name { color: var(--em-fg); }
+        .dp-action-card--amber:hover   .dp-action-card__name { color: var(--am-fg); }
+        .dp-action-card--rose:hover    .dp-action-card__name { color: var(--ro-fg); }
+        .dp-action-card--violet:hover  .dp-action-card__name { color: var(--vi-fg); }
+
         .dp-action-card__desc {
           font-size: .8125rem;
           color: var(--muted);
           margin: 0;
           line-height: 1.55;
         }
-
         .dp-action-card__cta {
           display: flex;
           align-items: center;
           gap: 5px;
-          font-size: .8125rem;
+          font-size: .8rem;
           font-weight: 600;
-          padding-top: .25rem;
+          padding-top: .625rem;
           border-top: 1px solid var(--border);
           opacity: 0;
-          transform: translateY(4px);
+          transform: translateY(5px);
           transition: opacity .22s ease, transform .22s ease;
         }
         .dp-action-card:hover .dp-action-card__cta {
           opacity: 1;
           transform: translateY(0);
         }
-        .dp-action-card__cta svg { width: 13px; height: 13px; }
+        .dp-action-card__cta svg {
+          width: 13px; height: 13px;
+          transition: transform .2s ease;
+        }
+        .dp-action-card:hover .dp-action-card__cta svg { transform: translateX(3px); }
+
         .dp-cta--blue    { color: var(--blue-fg); }
         .dp-cta--emerald { color: var(--em-fg); }
         .dp-cta--amber   { color: var(--am-fg); }
         .dp-cta--rose    { color: var(--ro-fg); }
         .dp-cta--violet  { color: var(--vi-fg); }
+
+        /* Bottom accent bar — slides in on hover */
+        .dp-action-card__bar {
+          position: absolute;
+          bottom: 0;
+          left: 50%; right: 50%;
+          height: 3px;
+          border-radius: 0 0 16px 16px;
+          transition: left .32s cubic-bezier(0.22,1,0.36,1),
+                      right .32s cubic-bezier(0.22,1,0.36,1);
+        }
+        .dp-action-card:hover .dp-action-card__bar { left: 0; right: 0; }
+        .dp-action-card--blue    .dp-action-card__bar { background: var(--blue-mid); }
+        .dp-action-card--emerald .dp-action-card__bar { background: var(--em-mid); }
+        .dp-action-card--amber   .dp-action-card__bar { background: var(--am-mid); }
+        .dp-action-card--rose    .dp-action-card__bar { background: var(--ro-mid); }
+        .dp-action-card--violet  .dp-action-card__bar { background: var(--vi-mid); }
 
         /* ── Stat cards ── */
         .dp-stats-grid {
@@ -657,13 +778,21 @@ const DestinationPage = () => {
           display: flex;
           flex-direction: column;
           gap: .625rem;
-          transition: transform .22s cubic-bezier(0.22,1,0.36,1),
-                      box-shadow .22s ease;
-          box-shadow: 0 1px 3px rgba(15,23,42,.04);
           position: relative;
           overflow: hidden;
+          cursor: default;
+          transition:
+            transform .24s cubic-bezier(0.22,1,0.36,1),
+            box-shadow .24s ease,
+            border-color .22s ease;
+          box-shadow: 0 1px 3px rgba(15,23,42,.04);
         }
-        /* Subtle top-accent stripe */
+        .dp-stat-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 30px rgba(15,23,42,.1), 0 2px 6px rgba(15,23,42,.04);
+        }
+
+        /* Accent top stripe */
         .dp-stat-card::before {
           content: '';
           position: absolute;
@@ -671,30 +800,53 @@ const DestinationPage = () => {
           height: 3px;
           border-radius: 14px 14px 0 0;
           opacity: 0;
-          transition: opacity .22s ease;
-        }
-        .dp-stat-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 10px 28px rgba(15,23,42,.1), 0 2px 6px rgba(15,23,42,.05);
+          transition: opacity .24s ease;
         }
         .dp-stat-card:hover::before { opacity: 1; }
+        .dp-stat-card--blue::before    { background: var(--blue-mid); }
+        .dp-stat-card--emerald::before { background: var(--em-mid); }
+        .dp-stat-card--rose::before    { background: var(--ro-mid); }
+        .dp-stat-card--violet::before  { background: var(--vi-mid); }
+        .dp-stat-card--amber::before   { background: var(--am-mid); }
+        .dp-stat-card--teal::before    { background: var(--tl-mid); }
 
-        .dp-stat-card--blue::before    { background: linear-gradient(90deg, var(--blue-mid), transparent); }
-        .dp-stat-card--emerald::before { background: linear-gradient(90deg, var(--em-mid), transparent); }
-        .dp-stat-card--rose::before    { background: linear-gradient(90deg, var(--ro-mid), transparent); }
-        .dp-stat-card--violet::before  { background: linear-gradient(90deg, var(--vi-mid), transparent); }
-        .dp-stat-card--amber::before   { background: linear-gradient(90deg, var(--am-mid), transparent); }
-        .dp-stat-card--teal::before    { background: linear-gradient(90deg, var(--tl-mid), transparent); }
+        /* Hover border tint */
+        .dp-stat-card--blue:hover    { border-color: var(--blue-border); }
+        .dp-stat-card--emerald:hover { border-color: var(--em-border); }
+        .dp-stat-card--rose:hover    { border-color: var(--ro-border); }
+        .dp-stat-card--violet:hover  { border-color: var(--vi-border); }
+        .dp-stat-card--amber:hover   { border-color: var(--am-border); }
+        .dp-stat-card--teal:hover    { border-color: var(--tl-border); }
+
+        /* Corner glow on hover */
+        .dp-stat-card::after {
+          content: '';
+          position: absolute;
+          top: -20px; right: -20px;
+          width: 80px; height: 80px;
+          border-radius: 50%;
+          opacity: 0;
+          transition: opacity .28s ease;
+          pointer-events: none;
+        }
+        .dp-stat-card:hover::after { opacity: 1; }
+        .dp-stat-card--blue::after    { background: radial-gradient(circle, ${hexToRgba("#3b82f6", 0.12)}, transparent 70%); }
+        .dp-stat-card--emerald::after { background: radial-gradient(circle, ${hexToRgba("#10b981", 0.12)}, transparent 70%); }
+        .dp-stat-card--rose::after    { background: radial-gradient(circle, ${hexToRgba("#f43f5e", 0.12)}, transparent 70%); }
+        .dp-stat-card--violet::after  { background: radial-gradient(circle, ${hexToRgba("#8b5cf6", 0.12)}, transparent 70%); }
+        .dp-stat-card--amber::after   { background: radial-gradient(circle, ${hexToRgba("#f59e0b", 0.12)}, transparent 70%); }
+        .dp-stat-card--teal::after    { background: radial-gradient(circle, ${hexToRgba("#14b8a6", 0.12)}, transparent 70%); }
 
         .dp-stat-icon {
-          width: 40px;
-          height: 40px;
+          width: 40px; height: 40px;
           border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          transition: transform .22s cubic-bezier(0.22,1,0.36,1);
         }
+        .dp-stat-card:hover .dp-stat-icon { transform: scale(1.1); }
         .dp-stat-icon svg { width: 20px; height: 20px; }
         .dp-stat-icon--blue    { background: var(--blue-bg); color: var(--blue-fg); }
         .dp-stat-icon--emerald { background: var(--em-bg);   color: var(--em-fg); }
@@ -704,31 +856,40 @@ const DestinationPage = () => {
         .dp-stat-icon--teal    { background: var(--tl-bg);   color: var(--tl-fg); }
 
         .dp-stat-value {
-          font-size: 1.875rem;
+          font-size: 2rem;
           font-weight: 800;
           color: var(--text);
           line-height: 1;
-          letter-spacing: -.03em;
+          letter-spacing: -.04em;
+          position: relative;
+          z-index: 1;
         }
         .dp-stat-label {
-          font-size: .725rem;
+          font-size: .7rem;
           font-weight: 600;
           color: var(--muted);
           text-transform: uppercase;
-          letter-spacing: .06em;
+          letter-spacing: .065em;
+          position: relative;
+          z-index: 1;
         }
 
         /* ── Skeleton ── */
-        .dp-skeleton-card { pointer-events: none; }
+        .dp-skeleton-card { pointer-events: none !important; }
         .dp-skel {
           border-radius: 6px;
-          background: linear-gradient(90deg, var(--border) 25%, var(--surf) 50%, var(--border) 75%);
-          background-size: 800px 100%;
-          animation: dp-shimmer 1.4s infinite;
+          background: linear-gradient(
+            90deg,
+            var(--border) 25%,
+            ${isDarkMode ? hexToRgba(surf, 0.6) : "#f8fafc"} 50%,
+            var(--border) 75%
+          );
+          background-size: 700px 100%;
+          animation: dp-shimmer 1.5s infinite;
         }
         .dp-skel--icon   { width: 40px; height: 40px; border-radius: 10px; }
-        .dp-skel--val    { width: 60%; height: 28px; margin-top: .625rem; }
-        .dp-skel--label  { width: 80%; height: 10px; }
+        .dp-skel--val    { width: 55%; height: 28px; margin-top: .625rem; border-radius: 7px; }
+        .dp-skel--label  { width: 80%; height: 10px; border-radius: 5px; }
 
         /* ── Charts ── */
         .dp-charts-row {
@@ -743,8 +904,10 @@ const DestinationPage = () => {
           border: 1.5px solid var(--border);
           border-radius: 16px;
           padding: 1.625rem;
-          box-shadow: 0 1px 3px rgba(15,23,42,.05);
+          box-shadow: 0 1px 3px rgba(15,23,42,.04);
+          transition: box-shadow .22s ease;
         }
+        .dp-chart-card:hover { box-shadow: 0 6px 18px rgba(15,23,42,.07); }
 
         .dp-chart-header {
           display: flex;
@@ -759,32 +922,29 @@ const DestinationPage = () => {
           font-size: .9375rem;
           font-weight: 700;
           color: var(--text);
-          letter-spacing: -.01em;
+          letter-spacing: -.012em;
         }
         .dp-chart-dot {
-          width: 8px;
-          height: 8px;
+          width: 8px; height: 8px;
           border-radius: 50%;
           flex-shrink: 0;
         }
         .dp-chart-dot--p  { background: var(--p); }
         .dp-chart-dot--ok { background: var(--ok); }
-
         .dp-chart-sub {
           font-size: .75rem;
           color: var(--muted);
-          font-weight: 500;
+          font-weight: 600;
           background: var(--bg);
           padding: 3px 10px;
           border-radius: 999px;
           border: 1px solid var(--border);
         }
 
-        /* Pie legend */
         .dp-pie-legend {
           display: flex;
           justify-content: center;
-          gap: 1.75rem;
+          gap: 2rem;
           margin-top: 1.125rem;
           padding-top: 1rem;
           border-top: 1px solid var(--border);
@@ -798,8 +958,7 @@ const DestinationPage = () => {
           font-weight: 500;
         }
         .dp-pie-legend-dot {
-          width: 10px;
-          height: 10px;
+          width: 10px; height: 10px;
           border-radius: 3px;
           flex-shrink: 0;
         }
@@ -813,17 +972,17 @@ const DestinationPage = () => {
         .dp-tooltip {
           background: #0f172a;
           border-radius: 10px;
-          padding: 8px 13px;
-          box-shadow: 0 8px 24px rgba(0,0,0,.25);
-          border: 1px solid rgba(255,255,255,.06);
+          padding: 9px 14px;
+          box-shadow: 0 8px 24px rgba(0,0,0,.28);
+          border: 1px solid rgba(255,255,255,.07);
         }
         .dp-tooltip__label {
-          font-size: .72rem;
+          font-size: .7rem;
           color: #94a3b8;
-          font-weight: 600;
+          font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: .05em;
-          margin-bottom: 3px;
+          letter-spacing: .055em;
+          margin-bottom: 4px;
         }
         .dp-tooltip__value {
           font-size: .9375rem;
@@ -831,10 +990,10 @@ const DestinationPage = () => {
           font-weight: 700;
         }
 
-        /* ── Error ── */
+        /* ── Error banner ── */
         .dp-error-banner {
-          background: ${hexToRgba(errColor, 0.06)};
-          border: 1.5px solid ${hexToRgba(errColor, 0.25)};
+          background: ${hexToRgba(errColor, 0.05)};
+          border: 1.5px solid ${hexToRgba(errColor, 0.22)};
           border-radius: 12px;
           padding: 1rem 1.25rem;
           display: flex;
@@ -860,18 +1019,19 @@ const DestinationPage = () => {
           font-size: .8125rem;
           font-weight: 700;
           cursor: pointer;
-          transition: opacity .15s, transform .15s;
           white-space: nowrap;
           letter-spacing: .01em;
+          transition: opacity .15s, transform .12s;
         }
-        .dp-retry-btn:hover { opacity: .88; transform: scale(.98); }
+        .dp-retry-btn:hover   { opacity: .88; }
+        .dp-retry-btn:active  { transform: scale(.97); }
 
         /* ── Info banner ── */
         .dp-info-banner {
           background: linear-gradient(135deg,
             ${hexToRgba(p, 0.04)} 0%,
             ${hexToRgba(acc, 0.06)} 100%);
-          border: 1.5px solid ${hexToRgba(p, 0.15)};
+          border: 1.5px solid ${hexToRgba(p, 0.14)};
           border-radius: 16px;
           padding: 1.375rem 1.625rem;
           display: flex;
@@ -879,16 +1039,17 @@ const DestinationPage = () => {
           gap: 1rem;
         }
         .dp-info-icon {
-          width: 40px;
-          height: 40px;
-          background: ${hexToRgba(p, 0.1)};
+          width: 40px; height: 40px;
+          background: ${hexToRgba(p, 0.09)};
           border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
           color: var(--p);
           flex-shrink: 0;
+          transition: transform .22s ease;
         }
+        .dp-info-banner:hover .dp-info-icon { transform: scale(1.08) rotate(-4deg); }
         .dp-info-icon svg { width: 18px; height: 18px; }
         .dp-info-title {
           font-size: .875rem;
@@ -904,241 +1065,273 @@ const DestinationPage = () => {
           margin: 0;
         }
 
-        /* ── Entrance animations ── */
-        .dp-fade-up {
-          animation: dp-fadeUp .5s cubic-bezier(0.22,1,0.36,1) both;
-        }
-        .dp-delay-1 { animation-delay: .05s; }
-        .dp-delay-2 { animation-delay: .1s; }
-        .dp-delay-3 { animation-delay: .15s; }
-        .dp-delay-4 { animation-delay: .2s; }
-
-        /* ── Spacing ── */
+        /* ── Spacing utils ── */
         .dp-mt-6 { margin-top: 1.5rem; }
         .dp-mt-7 { margin-top: 1.875rem; }
-        .dp-mt-8 { margin-top: 2.25rem; }
+        .dp-mt-8 { margin-top: 2.5rem; }
       `}</style>
 
       <div className="dp-root">
         <div className="dp-wrap">
 
-          {/* ── Breadcrumb / Header ── */}
-          <PageHeader
-            title="Destinations"
-            description="Manage and monitor your travel destination locations"
-            breadcrumbItems={breadcrumbItems}
-          />
+          {/* Breadcrumb / Header */}
+          <Reveal delay={0}>
+            <PageHeader
+              title="Destinations"
+              description="Manage and monitor your travel destination locations"
+              breadcrumbItems={breadcrumbItems}
+            />
+          </Reveal>
 
           {loading ? (
             <div className="dp-loading">
               <div className="dp-spinner-wrap">
                 <div className="dp-spinner" />
-                <div className="dp-spinner-dot" />
+                <div className="dp-spinner-center" />
               </div>
               <span className="dp-loading-text">Loading destination data…</span>
+              <span className="dp-loading-sub">Fetching statistics from the server</span>
             </div>
           ) : (
             <>
               {/* ── Quick Actions ── */}
-              <section className="dp-fade-up dp-delay-1">
-                <SectionHeader
-                  title="Quick Actions"
-                  subtitle="Jump directly to any destination management task"
-                  badge={`${destinationsData?.subData.length ?? 0} actions`}
-                />
-                <div className="dp-actions-grid">
-                  {destinationsData?.subData.map((action, idx) => {
-                    const { accent, icon, pillLabel } = getActionConfig(action.name);
-                    return (
-                      <a
-                        key={action.id}
-                        href={action.url}
-                        className={`dp-action-card dp-action-card--${accent}`}
-                        style={{ animationDelay: `${idx * 0.06}s` }}
-                      >
-                        <div className="dp-action-card__inner">
-                          <div className="dp-action-card__top">
-                            <div className={`dp-icon-wrap dp-icon-wrap--${accent}`}>{icon}</div>
-                            <span className={`dp-pill dp-pill--${accent}`}>{pillLabel}</span>
-                          </div>
-                          <div>
-                            <p className="dp-action-card__name">{action.name}</p>
-                            <p className="dp-action-card__desc">{action.description}</p>
-                          </div>
-                          <div className={`dp-action-card__cta dp-cta--${accent}`}>
-                            <span>Open</span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </div>
-                      </a>
-                    );
-                  })}
-                </div>
-              </section>
+              <Reveal delay={60}>
+                <section className="dp-mt-7">
+                  <SectionHeader
+                    title="Quick Actions"
+                    subtitle="Jump directly to any destination management task"
+                    badge={`${destinationsData?.subData.length ?? 0} actions`}
+                  />
+                  <div className="dp-actions-grid">
+                    {loading
+                      ? Array.from({ length: 4 }).map((_, i) => (
+                          <ActionCardSkeleton key={i} delay={i * 0.07} />
+                        ))
+                      : destinationsData?.subData.map((action, idx) => {
+                          const { accent, icon, pillLabel } = getActionConfig(action.name);
+                          return (
+                            <a
+                              key={action.id}
+                              href={action.url}
+                              className={`dp-action-card dp-action-card--${accent}`}
+                            >
+                              <div className="dp-action-card__inner">
+                                <div className="dp-action-card__top">
+                                  <div className={`dp-icon-wrap dp-icon-wrap--${accent}`}>{icon}</div>
+                                  <span className={`dp-pill dp-pill--${accent}`}>{pillLabel}</span>
+                                </div>
+                                <div>
+                                  <p className="dp-action-card__name">{action.name}</p>
+                                  <p className="dp-action-card__desc">{action.description}</p>
+                                </div>
+                                <div className={`dp-action-card__cta dp-cta--${accent}`}>
+                                  <span>Open</span>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                  </svg>
+                                </div>
+                              </div>
+                              {/* Bottom bar */}
+                              <div className="dp-action-card__bar" />
+                            </a>
+                          );
+                        })}
+                  </div>
+                </section>
+              </Reveal>
 
               {/* ── Error ── */}
               {error && (
-                <div className="dp-mt-6 dp-fade-up">
-                  <div className="dp-error-banner">
-                    <div className="dp-error-banner__left">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                      </svg>
-                      {error}
+                <Reveal delay={0}>
+                  <div className="dp-mt-6">
+                    <div className="dp-error-banner">
+                      <div className="dp-error-banner__left">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="8" x2="12" y2="12" />
+                          <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        {error}
+                      </div>
+                      <button className="dp-retry-btn" onClick={fetchStatistics}>Retry</button>
                     </div>
-                    <button className="dp-retry-btn" onClick={fetchStatistics}>Retry</button>
                   </div>
-                </div>
+                </Reveal>
               )}
 
               {/* ── Statistics ── */}
               {!error && (
-                <section className="dp-mt-8 dp-fade-up dp-delay-2">
-                  <SectionHeader
-                    title="Destination Statistics"
-                    subtitle="Live counts across all destination records"
-                    badge="Live"
-                  />
-                  <div className="dp-stats-grid">
-                    {loading
-                      ? Array.from({ length: 6 }).map((_, i) => <StatCardSkeleton key={i} />)
-                      : statCards.map((card, i) => (
-                          <div
-                            key={i}
-                            className={`dp-stat-card dp-stat-card--${card.accent} dp-fade-up`}
-                            style={{ animationDelay: `${0.1 + i * 0.06}s` }}
-                          >
-                            <div className={`dp-stat-icon dp-stat-icon--${card.accent}`}>
-                              {card.icon}
+                <Reveal delay={120}>
+                  <section className="dp-mt-8">
+                    <SectionHeader
+                      title="Destination Statistics"
+                      subtitle="Live counts across all destination records"
+                      badge="Live"
+                      live
+                    />
+                    <div className="dp-stats-grid">
+                      {loading
+                        ? Array.from({ length: 6 }).map((_, i) => (
+                            <StatCardSkeleton key={i} delay={i * 0.06} />
+                          ))
+                        : statCards.map((card, i) => (
+                            <div
+                              key={i}
+                              className={`dp-stat-card dp-stat-card--${card.accent}`}
+                            >
+                              <div className={`dp-stat-icon dp-stat-icon--${card.accent}`}>
+                                {card.icon}
+                              </div>
+                              <div className="dp-stat-value">
+                                <AnimatedCount value={card.value} duration={950 + i * 70} />
+                              </div>
+                              <div className="dp-stat-label">{card.title}</div>
                             </div>
-                            <div className="dp-stat-value">
-                              <AnimatedCount value={card.value} duration={900 + i * 80} />
-                            </div>
-                            <div className="dp-stat-label">{card.title}</div>
-                          </div>
-                        ))}
-                  </div>
-                </section>
+                          ))}
+                    </div>
+                  </section>
+                </Reveal>
               )}
 
               {/* ── Charts ── */}
               {!error && statistics && (
-                <section className="dp-mt-8 dp-fade-up dp-delay-3">
-                  <SectionHeader
-                    title="Analytics Overview"
-                    subtitle="Visual breakdown of wishlist distribution and category spread"
-                  />
-                  <div className="dp-charts-row">
+                <Reveal delay={180}>
+                  <section className="dp-mt-8">
+                    <SectionHeader
+                      title="Analytics Overview"
+                      subtitle="Visual breakdown of wishlist distribution and category spread"
+                    />
+                    <div className="dp-charts-row">
 
-                    {/* Pie — Wishlist */}
-                    <div className="dp-chart-card">
-                      <div className="dp-chart-header">
-                        <div className="dp-chart-title">
-                          <span className="dp-chart-dot dp-chart-dot--p" />
-                          Wishlist Distribution
-                        </div>
-                        <span className="dp-chart-sub">
-                          {(statistics.wishDetails.wishListCount + statistics.wishDetails.notWishListCount).toLocaleString()} total
-                        </span>
-                      </div>
-                      <div style={{ height: 240 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={pieChartData}
-                              cx="50%" cy="50%"
-                              innerRadius={62}
-                              outerRadius={100}
-                              paddingAngle={5}
-                              dataKey="value"
-                              strokeWidth={0}
-                            >
-                              {pieChartData.map((_, index) => (
-                                <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                              ))}
-                            </Pie>
-                            <Tooltip content={<CustomPieTooltip />} />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-                      <div className="dp-pie-legend">
-                        {pieChartData.map((item, i) => (
-                          <div key={i} className="dp-pie-legend-item">
-                            <span className="dp-pie-legend-dot" style={{ background: PIE_COLORS[i] }} />
-                            {item.name}
-                            <span className="dp-pie-legend-count">{item.value.toLocaleString()}</span>
+                      {/* Pie — Wishlist */}
+                      <div className="dp-chart-card">
+                        <div className="dp-chart-header">
+                          <div className="dp-chart-title">
+                            <span className="dp-chart-dot dp-chart-dot--p" />
+                            Wishlist Distribution
                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Bar — By Category */}
-                    <div className="dp-chart-card">
-                      <div className="dp-chart-header">
-                        <div className="dp-chart-title">
-                          <span className="dp-chart-dot dp-chart-dot--ok" />
-                          Destinations by Category
+                          <span className="dp-chart-sub">
+                            {(
+                              statistics.wishDetails.wishListCount +
+                              statistics.wishDetails.notWishListCount
+                            ).toLocaleString()}{" "}
+                            total
+                          </span>
                         </div>
-                        <span className="dp-chart-sub">
-                          {barChartData.length} categories
-                        </span>
+                        <div style={{ height: 240 }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={pieChartData}
+                                cx="50%" cy="50%"
+                                innerRadius={62}
+                                outerRadius={100}
+                                paddingAngle={5}
+                                dataKey="value"
+                                strokeWidth={0}
+                                animationBegin={200}
+                                animationDuration={900}
+                              >
+                                {pieChartData.map((_, index) => (
+                                  <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                                ))}
+                              </Pie>
+                              <Tooltip content={<CustomPieTooltip />} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div className="dp-pie-legend">
+                          {pieChartData.map((item, i) => (
+                            <div key={i} className="dp-pie-legend-item">
+                              <span className="dp-pie-legend-dot" style={{ background: PIE_COLORS[i] }} />
+                              {item.name}
+                              <span className="dp-pie-legend-count">{item.value.toLocaleString()}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div style={{ height: 280 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={barChartData} barSize={26} margin={{ top: 4, right: 4, bottom: 40, left: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke={hexToRgba(border, 0.8)} vertical={false} />
-                            <XAxis
-                              dataKey="name"
-                              tick={{ fontSize: 11, fill: textSecondary, fontWeight: 500 }}
-                              axisLine={false}
-                              tickLine={false}
-                              angle={-30}
-                              textAnchor="end"
-                              interval={0}
-                            />
-                            <YAxis
-                              tick={{ fontSize: 11, fill: textSecondary }}
-                              axisLine={false}
-                              tickLine={false}
-                              width={28}
-                            />
-                            <Tooltip
-                              content={<CustomBarTooltip />}
-                              cursor={{ fill: hexToRgba(p, 0.06), radius: 6 }}
-                            />
-                            <Bar dataKey="count" fill={p} radius={[7, 7, 0, 0]} name="Destinations" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
 
-                  </div>
-                </section>
+                      {/* Bar — By Category */}
+                      <div className="dp-chart-card">
+                        <div className="dp-chart-header">
+                          <div className="dp-chart-title">
+                            <span className="dp-chart-dot dp-chart-dot--ok" />
+                            Destinations by Category
+                          </div>
+                          <span className="dp-chart-sub">{barChartData.length} categories</span>
+                        </div>
+                        <div style={{ height: 280 }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                              data={barChartData}
+                              barSize={24}
+                              margin={{ top: 4, right: 4, bottom: 40, left: 0 }}
+                            >
+                              <CartesianGrid
+                                strokeDasharray="3 3"
+                                stroke={hexToRgba(border, 0.8)}
+                                vertical={false}
+                              />
+                              <XAxis
+                                dataKey="name"
+                                tick={{ fontSize: 11, fill: textSecondary, fontWeight: 500 }}
+                                axisLine={false}
+                                tickLine={false}
+                                angle={-30}
+                                textAnchor="end"
+                                interval={0}
+                              />
+                              <YAxis
+                                tick={{ fontSize: 11, fill: textSecondary }}
+                                axisLine={false}
+                                tickLine={false}
+                                width={28}
+                              />
+                              <Tooltip
+                                content={<CustomBarTooltip />}
+                                cursor={{ fill: hexToRgba(p, 0.06), radius: 6 }}
+                              />
+                              <Bar
+                                dataKey="count"
+                                fill={p}
+                                radius={[7, 7, 0, 0]}
+                                name="Destinations"
+                                animationBegin={300}
+                                animationDuration={900}
+                                animationEasing="ease-out"
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+
+                    </div>
+                  </section>
+                </Reveal>
               )}
 
               {/* ── Info banner ── */}
-              <section className="dp-mt-7 dp-fade-up dp-delay-4">
-                <div className="dp-info-banner">
-                  <div className="dp-info-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="12" y1="16" x2="12" y2="12" />
-                      <line x1="12" y1="8" x2="12.01" y2="8" />
-                    </svg>
+              <Reveal delay={240}>
+                <section className="dp-mt-7">
+                  <div className="dp-info-banner">
+                    <div className="dp-info-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="dp-info-title">Destination Management</p>
+                      <p className="dp-info-text">
+                        Use the quick-action cards above to browse, create, edit, or remove
+                        destinations. Statistics and charts reflect the latest data from your backend
+                        and update each time you visit this page.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="dp-info-title">Destination Management</p>
-                    <p className="dp-info-text">
-                      Use the quick-action cards above to browse, create, edit, or remove destinations.
-                      Statistics and charts reflect the latest data from your backend and update each time you visit this page.
-                    </p>
-                  </div>
-                </div>
-              </section>
+                </section>
+              </Reveal>
 
             </>
           )}

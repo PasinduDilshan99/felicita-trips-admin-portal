@@ -243,3 +243,186 @@ export interface DestinationStatisticsApiResponse {
   data: DestinationStatisticsData;
   timestamp: string;
 }
+
+
+export interface DestinationCategoriesDetails {
+  totalDestinationCategoriesCount: number;
+  activeDestinationsCategories: number;
+  inActiveDestinationsCategories: number;
+  terminateDestinationsCategories: number;
+  recentlyUpdateDestinationsCategories: number;
+  recentlyAddedDestinationsCategories: number;
+}
+
+export interface CategoryUsedDetail {
+  categoryId: number;
+  categoryName: string;
+  count: number;
+  color: string;
+  hoverColor: string;
+}
+
+export interface CategoryImagesCount {
+  categoryId: number;
+  categoryName: string;
+  imagesCount: number;
+  color: string;
+  hoverColor: string;
+}
+
+export interface DestinationCategoriesStatisticsData {
+  destinationCategoriesDetails: DestinationCategoriesDetails;
+  categoryUsedDetails: CategoryUsedDetail[];
+  categoriesImagesCounts: CategoryImagesCount[];
+}
+
+export interface DestinationCategoriesStatisticsApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: DestinationCategoriesStatisticsData;
+  timestamp: string;
+}
+
+export interface CategoryImage {
+  imageId: number;
+  imageName: string;
+  imageDescription: string | null;
+  imageUrl: string;
+  imageStatus: string;
+  imageCreatedAt: string;
+}
+
+export interface ActiveCategory {
+  categoryId: number;
+  category: string;
+  categoryDescription: string;
+  categoryStatus: string;
+  color: string;
+  hoverColor: string;
+  createdAt: string;
+  updatedAt: string;
+  images: CategoryImage[];
+}
+
+export interface ActiveCategoriesApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: ActiveCategory[];
+  timestamp: string;
+}
+
+
+export interface CategoryDestination {
+  destinationId: number;
+  destinationName: string;
+  destinationDescription: string;
+  location: string;
+  ratings: number;
+  destinationStatus: string;
+  primary: boolean;
+}
+
+export interface CategoryDetailsByIdResponse {
+  categoryId: number;
+  category: string;
+  categoryDescription: string;
+  categoryStatus: string;
+  color: string;
+  hoverColor: string;
+  createdAt: string;
+  updatedAt: string;
+  images: CategoryImage[];
+  destinations: CategoryDestination[];
+}
+
+export interface CategoryDetailsByIdApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: CategoryDetailsByIdResponse;
+  timestamp: string;
+}
+
+// Add these to your existing types/destination-types.ts file
+
+// Add Destination Category Types
+export interface AddDestinationCategoryImageRequest {
+  name: string;
+  description: string;
+  imageUrl: string;
+  status: "ACTIVE" | "INACTIVE";
+}
+
+export interface AddDestinationCategoryRequest {
+  category: string;
+  description: string;
+  status: string;
+  color: string;
+  hoverColor: string;
+  images: AddDestinationCategoryImageRequest[];
+}
+
+export interface AddDestinationCategoryResponse {
+  message: string;
+}
+
+export interface AddDestinationCategoryApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: AddDestinationCategoryResponse;
+  timestamp: string;
+}
+
+// Update Destination Category Types
+export interface UpdateDestinationCategoryImageRequest {
+  imageId: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  status: "ACTIVE" | "INACTIVE";
+}
+
+export interface UpdateDestinationCategoryRequest {
+  categoryId: number;
+  category: string;
+  description: string;
+  status: string;
+  color: string;
+  hoverColor: string;
+  removeImageIds: number[];
+  updateImages: UpdateDestinationCategoryImageRequest[];
+  newImages: AddDestinationCategoryImageRequest[];
+}
+
+export interface UpdateDestinationCategoryResponse {
+  message: string;
+  id: number;
+}
+
+export interface UpdateDestinationCategoryApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: UpdateDestinationCategoryResponse;
+  timestamp: string;
+}
+
+// Terminate Destination Category Types
+export interface TerminateDestinationCategoryRequest {
+  destinationCategoryId: number;
+}
+
+export interface TerminateDestinationCategoryResponse {
+  message: string;
+}
+
+export interface TerminateDestinationCategoryApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TerminateDestinationCategoryResponse;
+  timestamp: string;
+}

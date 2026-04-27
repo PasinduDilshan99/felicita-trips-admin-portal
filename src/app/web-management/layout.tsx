@@ -39,7 +39,13 @@ export default function WebManagementLayout({
       }}
     >
       <div className="flex">
-        <Sidebar data={webManagementSideBarData} title="Web Management" />
+        <Sidebar
+          data={webManagementSideBarData}
+          title="Web Management"
+          minWidth={260}
+          maxWidth={600}
+          defaultWidth={350}
+        />
         <main className="flex-1 w-full lg:ml-0">
           <div className="">
             <div className="mx-auto">{children}</div>

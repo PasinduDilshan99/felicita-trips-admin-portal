@@ -1,7 +1,7 @@
 // components/Sidebar.tsx
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   ChevronRight,
   ChevronDown,
@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   Building,
+  GripVertical,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -27,7 +28,16 @@ export interface SideBarDataType {
     name: string;
     description: string;
     url: string;
+    color?: string;
     privilege: string;
+    grandSubData?: {
+      id: number;
+      name: string;
+      description: string;
+      url: string;
+      color?: string;
+      privilege: string;
+    }[];
   }[];
 }
 
@@ -35,6 +45,9 @@ interface SidebarProps {
   data: SideBarDataType[];
   title?: string;
   logo?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  defaultWidth?: number;
 }
 
 // Helper function to convert hex to rgba
@@ -50,23 +63,61 @@ const Sidebar: React.FC<SidebarProps> = ({
   data,
   title = "Management System",
   logo,
+  minWidth = 240,
+  maxWidth = 480,
+  defaultWidth = 320,
 }) => {
   const [expandedItems, setExpandedItems] = useState<number[]>([]);
+  const [expandedSubItems, setExpandedSubItems] = useState<Set<string>>(new Set());
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(defaultWidth);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const startXRef = useRef<number>(0);
+  const startWidthRef = useRef<number>(0);
+  
   const { hasPrivilege } = useAuth();
   const { theme, isDarkMode } = useTheme();
   const pathname = usePathname() || "";
   const router = useRouter();
+
+  // Load saved width from localStorage
+  useEffect(() => {
+    const savedWidth = localStorage.getItem('sidebar-width');
+    if (savedWidth) {
+      const width = parseInt(savedWidth, 10);
+      if (!isNaN(width) && width >= minWidth && width <= maxWidth) {
+        setSidebarWidth(width);
+      }
+    }
+  }, [minWidth, maxWidth]);
+
+  // Save width to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem('sidebar-width', sidebarWidth.toString());
+  }, [sidebarWidth]);
 
   // Filter data based on privileges
   const filteredData = useMemo(() => {
     return data
       .filter((item) => {
         const hasMainPrivilege = hasPrivilege(item.privilege);
-        const filteredSubData = item.subData.filter((subItem) =>
-          hasPrivilege(subItem.privilege)
-        );
+        const filteredSubData = item.subData
+          .filter((subItem) => {
+            const hasSubPrivilege = hasPrivilege(subItem.privilege);
+            const filteredGrandSubData = subItem.grandSubData?.filter((grandSubItem) =>
+              hasPrivilege(grandSubItem.privilege)
+            ) || [];
+            
+            return hasSubPrivilege || filteredGrandSubData.length > 0;
+          })
+          .map((subItem) => ({
+            ...subItem,
+            grandSubData: subItem.grandSubData?.filter((grandSubItem) =>
+              hasPrivilege(grandSubItem.privilege)
+            ) || [],
+          }));
 
         return (
           hasMainPrivilege ||
@@ -75,9 +126,21 @@ const Sidebar: React.FC<SidebarProps> = ({
       })
       .map((item) => ({
         ...item,
-        subData: item.subData.filter((subItem) =>
-          hasPrivilege(subItem.privilege)
-        ),
+        subData: item.subData
+          .filter((subItem) => {
+            const hasSubPrivilege = hasPrivilege(subItem.privilege);
+            const filteredGrandSubData = subItem.grandSubData?.filter((grandSubItem) =>
+              hasPrivilege(grandSubItem.privilege)
+            ) || [];
+            
+            return hasSubPrivilege || filteredGrandSubData.length > 0;
+          })
+          .map((subItem) => ({
+            ...subItem,
+            grandSubData: subItem.grandSubData?.filter((grandSubItem) =>
+              hasPrivilege(grandSubItem.privilege)
+            ) || [],
+          })),
       }));
   }, [data, hasPrivilege]);
 
@@ -97,37 +160,43 @@ const Sidebar: React.FC<SidebarProps> = ({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Set expanded items based on current path - FIXED VERSION
+  // Set expanded items based on current path
   useEffect(() => {
     const expanded: number[] = [];
+    const expandedSubKeys = new Set<string>();
     
     filteredData.forEach((item) => {
       let shouldExpand = false;
       
-      // 1. Exact match for parent URL
+      // Check parent URL
       if (pathname === item.url) {
         shouldExpand = true;
       }
       
-      // 2. Check if we're on any subitem URL (exact match or deeper path)
-      const hasMatchingSubItem = item.subData.some((sub) => 
-        pathname === sub.url || 
-        pathname.startsWith(sub.url + '/')
-      );
+      // Check subitems and grandSubData
+      item.subData.forEach((sub) => {
+        // Check subitem URL
+        if (pathname === sub.url || pathname.startsWith(sub.url + '/')) {
+          shouldExpand = true;
+          expandedSubKeys.add(`${item.id}-${sub.id}`);
+        }
+        
+        // Check grandSubData
+        sub.grandSubData?.forEach((grand) => {
+          if (pathname === grand.url || pathname.startsWith(grand.url + '/')) {
+            shouldExpand = true;
+            expandedSubKeys.add(`${item.id}-${sub.id}`);
+          }
+        });
+      });
       
-      if (hasMatchingSubItem) {
-        shouldExpand = true;
-      }
-      
-      // 3. Check if we're in parent's directory but NOT matching a sibling
+      // Check directory paths
       if (pathname.startsWith(item.url + '/')) {
-        // Check if there's a sibling item that also matches this path
         const siblingMatch = filteredData.some(otherItem => 
           otherItem.id !== item.id && 
           pathname.startsWith(otherItem.url + '/')
         );
         
-        // Only expand if no sibling matches better
         if (!siblingMatch) {
           shouldExpand = true;
         }
@@ -139,14 +208,65 @@ const Sidebar: React.FC<SidebarProps> = ({
     });
     
     setExpandedItems(expanded);
+    setExpandedSubItems(expandedSubKeys);
   }, [pathname, filteredData]);
+
+  // Handle resize start
+  const handleResizeStart = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsResizing(true);
+    startXRef.current = e.clientX;
+    startWidthRef.current = sidebarWidth;
+  }, [sidebarWidth]);
+
+  // Handle resize move
+  const handleResizeMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const delta = e.clientX - startXRef.current;
+    let newWidth = startWidthRef.current + delta;
+    
+    // Apply constraints
+    newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+    
+    if (newWidth !== sidebarWidth) {
+      setSidebarWidth(newWidth);
+    }
+  }, [isResizing, minWidth, maxWidth, sidebarWidth]);
+
+  // Handle resize end
+  const handleResizeEnd = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  // Add/remove resize event listeners
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', handleResizeMove);
+      window.addEventListener('mouseup', handleResizeEnd);
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      window.removeEventListener('mousemove', handleResizeMove);
+      window.removeEventListener('mouseup', handleResizeEnd);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+    
+    return () => {
+      window.removeEventListener('mousemove', handleResizeMove);
+      window.removeEventListener('mouseup', handleResizeEnd);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing, handleResizeMove, handleResizeEnd]);
 
   const handleParentClick = (item: SideBarDataType) => {
     const hasSubItems = item.subData && item.subData.length > 0;
     const hasMainItemAccess = hasPrivilege(item.privilege);
     
     if (!hasMainItemAccess && !hasSubItems) {
-      return; // Do nothing if no access
+      return;
     }
 
     // Toggle expansion for parent item
@@ -171,6 +291,35 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
+  const handleSubItemClick = (item: SideBarDataType, subItem: any) => {
+    const hasGrandSubData = subItem.grandSubData && subItem.grandSubData.length > 0;
+    
+    if (hasGrandSubData) {
+      // Toggle expansion for grandSubData
+      setExpandedSubItems((prev) => {
+        const newSet = new Set(prev);
+        const key = `${item.id}-${subItem.id}`;
+        if (newSet.has(key)) {
+          newSet.delete(key);
+        } else {
+          newSet.add(key);
+        }
+        return newSet;
+      });
+    }
+    
+    // Navigate if user has access
+    if (hasPrivilege(subItem.privilege)) {
+      router.push(subItem.url);
+      
+      if (isMobileView) {
+        setTimeout(() => {
+          setIsSidebarOpen(false);
+        }, 300);
+      }
+    }
+  };
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -185,25 +334,46 @@ const Sidebar: React.FC<SidebarProps> = ({
       />
     ) : null;
 
+  // Resize handle component
+  const ResizeHandle = () => (
+    <div
+      className={`absolute right-0 top-0 h-full w-1 cursor-ew-resize transition-all duration-200 group z-50 ${
+        isResizing ? 'bg-opacity-100' : 'bg-opacity-0'
+      }`}
+      style={{
+        backgroundColor: isResizing ? theme.primary : 'transparent',
+      }}
+      onMouseDown={handleResizeStart}
+    >
+      <div 
+        className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-12 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200"
+        style={{ backgroundColor: theme.primary }}
+      />
+    </div>
+  );
+
   // If no accessible items, show minimal sidebar
   if (filteredData.length === 0) {
     return (
       <aside 
-        className="fixed lg:sticky top-0 left-0 h-screen border-r shadow-lg w-20 flex flex-col items-center justify-center transition-colors duration-300"
+        ref={sidebarRef}
+        className="fixed lg:sticky top-0 left-0 h-screen border-r shadow-lg flex flex-col items-center justify-center transition-all duration-300"
         style={{ 
+          width: isSidebarOpen ? sidebarWidth : 80,
           backgroundColor: theme.surface,
           borderColor: theme.border
         }}
       >
         <div className="text-center p-4">
           <div 
-            className="h-10 w-10 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2"
+            className="h-10 w-10 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2 mx-auto"
             style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }}
           >
             <Building className="text-white" size={20} />
           </div>
           <p className="text-xs mt-2" style={{ color: theme.textSecondary }}>No Access</p>
         </div>
+        {!isMobileView && <ResizeHandle />}
       </aside>
     );
   }
@@ -246,12 +416,29 @@ const Sidebar: React.FC<SidebarProps> = ({
           }
         }
 
+        @keyframes slideDownGrand {
+          from {
+            opacity: 0;
+            max-height: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            max-height: 800px;
+            transform: translateY(0);
+          }
+        }
+
         .animate-fadeIn {
           animation: fadeIn 0.4s ease-out;
         }
 
         .animate-slideDown {
           animation: slideDown 0.4s ease-out;
+        }
+
+        .animate-slideDownGrand {
+          animation: slideDownGrand 0.4s ease-out;
         }
 
         .smooth-hover {
@@ -280,37 +467,41 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen border-r shadow-lg transition-all duration-500 ease-in-out flex flex-col ${
+        ref={sidebarRef}
+        className={`fixed lg:sticky top-0 left-0 h-screen border-r shadow-lg transition-all duration-300 ease-in-out flex flex-col ${
           isSidebarOpen ? "translate-x-0 z-50" : "-translate-x-full z-50"
-        } ${isSidebarOpen ? "w-80" : "w-80"} lg:translate-x-0 lg:z-auto ${
-          !isSidebarOpen && !isMobileView ? "lg:w-20" : "lg:w-80"
-        }`}
+        } lg:translate-x-0 lg:z-auto`}
         style={{ 
+          width: isSidebarOpen ? sidebarWidth : 80,
           backgroundColor: theme.surface,
-          borderColor: theme.border
+          borderColor: theme.border,
+          transition: isResizing ? 'none' : 'all 0.3s ease-in-out'
         }}
       >
+        {/* Resize Handle - Only show on desktop when sidebar is open */}
+        {!isMobileView && isSidebarOpen && <ResizeHandle />}
+
         {/* Sidebar Header */}
-        <div className="p-6 border-b transition-colors duration-500 ease-in-out" style={{ borderColor: theme.border }}>
+        <div className="p-6 border-b transition-colors duration-500 ease-in-out flex-shrink-0" style={{ borderColor: theme.border }}>
           {isSidebarOpen ? (
             <div className="flex items-center space-x-3 animate-fadeIn">
               {logo ? (
                 <img
                   src={logo}
                   alt="Logo"
-                  className="h-10 w-10 rounded-lg transition-transform duration-300 hover:scale-110"
+                  className="h-10 w-10 rounded-lg transition-transform duration-300 hover:scale-110 flex-shrink-0"
                 />
               ) : (
                 <div 
-                  className="h-10 w-10 rounded-lg flex items-center justify-center transition-transform duration-300 hover:scale-110 hover:rotate-3"
+                  className="h-10 w-10 rounded-lg flex items-center justify-center transition-transform duration-300 hover:scale-110 hover:rotate-3 flex-shrink-0"
                   style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }}
                 >
                   <Building className="text-white" size={20} />
                 </div>
               )}
-              <div className="transition-opacity duration-500">
-                <h1 className="text-xl font-bold" style={{ color: theme.text }}>{title}</h1>
-                <p className="text-sm" style={{ color: theme.textSecondary }}>
+              <div className="transition-opacity duration-500 overflow-hidden">
+                <h1 className="text-xl font-bold truncate" style={{ color: theme.text }}>{title}</h1>
+                <p className="text-sm truncate" style={{ color: theme.textSecondary }}>
                   {filteredData.length} accessible modules
                 </p>
               </div>
@@ -336,7 +527,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               const isActive =
                 pathname === item.url ||
                 item.subData.some((sub) => 
-                  pathname === sub.url || pathname.startsWith(sub.url + '/')
+                  pathname === sub.url || 
+                  pathname.startsWith(sub.url + '/') ||
+                  sub.grandSubData?.some((grand) => 
+                    pathname === grand.url || pathname.startsWith(grand.url + '/')
+                  )
                 );
 
               const hasMainItemAccess = hasPrivilege(item.privilege);
@@ -379,9 +574,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                     {isSidebarOpen && (
                       <>
-                        <div className="ml-3 text-left flex-1 transition-all duration-300">
+                        <div className="ml-3 text-left flex-1 transition-all duration-300 overflow-hidden">
                           <span
-                            className={`font-medium block transition-colors duration-200 ${
+                            className={`font-medium block transition-colors duration-200 truncate ${
                               isActive ? "font-semibold" : ""
                             } ${!hasMainItemAccess ? "opacity-60" : ""}`}
                             style={{ color: isActive ? theme.primary : theme.text }}
@@ -389,11 +584,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                             {item.name}
                             {!hasMainItemAccess && hasSubItems && (
                               <span className="text-xs ml-2" style={{ color: theme.textSecondary }}>
-                                (Sub items only)
+                                (Sub only)
                               </span>
                             )}
                           </span>
-                          <span className="text-xs block mt-0.5 transition-opacity duration-200" style={{ color: theme.textSecondary }}>
+                          <span className="text-xs block mt-0.5 transition-opacity duration-200 truncate" style={{ color: theme.textSecondary }}>
                             {item.description}
                           </span>
                         </div>
@@ -401,7 +596,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         {hasSubItems && (
                           <ChevronDown
                             size={16}
-                            className={`transition-all duration-300 ease-in-out ${
+                            className={`transition-all duration-300 ease-in-out flex-shrink-0 ${
                               isExpanded ? "rotate-180" : "rotate-0"
                             }`}
                             style={{ color: theme.textSecondary }}
@@ -413,7 +608,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     {!isSidebarOpen && (
                       <div className="ml-2 transition-all duration-300">
                         <div className="text-xs font-medium truncate" style={{ color: theme.textSecondary }}>
-                          {item.name.charAt(0)}
+                          {item.name.charAt(0).toUpperCase()}
                         </div>
                       </div>
                     )}
@@ -422,73 +617,164 @@ const Sidebar: React.FC<SidebarProps> = ({
                   {/* Sub Items - Only show when expanded and sidebar is open */}
                   {isSidebarOpen && hasSubItems && isExpanded && (
                     <div className="ml-8 mt-1 space-y-1 pl-3 border-l animate-slideDown overflow-hidden" style={{ borderColor: theme.border }}>
-                      {item.subData.map((subItem, index) => {
+                      {item.subData.map((subItem, subIndex) => {
                         const isSubActive = 
                           pathname === subItem.url || 
-                          pathname.startsWith(subItem.url + '/');
-                        const hasSubItemAccess = hasPrivilege(
-                          subItem.privilege
-                        );
+                          pathname.startsWith(subItem.url + '/') ||
+                          subItem.grandSubData?.some((grand) => 
+                            pathname === grand.url || pathname.startsWith(grand.url + '/')
+                          );
+                        const hasSubItemAccess = hasPrivilege(subItem.privilege);
+                        const hasGrandSubData = subItem.grandSubData && subItem.grandSubData.length > 0;
+                        const isGrandExpanded = expandedSubItems.has(`${item.id}-${subItem.id}`);
+                        const grandSubItems = subItem.grandSubData || [];
 
                         return (
-                          <Link
-                            key={subItem.id}
-                            href={hasSubItemAccess ? subItem.url : "#"}
-                            className={`flex items-center w-full px-3 py-2 rounded-lg text-sm transition-all duration-300 ease-in-out smooth-hover ${
-                              isSubActive
-                                ? "font-medium shadow-sm"
-                                : ""
-                            } ${
-                              !hasSubItemAccess
-                                ? "opacity-50 cursor-not-allowed pointer-events-none"
-                                : ""
-                            }`}
-                            style={{
-                              animationDelay: `${index * 50}ms`,
-                              backgroundColor: isSubActive ? hexToRgba(theme.primary, 0.15) : "transparent",
-                              color: isSubActive ? theme.primary : theme.textSecondary,
-                            }}
-                            onClick={() =>
-                              isMobileView && setIsSidebarOpen(false)
-                            }
-                            onMouseEnter={(e) => {
-                              if (!isSubActive && hasSubItemAccess) {
-                                e.currentTarget.style.backgroundColor = hexToRgba(theme.primary, 0.05);
-                                e.currentTarget.style.color = theme.text;
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!isSubActive && hasSubItemAccess) {
-                                e.currentTarget.style.backgroundColor = "transparent";
-                                e.currentTarget.style.color = theme.textSecondary;
-                              }
-                            }}
-                          >
-                            <div
-                              className="h-2 w-2 rounded-full mr-3 flex-shrink-0 transition-all duration-300 hover:scale-125"
-                              style={{ backgroundColor: item.color }}
-                            />
-                            <div className="text-left flex-1">
-                              <span className="transition-all duration-200">
-                                {subItem.name}
-                                {!hasSubItemAccess && (
-                                  <span className="text-xs ml-1" style={{ color: theme.textSecondary }}>
-                                    (no access)
+                          <div key={subItem.id}>
+                            {/* Sub Item */}
+                            <button
+                              onClick={() => handleSubItemClick(item, subItem)}
+                              className={`flex items-center w-full px-3 py-2 rounded-lg text-sm transition-all duration-300 ease-in-out smooth-hover ${
+                                isSubActive
+                                  ? "font-medium shadow-sm"
+                                  : ""
+                              } ${
+                                !hasSubItemAccess && !hasGrandSubData
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              style={{
+                                animationDelay: `${subIndex * 50}ms`,
+                                backgroundColor: isSubActive ? hexToRgba(theme.primary, 0.15) : "transparent",
+                                color: isSubActive ? theme.primary : theme.textSecondary,
+                              }}
+                              disabled={!hasSubItemAccess && !hasGrandSubData}
+                              onMouseEnter={(e) => {
+                                if (!isSubActive && (hasSubItemAccess || hasGrandSubData)) {
+                                  e.currentTarget.style.backgroundColor = hexToRgba(theme.primary, 0.05);
+                                  e.currentTarget.style.color = theme.text;
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!isSubActive && (hasSubItemAccess || hasGrandSubData)) {
+                                  e.currentTarget.style.backgroundColor = "transparent";
+                                  e.currentTarget.style.color = theme.textSecondary;
+                                }
+                              }}
+                            >
+                              <div
+                                className="h-2 w-2 rounded-full mr-3 flex-shrink-0 transition-all duration-300 hover:scale-125"
+                                style={{ backgroundColor: subItem.color || item.color }}
+                              />
+                              <div className="text-left flex-1 overflow-hidden">
+                                <span className="transition-all duration-200 truncate block">
+                                  {subItem.name}
+                                  {!hasSubItemAccess && hasGrandSubData && (
+                                    <span className="text-xs ml-1" style={{ color: theme.textSecondary }}>
+                                      (Group)
+                                    </span>
+                                  )}
+                                  {!hasSubItemAccess && !hasGrandSubData && (
+                                    <span className="text-xs ml-1" style={{ color: theme.textSecondary }}>
+                                      (No access)
+                                    </span>
+                                  )}
+                                </span>
+                                {isSidebarOpen && subItem.description && (
+                                  <span className="text-xs block mt-0.5 truncate transition-opacity duration-200" style={{ color: theme.textSecondary }}>
+                                    {subItem.description}
                                   </span>
                                 )}
-                              </span>
-                              {isSidebarOpen && subItem.description && (
-                                <span className="text-xs block mt-0.5 truncate transition-opacity duration-200" style={{ color: theme.textSecondary }}>
-                                  {subItem.description}
-                                </span>
+                              </div>
+                              {hasGrandSubData && (
+                                <ChevronDown
+                                  size={14}
+                                  className={`transition-all duration-300 ease-in-out flex-shrink-0 ${
+                                    isGrandExpanded ? "rotate-180" : "rotate-0"
+                                  }`}
+                                  style={{ color: theme.textSecondary }}
+                                />
                               )}
-                            </div>
-                            {isSubActive && (
-                              <div className="ml-2 animate-fadeIn">
-                                <div className="h-2 w-2 rounded-full transition-all duration-300 hover:scale-125" style={{ backgroundColor: theme.primary }}></div>
+                              {isSubActive && !hasGrandSubData && (
+                                <div className="ml-2 animate-fadeIn">
+                                  <div className="h-2 w-2 rounded-full transition-all duration-300 hover:scale-125" style={{ backgroundColor: theme.primary }}></div>
+                                </div>
+                              )}
+                            </button>
+
+                            {/* Grand Sub Items */}
+                            {hasGrandSubData && isGrandExpanded && (
+                              <div className="ml-6 mt-1 space-y-1 pl-3 border-l animate-slideDownGrand overflow-hidden" style={{ borderColor: theme.border }}>
+                                {grandSubItems.map((grandItem, grandIndex) => {
+                                  const isGrandActive = 
+                                    pathname === grandItem.url || 
+                                    pathname.startsWith(grandItem.url + '/');
+                                  const hasGrandAccess = hasPrivilege(grandItem.privilege);
+
+                                  return (
+                                    <Link
+                                      key={grandItem.id}
+                                      href={hasGrandAccess ? grandItem.url : "#"}
+                                      className={`flex items-center w-full px-3 py-1.5 rounded-lg text-xs transition-all duration-300 ease-in-out smooth-hover ${
+                                        isGrandActive
+                                          ? "font-medium shadow-sm"
+                                          : ""
+                                      } ${
+                                        !hasGrandAccess
+                                          ? "opacity-50 cursor-not-allowed pointer-events-none"
+                                          : ""
+                                      }`}
+                                      style={{
+                                        animationDelay: `${grandIndex * 30}ms`,
+                                        backgroundColor: isGrandActive ? hexToRgba(theme.primary, 0.12) : "transparent",
+                                        color: isGrandActive ? theme.primary : theme.textSecondary,
+                                      }}
+                                      onClick={() =>
+                                        isMobileView && setIsSidebarOpen(false)
+                                      }
+                                      onMouseEnter={(e) => {
+                                        if (!isGrandActive && hasGrandAccess) {
+                                          e.currentTarget.style.backgroundColor = hexToRgba(theme.primary, 0.05);
+                                          e.currentTarget.style.color = theme.text;
+                                        }
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        if (!isGrandActive && hasGrandAccess) {
+                                          e.currentTarget.style.backgroundColor = "transparent";
+                                          e.currentTarget.style.color = theme.textSecondary;
+                                        }
+                                      }}
+                                    >
+                                      <div
+                                        className="h-1.5 w-1.5 rounded-full mr-3 flex-shrink-0 transition-all duration-300 hover:scale-125"
+                                        style={{ backgroundColor: grandItem.color || subItem.color || item.color }}
+                                      />
+                                      <div className="text-left flex-1 overflow-hidden">
+                                        <span className="transition-all duration-200 truncate block">
+                                          {grandItem.name}
+                                          {!hasGrandAccess && (
+                                            <span className="text-xs ml-1" style={{ color: theme.textSecondary }}>
+                                              (No access)
+                                            </span>
+                                          )}
+                                        </span>
+                                        {isSidebarOpen && grandItem.description && (
+                                          <span className="text-xs block mt-0.5 truncate transition-opacity duration-200 opacity-75" style={{ color: theme.textSecondary }}>
+                                            {grandItem.description}
+                                          </span>
+                                        )}
+                                      </div>
+                                      {isGrandActive && (
+                                        <div className="ml-2 animate-fadeIn">
+                                          <div className="h-1.5 w-1.5 rounded-full transition-all duration-300 hover:scale-125" style={{ backgroundColor: theme.primary }}></div>
+                                        </div>
+                                      )}
+                                    </Link>
+                                  );
+                                })}
                               </div>
                             )}
-                          </Link>
+                          </div>
                         );
                       })}
                     </div>
@@ -501,12 +787,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Footer with user info */}
         {isSidebarOpen && (
-          <div className="p-4 border-t mt-auto transition-colors duration-300" style={{ borderColor: theme.border }}>
+          <div className="p-4 border-t mt-auto transition-colors duration-300 flex-shrink-0" style={{ borderColor: theme.border }}>
             <div className="text-xs text-center" style={{ color: theme.textSecondary }}>
-              <p>
+              <p className="truncate">
                 Showing {filteredData.length} of {data.length} modules
               </p>
-              <p className="mt-1">Access restricted by privileges</p>
+              <p className="mt-1 truncate">Drag right edge to resize</p>
             </div>
           </div>
         )}
