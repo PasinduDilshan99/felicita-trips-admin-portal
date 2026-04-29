@@ -45,6 +45,11 @@ import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
+import {
+  DESTINATION_CATEGORY_UPDATE_URL,
+  DESTINATION_PAGE_URL,
+  WEB_MANAGEMENT_URL,
+} from "@/utils/urls";
 
 // Helper function to convert hex to rgba
 const hexToRgba = (hex: string, opacity: number): string => {
@@ -133,14 +138,14 @@ const UpdateDestinationPage = () => {
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
+    { label: "Web Management", href: WEB_MANAGEMENT_URL },
     {
       label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
+      href: DESTINATION_PAGE_URL,
     },
     {
       label: "Update",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/update`,
+      href: DESTINATION_CATEGORY_UPDATE_URL,
     },
   ];
 

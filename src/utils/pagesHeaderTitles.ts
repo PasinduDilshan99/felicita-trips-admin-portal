@@ -6,3 +6,10 @@ export const VIEW_DESTINATION_DETAILS_PAGE_TITLE = "View Destination Details";
 export const ADD_DESTINATION_PAGE_TITLE = "Add New Destination";
 export const UPDATE_DESTINATION_PAGE_TITLE = "Update Destination";
 export const REMOVE_DESTINATION_PAGE_TITLE = "Terminate Destination";
+
+export const DESTINATION_CATEGORIES_PAGE_TITLE = "Destination Categories";
+export const VIEW_DESTINATION_CATEGORIES_PAGE_TITLE = "Destination Categories";
+export const VIEW_DESTINATION_CATEGORY_DETAILS_PAGE_TITLE = "Destination Category Details";
+export const ADD_DESTINATION_CATEGORY_PAGE_TITLE = "Add New Destination Category";
+export const UPDATE_DESTINATION_CATEGORY_PAGE_TITLE = "Update Destination Category";
+export const REMOVE_DESTINATION_CATEGORY_PAGE_TITLE = "Terminate Destination Category";

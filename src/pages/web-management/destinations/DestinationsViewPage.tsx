@@ -26,7 +26,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { ResultsHeader } from "@/components/destinations-components/view-destinations-components/ResultsHeader";
+import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { EmptyState } from "@/components/destinations-components/view-destinations-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import { DESTINATION_PAGE_URL, DESTINATIONS_VIEW_PAGE_URL, WEB_MANAGEMENT_URL } from "@/utils/urls";

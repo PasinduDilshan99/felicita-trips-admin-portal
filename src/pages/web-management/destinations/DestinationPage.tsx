@@ -22,17 +22,7 @@ import {
 import { DestinationStatisticsData } from "@/types/destination-types";
 import { DestinationService } from "@/services/destinationService";
 import { useTheme } from "@/contexts/ThemeContext";
-
-/* ─────────────────────────────────────────────
-   Utility
-───────────────────────────────────────────── */
-const hexToRgba = (hex: string, opacity: number): string => {
-  const h = hex.replace("#", "");
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { hexToRgba } from "@/utils/functions";
 
 /* ─────────────────────────────────────────────
    Animated Counter  — eases out, starts from 0
@@ -1192,14 +1182,21 @@ const DestinationPage = () => {
 
       <div className="dp-root">
         <div>
-          {/* Breadcrumb / Header */}
           <Reveal delay={0}>
-            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <PageHeader
-                title="Destinations"
-                description="Manage and monitor your travel destination locations"
-                breadcrumbItems={breadcrumbItems}
-              />
+            <div
+              className="sticky top-0 z-10 backdrop-blur-md border-b shadow-sm transition-colors duration-300"
+              style={{
+                backgroundColor: `${theme.surface}D9`,
+                borderColor: theme.border,
+              }}
+            >
+              <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <PageHeader
+                  title="Destinations"
+                  description="Manage and monitor your travel destination locations"
+                  breadcrumbItems={breadcrumbItems}
+                />
+              </div>
             </div>
           </Reveal>
 

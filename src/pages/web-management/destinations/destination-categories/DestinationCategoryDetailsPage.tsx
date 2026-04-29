@@ -4,26 +4,30 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/common-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
 import { DestinationService } from "@/services/destinationService";
 import { CategoryDetailsByIdResponse } from "@/types/destination-types";
 import { useTheme } from "@/contexts/ThemeContext";
-
-// Import components
-import { ErrorState } from "@/components/destination-categories-components/destination-category-details-veiw-components/ErrorState";
-import { ActionButtons } from "@/components/destination-categories-components/destination-category-details-veiw-components/ActionButtons";
 import { CategoryHeroImage } from "@/components/destination-categories-components/destination-category-details-veiw-components/CategoryHeroImage";
 import { CategoryBasicInfo } from "@/components/destination-categories-components/destination-category-details-veiw-components/CategoryBasicInfo";
 import { CategoryBrandColors } from "@/components/destination-categories-components/destination-category-details-veiw-components/CategoryBrandColors";
 import { CategoryStatistics } from "@/components/destination-categories-components/destination-category-details-veiw-components/CategoryStatistics";
 import { CategoryQuickActions } from "@/components/destination-categories-components/destination-category-details-veiw-components/CategoryQuickActions";
-import { ImageModal } from "@/components/destination-categories-components/destination-category-details-veiw-components/ImageModal";
 import { ExpandedGallery } from "@/components/destination-categories-components/destination-category-details-veiw-components/ExpandedGallery";
-import { LoadingState } from "@/components/destination-categories-components/destination-category-details-veiw-components/LoadingState";
 import { DestinationsList } from "@/components/destination-categories-components/destination-category-details-veiw-components/DestinationsList";
+import ActionButtons from "@/components/common-components/ActionButtons";
+import ImageModal, {
+  ImageModalImage,
+} from "@/components/common-components/ImageModal";
+import CommonLoading from "@/components/common-components/CommonLoading";
+import CommonErrorState from "@/components/common-components/CommonErrorState";
+import {
+  DESTINATION_CATEGORIES_PAGE_URL,
+  DESTINATION_CATEGORY_TERMINATE_URL,
+  DESTINATION_CATEGORY_UPDATE_URL,
+  DESTINATION_CATEGORY_VIEW_PAGE_URL,
+  DESTINATION_PAGE_URL,
+  WEB_MANAGEMENT_URL,
+} from "@/utils/urls";
 
 const DestinationCategoryDetailsPage = () => {
   const params = useParams();
@@ -45,14 +49,14 @@ const DestinationCategoryDetailsPage = () => {
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
+    { label: "Web Management", href: WEB_MANAGEMENT_URL },
     {
       label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
+      href: DESTINATION_PAGE_URL,
     },
     {
       label: "Categories",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/categories/view`,
+      href: DESTINATION_CATEGORIES_PAGE_URL,
     },
     {
       label: category?.category || "Category Details",
@@ -85,6 +89,17 @@ const DestinationCategoryDetailsPage = () => {
     }
   };
 
+  // Prepare images for modal
+  const getModalImages = (): ImageModalImage[] => {
+    if (!category) return [];
+    return category.images.map((img) => ({
+      url: img.imageUrl,
+      name: img.imageName,
+      description: img.imageDescription || undefined,
+      id: img.imageId,
+    }));
+  };
+
   const changeImage = (idx: number) => {
     setImgTransition(true);
     setTimeout(() => {
@@ -112,20 +127,21 @@ const DestinationCategoryDetailsPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleBack = () =>
-    router.push(
-      `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/categories/view`,
-    );
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleBack = () => router.push(DESTINATION_CATEGORY_VIEW_PAGE_URL);
 
   const handleEdit = () =>
     router.push(
-      `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/categories/edit/${categoryIdParam}`,
+      `${DESTINATION_CATEGORY_UPDATE_URL}/?categoryId=${categoryIdParam}&name=${category?.category}`,
     );
 
   const handleDelete = () => {
-    if (confirm("Are you sure you want to delete this category?")) {
-      console.log("Delete category:", categoryIdParam);
-    }
+    router.push(
+      `${DESTINATION_CATEGORY_TERMINATE_URL}?categoryId=${categoryIdParam}&name=${category?.category}`,
+    );
   };
 
   const handleShare = () => {
@@ -141,9 +157,34 @@ const DestinationCategoryDetailsPage = () => {
     }
   };
 
-  if (loading) return <LoadingState />;
-  if (error || !category)
-    return <ErrorState error={error} onBack={handleBack} />;
+  if (loading) {
+    return (
+      <CommonLoading
+        message="Loading category details..."
+        subMessage="Please wait while we fetch category information"
+        size="lg"
+        fullScreen={true}
+      />
+    );
+  }
+
+  if (error || !category) {
+    return (
+      <CommonErrorState
+        error={error}
+        title="Failed to Load Category"
+        message="The category couldn't be loaded. Please try again."
+        variant="error"
+        showBackButton={true}
+        showRetryButton={true}
+        onBack={handleBack}
+        onRetry={fetchCategoryDetails}
+        backButtonText="Back to Categories"
+        retryButtonText="Try Again"
+        fullScreen={true}
+      />
+    );
+  }
 
   return (
     <div
@@ -152,13 +193,13 @@ const DestinationCategoryDetailsPage = () => {
     >
       {/* Topbar */}
       <div
-        className="sticky top-0 z-50 backdrop-blur-md border-b shadow-sm transition-colors duration-300"
+        className="sticky top-0 z-10 backdrop-blur-md border-b shadow-sm transition-colors duration-300"
         style={{
           backgroundColor: `${theme.surface}D9`,
           borderColor: theme.border,
         }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-3.5">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title={category.category}
             description={`Category ID: ${category.categoryId}`}
@@ -168,12 +209,15 @@ const DestinationCategoryDetailsPage = () => {
       </div>
 
       {/* Main */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <ActionButtons
-          onBack={handleBack}
-          onShare={handleShare}
+          title={category.category}
+          showEdit={true}
+          showDelete={true}
+          showShare={true}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onShare={handleShare}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
@@ -238,13 +282,14 @@ const DestinationCategoryDetailsPage = () => {
       {/* Modals */}
       {isModalOpen && category && (
         <ImageModal
-          images={category.images}
-          currentIndex={currentImageIndex}
-          onClose={() => setIsModalOpen(false)}
-          onNavigate={(index) => {
-            setCurrentImageIndex(index);
-            setImgTransition(false);
-          }}
+          isOpen={isModalOpen}
+          images={getModalImages()}
+          initialIndex={currentImageIndex}
+          onClose={handleModalClose}
+          showNavigation={true}
+          showDownload={true}
+          showZoom={true}
+          allowKeyboardNavigation={true}
         />
       )}
 

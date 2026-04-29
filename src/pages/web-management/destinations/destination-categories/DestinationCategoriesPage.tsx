@@ -23,17 +23,7 @@ import {
 import { DestinationCategoriesStatisticsData } from "@/types/destination-types";
 import { DestinationService } from "@/services/destinationService";
 import { useTheme } from "@/contexts/ThemeContext";
-
-/* ─────────────────────────────────────────────
-   Utility
-───────────────────────────────────────────── */
-const hexToRgba = (hex: string, opacity: number): string => {
-  const h = hex.replace("#", "");
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { hexToRgba } from "@/utils/functions";
 
 /* ─────────────────────────────────────────────
    Animated Counter
@@ -282,7 +272,7 @@ const DestinationCategoriesPage = () => {
       href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
     },
     {
-      label: "Destination Categories",
+      label: "Categories",
       href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}`,
     },
   ];
@@ -1071,13 +1061,23 @@ const DestinationCategoriesPage = () => {
       `}</style>
 
       <div className="dpc-root">
-        <div className="dpc-wrap">
+        <div>
           {/* ── Breadcrumb / Header ── */}
-          <PageHeader
-            title="Destination Categories"
-            description="Manage and monitor destination category classifications"
-            breadcrumbItems={breadcrumbItems}
-          />
+          <div
+            className="sticky top-0 z-10 backdrop-blur-md border-b shadow-sm transition-colors duration-300"
+            style={{
+              backgroundColor: `${theme.surface}D9`,
+              borderColor: theme.border,
+            }}
+          >
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <PageHeader
+                title="Destination Categories"
+                description="Manage and monitor destination category classifications"
+                breadcrumbItems={breadcrumbItems}
+              />
+            </div>
+          </div>
 
           {loading ? (
             <div className="dpc-loading">
@@ -1088,7 +1088,7 @@ const DestinationCategoriesPage = () => {
               <span className="dpc-loading-text">Loading category data…</span>
             </div>
           ) : (
-            <>
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
               {/* ── Quick Actions ── */}
               <section className="dpc-fade-up dpc-delay-1">
                 <SectionHeader
@@ -1455,7 +1455,7 @@ const DestinationCategoriesPage = () => {
                   </div>
                 </div>
               </section>
-            </>
+            </div>
           )}
         </div>
       </div>

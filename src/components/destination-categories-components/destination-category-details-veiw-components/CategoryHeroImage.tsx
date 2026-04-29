@@ -4,6 +4,7 @@ import React from "react";
 import { ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
 import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
+import NavigationButton from "@/components/common-components/NavigationButton";
 
 interface CategoryHeroImageProps {
   images: Array<{ imageId: number; imageName: string; imageUrl: string }>;
@@ -97,18 +98,8 @@ const CategoryHeroImage = ({
         {/* Navigation Arrows */}
         {hasMultipleImages && (
           <>
-            <button
-              onClick={onPrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200"
-            >
-              <ChevronLeft className="w-5 h-5 text-gray-800" />
-            </button>
-            <button
-              onClick={onNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200"
-            >
-              <ChevronRight className="w-5 h-5 text-gray-800" />
-            </button>
+            <NavigationButton direction="left" onClick={onPrev} size="sm" />
+            <NavigationButton direction="right" onClick={onNext} size="sm" />
           </>
         )}
       </div>

@@ -13,7 +13,6 @@ import { SingleDestinationResponse } from "@/types/destination-types";
 
 // Import components
 import { ExpandedGallery } from "@/components/destinations-components/view-destination-details-components/ExpandedGallery";
-import { ActionButtons } from "@/components/destinations-components/view-destination-details-components/ActionButtons";
 import { HeroImage } from "@/components/destinations-components/view-destination-details-components/HeroImage";
 import { DestinationOverview } from "@/components/destinations-components/view-destination-details-components/DestinationOverview";
 import { ActivitiesList } from "@/components/destinations-components/view-destination-details-components/ActivitiesList";
@@ -22,7 +21,9 @@ import { CategoriesList } from "@/components/destinations-components/view-destin
 import { LocationMap } from "@/components/destinations-components/view-destination-details-components/LocationMap";
 import { GalleryMini } from "@/components/destinations-components/view-destination-details-components/GalleryMini";
 import { useTheme } from "@/contexts/ThemeContext";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import ImageModal, {
+  ImageModalImage,
+} from "@/components/common-components/ImageModal";
 import {
   DESTINATION_PAGE_URL,
   DESTINATION_TERMINATE_PAGE_URL,
@@ -32,6 +33,7 @@ import {
 } from "@/utils/urls";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
+import ActionButtons from "@/components/common-components/ActionButtons";
 
 const DestinationDetailsPage = () => {
   const params = useParams();
@@ -205,7 +207,10 @@ const DestinationDetailsPage = () => {
       {/* Main */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <ActionButtons
-          destinationName={destination.destinationName}
+          title={destination.destinationName}
+          showShare={true}
+          showEdit={true}
+          showDelete={true}
           onShare={handleShare}
           onEdit={handleEdit}
           onDelete={handleDelete}

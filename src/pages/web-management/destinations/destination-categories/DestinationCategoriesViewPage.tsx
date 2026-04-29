@@ -7,47 +7,112 @@ import {
   WEB_MANAGEMENT_DESTINATION_PATH,
 } from "@/utils/constant";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import { Loader2 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { LoadingState } from "@/components/destinations-components/view-destinations-components/LoadingState";
-import Pagination from "@/components/common-components/Pagination";
-import { ResultsHeader } from "@/components/destinations-components/view-destinations-components/ResultsHeader";
+import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { ActiveCategory } from "@/types/destination-types";
 import { DestinationService } from "@/services/destinationService";
-import CategoryFilter from "@/components/destination-categories-components/destination-categories-view-components/CategoryFilter";
 import CategoryCard from "@/components/destination-categories-components/destination-categories-view-components/CategoryCard";
 import CategoryListCard from "@/components/destination-categories-components/destination-categories-view-components/CategoryListCard";
 import { CategoryEmptyState } from "@/components/destination-categories-components/destination-categories-view-components/CategoryEmptyState";
 import { useRouter, useSearchParams } from "next/navigation";
+import FilterPanel, {
+  FilterField,
+  SortOption,
+} from "@/components/common-components/FilterPanel";
+import Pagination from "@/components/common-components/Pagination";
+import ActiveFilters from "@/components/common-components/ActiveFilters";
+import CommonLoading from "@/components/common-components/CommonLoading";
+import CommonErrorState from "@/components/common-components/CommonErrorState";
+import {
+  ACTIVITY_CATEGORIES_PAGE_URL,
+  DESTINATION_PAGE_URL,
+  WEB_MANAGEMENT_URL,
+} from "@/utils/urls";
 
 // Category Filter Params
 interface CategoryFilterParams {
-  searchTerm: string | null;
+  name: string | null; // Changed from searchTerm to name
   categoryStatus: "ACTIVE" | "INACTIVE" | null;
   pageSize: number;
   pageNumber: number;
+  sortBy?: string;
+  sortDirection?: "ASC" | "DESC";
 }
+
+// Sort options for categories
+const SORT_OPTIONS: SortOption[] = [
+  { value: "category", label: "Category Name" },
+  { value: "createdAt", label: "Created Date" },
+  { value: "updatedAt", label: "Updated Date" },
+  { value: "categoryId", label: "Category ID" },
+];
 
 // Utility functions for URL params management
 const filtersToUrlParams = (filters: CategoryFilterParams): URLSearchParams => {
   const params = new URLSearchParams();
 
-  if (filters.searchTerm) params.set("searchTerm", filters.searchTerm);
-  if (filters.categoryStatus) params.set("categoryStatus", filters.categoryStatus);
+  if (filters.name) params.set("name", filters.name); // Changed from searchTerm to name
+  if (filters.categoryStatus)
+    params.set("categoryStatus", filters.categoryStatus);
   if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
   if (filters.pageNumber && filters.pageNumber !== 1)
     params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
 
   return params;
 };
 
 const urlParamsToFilters = (params: URLSearchParams): CategoryFilterParams => {
   return {
-    searchTerm: params.get("searchTerm") || null,
-    categoryStatus: (params.get("categoryStatus") as "ACTIVE" | "INACTIVE" | null) || null,
+    name: params.get("name") || null, // Changed from searchTerm to name
+    categoryStatus:
+      (params.get("categoryStatus") as "ACTIVE" | "INACTIVE" | null) || null,
     pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
-    pageNumber: params.get("pageNumber") ? parseInt(params.get("pageNumber")!) : 1,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") || undefined,
+    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
   };
+};
+
+// Helper function to sort categories
+const sortCategories = (
+  categoriesList: ActiveCategory[],
+  sortBy?: string,
+  sortDirection: "ASC" | "DESC" = "ASC",
+): ActiveCategory[] => {
+  if (!sortBy) return categoriesList;
+
+  const sorted = [...categoriesList];
+
+  sorted.sort((a, b) => {
+    let comparison = 0;
+
+    switch (sortBy) {
+      case "category":
+        comparison = a.category.localeCompare(b.category);
+        break;
+      case "categoryId":
+        comparison = a.categoryId - b.categoryId;
+        break;
+      case "createdAt":
+        comparison =
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        break;
+      case "updatedAt":
+        comparison =
+          new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+        break;
+      default:
+        comparison = 0;
+    }
+
+    return sortDirection === "ASC" ? comparison : -comparison;
+  });
+
+  return sorted;
 };
 
 // Main component wrapped with Suspense
@@ -58,26 +123,56 @@ const DestinationCategoriesViewContent = () => {
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
+    { label: "Web Management", href: WEB_MANAGEMENT_URL },
     {
       label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
+      href: DESTINATION_PAGE_URL,
     },
     {
       label: "Categories",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/categories/view`,
+      href: ACTIVITY_CATEGORIES_PAGE_URL,
     },
   ];
 
   const [categories, setCategories] = useState<ActiveCategory[]>([]);
-  const [filteredCategories, setFilteredCategories] = useState<ActiveCategory[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<
+    ActiveCategory[]
+  >([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const [filters, setFilters] = useState<CategoryFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams())
+    urlParamsToFilters(searchParams || new URLSearchParams()),
   );
+
+  // Get sort label for display
+  const getSortLabel = (sortBy: string): string => {
+    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
+    return option ? option.label : sortBy;
+  };
+
+  // Define filter fields for FilterPanel
+  const filterFields: FilterField[] = [
+    {
+      key: "name", // Changed from searchTerm to name
+      label: "Category Name",
+      type: "text",
+      placeholder: "Search by category name...",
+      width: "full",
+    },
+    {
+      key: "categoryStatus",
+      label: "Status",
+      type: "select",
+      options: [
+        { value: "ACTIVE", label: "Active" },
+        { value: "INACTIVE", label: "Inactive" },
+      ],
+      width: "third",
+    },
+  ];
 
   // Update URL with current filters
   const updateURL = useCallback(
@@ -90,21 +185,25 @@ const DestinationCategoriesViewContent = () => {
 
       router.replace(newURL, { scroll: false });
     },
-    [router]
+    [router],
   );
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await DestinationService.getActiveCategories();
       const data = response.data;
       setCategories(data);
 
       // Apply initial filtering based on URL params
-      const urlFilters = urlParamsToFilters(searchParams || new URLSearchParams());
+      const urlFilters = urlParamsToFilters(
+        searchParams || new URLSearchParams(),
+      );
       applyFilters(data, urlFilters);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
+    } catch (err: any) {
+      console.error("Error fetching categories:", err);
+      setError(err.message || "Failed to load categories");
     } finally {
       setLoading(false);
       setIsInitialLoad(false);
@@ -113,26 +212,33 @@ const DestinationCategoriesViewContent = () => {
 
   const applyFilters = (
     categoriesList: ActiveCategory[],
-    currentFilters: CategoryFilterParams
+    currentFilters: CategoryFilterParams,
   ) => {
     let filtered = [...categoriesList];
 
-    // Apply search term filter
-    if (currentFilters.searchTerm) {
-      const searchLower = currentFilters.searchTerm.toLowerCase();
+    // Apply name filter (changed from searchTerm)
+    if (currentFilters.name) {
+      const searchLower = currentFilters.name.toLowerCase();
       filtered = filtered.filter(
         (category) =>
           category.category.toLowerCase().includes(searchLower) ||
-          category.categoryDescription.toLowerCase().includes(searchLower)
+          category.categoryDescription.toLowerCase().includes(searchLower),
       );
     }
 
     // Apply status filter
     if (currentFilters.categoryStatus) {
       filtered = filtered.filter(
-        (category) => category.categoryStatus === currentFilters.categoryStatus
+        (category) => category.categoryStatus === currentFilters.categoryStatus,
       );
     }
+
+    // Apply sorting
+    filtered = sortCategories(
+      filtered,
+      currentFilters.sortBy,
+      currentFilters.sortDirection,
+    );
 
     setFilteredCategories(filtered);
   };
@@ -145,14 +251,16 @@ const DestinationCategoriesViewContent = () => {
   // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(searchParams || new URLSearchParams());
+      const urlFilters = urlParamsToFilters(
+        searchParams || new URLSearchParams(),
+      );
       setFilters(urlFilters);
       applyFilters(categories, urlFilters);
     }
   }, [searchParams, isInitialLoad, categories]);
 
-  const handleFilterChange = (newFilters: CategoryFilterParams) => {
-    setFilters(newFilters);
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSearch = () => {
@@ -164,18 +272,32 @@ const DestinationCategoriesViewContent = () => {
 
   const handleReset = () => {
     const resetFilters: CategoryFilterParams = {
-      searchTerm: null,
+      name: null, // Changed from searchTerm to name
       categoryStatus: null,
       pageSize: 6,
       pageNumber: 1,
+      sortBy: undefined,
+      sortDirection: "ASC" as const,
     };
     setFilters(resetFilters);
     updateURL(resetFilters);
     applyFilters(categories, resetFilters);
   };
 
-  const handleRemoveFilter = (key: keyof CategoryFilterParams) => {
+  const handleRemoveFilter = (key: string) => {
     const updatedFilters = { ...filters, [key]: null, pageNumber: 1 };
+    setFilters(updatedFilters);
+    updateURL(updatedFilters);
+    applyFilters(categories, updatedFilters);
+  };
+
+  const handleRemoveSort = () => {
+    const updatedFilters: CategoryFilterParams = {
+      ...filters,
+      sortBy: undefined,
+      sortDirection: "ASC" as const,
+      pageNumber: 1,
+    };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
     applyFilters(categories, updatedFilters);
@@ -188,12 +310,25 @@ const DestinationCategoriesViewContent = () => {
     applyFilters(categories, updatedFilters);
   };
 
+  const handleSortChange = (
+    newSortBy: string,
+    newSortDirection: "ASC" | "DESC",
+  ) => {
+    const updatedFilters = {
+      ...filters,
+      sortBy: newSortBy || undefined,
+      sortDirection: newSortDirection,
+      pageNumber: 1,
+    };
+    setFilters(updatedFilters);
+    updateURL(updatedFilters);
+    applyFilters(categories, updatedFilters);
+  };
+
   const handlePageChange = (page: number) => {
     const updatedFilters = { ...filters, pageNumber: page };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
-    // No need to reapply filters for page change as it just affects pagination of already filtered data
-    // But we keep the URL updated
   };
 
   const toggleViewMode = (mode: "grid" | "list") => {
@@ -209,12 +344,71 @@ const DestinationCategoriesViewContent = () => {
   const currentEnd = Math.min(endIndex, totalItems);
 
   // Get active filters for display
-  const getActiveFilterCount = () => {
-    let count = 0;
-    if (filters.searchTerm) count++;
-    if (filters.categoryStatus) count++;
-    return count;
+  const getActiveFilters = () => {
+    const activeFilters: Array<{ key: string; label: string; value: string }> =
+      [];
+
+    if (filters.name) {
+      // Changed from searchTerm to name
+      activeFilters.push({
+        key: "name",
+        label: "Category Name",
+        value: filters.name,
+      });
+    }
+    if (filters.categoryStatus) {
+      activeFilters.push({
+        key: "categoryStatus",
+        label: "Status",
+        value: filters.categoryStatus === "ACTIVE" ? "Active" : "Inactive",
+      });
+    }
+
+    return activeFilters;
   };
+
+  // Get sort filter for display
+  const getSortFilter = () => {
+    if (!filters.sortBy) return null;
+    return {
+      sortBy: filters.sortBy,
+      sortLabel: getSortLabel(filters.sortBy),
+      sortDirection: filters.sortDirection || "ASC",
+    };
+  };
+
+  // Convert filters for FilterPanel
+  const filterPanelFilters: Record<string, any> = {
+    name: filters.name, // Changed from searchTerm to name
+    categoryStatus: filters.categoryStatus,
+  };
+
+  if (loading) {
+    return (
+      <CommonLoading
+        message="Loading categories..."
+        subMessage="Fetching destination categories with rich content"
+        size="lg"
+        fullScreen={true}
+      />
+    );
+  }
+
+  if (error) {
+    return (
+      <CommonErrorState
+        error={error}
+        title="Failed to Load Categories"
+        message="Unable to load destination categories. Please try again."
+        variant="error"
+        showBackButton={false}
+        showRetryButton={true}
+        onRetry={fetchCategories}
+        retryButtonText="Try Again"
+        fullScreen={true}
+      />
+    );
+  }
 
   return (
     <div
@@ -237,25 +431,43 @@ const DestinationCategoriesViewContent = () => {
         </div>
       </div>
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filter Section */}
+        {/* Filter Section - Using FilterPanel with sorting */}
         <div className="mb-8">
-          <CategoryFilter
-            filters={filters}
+          <FilterPanel
+            filters={filterPanelFilters}
+            fields={filterFields}
             onFilterChange={handleFilterChange}
             onSearch={handleSearch}
             onReset={handleReset}
             onPageSizeChange={handlePageSizeChange}
+            onSortChange={handleSortChange}
+            pageSize={filters.pageSize}
+            pageSizeOptions={[6, 9, 12, 24]}
+            showPageSize={true}
+            showSorting={true}
+            sortOptions={SORT_OPTIONS}
+            sortBy={filters.sortBy || ""}
+            sortDirection={filters.sortDirection || "ASC"}
+            title="Filter Categories"
+            searchButtonText="Search"
+            resetButtonText="Reset"
+            showActiveFilters={false}
+            collapsible={true}
+            isLoading={loading}
           />
         </div>
 
         {/* Active Filters Display */}
-        {getActiveFilterCount() > 0 && (
-          <ActiveCategoryFilters
-            filters={filters}
-            onRemoveFilter={handleRemoveFilter}
-            onClearAll={handleReset}
-          />
-        )}
+        <ActiveFilters
+          filters={getActiveFilters()}
+          sortFilter={getSortFilter()}
+          onRemoveFilter={handleRemoveFilter}
+          onRemoveSort={handleRemoveSort}
+          onClearAll={handleReset}
+          title="Active Filters"
+          showClearAll={true}
+          variant="default"
+        />
 
         {/* Results Header */}
         <ResultsHeader
@@ -266,154 +478,53 @@ const DestinationCategoriesViewContent = () => {
           onViewModeChange={toggleViewMode}
         />
 
-        {/* Loading State */}
-        {loading && (
-          <LoadingState
-            message="Loading categories..."
-            subMessage="Fetching destination categories with rich content"
-          />
-        )}
-
         {/* Categories Grid/List */}
-        {!loading && (
+        {paginatedCategories.length === 0 ? (
+          <CategoryEmptyState
+            onClearFilters={handleReset}
+            hasActiveFilters={getActiveFilters().length > 0 || !!filters.sortBy}
+            searchTerm={filters.name} // Pass name as searchTerm for the empty state
+          />
+        ) : (
           <>
-            {paginatedCategories.length === 0 ? (
-              <CategoryEmptyState
-                onClearFilters={handleReset}
-                hasActiveFilters={getActiveFilterCount() > 0}
-                searchTerm={filters.searchTerm}
-              />
-            ) : (
-              <>
-                {/* Grid View */}
-                {viewMode === "grid" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {paginatedCategories.map((category) => (
-                      <CategoryCard
-                        key={category.categoryId}
-                        category={category}
-                      />
-                    ))}
-                  </div>
-                )}
+            {/* Grid View */}
+            {viewMode === "grid" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {paginatedCategories.map((category) => (
+                  <CategoryCard key={category.categoryId} category={category} />
+                ))}
+              </div>
+            )}
 
-                {/* List View */}
-                {viewMode === "list" && (
-                  <div className="space-y-6 mb-8">
-                    {paginatedCategories.map((category) => (
-                      <CategoryListCard
-                        key={category.categoryId}
-                        category={category}
-                      />
-                    ))}
-                  </div>
-                )}
+            {/* List View */}
+            {viewMode === "list" && (
+              <div className="space-y-6 mb-8">
+                {paginatedCategories.map((category) => (
+                  <CategoryListCard
+                    key={category.categoryId}
+                    category={category}
+                  />
+                ))}
+              </div>
+            )}
 
-                {/* Pagination */}
-                {totalItems > filters.pageSize && (
-                  <div className="mt-10">
-                    <Pagination
-                      currentPage={filters.pageNumber}
-                      totalItems={totalItems}
-                      pageSize={filters.pageSize}
-                      onPageChange={handlePageChange}
-                    />
-                  </div>
-                )}
-              </>
+            {/* Pagination */}
+            {totalItems > filters.pageSize && (
+              <div className="mt-10">
+                <Pagination
+                  currentPage={filters.pageNumber}
+                  totalItems={totalItems}
+                  pageSize={filters.pageSize}
+                  onPageChange={handlePageChange}
+                  showResultsCount={true}
+                  showFirstLastButtons={true}
+                  showProgressBar={true}
+                  size="md"
+                />
+              </div>
             )}
           </>
         )}
-      </div>
-    </div>
-  );
-};
-
-// Active Filters Component for Categories
-const ActiveCategoryFilters: React.FC<{
-  filters: CategoryFilterParams;
-  onRemoveFilter: (key: keyof CategoryFilterParams) => void;
-  onClearAll: () => void;
-}> = ({ filters, onRemoveFilter, onClearAll }) => {
-  const { theme } = useTheme();
-  const { Filter, X } = require("lucide-react");
-
-  interface ActiveFilterItem {
-    key: keyof CategoryFilterParams;
-    label: string;
-    value: string;
-  }
-
-  const activeFilters: ActiveFilterItem[] = [];
-
-  if (filters.searchTerm) {
-    activeFilters.push({
-      key: "searchTerm",
-      label: "Search",
-      value: filters.searchTerm,
-    });
-  }
-  if (filters.categoryStatus) {
-    activeFilters.push({
-      key: "categoryStatus",
-      label: "Status",
-      value: filters.categoryStatus,
-    });
-  }
-
-  if (activeFilters.length === 0) return null;
-
-  return (
-    <div
-      className="rounded-xl shadow-sm border p-4 mb-6 transition-colors duration-300"
-      style={{
-        backgroundColor: theme.surface,
-        borderColor: theme.border,
-      }}
-    >
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4" style={{ color: theme.primary }} />
-          <span
-            className="text-sm font-medium"
-            style={{ color: theme.textSecondary }}
-          >
-            Active Filters:
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {activeFilters.map((filter) => (
-            <div
-              key={filter.key}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors duration-300"
-              style={{
-                backgroundColor: `${theme.primary}10`,
-                border: `1px solid ${theme.primary}30`,
-              }}
-            >
-              <span className="font-medium" style={{ color: theme.primary }}>
-                {filter.label}:
-              </span>
-              <span style={{ color: theme.text }}>{filter.value}</span>
-              <button
-                onClick={() => onRemoveFilter(filter.key)}
-                className="ml-1 transition-colors hover:opacity-70"
-                style={{ color: theme.primary }}
-                aria-label={`Remove ${filter.label} filter`}
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={onClearAll}
-          className="text-sm transition-colors flex items-center gap-1 hover:opacity-70"
-          style={{ color: theme.error }}
-        >
-          <X className="w-3.5 h-3.5" />
-          Clear all
-        </button>
       </div>
     </div>
   );
@@ -433,9 +544,12 @@ const DestinationCategoriesViewPage = () => {
             borderColor: theme.border,
           }}
         >
-          <Loader2
-            className="w-12 h-12 animate-spin"
-            style={{ color: theme.primary }}
+          <div
+            className="w-12 h-12 rounded-full border-4 border-t-transparent animate-spin"
+            style={{
+              borderColor: `${theme.primary}20`,
+              borderTopColor: theme.primary,
+            }}
           />
           <span
             className="mt-4 text-lg font-medium"
