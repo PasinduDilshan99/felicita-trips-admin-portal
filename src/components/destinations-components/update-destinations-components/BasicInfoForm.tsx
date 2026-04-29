@@ -2,7 +2,10 @@
 
 import React, { useId, useRef } from "react";
 import { Edit, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
+import { DESCRIPTION_MAX_CHARACTERS, NAME_MAX_CHARACTERS } from "@/data/destination-constant-data";
+import { DESTINATION_STATUS_OPTIONS } from "@/data/status-options-data";
 
 interface BasicInfoFormProps {
   destination: any;
@@ -10,23 +13,58 @@ interface BasicInfoFormProps {
   onFieldChange: (field: string, value: any) => void;
 }
 
-const NAME_MAX = 100;
-const DESCRIPTION_MAX = 1000;
+/* ─── Animation Variants ─────────────────────────────────────────────────── */
 
-const STATUS_OPTIONS = [
-  {
-    value: "ACTIVE",
-    label: "Active",
-    description: "Visible to customers",
-    color: "#16a34a",
+const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: EASE_OUT },
   },
-  {
-    value: "INACTIVE",
-    label: "Inactive",
-    description: "Hidden from customers",
-    color: "#6b7280",
+};
+
+const fieldGroupVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.07, delayChildren: 0.1 },
   },
-];
+};
+
+const fieldVariants: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.38, ease: EASE_OUT },
+  },
+};
+
+const modifiedBadgeVariants: Variants = {
+  hidden: { opacity: 0, height: 0, marginTop: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    marginTop: 6,
+    transition: { duration: 0.22, ease: "easeOut" },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    marginTop: 0,
+    transition: { duration: 0.18, ease: "easeIn" },
+  },
+};
+
+const pillVariants: Variants = {
+  rest: { scale: 1, y: 0 },
+  hover: { y: -2, transition: { duration: 0.15, ease: "easeOut" } },
+  tap: { scale: 0.97, transition: { duration: 0.1 } },
+};
+
+/* ─── Component ──────────────────────────────────────────────────────────── */
 
 export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   destination,
@@ -38,7 +76,7 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   const statusRef = useRef<HTMLSelectElement>(null);
 
   const descLength = (destination.destinationDescription ?? "").length;
-  const descPct = (descLength / DESCRIPTION_MAX) * 100;
+  const descPct = (descLength / DESCRIPTION_MAX_CHARACTERS) * 100;
   const descColor =
     descPct > 90 ? theme.error : descPct > 70 ? "#f59e0b" : theme.primary;
 
@@ -46,7 +84,7 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     if (!statusRef.current) return;
     const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
       window.HTMLSelectElement.prototype,
-      "value",
+      "value"
     )?.set;
     nativeInputValueSetter?.call(statusRef.current, value);
     statusRef.current.dispatchEvent(new Event("change", { bubbles: true }));
@@ -67,11 +105,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
         HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
       >
     ) => {
-      if (!isChanged) {
-        e.currentTarget.style.borderColor = theme.border;
-      } else {
-        e.currentTarget.style.borderColor = theme.primary;
-      }
+      e.currentTarget.style.borderColor = isChanged
+        ? theme.primary
+        : theme.border;
       e.currentTarget.style.boxShadow = "none";
     },
   });
@@ -81,6 +117,25 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     color: theme.text,
     transition: "border-color 0.18s ease, box-shadow 0.18s ease",
   };
+
+  /* ── Field helper for consistent label + modified badge ── */
+  const ModifiedBadge = ({ field }: { field: string }) => (
+    <AnimatePresence>
+      {hasChanged(field) && (
+        <motion.p
+          key="badge"
+          variants={modifiedBadgeVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="text-xs flex items-center gap-1 overflow-hidden"
+          style={{ color: theme.primary }}
+        >
+          This field has been modified
+        </motion.p>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <>
@@ -94,32 +149,40 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
         }
         .field-error { animation: errorShake 0.35s ease; }
 
-        .status-pill {
-          transition: background 0.18s ease, border-color 0.18s ease,
-                      box-shadow 0.18s ease, transform 0.15s ease;
-        }
-        .status-pill:hover { transform: translateY(-1px); }
-
+        /* Smooth progress bar fill */
         .desc-bar-fill {
-          transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+          transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                      background-color 0.25s ease;
         }
+
+        /* Remove number input spinners */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+        input[type=number] { -moz-appearance: textfield; }
       `}</style>
 
-      <div
-        className="rounded-2xl overflow-hidden"
+      {/* ── Card ── */}
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        className="rounded-2xl overflow-hidden w-full"
         style={{
           backgroundColor: theme.surface,
           border: `1px solid ${theme.border}`,
-          boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+          boxShadow: "0 2px 16px rgba(0,0,0,0.07)",
         }}
       >
-        {/* Header */}
-        <div
-          className="flex items-center gap-3 px-6 py-4"
+        {/* ── Header ── */}
+        <motion.div
+          className="flex items-center gap-3 px-4 sm:px-6 py-4"
           style={{ borderBottom: `1px solid ${theme.border}` }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
         >
           <span
-            className="flex items-center justify-center w-8 h-8 rounded-lg"
+            className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0"
             style={{
               backgroundColor: `${theme.primary}18`,
               color: theme.primary,
@@ -127,81 +190,77 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           >
             <Edit className="w-4 h-4" />
           </span>
-          <div>
+          <div className="min-w-0">
             <h2
-              className="text-base font-semibold leading-tight"
+              className="text-sm sm:text-base font-semibold leading-tight truncate"
               style={{ color: theme.text }}
             >
               Basic Information
             </h2>
-            <p
-              className="text-xs mt-0.5"
-              style={{ color: theme.textSecondary }}
-            >
+            <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
               Core details about the destination
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Fields */}
-        <div className="px-6 py-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Destination Name */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label
-                  htmlFor={`${uid}-name`}
-                  className="text-sm font-medium"
-                  style={{ color: theme.textSecondary }}
-                >
-                  Destination Name
-                  <span style={{ color: theme.error }}> *</span>
-                </label>
-                <span
-                  className="text-xs tabular-nums"
-                  style={{
-                    color:
-                      (destination.destinationName ?? "").length > NAME_MAX * 0.9
-                        ? theme.error
-                        : theme.textSecondary,
-                  }}
-                >
-                  {(destination.destinationName ?? "").length}/{NAME_MAX}
-                </span>
-              </div>
-              <input
-                id={`${uid}-name`}
-                type="text"
-                value={destination.destinationName}
-                onChange={(e) =>
-                  onFieldChange("destinationName", e.target.value)
-                }
-                placeholder="e.g. Sigiriya Rock Fortress"
-                maxLength={NAME_MAX}
-                className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
+        {/* ── Fields ── */}
+        <motion.div
+          className="px-4 sm:px-6 py-5 sm:py-6"
+          variants={fieldGroupVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* ── Destination Name (outside grid, always full width) ── */}
+          <motion.div variants={fieldVariants} className="mb-5 md:mb-6">
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                htmlFor={`${uid}-name`}
+                className="text-sm font-medium"
+                style={{ color: theme.textSecondary }}
+              >
+                Destination Name
+                <span style={{ color: theme.error }}> *</span>
+              </label>
+              <span
+                className="text-xs tabular-nums"
                 style={{
-                  ...fieldBase,
-                  borderColor: hasChanged("destinationName")
-                    ? theme.primary
-                    : theme.border,
-                  backgroundColor: hasChanged("destinationName")
-                    ? `${theme.primary}10`
-                    : theme.background,
+                  color:
+                    (destination.destinationName ?? "").length >
+                    NAME_MAX_CHARACTERS * 0.9
+                      ? theme.error
+                      : theme.textSecondary,
                 }}
-                {...focusHandlers(hasChanged("destinationName"))}
-              />
-              {hasChanged("destinationName") && (
-                <p
-                  className="mt-1.5 text-xs flex items-center gap-1"
-                  style={{ color: theme.primary }}
-                >
-                  This field has been modified
-                </p>
-              )}
+              >
+                {(destination.destinationName ?? "").length}/{NAME_MAX_CHARACTERS}
+              </span>
             </div>
+            <input
+              id={`${uid}-name`}
+              type="text"
+              value={destination.destinationName}
+              onChange={(e) => onFieldChange("destinationName", e.target.value)}
+              placeholder="e.g. Sigiriya Rock Fortress"
+              maxLength={NAME_MAX_CHARACTERS}
+              className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
+              style={{
+                ...fieldBase,
+                borderColor: hasChanged("destinationName")
+                  ? theme.primary
+                  : theme.border,
+                backgroundColor: hasChanged("destinationName")
+                  ? `${theme.primary}10`
+                  : theme.background,
+              }}
+              {...focusHandlers(hasChanged("destinationName"))}
+            />
+            <ModifiedBadge field="destinationName" />
+          </motion.div>
 
-            {/* Status - Custom Pill Buttons */}
-            <div>
+          {/* Responsive grid: mobile 1col → md 2col */}
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+
+            {/* ── Status Pills ── */}
+            <motion.div variants={fieldVariants} className="md:col-span-2">
               <label
                 className="block text-sm font-medium mb-2"
                 style={{ color: theme.textSecondary }}
@@ -209,7 +268,7 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                 Status
               </label>
 
-              {/* Hidden select keeps onFieldChange contract intact */}
+              {/* Hidden select */}
               <select
                 ref={statusRef}
                 name="statusName"
@@ -219,22 +278,27 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                 aria-hidden="true"
                 tabIndex={-1}
               >
-                {STATUS_OPTIONS.map((o) => (
+                {DESTINATION_STATUS_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
                     {o.label}
                   </option>
                 ))}
               </select>
 
-              <div className="flex gap-3">
-                {STATUS_OPTIONS.map((opt) => {
+              {/* Pills — 2×2 grid on all screens */}
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                {DESTINATION_STATUS_OPTIONS.map((opt) => {
                   const isSelected = destination.statusName === opt.value;
                   return (
-                    <button
+                    <motion.button
                       key={opt.value}
                       type="button"
                       onClick={() => handleStatusClick(opt.value)}
-                      className="status-pill flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left"
+                      variants={pillVariants}
+                      initial="rest"
+                      whileHover="hover"
+                      whileTap="tap"
+                      className="flex-1 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 text-left min-w-0 cursor-pointer"
                       style={{
                         backgroundColor: isSelected
                           ? `${opt.color}10`
@@ -243,55 +307,72 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                         boxShadow: isSelected
                           ? `0 0 0 3px ${opt.color}18`
                           : "none",
+                        transition:
+                          "background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
                       }}
                     >
                       <span
-                        className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                        className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center"
                         style={{
                           backgroundColor: isSelected
                             ? `${opt.color}20`
                             : `${theme.border}60`,
+                          transition: "background-color 0.18s ease",
                         }}
                       >
-                        <span
+                        <motion.span
                           className="w-2.5 h-2.5 rounded-full"
-                          style={{
+                          animate={{
                             backgroundColor: isSelected
                               ? opt.color
                               : theme.textSecondary,
+                            scale: isSelected ? 1.15 : 1,
                           }}
+                          transition={{ duration: 0.2 }}
                         />
                       </span>
-                      <span className="min-w-0">
+                      <span className="min-w-0 flex-1">
                         <span
-                          className="block text-sm font-semibold leading-tight"
+                          className="block text-xs sm:text-sm font-semibold leading-tight truncate"
                           style={{
                             color: isSelected ? opt.color : theme.text,
+                            transition: "color 0.18s ease",
                           }}
                         >
                           {opt.label}
                         </span>
                         <span
-                          className="block text-xs mt-0.5"
+                          className="block text-xs mt-0.5 truncate"
                           style={{ color: theme.textSecondary }}
                         >
                           {opt.description}
                         </span>
                       </span>
-                      {isSelected && (
-                        <CheckCircle2
-                          className="w-4 h-4 ml-auto flex-shrink-0"
-                          style={{ color: opt.color }}
-                        />
-                      )}
-                    </button>
+                      <AnimatePresence>
+                        {isSelected && (
+                          <motion.span
+                            key="check"
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.5 }}
+                            transition={{ duration: 0.2, ease: "backOut" }}
+                            className="ml-auto flex-shrink-0"
+                          >
+                            <CheckCircle2
+                              className="w-4 h-4"
+                              style={{ color: opt.color }}
+                            />
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
                   );
                 })}
               </div>
-            </div>
+            </motion.div>
 
-            {/* Description */}
-            <div className="md:col-span-2">
+            {/* ── Description ── */}
+            <motion.div variants={fieldVariants} className="md:col-span-2">
               <div className="flex items-center justify-between mb-1.5">
                 <label
                   htmlFor={`${uid}-description`}
@@ -310,7 +391,7 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                 }
                 rows={5}
                 placeholder="Describe what makes this destination special…"
-                maxLength={DESCRIPTION_MAX}
+                maxLength={DESCRIPTION_MAX_CHARACTERS}
                 className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none"
                 style={{
                   ...fieldBase,
@@ -339,26 +420,19 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  {hasChanged("destinationDescription") && (
-                    <p
-                      className="text-xs flex items-center gap-1"
-                      style={{ color: theme.primary }}
-                    >
-                      This field has been modified
-                    </p>
-                  )}
+                  <ModifiedBadge field="destinationDescription" />
                   <span
                     className="text-xs tabular-nums ml-auto"
-                    style={{ color: descColor }}
+                    style={{ color: descColor, transition: "color 0.25s ease" }}
                   >
-                    {descLength}/{DESCRIPTION_MAX}
+                    {descLength}/{DESCRIPTION_MAX_CHARACTERS}
                   </span>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Location */}
-            <div>
+            {/* ── Location ── */}
+            <motion.div variants={fieldVariants}>
               <label
                 className="block text-sm font-medium mb-1.5"
                 style={{ color: theme.textSecondary }}
@@ -383,23 +457,17 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                 }}
                 {...focusHandlers(hasChanged("location"))}
               />
-              {hasChanged("location") && (
-                <p
-                  className="mt-1.5 text-xs flex items-center gap-1"
-                  style={{ color: theme.primary }}
-                >
-                  This field has been modified
-                </p>
-              )}
-            </div>
+              <ModifiedBadge field="location" />
+            </motion.div>
 
-            {/* Extra Price */}
-            <div>
+            {/* ── Extra Price ── */}
+            <motion.div variants={fieldVariants}>
               <label
                 className="block text-sm font-medium mb-1.5"
                 style={{ color: theme.textSecondary }}
               >
-                Extra Price (Optional)
+                Extra Price{" "}
+                <span className="font-normal text-xs">(Optional)</span>
               </label>
               <input
                 type="number"
@@ -409,17 +477,14 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                   onFieldChange("extraPrice", parseFloat(e.target.value))
                 }
                 className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
-                style={{
-                  ...fieldBase,
-                  borderColor: theme.border,
-                }}
+                style={{ ...fieldBase, borderColor: theme.border }}
                 placeholder="0.00"
                 {...focusHandlers(false)}
               />
-            </div>
+            </motion.div>
 
-            {/* Extra Price Note */}
-            <div>
+            {/* ── Extra Price Note ── */}
+            <motion.div variants={fieldVariants}>
               <label
                 className="block text-sm font-medium mb-1.5"
                 style={{ color: theme.textSecondary }}
@@ -429,21 +494,16 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               <input
                 type="text"
                 value={destination.extraPriceNote || ""}
-                onChange={(e) =>
-                  onFieldChange("extraPriceNote", e.target.value)
-                }
+                onChange={(e) => onFieldChange("extraPriceNote", e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
-                style={{
-                  ...fieldBase,
-                  borderColor: theme.border,
-                }}
+                style={{ ...fieldBase, borderColor: theme.border }}
                 placeholder="e.g., Entrance fee, Tax, etc."
                 {...focusHandlers(false)}
               />
-            </div>
+            </motion.div>
 
-            {/* Latitude */}
-            <div>
+            {/* ── Latitude ── */}
+            <motion.div variants={fieldVariants}>
               <label
                 className="block text-sm font-medium mb-1.5"
                 style={{ color: theme.textSecondary }}
@@ -470,18 +530,11 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                 placeholder="e.g. 7.9567"
                 {...focusHandlers(hasChanged("latitude"))}
               />
-              {hasChanged("latitude") && (
-                <p
-                  className="mt-1.5 text-xs flex items-center gap-1"
-                  style={{ color: theme.primary }}
-                >
-                  This field has been modified
-                </p>
-              )}
-            </div>
+              <ModifiedBadge field="latitude" />
+            </motion.div>
 
-            {/* Longitude */}
-            <div>
+            {/* ── Longitude ── */}
+            <motion.div variants={fieldVariants}>
               <label
                 className="block text-sm font-medium mb-1.5"
                 style={{ color: theme.textSecondary }}
@@ -508,18 +561,12 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                 placeholder="e.g. 80.7417"
                 {...focusHandlers(hasChanged("longitude"))}
               />
-              {hasChanged("longitude") && (
-                <p
-                  className="mt-1.5 text-xs flex items-center gap-1"
-                  style={{ color: theme.primary }}
-                >
-                  This field has been modified
-                </p>
-              )}
-            </div>
+              <ModifiedBadge field="longitude" />
+            </motion.div>
+
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </>
   );
 };

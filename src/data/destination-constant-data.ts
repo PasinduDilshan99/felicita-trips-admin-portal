@@ -1,0 +1,2 @@
+export const NAME_MAX_CHARACTERS = 100;
+export const DESCRIPTION_MAX_CHARACTERS = 1000;

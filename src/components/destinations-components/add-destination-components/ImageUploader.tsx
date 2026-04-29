@@ -240,7 +240,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                   type="button"
                   onClick={onAddImage}
                   disabled={uploadingImages || !newImage.imageUrl}
-                  className="w-full px-4 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="cursor-pointer w-full px-4 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{
                     backgroundColor: `${theme.success}10`,
                     border: `1px solid ${theme.success}30`,
@@ -367,7 +367,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                       type="button"
                       onClick={() => onRemoveImage(index)}
                       disabled={preview.uploading}
-                      className="absolute top-3 right-3 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 disabled:opacity-0"
+                      className="cursor-pointer absolute top-3 right-3 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 disabled:opacity-0"
                       style={{
                         backgroundColor: theme.error,
                         color: "white",

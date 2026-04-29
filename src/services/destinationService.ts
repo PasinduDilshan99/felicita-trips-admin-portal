@@ -41,6 +41,27 @@ export class DestinationService {
     params: DestinationFilterParams,
   ): Promise<DestinationApiResponse> {
     try {
+      // Prepare the request body
+      const requestBody: any = {
+        name: params.name || null,
+        minPrice: params.minPrice || null,
+        maxPrice: params.maxPrice || null,
+        duration: params.duration || null,
+        destinationCategory: params.destinationCategory || null,
+        season: params.season || null,
+        status: params.status || null,
+        pageSize: params.pageSize,
+        pageNumber: params.pageNumber,
+      };
+
+      // Add sorting parameters if provided
+      if (params.sortBy) {
+        requestBody.sortBy = params.sortBy;
+      }
+      if (params.sortDirection) {
+        requestBody.sortDirection = params.sortDirection;
+      }
+
       const response = await fetch(
         GET_DESTINATIONS_DETAILS_BY_REQUEST_DATA_FE,
         {
@@ -50,17 +71,7 @@ export class DestinationService {
             Accept: "application/json",
           },
           credentials: "include",
-          body: JSON.stringify({
-            name: params.name || null,
-            minPrice: params.minPrice || null,
-            maxPrice: params.maxPrice || null,
-            duration: params.duration || null,
-            destinationCategory: params.destinationCategory || null,
-            season: params.season || null,
-            status: params.status || null,
-            pageSize: params.pageSize,
-            pageNumber: params.pageNumber,
-          }),
+          body: JSON.stringify(requestBody),
         },
       );
 

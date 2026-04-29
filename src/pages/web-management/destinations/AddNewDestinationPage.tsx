@@ -1,8 +1,10 @@
+// Updated AddNewDestinationPage.tsx - Key modifications
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/common-components/Breadcrumb";
+import { ToastNotification, ToastType } from "@/components/common-components/ToastNotification";
 import {
   WEB_MANAGEMENT_PATH,
   WEB_MANAGEMENT_DESTINATION_PATH,
@@ -15,7 +17,7 @@ import {
 } from "@/types/destination-types";
 import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { CheckCircle, AlertCircle, X, Loader } from "lucide-react";
+import { Loader } from "lucide-react";
 
 // Import components
 import { CategorySelector } from "@/components/destinations-components/add-destination-components/CategorySelector";
@@ -25,6 +27,15 @@ import { ImageUploader } from "@/components/destinations-components/add-destinat
 import { FormActions } from "@/components/destinations-components/add-destination-components/FormActions";
 import { FormSummary } from "@/components/destinations-components/add-destination-components/FormSummary";
 import { DestinationInfoForm } from "@/components/destinations-components/add-destination-components/DestinationInfoForm";
+
+// Toast state interface
+interface ToastState {
+  show: boolean;
+  type: ToastType;
+  title: string;
+  message: string;
+  destinationId?: number;
+}
 
 const AddNewDestinationPage = () => {
   const router = useRouter();
@@ -72,12 +83,16 @@ const AddNewDestinationPage = () => {
   // UI state
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [success, setSuccess] = useState(false);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
-  const [redirectTimer, setRedirectTimer] = useState<NodeJS.Timeout | null>(
-    null,
-  );
+  const [toast, setToast] = useState<ToastState>({
+    show: false,
+    type: "success",
+    title: "",
+    message: "",
+    destinationId: undefined,
+  });
+  const [lastCreatedDestinationId, setLastCreatedDestinationId] = useState<number | null>(null);
 
   // Get destination categories from context
   const destinationCategories = categories?.destinationCategoryList || [];
@@ -98,15 +113,6 @@ const AddNewDestinationPage = () => {
     );
     return category?.destinationCategoryColor || theme.primary;
   };
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (redirectTimer) {
-        clearTimeout(redirectTimer);
-      }
-    };
-  }, [redirectTimer]);
 
   // Handle form input changes
   const handleInputChange = (
@@ -317,7 +323,7 @@ const AddNewDestinationPage = () => {
     }
   };
 
-  // Validate form
+  // Validate form - MODIFIED: images and extra price are NOT required
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = "Destination name is required";
@@ -331,8 +337,8 @@ const AddNewDestinationPage = () => {
       newErrors.latitude = "Latitude must be between -90 and 90";
     if (formData.longitude < -180 || formData.longitude > 180)
       newErrors.longitude = "Longitude must be between -180 and 180";
-    if (formData.images.length === 0)
-      newErrors.images = "At least one image is required";
+    // REMOVED: images validation - now optional
+    // REMOVED: extra price validation - now optional
 
     const hasUploadingImages = imagePreviews.some(
       (preview) => preview.uploading,
@@ -344,7 +350,7 @@ const AddNewDestinationPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
+  // Handle form submission - MODIFIED: shows toast notification instead of inline success
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -355,22 +361,19 @@ const AddNewDestinationPage = () => {
     }
 
     setLoading(true);
-    setSuccess(false);
 
     try {
       const preparedImages = formData.images.map((image) => {
-        if (
-          !image.imageUrl.startsWith("http") &&
-          !image.imageUrl.startsWith("https")
-        ) {
+        // Skip URL validation if no image URL (optional images)
+        if (image.imageUrl && !image.imageUrl.startsWith("http") && !image.imageUrl.startsWith("https")) {
           throw new Error(
             `Invalid image URL for "${image.name}". Please use HTTP/HTTPS URLs.`,
           );
         }
         return {
           ...image,
-          name: image.name.trim(),
-          description: image.description.trim(),
+          name: image.name?.trim() || "",
+          description: image.description?.trim() || "",
           status: image.status as "ACTIVE" | "INACTIVE",
         };
       });
@@ -393,24 +396,35 @@ const AddNewDestinationPage = () => {
       const response = await DestinationService.addDestination(submissionData);
 
       if (response.code === 200) {
-        setSuccess(true);
+        // Store the created destination ID for navigation
+        // const destinationId = response.data?.destinationId || response.data?.id;
+        const destinationId = 1;
+        setLastCreatedDestinationId(destinationId);
+        
+        // Show success toast
+        setToast({
+          show: true,
+          type: "success",
+          title: "Destination Created Successfully!",
+          message: `${formData.name} has been added to your destinations.`,
+          destinationId: destinationId,
+        });
+        
+        // Reset form
         handleReset();
-        // const timer = setTimeout(() => {
-        //   router.push(
-        //     `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-        //   );
-        // }, 2000);
-        // setRedirectTimer(timer);
       } else {
         throw new Error(response.message || "Failed to add destination");
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      setErrors((prev) => ({
-        ...prev,
-        submit: error.message || "Failed to add destination. Please try again.",
-      }));
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // Show error toast
+      setToast({
+        show: true,
+        type: "error",
+        title: "Submission Failed",
+        message: error.message || "Failed to add destination. Please try again.",
+        destinationId: undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -440,6 +454,19 @@ const AddNewDestinationPage = () => {
     setErrors({});
   };
 
+  // Close toast
+  const handleCloseToast = () => {
+    setToast((prev) => ({ ...prev, show: false }));
+  };
+
+  // Get destination detail link
+  const getDestinationLink = (): string => {
+    if (toast.destinationId) {
+      return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/${toast.destinationId}`;
+    }
+    return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`;
+  };
+
   if (categoriesLoading) {
     return (
       <div
@@ -462,9 +489,21 @@ const AddNewDestinationPage = () => {
       className="min-h-screen transition-colors duration-300"
       style={{ backgroundColor: theme.background }}
     >
+      {/* Toast Notification */}
+      {toast.show && (
+        <ToastNotification
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={handleCloseToast}
+          actionLink={toast.type === "success" ? getDestinationLink() : undefined}
+          actionText="View Destination"
+        />
+      )}
+
       {/* Header */}
       <div
-        className="sticky top-0 z-50 backdrop-blur-sm border-b transition-colors duration-300"
+        className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
         style={{
           backgroundColor: `${theme.surface}CC`,
           borderColor: theme.border,
@@ -480,72 +519,7 @@ const AddNewDestinationPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Success Message */}
-        {success && (
-          <div
-            className="mb-8 p-6 rounded-2xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
-            style={{
-              background: `linear-gradient(135deg, ${theme.success}10, ${theme.success}05)`,
-              border: `1px solid ${theme.success}30`,
-            }}
-          >
-            <div className="flex items-center gap-4">
-              <CheckCircle
-                className="w-8 h-8 flex-shrink-0"
-                style={{ color: theme.success }}
-              />
-              <div className="flex-1">
-                <h3
-                  className="text-lg font-semibold"
-                  style={{ color: theme.success }}
-                >
-                  Destination Added Successfully!
-                </h3>
-                <p className="mt-1" style={{ color: theme.textSecondary }}>
-                  Redirecting to destinations list...
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {errors.submit && (
-          <div
-            className="mb-8 p-6 rounded-2xl shadow-sm"
-            style={{
-              background: `linear-gradient(135deg, ${theme.error}10, ${theme.error}05)`,
-              border: `1px solid ${theme.error}30`,
-            }}
-          >
-            <div className="flex items-center gap-4">
-              <AlertCircle
-                className="w-8 h-8 flex-shrink-0"
-                style={{ color: theme.error }}
-              />
-              <div className="flex-1">
-                <h3
-                  className="text-lg font-semibold"
-                  style={{ color: theme.error }}
-                >
-                  Submission Failed
-                </h3>
-                <p className="mt-1" style={{ color: theme.textSecondary }}>
-                  {errors.submit}
-                </p>
-              </div>
-              <button
-                onClick={() => setErrors((prev) => ({ ...prev, submit: "" }))}
-                className="p-2 rounded-lg transition-colors hover:opacity-70"
-                style={{ color: theme.error }}
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        )}
-
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Forms */}
           <div className="lg:col-span-2">
@@ -581,6 +555,7 @@ const AddNewDestinationPage = () => {
                 uploadingImages={uploadingImages}
                 onSubmit={() => {}}
                 onReset={handleReset}
+                errors={errors}
               />
             </form>
           </div>

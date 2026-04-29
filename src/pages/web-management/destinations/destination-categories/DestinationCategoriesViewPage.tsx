@@ -10,7 +10,7 @@ import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { LoadingState } from "@/components/destinations-components/view-destinations-components/LoadingState";
-import Pagination from "@/components/destinations-components/DestinationPagination";
+import Pagination from "@/components/common-components/Pagination";
 import { ResultsHeader } from "@/components/destinations-components/view-destinations-components/ResultsHeader";
 import { ActiveCategory } from "@/types/destination-types";
 import { DestinationService } from "@/services/destinationService";

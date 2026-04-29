@@ -71,7 +71,7 @@ const DestinationFilter: React.FC<DestinationFilterProps> = ({
         <div className="flex gap-3">
           <button
             onClick={onReset}
-            className="px-4 py-2 rounded-md transition-all duration-200 hover:opacity-80"
+            className="cursor-pointer px-4 py-2 rounded-md transition-all duration-200 hover:opacity-80"
             style={{ 
               border: `1px solid ${theme.border}`,
               color: theme.textSecondary,
@@ -88,7 +88,7 @@ const DestinationFilter: React.FC<DestinationFilterProps> = ({
           </button>
           <button
             onClick={onSearch}
-            className="px-4 py-2 rounded-md transition-all duration-200 hover:opacity-90 hover:scale-105"
+            className="cursor-pointer px-4 py-2 rounded-md transition-all duration-200 hover:opacity-90 hover:scale-105"
             style={{ 
               background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`,
               color: '#fff'

@@ -286,7 +286,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
               type="button"
               onClick={onGetCurrentLocation}
               disabled={loading}
-              className="location-btn flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="cursor-pointer location-btn flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               style={{
                 backgroundColor: `${theme.primary}10`,
                 borderColor: `${theme.primary}30`,
@@ -318,7 +318,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
             <button
               type="button"
               onClick={() => setMapExpanded((p) => !p)}
-              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors"
+              className="cursor-pointer w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors"
               style={{
                 backgroundColor: mapExpanded
                   ? `${theme.primary}08`

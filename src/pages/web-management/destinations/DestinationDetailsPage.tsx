@@ -1,3 +1,4 @@
+// app/destinations/view/[destinationId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -12,8 +13,6 @@ import { SingleDestinationResponse } from "@/types/destination-types";
 
 // Import components
 import { ExpandedGallery } from "@/components/destinations-components/view-destination-details-components/ExpandedGallery";
-import { LoadingState } from "@/components/destinations-components/view-destination-details-components/LoadingState";
-import { ErrorState } from "@/components/destinations-components/view-destination-details-components/ErrorState";
 import { ActionButtons } from "@/components/destinations-components/view-destination-details-components/ActionButtons";
 import { HeroImage } from "@/components/destinations-components/view-destination-details-components/HeroImage";
 import { DestinationOverview } from "@/components/destinations-components/view-destination-details-components/DestinationOverview";
@@ -23,7 +22,16 @@ import { CategoriesList } from "@/components/destinations-components/view-destin
 import { LocationMap } from "@/components/destinations-components/view-destination-details-components/LocationMap";
 import { GalleryMini } from "@/components/destinations-components/view-destination-details-components/GalleryMini";
 import { useTheme } from "@/contexts/ThemeContext";
-import { ImageModal } from "@/components/destinations-components/view-destination-details-components/ImageModal";
+import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import {
+  DESTINATION_PAGE_URL,
+  DESTINATION_TERMINATE_PAGE_URL,
+  DESTINATION_UPDATE_PAGE_URL,
+  DESTINATIONS_VIEW_PAGE_URL,
+  WEB_MANAGEMENT_URL,
+} from "@/utils/urls";
+import CommonLoading from "@/components/common-components/CommonLoading";
+import CommonErrorState from "@/components/common-components/CommonErrorState";
 
 const DestinationDetailsPage = () => {
   const params = useParams();
@@ -31,7 +39,8 @@ const DestinationDetailsPage = () => {
   const { theme } = useTheme();
   const destinationId = parseInt(params?.destinationId as string);
 
-  const [destination, setDestination] = useState<SingleDestinationResponse | null>(null);
+  const [destination, setDestination] =
+    useState<SingleDestinationResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -41,10 +50,13 @@ const DestinationDetailsPage = () => {
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    { label: "Destinations", href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}` },
-    { label: "View", href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view` },
-    { label: destination?.destinationName || "Details", href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/${destinationId}` },
+    { label: "Web Management", href: WEB_MANAGEMENT_URL },
+    { label: "Destinations", href: `${DESTINATION_PAGE_URL}` },
+    { label: "View", href: `${DESTINATIONS_VIEW_PAGE_URL}` },
+    {
+      label: destination?.destinationName || "Details",
+      href: `${DESTINATIONS_VIEW_PAGE_URL}/${destinationId}?name${destination?.destinationName}`,
+    },
   ];
 
   useEffect(() => {
@@ -55,7 +67,8 @@ const DestinationDetailsPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await DestinationService.getDestinationById(destinationId);
+      const response =
+        await DestinationService.getDestinationById(destinationId);
       setDestination(response.data);
     } catch {
       setError("Failed to load destination details. Please try again.");
@@ -74,7 +87,10 @@ const DestinationDetailsPage = () => {
 
   const handlePrevImage = () => {
     if (!destination) return;
-    const next = currentImageIndex === 0 ? destination.images.length - 1 : currentImageIndex - 1;
+    const next =
+      currentImageIndex === 0
+        ? destination.images.length - 1
+        : currentImageIndex - 1;
     changeImage(next);
   };
 
@@ -83,15 +99,36 @@ const DestinationDetailsPage = () => {
     changeImage((currentImageIndex + 1) % destination.images.length);
   };
 
+  // Prepare images for modal
+  const getModalImages = (): ImageModalImage[] => {
+    if (!destination) return [];
+    return destination.images.map((img) => ({
+      url: img.imageUrl,
+      name: img.imageName,
+      description: img.imageDescription,
+      id: img.imageId,
+    }));
+  };
+
   const handleImageClick = (index: number) => {
     setCurrentImageIndex(index);
     setIsModalOpen(true);
   };
 
-  const handleBack = () => router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view`);
-  const handleEdit = () => router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/update?destinationId=${destinationId}&name=${destination?.destinationName}`);
-  const handleDelete = () => router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/terminate?destinationId=${destinationId}&name=${destination?.destinationName}`);
-  
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleBack = () => router.push(`${DESTINATIONS_VIEW_PAGE_URL}`);
+  const handleEdit = () =>
+    router.push(
+      `${DESTINATION_UPDATE_PAGE_URL}/${destinationId}?name=${destination?.destinationName}`,
+    );
+  const handleDelete = () =>
+    router.push(
+      `${DESTINATION_TERMINATE_PAGE_URL}/${destinationId}?name=${destination?.destinationName}`,
+    );
+
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -107,24 +144,56 @@ const DestinationDetailsPage = () => {
 
   const totalActivities = destination?.activities?.length ?? 0;
   const totalImages = destination?.images?.length ?? 0;
-  const avgDuration = totalActivities > 0
-    ? Math.round((destination!.activities!.reduce((s, a) => s + (a.durationHours ?? 0), 0) ?? 0) / totalActivities)
-    : 0;
+  const avgDuration =
+    totalActivities > 0
+      ? Math.round(
+          (destination!.activities!.reduce(
+            (s, a) => s + (a.durationHours ?? 0),
+            0,
+          ) ?? 0) / totalActivities,
+        )
+      : 0;
 
-  if (loading) return <LoadingState />;
-  if (error || !destination) return <ErrorState error={error} onBack={handleBack} />;
+  if (loading)
+    return (
+      <CommonLoading
+        message={`Loading destination(${destination?.destinationName}) Details...`}
+        subMessage="Fetching the latest travel experiences"
+        size="lg"
+      />
+    );
+  if (error || !destination) {
+    return (
+      <CommonErrorState
+        error={error}
+        title="Failed to Load Destination"
+        message="The destination couldn't be loaded. Please try again."
+        variant="error"
+        showBackButton={true}
+        showRetryButton={true}
+        onBack={handleBack}
+        onRetry={fetchDestination}
+        backButtonText="Back to Destinations"
+        retryButtonText="Try Again"
+        fullScreen={true}
+      />
+    );
+  }
 
   return (
-    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: theme.background }}>
+    <div
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
       {/* Topbar */}
-      <div 
-        className="sticky top-0 z-50 backdrop-blur-md border-b shadow-sm transition-colors duration-300"
-        style={{ 
+      <div
+        className="sticky top-0 z-10 backdrop-blur-md border-b shadow-sm transition-colors duration-300"
+        style={{
           backgroundColor: `${theme.surface}D9`,
-          borderColor: theme.border 
+          borderColor: theme.border,
         }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-3.5">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title={destination.destinationName}
             description={`Destination ID: ${destination.destinationId}`}
@@ -134,9 +203,9 @@ const DestinationDetailsPage = () => {
       </div>
 
       {/* Main */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <ActionButtons
-          onBack={handleBack}
+          destinationName={destination.destinationName}
           onShare={handleShare}
           onEdit={handleEdit}
           onDelete={handleDelete}
@@ -176,7 +245,9 @@ const DestinationDetailsPage = () => {
               isWishlisted={destination.wish}
             />
 
-            <CategoriesList categories={destination.destinationCategoryDetailsDtos || []} />
+            <CategoriesList
+              categories={destination.destinationCategoryDetailsDtos || []}
+            />
 
             <LocationMap
               location={destination.location}
@@ -196,13 +267,14 @@ const DestinationDetailsPage = () => {
       {/* Modals */}
       {isModalOpen && destination && (
         <ImageModal
-          images={destination.images}
-          currentIndex={currentImageIndex}
-          onClose={() => setIsModalOpen(false)}
-          onNavigate={(index) => {
-            setCurrentImageIndex(index);
-            setImgTransition(false);
-          }}
+          isOpen={isModalOpen}
+          images={getModalImages()}
+          initialIndex={currentImageIndex}
+          onClose={handleModalClose}
+          showNavigation={true}
+          showDownload={true}
+          showZoom={true}
+          allowKeyboardNavigation={true}
         />
       )}
 

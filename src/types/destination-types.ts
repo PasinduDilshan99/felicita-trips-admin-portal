@@ -53,6 +53,8 @@ export interface DestinationFilterParams {
   status: string | null;
   pageSize: number;
   pageNumber: number;
+  sortBy?: string; // Optional: "name", "ratings", "location", "destination_id", "created_at", "updated_at"
+  sortDirection?: "ASC" | "DESC"; // Optional: "ASC" or "DESC"
 }
 
 export interface DestinationResponse {
@@ -75,7 +77,7 @@ export interface SingleDestinationResponse {
   location: string;
   latitude: number;
   longitude: number;
-  wish:boolean;
+  wish: boolean;
   destinationCategoryDetailsDtos: DestinationCategoryDetailsDtos[];
   statusName: string;
   activities: Activity[];
@@ -244,7 +246,6 @@ export interface DestinationStatisticsApiResponse {
   timestamp: string;
 }
 
-
 export interface DestinationCategoriesDetails {
   totalDestinationCategoriesCount: number;
   activeDestinationsCategories: number;
@@ -312,7 +313,6 @@ export interface ActiveCategoriesApiResponse {
   data: ActiveCategory[];
   timestamp: string;
 }
-
 
 export interface CategoryDestination {
   destinationId: number;

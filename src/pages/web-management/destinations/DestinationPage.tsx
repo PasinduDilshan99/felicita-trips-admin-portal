@@ -59,7 +59,9 @@ const AnimatedCount = ({
       // Expo ease-out for a snappier feel
       const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
       const current = eased * value;
-      setDisplay(decimals ? parseFloat(current.toFixed(decimals)) : Math.round(current));
+      setDisplay(
+        decimals ? parseFloat(current.toFixed(decimals)) : Math.round(current),
+      );
       if (t < 1) rafRef.current = requestAnimationFrame(animate);
     };
     rafRef.current = requestAnimationFrame(animate);
@@ -75,7 +77,10 @@ const AnimatedCount = ({
    Skeleton Card
 ───────────────────────────────────────────── */
 const StatCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
-  <div className="dp-stat-card dp-skeleton-card" style={{ animationDelay: `${delay}s` }}>
+  <div
+    className="dp-stat-card dp-skeleton-card"
+    style={{ animationDelay: `${delay}s` }}
+  >
     <div className="dp-skel dp-skel--icon" />
     <div className="dp-skel dp-skel--val" />
     <div className="dp-skel dp-skel--label" />
@@ -83,16 +88,31 @@ const StatCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
 );
 
 const ActionCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
-  <div className="dp-action-card dp-skeleton-card" style={{ animationDelay: `${delay}s`, pointerEvents: "none" }}>
+  <div
+    className="dp-action-card dp-skeleton-card"
+    style={{ animationDelay: `${delay}s`, pointerEvents: "none" }}
+  >
     <div style={{ display: "flex", flexDirection: "column", gap: ".875rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div className="dp-skel" style={{ width: 46, height: 46, borderRadius: 12 }} />
-        <div className="dp-skel" style={{ width: 56, height: 22, borderRadius: 999 }} />
+        <div
+          className="dp-skel"
+          style={{ width: 46, height: 46, borderRadius: 12 }}
+        />
+        <div
+          className="dp-skel"
+          style={{ width: 56, height: 22, borderRadius: 999 }}
+        />
       </div>
       <div>
-        <div className="dp-skel" style={{ width: "70%", height: 14, marginBottom: 8 }} />
+        <div
+          className="dp-skel"
+          style={{ width: "70%", height: 14, marginBottom: 8 }}
+        />
         <div className="dp-skel" style={{ width: "90%", height: 11 }} />
-        <div className="dp-skel" style={{ width: "60%", height: 11, marginTop: 5 }} />
+        <div
+          className="dp-skel"
+          style={{ width: "60%", height: 11, marginTop: 5 }}
+        />
       </div>
     </div>
   </div>
@@ -101,12 +121,22 @@ const ActionCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
 /* ─────────────────────────────────────────────
    Action config
 ───────────────────────────────────────────── */
-const ACTION_CONFIG: Record<string, { accent: string; icon: JSX.Element; pillLabel: string }> = {
+const ACTION_CONFIG: Record<
+  string,
+  { accent: string; icon: JSX.Element; pillLabel: string }
+> = {
   view: {
     accent: "blue",
     pillLabel: "Browse",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
       </svg>
@@ -116,7 +146,14 @@ const ACTION_CONFIG: Record<string, { accent: string; icon: JSX.Element; pillLab
     accent: "emerald",
     pillLabel: "Create",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <circle cx="12" cy="12" r="9" />
         <path d="M12 8v8M8 12h8" />
       </svg>
@@ -126,7 +163,14 @@ const ACTION_CONFIG: Record<string, { accent: string; icon: JSX.Element; pillLab
     accent: "amber",
     pillLabel: "Edit",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
         <path d="M17.586 3.586a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
       </svg>
@@ -136,7 +180,14 @@ const ACTION_CONFIG: Record<string, { accent: string; icon: JSX.Element; pillLab
     accent: "rose",
     pillLabel: "Remove",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
         <path d="M10 11v6M14 11v6" />
       </svg>
@@ -146,7 +197,14 @@ const ACTION_CONFIG: Record<string, { accent: string; icon: JSX.Element; pillLab
     accent: "violet",
     pillLabel: "Manage",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <rect x="5" y="2" width="14" height="20" rx="2" />
         <path d="M9 7h6M9 11h6M9 15h4" />
       </svg>
@@ -156,10 +214,14 @@ const ACTION_CONFIG: Record<string, { accent: string; icon: JSX.Element; pillLab
 
 const getActionConfig = (name: string) => {
   const lower = name.toLowerCase();
-  if (lower.includes("view") || lower.includes("all")) return ACTION_CONFIG.view;
-  if (lower.includes("add") || lower.includes("create")) return ACTION_CONFIG.add;
-  if (lower.includes("update") || lower.includes("edit")) return ACTION_CONFIG.update;
-  if (lower.includes("remove") || lower.includes("delete")) return ACTION_CONFIG.remove;
+  if (lower.includes("view") || lower.includes("all"))
+    return ACTION_CONFIG.view;
+  if (lower.includes("add") || lower.includes("create"))
+    return ACTION_CONFIG.add;
+  if (lower.includes("update") || lower.includes("edit"))
+    return ACTION_CONFIG.update;
+  if (lower.includes("remove") || lower.includes("delete"))
+    return ACTION_CONFIG.remove;
   return ACTION_CONFIG.default;
 };
 
@@ -207,7 +269,9 @@ const SectionHeader = ({
         <div className="dp-section-header__title-row">
           <h2 className="dp-section-header__title">{title}</h2>
           {badge && (
-            <span className={`dp-section-badge${live ? " dp-section-badge--live" : ""}`}>
+            <span
+              className={`dp-section-badge${live ? " dp-section-badge--live" : ""}`}
+            >
               {live && <span className="dp-live-dot" />}
               {badge}
             </span>
@@ -242,7 +306,7 @@ const Reveal = ({
           observer.disconnect();
         }
       },
-      { threshold: 0.06 }
+      { threshold: 0.06 },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -254,7 +318,8 @@ const Reveal = ({
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(20px)",
-        transition: "opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1)",
+        transition:
+          "opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1)",
       }}
     >
       {children}
@@ -267,18 +332,22 @@ const Reveal = ({
 ───────────────────────────────────────────── */
 const DestinationPage = () => {
   const { theme, isDarkMode } = useTheme();
-  const [statistics, setStatistics] = useState<DestinationStatisticsData | null>(null);
+  const [statistics, setStatistics] =
+    useState<DestinationStatisticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const destinationsData = webManagementSideBarData.find(
-    (item) => item.name === "Destinations"
+    (item) => item.name === "Destinations",
   );
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
     { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    { label: "Destinations", href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}` },
+    {
+      label: "Destinations",
+      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
+    },
   ];
 
   useEffect(() => {
@@ -304,7 +373,10 @@ const DestinationPage = () => {
   const pieChartData = statistics
     ? [
         { name: "Wishlisted", value: statistics.wishDetails.wishListCount },
-        { name: "Not Wishlisted", value: statistics.wishDetails.notWishListCount },
+        {
+          name: "Not Wishlisted",
+          value: statistics.wishDetails.notWishListCount,
+        },
       ]
     : [];
 
@@ -315,7 +387,12 @@ const DestinationPage = () => {
     })) || [];
 
   /* ── Stat cards ── */
-  type StatCard = { title: string; value: number; icon: JSX.Element; accent: string };
+  type StatCard = {
+    title: string;
+    value: number;
+    icon: JSX.Element;
+    accent: string;
+  };
 
   const statCards: StatCard[] = statistics
     ? [
@@ -324,7 +401,14 @@ const DestinationPage = () => {
           value: statistics.destinationDetails.totalDestinationCount,
           accent: "blue",
           icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
               <circle cx="12" cy="9" r="2.5" />
             </svg>
@@ -335,7 +419,14 @@ const DestinationPage = () => {
           value: statistics.destinationDetails.activeDestinations,
           accent: "emerald",
           icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           ),
@@ -345,7 +436,14 @@ const DestinationPage = () => {
           value: statistics.destinationDetails.inActiveDestinations,
           accent: "rose",
           icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="9" />
               <path d="M15 9l-6 6M9 9l6 6" />
             </svg>
@@ -356,7 +454,14 @@ const DestinationPage = () => {
           value: statistics.destinationDetails.hiddenDestinations,
           accent: "violet",
           icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
               <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
               <line x1="1" y1="1" x2="23" y2="23" />
@@ -368,7 +473,14 @@ const DestinationPage = () => {
           value: statistics.destinationDetails.recentlyUpdateDestinations,
           accent: "amber",
           icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="23 4 23 10 17 10" />
               <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
             </svg>
@@ -379,7 +491,14 @@ const DestinationPage = () => {
           value: statistics.destinationDetails.recentlyAddedDestinations,
           accent: "teal",
           icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="9" />
               <line x1="12" y1="8" x2="12" y2="16" />
               <line x1="8" y1="12" x2="16" y2="12" />
@@ -1072,15 +1191,16 @@ const DestinationPage = () => {
       `}</style>
 
       <div className="dp-root">
-        <div className="dp-wrap">
-
+        <div>
           {/* Breadcrumb / Header */}
           <Reveal delay={0}>
-            <PageHeader
-              title="Destinations"
-              description="Manage and monitor your travel destination locations"
-              breadcrumbItems={breadcrumbItems}
-            />
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <PageHeader
+                title="Destinations"
+                description="Manage and monitor your travel destination locations"
+                breadcrumbItems={breadcrumbItems}
+              />
+            </div>
           </Reveal>
 
           {loading ? (
@@ -1090,13 +1210,15 @@ const DestinationPage = () => {
                 <div className="dp-spinner-center" />
               </div>
               <span className="dp-loading-text">Loading destination data…</span>
-              <span className="dp-loading-sub">Fetching statistics from the server</span>
+              <span className="dp-loading-sub">
+                Fetching statistics from the server
+              </span>
             </div>
           ) : (
-            <>
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
               {/* ── Quick Actions ── */}
               <Reveal delay={60}>
-                <section className="dp-mt-7">
+                <section>
                   <SectionHeader
                     title="Quick Actions"
                     subtitle="Jump directly to any destination management task"
@@ -1108,7 +1230,9 @@ const DestinationPage = () => {
                           <ActionCardSkeleton key={i} delay={i * 0.07} />
                         ))
                       : destinationsData?.subData.map((action, idx) => {
-                          const { accent, icon, pillLabel } = getActionConfig(action.name);
+                          const { accent, icon, pillLabel } = getActionConfig(
+                            action.name,
+                          );
                           return (
                             <a
                               key={action.id}
@@ -1117,16 +1241,37 @@ const DestinationPage = () => {
                             >
                               <div className="dp-action-card__inner">
                                 <div className="dp-action-card__top">
-                                  <div className={`dp-icon-wrap dp-icon-wrap--${accent}`}>{icon}</div>
-                                  <span className={`dp-pill dp-pill--${accent}`}>{pillLabel}</span>
+                                  <div
+                                    className={`dp-icon-wrap dp-icon-wrap--${accent}`}
+                                  >
+                                    {icon}
+                                  </div>
+                                  <span
+                                    className={`dp-pill dp-pill--${accent}`}
+                                  >
+                                    {pillLabel}
+                                  </span>
                                 </div>
                                 <div>
-                                  <p className="dp-action-card__name">{action.name}</p>
-                                  <p className="dp-action-card__desc">{action.description}</p>
+                                  <p className="dp-action-card__name">
+                                    {action.name}
+                                  </p>
+                                  <p className="dp-action-card__desc">
+                                    {action.description}
+                                  </p>
                                 </div>
-                                <div className={`dp-action-card__cta dp-cta--${accent}`}>
+                                <div
+                                  className={`dp-action-card__cta dp-cta--${accent}`}
+                                >
                                   <span>Open</span>
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                                  <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2.5}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
                                     <path d="M5 12h14M12 5l7 7-7 7" />
                                   </svg>
                                 </div>
@@ -1146,14 +1291,26 @@ const DestinationPage = () => {
                   <div className="dp-mt-6">
                     <div className="dp-error-banner">
                       <div className="dp-error-banner__left">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <circle cx="12" cy="12" r="10" />
                           <line x1="12" y1="8" x2="12" y2="12" />
                           <line x1="12" y1="16" x2="12.01" y2="16" />
                         </svg>
                         {error}
                       </div>
-                      <button className="dp-retry-btn" onClick={fetchStatistics}>Retry</button>
+                      <button
+                        className="dp-retry-btn"
+                        onClick={fetchStatistics}
+                      >
+                        Retry
+                      </button>
                     </div>
                   </div>
                 </Reveal>
@@ -1179,11 +1336,16 @@ const DestinationPage = () => {
                               key={i}
                               className={`dp-stat-card dp-stat-card--${card.accent}`}
                             >
-                              <div className={`dp-stat-icon dp-stat-icon--${card.accent}`}>
+                              <div
+                                className={`dp-stat-icon dp-stat-icon--${card.accent}`}
+                              >
                                 {card.icon}
                               </div>
                               <div className="dp-stat-value">
-                                <AnimatedCount value={card.value} duration={950 + i * 70} />
+                                <AnimatedCount
+                                  value={card.value}
+                                  duration={950 + i * 70}
+                                />
                               </div>
                               <div className="dp-stat-label">{card.title}</div>
                             </div>
@@ -1202,7 +1364,6 @@ const DestinationPage = () => {
                       subtitle="Visual breakdown of wishlist distribution and category spread"
                     />
                     <div className="dp-charts-row">
-
                       {/* Pie — Wishlist */}
                       <div className="dp-chart-card">
                         <div className="dp-chart-header">
@@ -1223,7 +1384,8 @@ const DestinationPage = () => {
                             <PieChart>
                               <Pie
                                 data={pieChartData}
-                                cx="50%" cy="50%"
+                                cx="50%"
+                                cy="50%"
                                 innerRadius={62}
                                 outerRadius={100}
                                 paddingAngle={5}
@@ -1233,7 +1395,10 @@ const DestinationPage = () => {
                                 animationDuration={900}
                               >
                                 {pieChartData.map((_, index) => (
-                                  <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                                  <Cell
+                                    key={`cell-${index}`}
+                                    fill={PIE_COLORS[index % PIE_COLORS.length]}
+                                  />
                                 ))}
                               </Pie>
                               <Tooltip content={<CustomPieTooltip />} />
@@ -1243,9 +1408,14 @@ const DestinationPage = () => {
                         <div className="dp-pie-legend">
                           {pieChartData.map((item, i) => (
                             <div key={i} className="dp-pie-legend-item">
-                              <span className="dp-pie-legend-dot" style={{ background: PIE_COLORS[i] }} />
+                              <span
+                                className="dp-pie-legend-dot"
+                                style={{ background: PIE_COLORS[i] }}
+                              />
                               {item.name}
-                              <span className="dp-pie-legend-count">{item.value.toLocaleString()}</span>
+                              <span className="dp-pie-legend-count">
+                                {item.value.toLocaleString()}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -1258,7 +1428,9 @@ const DestinationPage = () => {
                             <span className="dp-chart-dot dp-chart-dot--ok" />
                             Destinations by Category
                           </div>
-                          <span className="dp-chart-sub">{barChartData.length} categories</span>
+                          <span className="dp-chart-sub">
+                            {barChartData.length} categories
+                          </span>
                         </div>
                         <div style={{ height: 280 }}>
                           <ResponsiveContainer width="100%" height="100%">
@@ -1274,7 +1446,11 @@ const DestinationPage = () => {
                               />
                               <XAxis
                                 dataKey="name"
-                                tick={{ fontSize: 11, fill: textSecondary, fontWeight: 500 }}
+                                tick={{
+                                  fontSize: 11,
+                                  fill: textSecondary,
+                                  fontWeight: 500,
+                                }}
                                 axisLine={false}
                                 tickLine={false}
                                 angle={-30}
@@ -1304,7 +1480,6 @@ const DestinationPage = () => {
                           </ResponsiveContainer>
                         </div>
                       </div>
-
                     </div>
                   </section>
                 </Reveal>
@@ -1315,7 +1490,14 @@ const DestinationPage = () => {
                 <section className="dp-mt-7">
                   <div className="dp-info-banner">
                     <div className="dp-info-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.75}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <circle cx="12" cy="12" r="10" />
                         <line x1="12" y1="16" x2="12" y2="12" />
                         <line x1="12" y1="8" x2="12.01" y2="8" />
@@ -1324,18 +1506,17 @@ const DestinationPage = () => {
                     <div>
                       <p className="dp-info-title">Destination Management</p>
                       <p className="dp-info-text">
-                        Use the quick-action cards above to browse, create, edit, or remove
-                        destinations. Statistics and charts reflect the latest data from your backend
-                        and update each time you visit this page.
+                        Use the quick-action cards above to browse, create,
+                        edit, or remove destinations. Statistics and charts
+                        reflect the latest data from your backend and update
+                        each time you visit this page.
                       </p>
                     </div>
                   </div>
                 </section>
               </Reveal>
-
-            </>
+            </div>
           )}
-
         </div>
       </div>
     </>

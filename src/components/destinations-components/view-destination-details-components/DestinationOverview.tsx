@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Globe, BadgeCheck } from "lucide-react";
 import { IconBadge } from "./IconBadge";
 import { useTheme } from "@/contexts/ThemeContext";
+import { DESTINATION_CATEGORY_VIEW_DETAILS_URL } from "@/utils/urls";
 
 interface Category {
   id: number;
@@ -27,9 +29,14 @@ export const DestinationOverview: React.FC<DestinationOverviewProps> = ({
   longitude,
   categories,
 }) => {
+  const router = useRouter();
   const { theme } = useTheme();
   const primaryCategory = categories.find((c) => c.isPrimary);
   const secondaryCategories = categories.filter((c) => !c.isPrimary);
+
+  const handleCategoryClick = (categoryId: number, categoryName: string) => {
+    router.push(`${DESTINATION_CATEGORY_VIEW_DETAILS_URL}/${categoryId}?name=${encodeURIComponent(categoryName)}`);
+  };
 
   return (
     <div 
@@ -86,10 +93,19 @@ export const DestinationOverview: React.FC<DestinationOverviewProps> = ({
           <div className="space-y-2.5">
             {primaryCategory && (
               <div 
-                className="p-3 rounded-xl border"
+                className="p-3 rounded-xl border cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-98"
                 style={{ 
                   backgroundColor: `${theme.primary}10`,
-                  borderColor: `${theme.primary}30`
+                  borderColor: `${theme.primary}30`,
+                }}
+                onClick={() => handleCategoryClick(primaryCategory.id, primaryCategory.name)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${theme.primary}15`;
+                  e.currentTarget.style.boxShadow = `0 4px 12px ${theme.primary}20`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = `${theme.primary}10`;
+                  e.currentTarget.style.boxShadow = "none";
                 }}
               >
                 <div className="flex items-center gap-1.5 mb-1">
@@ -112,10 +128,21 @@ export const DestinationOverview: React.FC<DestinationOverviewProps> = ({
               {secondaryCategories.map((cat) => (
                 <div 
                   key={cat.id} 
-                  className="px-3.5 py-2 rounded-xl border"
+                  className="px-3.5 py-2 rounded-xl border cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-98"
                   style={{ 
                     backgroundColor: theme.background,
-                    borderColor: theme.border 
+                    borderColor: theme.border,
+                  }}
+                  onClick={() => handleCategoryClick(cat.id, cat.name)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = `${theme.primary}5`;
+                    e.currentTarget.style.borderColor = `${theme.primary}30`;
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.background;
+                    e.currentTarget.style.borderColor = theme.border;
+                    e.currentTarget.style.transform = "translateY(0)";
                   }}
                 >
                   <p className="text-sm font-semibold" style={{ color: theme.text }}>

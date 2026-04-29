@@ -79,7 +79,7 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
               <span style={{ color: theme.text }}>{filter.value}</span>
               <button
                 onClick={() => onRemoveFilter(filter.key)}
-                className="ml-1 transition-colors hover:opacity-70"
+                className="cursor-pointer ml-1 transition-colors hover:opacity-70"
                 style={{ color: theme.primary }}
                 aria-label={`Remove ${filter.label} filter`}
               >
@@ -90,7 +90,7 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
         </div>
         <button
           onClick={onClearAll}
-          className="text-sm transition-colors flex items-center gap-1 hover:opacity-70"
+          className="cursor-pointer text-sm transition-colors flex items-center gap-1 hover:opacity-70"
           style={{ color: theme.error }}
         >
           <X className="w-3.5 h-3.5" />

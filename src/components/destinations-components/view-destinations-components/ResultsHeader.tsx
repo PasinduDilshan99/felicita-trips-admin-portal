@@ -60,7 +60,7 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
           >
             <button
               onClick={() => onViewModeChange('grid')}
-              className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`cursor-pointer flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
                 viewMode === 'grid'
                   ? 'text-white shadow-md'
                   : 'hover:text-white'
@@ -77,7 +77,7 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
             </button>
             <button
               onClick={() => onViewModeChange('list')}
-              className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`cursor-pointer flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
                 viewMode === 'list'
                   ? 'text-white shadow-md'
                   : 'hover:text-white'

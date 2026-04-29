@@ -3,6 +3,7 @@
 import React, { useId, useRef } from "react";
 import { FileText, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { DESTINATION_STATUS_OPTIONS } from "@/data/status-options-data";
 
 interface DestinationInfoFormProps {
   formData: any;
@@ -14,24 +15,8 @@ interface DestinationInfoFormProps {
   ) => void;
 }
 
-const STATUS_OPTIONS = [
-  {
-    value: "ACTIVE",
-    label: "Active",
-    description: "Visible to customers",
-    color: "#16a34a",
-  },
-  {
-    value: "INACTIVE",
-    label: "Inactive",
-    description: "Hidden from customers",
-    color: "#6b7280",
-  },
-  
-];
-
-const DESCRIPTION_MAX = 1000;
-const NAME_MAX = 100;
+const DESCRIPTION_MAX = 3500;
+const NAME_MAX = 250;
 
 export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
   formData,
@@ -285,7 +270,7 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
               aria-hidden="true"
               tabIndex={-1}
             >
-              {STATUS_OPTIONS.map((o) => (
+              {DESTINATION_STATUS_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>
@@ -293,14 +278,14 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
             </select>
 
             <div className="flex gap-3">
-              {STATUS_OPTIONS.map((opt) => {
+              {DESTINATION_STATUS_OPTIONS.map((opt) => {
                 const isSelected = formData.status === opt.value;
                 return (
                   <button
                     key={opt.value}
                     type="button"
                     onClick={() => handleStatusClick(opt.value)}
-                    className="status-pill flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left"
+                    className="cursor-pointer status-pill flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left"
                     style={{
                       backgroundColor: isSelected
                         ? `${opt.color}10`

@@ -1,7 +1,16 @@
 "use client";
 
 import React from "react";
-import { Eye, Shield, MapPin, Tag, DollarSign, Image, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Eye,
+  Shield,
+  MapPin,
+  Tag,
+  DollarSign,
+  Image,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface FormSummaryProps {
@@ -72,7 +81,10 @@ export const FormSummary: React.FC<FormSummaryProps> = ({
               >
                 Form Summary
               </h2>
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
                 Review your destination information
               </p>
             </div>
@@ -86,18 +98,22 @@ export const FormSummary: React.FC<FormSummaryProps> = ({
               style={{ backgroundColor: `${theme.primary}08` }}
             >
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ color: theme.primary }}>
+                <span
+                  className="text-xs font-medium px-2 py-0.5 rounded-full"
+                  style={{ color: theme.primary }}
+                >
                   Destination
                 </span>
               </div>
               <span
                 className="font-medium text-sm text-right max-w-[60%] truncate"
-                style={{ color: formData.name ? theme.text : theme.textSecondary }}
+                style={{
+                  color: formData.name ? theme.text : theme.textSecondary,
+                }}
               >
                 {formData.name || "Not set"}
               </span>
             </div>
-
             {/* Categories */}
             <div
               className="flex justify-between items-start p-3 rounded-xl"
@@ -105,7 +121,10 @@ export const FormSummary: React.FC<FormSummaryProps> = ({
             >
               <div className="flex items-center gap-2">
                 <Tag className="w-3.5 h-3.5" style={{ color: theme.success }} />
-                <span className="text-xs font-medium" style={{ color: theme.textSecondary }}>
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
                   Categories
                 </span>
               </div>
@@ -118,7 +137,7 @@ export const FormSummary: React.FC<FormSummaryProps> = ({
                         className="inline-block px-2 py-0.5 rounded text-xs font-medium"
                         style={{
                           backgroundColor: `${getCategoryColor(id)}20`,
-                          color: getCategoryColor(id)
+                          color: getCategoryColor(id),
                         }}
                       >
                         {getCategoryName(id)}
@@ -126,65 +145,85 @@ export const FormSummary: React.FC<FormSummaryProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <span className="text-xs" style={{ color: theme.textSecondary }}>
+                  <span
+                    className="text-xs"
+                    style={{ color: theme.textSecondary }}
+                  >
                     Not set
                   </span>
                 )}
               </div>
             </div>
-
             {/* Location */}
             <div
               className="flex justify-between items-start p-3 rounded-xl"
               style={{ backgroundColor: `${theme.accent}08` }}
             >
               <div className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5" style={{ color: theme.accent }} />
-                <span className="text-xs font-medium" style={{ color: theme.textSecondary }}>
+                <MapPin
+                  className="w-3.5 h-3.5"
+                  style={{ color: theme.accent }}
+                />
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
                   Location
                 </span>
               </div>
               <div className="text-right">
                 <span
                   className="font-medium text-sm max-w-[60%] truncate block"
-                  style={{ color: formData.location ? theme.text : theme.textSecondary }}
+                  style={{
+                    color: formData.location ? theme.text : theme.textSecondary,
+                  }}
                 >
                   {formData.location || "Not set"}
                 </span>
                 {hasCoordinates && (
-                  <span className="text-xs mt-0.5 block" style={{ color: theme.textSecondary }}>
-                    {Number(formData.latitude).toFixed(4)}°, {Number(formData.longitude).toFixed(4)}°
+                  <span
+                    className="text-xs mt-0.5 block"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    {Number(formData.latitude).toFixed(4)}°,{" "}
+                    {Number(formData.longitude).toFixed(4)}°
                   </span>
                 )}
               </div>
             </div>
-
             {/* Status */}
             <div
               className="flex justify-between items-center p-3 rounded-xl"
               style={{ backgroundColor: `${theme.warning}08` }}
             >
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-3.5 h-3.5" style={{ color: theme.warning }} />
-                <span className="text-xs font-medium" style={{ color: theme.textSecondary }}>
+                <CheckCircle
+                  className="w-3.5 h-3.5"
+                  style={{ color: theme.warning }}
+                />
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
                   Status
                 </span>
               </div>
               <span
                 className="text-xs font-semibold px-2.5 py-1 rounded-full"
                 style={{
-                  backgroundColor: formData.status === "ACTIVE" 
-                    ? `${theme.success}20`
-                    : `${theme.textSecondary}20`,
-                  color: formData.status === "ACTIVE" 
-                    ? theme.success
-                    : theme.textSecondary,
+                  backgroundColor:
+                    formData.status === "ACTIVE"
+                      ? `${theme.success}20`
+                      : `${theme.textSecondary}20`,
+                  color:
+                    formData.status === "ACTIVE"
+                      ? theme.success
+                      : theme.textSecondary,
                 }}
               >
                 {formData.status || "Not set"}
               </span>
             </div>
-
             {/* Pricing */}
             {hasPricing && (
               <div
@@ -192,26 +231,37 @@ export const FormSummary: React.FC<FormSummaryProps> = ({
                 style={{ backgroundColor: `${theme.success}08` }}
               >
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-3.5 h-3.5" style={{ color: theme.success }} />
-                  <span className="text-xs font-medium" style={{ color: theme.textSecondary }}>
+                  <DollarSign
+                    className="w-3.5 h-3.5"
+                    style={{ color: theme.success }}
+                  />
+                  <span
+                    className="text-xs font-medium"
+                    style={{ color: theme.textSecondary }}
+                  >
                     Pricing
                   </span>
                 </div>
                 <div className="text-right">
                   {formData.extraPrice && (
-                    <div className="font-semibold text-sm" style={{ color: theme.success }}>
+                    <div
+                      className="font-semibold text-sm"
+                      style={{ color: theme.success }}
+                    >
                       ${Number(formData.extraPrice).toFixed(2)}
                     </div>
                   )}
                   {formData.extraPriceNote && (
-                    <div className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+                    <div
+                      className="text-xs mt-0.5"
+                      style={{ color: theme.textSecondary }}
+                    >
                       {formData.extraPriceNote}
                     </div>
                   )}
                 </div>
               </div>
             )}
-
             {/* Images */}
             <div
               className="flex justify-between items-center p-3 rounded-xl"
@@ -219,16 +269,25 @@ export const FormSummary: React.FC<FormSummaryProps> = ({
             >
               <div className="flex items-center gap-2">
                 <Image className="w-3.5 h-3.5" style={{ color: theme.error }} />
-                <span className="text-xs font-medium" style={{ color: theme.textSecondary }}>
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
                   Images
                 </span>
               </div>
-              <span
-                className="font-semibold text-sm"
-                style={{ color: hasImages ? theme.text : theme.textSecondary }}
-              >
-                {hasImages ? `${formData.images.length} image(s)` : "No images"}
-              </span>
+              <div className="text-right">
+                <span
+                  className="font-semibold text-sm"
+                  style={{
+                    color: hasImages ? theme.text : theme.textSecondary,
+                  }}
+                >
+                  {hasImages
+                    ? `${formData.images.length} image(s)`
+                    : "No images (optional)"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -262,7 +321,10 @@ export const FormSummary: React.FC<FormSummaryProps> = ({
               >
                 Tips & Guidelines
               </h2>
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
                 Best practices for destination creation
               </p>
             </div>
@@ -274,37 +336,40 @@ export const FormSummary: React.FC<FormSummaryProps> = ({
               {[
                 {
                   text: "Images are automatically uploaded to Cloudinary for optimal performance",
-                  icon: "upload"
+                  icon: "upload",
                 },
                 {
                   text: "Use descriptive names and detailed descriptions (max 1000 characters)",
-                  icon: "text"
+                  icon: "text",
                 },
                 {
                   text: "Add high-quality images (max 5MB each) for better presentation",
-                  icon: "image"
+                  icon: "image",
                 },
                 {
                   text: "You can select multiple categories for better discoverability",
-                  icon: "tag"
+                  icon: "tag",
                 },
                 {
                   text: "Verify coordinates for accurate location mapping",
-                  icon: "map"
-                }
+                  icon: "map",
+                },
               ].map((tip, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="flex items-start gap-3 group"
                   style={{
-                    animation: `fadeSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) ${index * 0.05}s both`
+                    animation: `fadeSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) ${index * 0.05}s both`,
                   }}
                 >
-                  <div 
+                  <div
                     className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 transition-all duration-200 group-hover:scale-125"
                     style={{ backgroundColor: theme.success }}
                   />
-                  <p className="text-sm leading-relaxed" style={{ color: theme.textSecondary }}>
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: theme.textSecondary }}
+                  >
                     {tip.text}
                   </p>
                 </div>

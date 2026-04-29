@@ -91,7 +91,7 @@ export const FormActions: React.FC<FormActionsProps> = ({
             <button
               type="button"
               onClick={onReset}
-              className="flex-1 px-6 py-3 rounded-xl border-2 transition-all duration-200 font-medium flex items-center justify-center gap-2 hover:translate-y-[-1px] active:translate-y-0"
+              className="cursor-pointer flex-1 px-6 py-3 rounded-xl border-2 transition-all duration-200 font-medium flex items-center justify-center gap-2 hover:translate-y-[-1px] active:translate-y-0"
               style={{
                 backgroundColor: theme.background,
                 borderColor: theme.border,
@@ -117,7 +117,7 @@ export const FormActions: React.FC<FormActionsProps> = ({
               type="submit"
               onClick={onSubmit}
               disabled={loading || uploadingImages}
-              className="flex-1 px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:translate-y-[-1px] active:translate-y-0 disabled:hover:translate-y-0"
+              className="cursor-pointer flex-1 px-6 py-3 rounded-xl text-white font-medium flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:translate-y-[-1px] active:translate-y-0 disabled:hover:translate-y-0"
               style={{
                 background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent || theme.primary})`,
                 boxShadow: hasErrors ? `0 0 0 2px ${theme.error}40` : "none",

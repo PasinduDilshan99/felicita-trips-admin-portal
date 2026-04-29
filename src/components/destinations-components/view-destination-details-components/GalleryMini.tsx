@@ -1,3 +1,4 @@
+// components/destinations-components/view-destination-details-components/GalleryMini.tsx
 "use client";
 
 import React from "react";
@@ -7,7 +8,7 @@ import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface GalleryMiniProps {
-  images: Array<{ imageId: number; imageUrl: string; imageName: string }>;
+  images: Array<{ imageId: number; imageUrl: string; imageName: string; imageDescription?: string }>;
   onImageClick: (index: number) => void;
   onViewAll: () => void;
 }
@@ -31,7 +32,6 @@ export const GalleryMini: React.FC<GalleryMiniProps> = ({
 
   // Custom color for gallery (you can adjust these values)
   const galleryColor = "#be185d"; // Pink color
-  // Or use theme.accent if you prefer: const galleryColor = theme.accent;
 
   return (
     <div
@@ -87,12 +87,13 @@ export const GalleryMini: React.FC<GalleryMiniProps> = ({
         ))}
         {totalImages > 6 && (
           <div
-            className="aspect-square rounded-lg flex items-center justify-center text-sm font-bold border"
+            className="aspect-square rounded-lg flex items-center justify-center text-sm font-bold border cursor-pointer hover:scale-105 transition-all duration-200"
             style={{
               backgroundColor: theme.background,
               color: theme.textSecondary,
               borderColor: theme.border,
             }}
+            onClick={onViewAll}
           >
             +{totalImages - 6}
           </div>
@@ -103,7 +104,7 @@ export const GalleryMini: React.FC<GalleryMiniProps> = ({
         className="w-full text-center text-sm font-semibold py-1.5 transition-colors"
         style={{ color: theme.primary }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.color = theme.secondary;
+          e.currentTarget.style.color = theme.accent;
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.color = theme.primary;

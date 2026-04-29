@@ -35,6 +35,7 @@ export interface Notification {
   isArchived: boolean;
   isDeleted: boolean;
   assignedTo: number | null;
+  assignedUsername: string | null;
   targetRole: TargetRole | null;
   sourceModule: SourceModule;
   expiresAt: string | null;

@@ -1,3 +1,4 @@
+// app/destinations/update/page.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -28,8 +29,8 @@ import {
   XCircle,
   Loader2,
   RefreshCw,
+  X,
 } from "lucide-react";
-import DestinationSearch from "@/components/destinations-components/update-destinations-components/DestinationSearch";
 import DestinationDetailsForm from "@/components/destinations-components/update-destinations-components/DestinationDetailsForm";
 import UpdateConfirmationModal from "@/components/destinations-components/update-destinations-components/UpdateConfirmationModal";
 import {
@@ -39,6 +40,11 @@ import {
 } from "@/types/common-types";
 import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
+import CommonLoading from "@/components/common-components/CommonLoading";
+import CommonErrorState from "@/components/common-components/CommonErrorState";
+import CommonSearch from "@/components/common-components/CommonSearch";
+import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 
 // Helper function to convert hex to rgba
 const hexToRgba = (hex: string, opacity: number): string => {
@@ -109,6 +115,14 @@ const UpdateDestinationPage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
+  // Toast notification state
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    title: string;
+    message: string;
+    actionLink?: string;
+  } | null>(null);
+
   // Derive available categories from context
   const [availableCategories, setAvailableCategories] = useState<
     DestinationCategory[]
@@ -164,6 +178,11 @@ const UpdateDestinationPage = () => {
       setDestinations(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load destinations");
+      setToast({
+        type: "error",
+        title: "Error",
+        message: err.message || "Failed to load destinations",
+      });
     } finally {
       setLoading(false);
     }
@@ -219,6 +238,11 @@ const UpdateDestinationPage = () => {
       }
     } catch (error: any) {
       setError(error.message || "Failed to upload image");
+      setToast({
+        type: "error",
+        title: "Upload Failed",
+        message: error.message || "Failed to upload image",
+      });
     } finally {
       setUploadingImages(false);
     }
@@ -251,6 +275,11 @@ const UpdateDestinationPage = () => {
       setCurrentCategoryIds(categoryIds);
     } catch (err: any) {
       setError(err.message || "Failed to load destination details");
+      setToast({
+        type: "error",
+        title: "Load Failed",
+        message: err.message || "Failed to load destination details",
+      });
     } finally {
       setLoadingDetails(false);
     }
@@ -417,7 +446,17 @@ const UpdateDestinationPage = () => {
     try {
       const response = await DestinationService.updateDestination(updateData);
 
-      setSuccess(`Destination updated successfully! ID: ${response.data.id}`);
+      const successMsg = `Destination "${editedDestination?.destinationName}" updated successfully!`;
+      setSuccess(successMsg);
+
+      // Show success toast with navigation link
+      setToast({
+        type: "success",
+        title: "Update Successful!",
+        message: `${editedDestination?.destinationName} has been updated successfully.`,
+        actionLink: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view?id=${selectedDestination?.destinationId}`,
+      });
+
       setShowConfirmModal(false);
 
       setTimeout(() => {
@@ -427,6 +466,12 @@ const UpdateDestinationPage = () => {
       }, 2000);
     } catch (err: any) {
       setError(err.message || "Failed to update destination");
+      setToast({
+        type: "error",
+        title: "Update Failed",
+        message:
+          err.message || "Failed to update destination. Please try again.",
+      });
     } finally {
       setLoadingUpdate(false);
     }
@@ -443,7 +488,32 @@ const UpdateDestinationPage = () => {
       setCurrentCategoryIds(originalCategoryIds);
       setError(null);
       setSuccess(null);
+
+      setToast({
+        type: "success",
+        title: "Changes Reset",
+        message: "All unsaved changes have been discarded.",
+      });
     }
+  };
+
+  const handleClearDestinationSelection = () => {
+    setSelectedDestination(null);
+    setOriginalDestination(null);
+    setEditedDestination(null);
+    setRemovedImages([]);
+    setRemovedActivities([]);
+    setNewImages([]);
+    setNewActivities([]);
+    setOriginalCategoryIds([]);
+    setCurrentCategoryIds([]);
+    setToast(null);
+
+    // Update URL to remove query params
+    const url = new URL(window.location.href);
+    url.searchParams.delete("destination-id");
+    url.searchParams.delete("destination-name");
+    router.replace(url.toString(), { scroll: false });
   };
 
   // Get changed fields for confirmation modal
@@ -532,60 +602,44 @@ const UpdateDestinationPage = () => {
     return changes;
   };
 
+  // Convert destinations to search items format
+  const searchItems = destinations.map((dest) => ({
+    id: dest.destinationId,
+    name: dest.destinationName,
+  }));
+
+  const selectedSearchItem = selectedDestination
+    ? {
+        id: selectedDestination.destinationId,
+        name: selectedDestination.destinationName,
+      }
+    : null;
+
   // Show loading state if common data is loading
   if (commonLoading) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center transition-colors duration-300"
-        style={{ backgroundColor: theme.background }}
-      >
-        <div className="text-center">
-          <Loader2
-            className="w-12 h-12 animate-spin mx-auto mb-4"
-            style={{ color: theme.primary }}
-          />
-          <p style={{ color: theme.textSecondary }}>Loading categories...</p>
-        </div>
-      </div>
+      <CommonLoading
+        message="Loading categories..."
+        subMessage="Please wait while we fetch available categories"
+        size="lg"
+      />
     );
   }
 
   // Show error state if common data failed to load
   if (commonError) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center transition-colors duration-300"
-        style={{ backgroundColor: theme.background }}
-      >
-        <div
-          className="text-center max-w-md mx-auto p-6 rounded-2xl shadow-lg transition-colors duration-300"
-          style={{
-            backgroundColor: theme.surface,
-            border: `1px solid ${theme.border}`,
-          }}
-        >
-          <AlertCircle
-            className="w-12 h-12 mx-auto mb-4"
-            style={{ color: theme.error }}
-          />
-          <h3
-            className="text-lg font-semibold mb-2"
-            style={{ color: theme.text }}
-          >
-            Failed to Load Categories
-          </h3>
-          <p className="mb-4" style={{ color: theme.textSecondary }}>
-            {commonError}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
-            style={{ backgroundColor: theme.primary, color: "#fff" }}
-          >
-            Retry
-          </button>
-        </div>
-      </div>
+      <CommonErrorState
+        error={commonError}
+        title="Failed to Load Categories"
+        message="Unable to load destination categories. Please try again."
+        variant="error"
+        showBackButton={false}
+        showRetryButton={true}
+        onRetry={() => window.location.reload()}
+        retryButtonText="Retry"
+        fullScreen={true}
+      />
     );
   }
 
@@ -594,15 +648,27 @@ const UpdateDestinationPage = () => {
       className="min-h-screen transition-colors duration-300"
       style={{ backgroundColor: theme.background }}
     >
+      {/* Toast Notifications */}
+      {toast && (
+        <ToastNotification
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={() => setToast(null)}
+          actionLink={toast.actionLink}
+          actionText="View Destination"
+        />
+      )}
+
       {/* Header with Breadcrumb */}
       <div
-        className="sticky top-0 z-50 backdrop-blur-sm border-b transition-colors duration-300"
+        className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
         style={{
           backgroundColor: `${theme.surface}CC`,
           borderColor: theme.border,
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title="Update Destination"
             description="Edit and update existing destination information"
@@ -612,109 +678,67 @@ const UpdateDestinationPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Success Message */}
-        {success && (
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section - Only show when no destination is selected */}
+        {!selectedDestination && (
           <div
-            className="mb-8 p-6 rounded-2xl shadow-sm transition-colors duration-300"
-            style={{
-              background: `linear-gradient(135deg, ${hexToRgba(theme.success, 0.1)}, ${hexToRgba(theme.success, 0.05)})`,
-              border: `1px solid ${hexToRgba(theme.success, 0.3)}`,
-            }}
-          >
-            <div className="flex items-center gap-4">
-              <CheckCircle
-                className="w-8 h-8 flex-shrink-0"
-                style={{ color: theme.success }}
-              />
-              <div className="flex-1">
-                <h3
-                  className="text-lg font-semibold"
-                  style={{ color: theme.success }}
-                >
-                  Update Successful!
-                </h3>
-                <p className="mt-1" style={{ color: theme.textSecondary }}>
-                  {success}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div
-            className="mb-8 p-6 rounded-2xl shadow-sm transition-colors duration-300"
-            style={{
-              background: `linear-gradient(135deg, ${hexToRgba(theme.error, 0.1)}, ${hexToRgba(theme.error, 0.05)})`,
-              border: `1px solid ${hexToRgba(theme.error, 0.3)}`,
-            }}
-          >
-            <div className="flex items-center gap-4">
-              <XCircle
-                className="w-8 h-8 flex-shrink-0"
-                style={{ color: theme.error }}
-              />
-              <div className="flex-1">
-                <h3
-                  className="text-lg font-semibold"
-                  style={{ color: theme.error }}
-                >
-                  Error
-                </h3>
-                <p className="mt-1" style={{ color: theme.textSecondary }}>
-                  {error}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Search Section */}
-        <div
-          className="rounded-2xl shadow-lg p-8 mb-8 transition-all duration-300"
-          style={{
-            backgroundColor: theme.surface,
-            border: `1px solid ${theme.border}`,
-          }}
-        >
-          <h2
-            className="text-2xl font-bold mb-6 flex items-center gap-3"
-            style={{ color: theme.text }}
-          >
-            <Search className="w-6 h-6" style={{ color: theme.primary }} />
-            Select Destination to Update
-          </h2>
-
-          <DestinationSearch
-            destinations={destinations}
-            loading={loading}
-            selectedDestination={selectedDestination}
-            onSelectDestination={handleSelectDestination}
-            initialSearchTerm={initialDestinationName}
-          />
-        </div>
-
-        {/* Loading State for Details */}
-        {loadingDetails && (
-          <div
-            className="rounded-2xl shadow-lg p-12 text-center transition-colors duration-300"
+            className="rounded-2xl shadow-lg p-8 mb-8 transition-all duration-300"
             style={{
               backgroundColor: theme.surface,
               border: `1px solid ${theme.border}`,
             }}
           >
-            <Loader2
-              className="w-12 h-12 animate-spin mx-auto mb-4"
-              style={{ color: theme.primary }}
+            <h2
+              className="text-2xl font-bold mb-6 flex items-center gap-3"
+              style={{ color: theme.text }}
+            >
+              <Search className="w-6 h-6" style={{ color: theme.primary }} />
+              Select Destination to Update
+            </h2>
+
+            <CommonSearch
+              items={searchItems}
+              loading={loading}
+              selectedItem={selectedSearchItem}
+              onSelectItem={(item) =>
+                handleSelectDestination(item.id as number, item.name)
+              }
+              onClearSelection={handleClearDestinationSelection}
+              initialSearchTerm={initialDestinationName}
+              placeholder="Search destinations..."
+              title="Destinations"
+              variant="primary"
+              size="md"
+              getBadgeText={(item) => `ID: ${item.id}`}
             />
-            <p style={{ color: theme.textSecondary }}>
-              Loading destination details...
-            </p>
           </div>
         )}
-
+        {/* Selected Destination Info Bar */}
+        <SelectedItemBar
+          item={
+            selectedDestination
+              ? {
+                  id: selectedDestination.destinationId,
+                  name: selectedDestination.destinationName,
+                }
+              : null
+          }
+          onClear={handleClearDestinationSelection}
+          variant="primary"
+          title="Currently Editing"
+          showId={true}
+          clearButtonText="Change Destination"
+          size="md"
+        />
+        {loadingDetails && (
+          <CommonLoading
+            message="Loading destination details..."
+            subMessage="Please wait while we fetch the destination information"
+            size="lg"
+            fullScreen={false}
+            className="rounded-2xl shadow-lg border"
+          />
+        )}
         {/* Destination Details Form */}
         {editedDestination && selectedDestination && (
           <DestinationDetailsForm
@@ -740,7 +764,6 @@ const UpdateDestinationPage = () => {
             uploadingImages={uploadingImages}
           />
         )}
-
         {/* Action Buttons */}
         {editedDestination && originalDestination && (
           <div
@@ -754,7 +777,7 @@ const UpdateDestinationPage = () => {
               <button
                 onClick={handleResetChanges}
                 disabled={!hasChanges() || loadingUpdate || uploadingImages}
-                className="flex-1 px-6 py-4 rounded-xl border-2 transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer flex-1 px-6 py-4 rounded-xl border-2 transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: theme.background,
                   borderColor: theme.border,
@@ -779,7 +802,7 @@ const UpdateDestinationPage = () => {
               <button
                 onClick={() => setShowConfirmModal(true)}
                 disabled={!hasChanges() || loadingUpdate || uploadingImages}
-                className="flex-1 px-6 py-4 rounded-xl text-white font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer flex-1 px-6 py-4 rounded-xl text-white font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`,
                 }}
@@ -846,7 +869,6 @@ const UpdateDestinationPage = () => {
             )}
           </div>
         )}
-
         {/* Confirmation Modal */}
         {showConfirmModal && originalDestination && editedDestination && (
           <UpdateConfirmationModal
@@ -863,6 +885,7 @@ const UpdateDestinationPage = () => {
             newActivities={newActivities}
             removedCategoryIds={getCategoryChanges().removedCategoryIds}
             addedCategoryIds={getCategoryChanges().addedCategoryIds}
+            availableCategories={availableCategories}
           />
         )}
       </div>

@@ -1,3 +1,4 @@
+// app/web-management/destinations/terminate/page.tsx (Updated with CommonSearch)
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,11 +9,21 @@ import {
   WEB_MANAGEMENT_DESTINATION_PATH,
 } from "@/utils/constant";
 import { DestinationService } from "@/services/destinationService";
-import { DestinationForTerminate, SingleDestinationResponse } from "@/types/destination-types";
-import { CheckCircle, XCircle, X, AlertTriangle, Loader2, Activity } from "lucide-react";
+import {
+  DestinationForTerminate,
+  SingleDestinationResponse,
+} from "@/types/destination-types";
+import { AlertTriangle, Activity, Search } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
+import ImageModal, {
+  ImageModalImage,
+} from "@/components/common-components/ImageModal";
+import CommonSearch from "@/components/common-components/CommonSearch";
+import SelectedItemBar from "@/components/common-components/SelectedItemBar";
+import CommonLoading from "@/components/common-components/CommonLoading";
+import CommonErrorState from "@/components/common-components/CommonErrorState";
 
-import { DestinationSearch } from "@/components/destinations-components/terminate-destination-components/DestinationSearch";
 import { DestinationStats } from "@/components/destinations-components/terminate-destination-components/DestinationStats";
 import { BasicInfoPanel } from "@/components/destinations-components/terminate-destination-components/BasicInfoPanel";
 import { ActivitiesList } from "@/components/destinations-components/terminate-destination-components/ActivitiesList";
@@ -21,29 +32,41 @@ import { TerminationModal } from "@/components/destinations-components/terminate
 import { ImagesPanel } from "@/components/destinations-components/terminate-destination-components/ImagesPanel";
 
 const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
+  hex = hex.replace("#", "");
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
 
+// Type for search items
+interface DestinationSearchItem {
+  id: number;
+  name: string;
+}
+
 const TerminateDestinationPage = () => {
   const { theme } = useTheme();
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   const initialDestinationName = searchParams?.get("destination-name") || "";
   const initialDestinationId = searchParams?.get("destination-id") || "";
 
-  const [destinations, setDestinations] = useState<DestinationForTerminate[]>([]);
-  const [searchTerm, setSearchTerm] = useState(initialDestinationName);
-  const [selectedDestination, setSelectedDestination] = useState<DestinationForTerminate | null>(
-    initialDestinationId && initialDestinationName
-      ? { destinationId: parseInt(initialDestinationId), destinationName: initialDestinationName }
-      : null
+  const [destinations, setDestinations] = useState<DestinationForTerminate[]>(
+    [],
   );
-  const [destinationDetails, setDestinationDetails] = useState<SingleDestinationResponse | null>(null);
+  const [selectedDestination, setSelectedDestination] =
+    useState<DestinationForTerminate | null>(
+      initialDestinationId && initialDestinationName
+        ? {
+            destinationId: parseInt(initialDestinationId),
+            destinationName: initialDestinationName,
+          }
+        : null,
+    );
+  const [destinationDetails, setDestinationDetails] =
+    useState<SingleDestinationResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingTerminate, setLoadingTerminate] = useState(false);
@@ -51,11 +74,29 @@ const TerminateDestinationPage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
+  // Toast notification state
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    title: string;
+    message: string;
+    actionLink?: string;
+  } | null>(null);
+
+  // Image modal state
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
     { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    { label: "Destinations", href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}` },
-    { label: "Terminate", href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/terminate` },
+    {
+      label: "Destinations",
+      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
+    },
+    {
+      label: "Terminate",
+      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/terminate`,
+    },
   ];
 
   const fetchDestinations = async () => {
@@ -66,6 +107,11 @@ const TerminateDestinationPage = () => {
       setDestinations(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load destinations");
+      setToast({
+        type: "error",
+        title: "Error",
+        message: err.message || "Failed to load destinations",
+      });
     } finally {
       setLoading(false);
     }
@@ -80,6 +126,11 @@ const TerminateDestinationPage = () => {
       setDestinationDetails(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load destination details");
+      setToast({
+        type: "error",
+        title: "Load Failed",
+        message: err.message || "Failed to load destination details",
+      });
     } finally {
       setLoadingDetails(false);
     }
@@ -87,8 +138,26 @@ const TerminateDestinationPage = () => {
 
   const handleSelectDestination = async (id: number, name: string) => {
     setSelectedDestination({ destinationId: id, destinationName: name });
-    setSearchTerm(name);
     await fetchDestinationDetails(id);
+
+    // Update URL
+    const url = new URL(window.location.href);
+    url.searchParams.set("destination-id", id.toString());
+    url.searchParams.set("destination-name", name);
+    router.replace(url.toString(), { scroll: false });
+  };
+
+  const handleClearDestinationSelection = () => {
+    setSelectedDestination(null);
+    setDestinationDetails(null);
+    setError(null);
+    setSuccess(null);
+
+    // Update URL to remove query params
+    const url = new URL(window.location.href);
+    url.searchParams.delete("destination-id");
+    url.searchParams.delete("destination-name");
+    router.replace(url.toString(), { scroll: false });
   };
 
   const handleTerminateClick = () => {
@@ -104,23 +173,64 @@ const TerminateDestinationPage = () => {
     setSuccess(null);
 
     try {
-      await DestinationService.terminateDestination(selectedDestination.destinationId);
-      
+      await DestinationService.terminateDestination(
+        selectedDestination.destinationId,
+      );
+
       setSuccess("Destination terminated successfully!");
+      setToast({
+        type: "success",
+        title: "Termination Successful!",
+        message: `"${selectedDestination.destinationName}" has been permanently removed from the system.`,
+      });
+
       setShowConfirmModal(false);
-      
+
       setTimeout(() => {
-        setSelectedDestination(null);
-        setDestinationDetails(null);
-        setSearchTerm("");
+        handleClearDestinationSelection();
         fetchDestinations();
       }, 2000);
     } catch (err: any) {
       setError(err.message || "Failed to terminate destination");
+      setToast({
+        type: "error",
+        title: "Termination Failed",
+        message:
+          err.message || "Failed to terminate destination. Please try again.",
+      });
     } finally {
       setLoadingTerminate(false);
     }
   };
+
+  // Prepare images for modal
+  const getModalImages = (): ImageModalImage[] => {
+    if (!destinationDetails?.images) return [];
+    return destinationDetails.images.map((img) => ({
+      url: img.imageUrl,
+      name: img.imageName,
+      description: img.imageDescription,
+      id: img.imageId,
+    }));
+  };
+
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setImageModalOpen(true);
+  };
+
+  // Convert destinations to search items format
+  const searchItems: DestinationSearchItem[] = destinations.map((dest) => ({
+    id: dest.destinationId,
+    name: dest.destinationName,
+  }));
+
+  const selectedSearchItem: DestinationSearchItem | null = selectedDestination
+    ? {
+        id: selectedDestination.destinationId,
+        name: selectedDestination.destinationName,
+      }
+    : null;
 
   useEffect(() => {
     if (!selectedDestination) {
@@ -130,21 +240,50 @@ const TerminateDestinationPage = () => {
 
   useEffect(() => {
     if (initialDestinationId && !destinationDetails) {
-      handleSelectDestination(parseInt(initialDestinationId), initialDestinationName);
+      handleSelectDestination(
+        parseInt(initialDestinationId),
+        initialDestinationName,
+      );
     }
   }, [initialDestinationId, initialDestinationName]);
 
+  if (loading && !selectedDestination) {
+    return (
+      <CommonLoading
+        message="Loading destinations..."
+        subMessage="Please wait while we fetch available destinations"
+        size="lg"
+        fullScreen={true}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: theme.background }}>
+    <div
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
+      {/* Toast Notifications */}
+      {toast && (
+        <ToastNotification
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={() => setToast(null)}
+          actionLink={toast.actionLink}
+          actionText="View Details"
+        />
+      )}
+
       {/* Header */}
       <div
-        className="sticky top-0 z-50 backdrop-blur-sm border-b transition-all duration-300"
+        className="sticky top-0 z-10 backdrop-blur-sm border-b transition-all duration-300"
         style={{
           backgroundColor: `${theme.surface}CC`,
           borderColor: theme.border,
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title="Terminate Destination"
             description="Permanently remove a destination from the system"
@@ -154,90 +293,83 @@ const TerminateDestinationPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Success Message */}
-        {success && (
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section - Only show when no destination is selected */}
+        {!selectedDestination && (
           <div
-            className="mb-8 p-6 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300"
+            className="rounded-2xl shadow-lg mb-8 transition-all duration-300"
             style={{
-              background: `linear-gradient(135deg, ${hexToRgba(theme.success, 0.1)}, ${hexToRgba(theme.success, 0.05)})`,
-              border: `1px solid ${hexToRgba(theme.success, 0.3)}`,
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`,
             }}
           >
-            <div className="flex items-center gap-4">
-              <CheckCircle className="w-8 h-8 flex-shrink-0" style={{ color: theme.success }} />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold" style={{ color: theme.success }}>Operation Successful!</h3>
-                <p className="mt-1" style={{ color: theme.textSecondary }}>{success}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div
-            className="mb-8 p-6 rounded-2xl"
-            style={{
-              background: `linear-gradient(135deg, ${hexToRgba(theme.error, 0.1)}, ${hexToRgba(theme.error, 0.05)})`,
-              border: `1px solid ${hexToRgba(theme.error, 0.3)}`,
-            }}
-          >
-            <div className="flex items-center gap-4">
-              <XCircle className="w-8 h-8 flex-shrink-0" style={{ color: theme.error }} />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold" style={{ color: theme.error }}>Error</h3>
-                <p className="mt-1" style={{ color: theme.textSecondary }}>{error}</p>
-              </div>
-              <button
-                onClick={() => setError(null)}
-                className="p-2 rounded-lg transition-colors hover:opacity-70"
-                style={{ color: theme.error }}
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Search Section */}
-        <div
-          className="rounded-2xl shadow-lg mb-8 transition-all duration-300"
-          style={{
-            backgroundColor: theme.surface,
-            border: `1px solid ${theme.border}`,
-          }}
-        >
-          <div className="px-5 sm:px-6 py-4 flex items-center gap-3 border-b" style={{ borderColor: theme.border }}>
-            <span
-              className="w-9 h-9 flex items-center justify-center rounded-xl"
-              style={{ background: hexToRgba(theme.primary, 0.1), color: theme.primary }}
+            <div
+              className="px-5 sm:px-6 py-4 flex items-center gap-3 border-b"
+              style={{ borderColor: theme.border }}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </span>
-            <div>
-              <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
-                Select Destination to Terminate
-              </h2>
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-                Search and select a destination to review its data before termination
-              </p>
+              <span
+                className="w-9 h-9 flex items-center justify-center rounded-xl"
+                style={{
+                  background: hexToRgba(theme.error, 0.1),
+                  color: theme.error,
+                }}
+              >
+                <Search className="w-4 h-4" />
+              </span>
+              <div>
+                <h2
+                  className="text-sm sm:text-base font-semibold"
+                  style={{ color: theme.text }}
+                >
+                  Select Destination to Terminate
+                </h2>
+                <p
+                  className="text-xs mt-0.5"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Search and select a destination to review its data before
+                  termination
+                </p>
+              </div>
+            </div>
+
+            <div className="px-5 sm:px-6 py-5">
+              <CommonSearch<DestinationSearchItem>
+                items={searchItems}
+                loading={loading}
+                selectedItem={selectedSearchItem}
+                onSelectItem={(item) =>
+                  handleSelectDestination(item.id, item.name)
+                }
+                onClearSelection={handleClearDestinationSelection}
+                initialSearchTerm={initialDestinationName}
+                placeholder="Search destinations..."
+                title="Destinations"
+                variant="error"
+                size="md"
+                getBadgeText={(item) => `ID: ${item.id}`}
+              />
             </div>
           </div>
+        )}
 
-          <div className="px-5 sm:px-6 py-5">
-            <DestinationSearch
-              destinations={destinations}
-              loading={loading}
-              selectedDestination={selectedDestination}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onSelectDestination={handleSelectDestination}
-            />
-          </div>
-        </div>
+        {/* Selected Destination Info Bar */}
+        <SelectedItemBar
+          item={
+            selectedDestination
+              ? {
+                  id: selectedDestination.destinationId,
+                  name: selectedDestination.destinationName,
+                }
+              : null
+          }
+          onClear={handleClearDestinationSelection}
+          variant="error"
+          title="Selected for Termination"
+          showId={true}
+          clearButtonText="Change Selection"
+          size="md"
+        />
 
         {/* Destination Details Section */}
         {selectedDestination && (
@@ -259,14 +391,23 @@ const TerminateDestinationPage = () => {
             >
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: `linear-gradient(135deg, ${theme.error}, ${theme.error})`, color: "#fff" }}
+                style={{
+                  background: `linear-gradient(135deg, ${theme.error}, ${theme.error})`,
+                  color: "#fff",
+                }}
               >
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold" style={{ color: theme.error }}>Destination Termination Review</h2>
+                <h2
+                  className="text-base font-bold"
+                  style={{ color: theme.error }}
+                >
+                  Destination Termination Review
+                </h2>
                 <p className="text-xs mt-0.5" style={{ color: theme.error }}>
-                  Review all data carefully. This action is permanent and cannot be undone.
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
                 </p>
               </div>
               <div
@@ -276,33 +417,45 @@ const TerminateDestinationPage = () => {
                   border: `1px solid ${hexToRgba(theme.error, 0.2)}`,
                 }}
               >
-                <span className="text-xs" style={{ color: theme.error }}>ID</span>
-                <span className="text-sm font-bold" style={{ color: theme.error }}>
+                <span className="text-xs" style={{ color: theme.error }}>
+                  ID
+                </span>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: theme.error }}
+                >
                   #{selectedDestination.destinationId}
                 </span>
               </div>
             </div>
 
             {/* Loading Details */}
-            {loadingDetails ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-4">
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                  style={{ background: hexToRgba(theme.primary, 0.1) }}
-                >
-                  <Loader2 size={22} className="animate-spin" style={{ color: theme.primary }} />
-                </div>
-                <p className="text-sm" style={{ color: theme.textSecondary }}>Loading destination details…</p>
-              </div>
-            ) : destinationDetails ? (
+            {loadingDetails && (
+              <CommonLoading
+                message="Loading destination details..."
+                subMessage="Please wait while we fetch the destination information"
+                size="lg"
+              />
+            )}
+
+            {/* Destination Details Content */}
+            {!loadingDetails && destinationDetails && (
               <div className="p-5 sm:p-6 space-y-6">
                 <DestinationStats destinationDetails={destinationDetails} />
 
-                <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+                <div
+                  className="grid gap-6"
+                  style={{
+                    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                  }}
+                >
                   {/* Left Column */}
                   <div className="space-y-5">
                     <BasicInfoPanel destinationDetails={destinationDetails} />
-                    <ImagesPanel images={destinationDetails.images} />
+                    <ImagesPanel
+                      images={destinationDetails.images}
+                      onImageClick={handleImageClick}
+                    />
                   </div>
 
                   {/* Right Column */}
@@ -314,10 +467,23 @@ const TerminateDestinationPage = () => {
                         border: `1.5px solid ${hexToRgba(theme.warning, 0.3)}`,
                       }}
                     >
-                      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${hexToRgba(theme.warning, 0.3)}` }}>
+                      <div
+                        className="flex items-center justify-between px-4 py-3"
+                        style={{
+                          borderBottom: `1px solid ${hexToRgba(theme.warning, 0.3)}`,
+                        }}
+                      >
                         <div className="flex items-center gap-2">
-                          <Activity className="w-4 h-4" style={{ color: theme.warning }} />
-                          <h3 className="text-sm font-semibold" style={{ color: theme.text }}>Activities ({destinationDetails.activities.length})</h3>
+                          <Activity
+                            className="w-4 h-4"
+                            style={{ color: theme.warning }}
+                          />
+                          <h3
+                            className="text-sm font-semibold"
+                            style={{ color: theme.text }}
+                          >
+                            Activities ({destinationDetails.activities.length})
+                          </h3>
                         </div>
                         <span
                           className="text-xs font-semibold px-2 py-0.5 rounded-full"
@@ -331,7 +497,9 @@ const TerminateDestinationPage = () => {
                         </span>
                       </div>
                       <div className="px-4 py-4">
-                        <ActivitiesList activities={destinationDetails.activities} />
+                        <ActivitiesList
+                          activities={destinationDetails.activities}
+                        />
                       </div>
                     </div>
 
@@ -340,27 +508,48 @@ const TerminateDestinationPage = () => {
                 </div>
 
                 {/* Termination Button */}
-                <div className="flex justify-center pt-4" style={{ borderTop: `1.5px solid ${hexToRgba(theme.error, 0.2)}` }}>
+                <div
+                  className="flex justify-center pt-4"
+                  style={{
+                    borderTop: `1.5px solid ${hexToRgba(theme.error, 0.2)}`,
+                  }}
+                >
                   <button
                     onClick={handleTerminateClick}
                     disabled={loadingTerminate}
-                    className="flex items-center gap-3 px-8 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 hover:opacity-90 hover:scale-105"
+                    className="cursor-pointer flex items-center gap-3 px-8 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-xl active:scale-95 disabled:hover:scale-100"
                     style={{
-                      background: `linear-gradient(135deg, ${theme.error}, ${theme.error})`,
+                      background: loadingTerminate
+                        ? `linear-gradient(135deg, ${theme.error}, ${theme.error}dd)`
+                        : `linear-gradient(135deg, ${theme.error}, ${hexToRgba(theme.error, 0.8)})`,
                       color: "#fff",
                       opacity: loadingTerminate ? 0.6 : 1,
                       boxShadow: `0 4px 16px ${hexToRgba(theme.error, 0.3)}`,
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   >
                     {loadingTerminate ? (
                       <>
-                        <Loader2 size={18} className="animate-spin" />
-                        Processing…
+                        <div className="relative w-4 h-4">
+                          <div className="absolute inset-0 border-2 border-white/30 rounded-full" />
+                          <div className="absolute inset-0 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        </div>
+                        <span className="animate-pulse">Processing…</span>
                       </>
                     ) : (
                       <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        <svg
+                          className="w-4 h-4 transition-transform duration-200 group-hover:rotate-12"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
                         </svg>
                         Terminate Destination Permanently
                       </>
@@ -368,12 +557,26 @@ const TerminateDestinationPage = () => {
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <AlertTriangle size={36} style={{ color: theme.textSecondary }} />
-                <p className="text-sm font-medium" style={{ color: theme.text }}>Could not load destination details</p>
-                <p className="text-xs" style={{ color: theme.textSecondary }}>Please try selecting the destination again</p>
-              </div>
+            )}
+
+            {/* Error State */}
+            {!loadingDetails && !destinationDetails && error && (
+              <CommonErrorState
+                error={error}
+                title="Failed to Load Destination"
+                message="The destination couldn't be loaded. Please try again."
+                variant="error"
+                showBackButton={true}
+                showRetryButton={true}
+                onBack={handleClearDestinationSelection}
+                onRetry={() =>
+                  selectedDestination &&
+                  fetchDestinationDetails(selectedDestination.destinationId)
+                }
+                backButtonText="Change Selection"
+                retryButtonText="Try Again"
+                fullScreen={false}
+              />
             )}
           </div>
         )}
@@ -386,6 +589,18 @@ const TerminateDestinationPage = () => {
         loading={loadingTerminate}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleConfirmTerminate}
+      />
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModalOpen}
+        images={getModalImages()}
+        initialIndex={selectedImageIndex}
+        onClose={() => setImageModalOpen(false)}
+        showNavigation={true}
+        showDownload={true}
+        showZoom={true}
+        allowKeyboardNavigation={true}
       />
     </div>
   );
