@@ -1,5 +1,6 @@
 export const WEB_MANAGEMENT_URL = "/web-management";
 export const TRAVEL_MANAGEMENT_URL = "/travel-management";
+export const WEB_PAGE_MANAGEMENT_URL = "/web-page-management";
 export const EMPLOYEE_MANAGEMENT_URL = "/employee-management";
 export const HOTEL_MANAGEMENT_URL = "/hotel-management";
 export const VEHICLE_MANAGEMENT_URL = "/vehicle-management";
@@ -25,7 +26,9 @@ export const ACTIVITY_CATEGORIES_PAGE_URL = `${ACTIVITIES_PAGE_URL}/categories`;
 export const ACTIVITY_CATEGORY_VIEW_PAGE_URL = `${ACTIVITY_CATEGORIES_PAGE_URL}/view`;
 export const ACTIVITY_CATEGORY_VIEW_DETAILS_URL = `${ACTIVITY_CATEGORY_VIEW_PAGE_URL}`;
 
-
 export const SEASONS_PAGE_URL = `${WEB_MANAGEMENT_URL}/seasons`;
 export const SEASONS_VIEW_PAGE_URL = `${SEASONS_PAGE_URL}/view`;
 export const SEASON_DETAILS_VIEW_PAGE_URL = `${SEASONS_VIEW_PAGE_URL}`;
+
+export const WEB_HOME_PAGE_URL = `${WEB_PAGE_MANAGEMENT_URL}/home-page`;
+export const TRENDING_DESTINATIONS_MANAGE_URL = `${WEB_HOME_PAGE_URL}/trending-destinations`;

@@ -262,7 +262,7 @@ const NavBar = () => {
                 initial="rest"
                 whileHover="hover"
                 whileTap="tap"
-                className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg flex items-center justify-center cursor-pointer overflow-hidden bg-white/10"
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg flex items-center justify-center cursor-pointer overflow-hidden"
               >
                 <img
                   src={COMPANY_LOGO_IMAGE}
@@ -300,11 +300,20 @@ const NavBar = () => {
               >
                 {/* User Avatar */}
                 <motion.div
-                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/30"
+                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-full overflow-hidden bg-white/20 flex items-center justify-center border-2 border-white/30"
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.15 }}
                 >
-                  {user?.firstName ? (
+                  {user?.imageUrl ? (
+                    <img
+                      src={user.imageUrl}
+                      alt="User avatar"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  ) : user?.firstName ? (
                     <span className="font-semibold text-xs sm:text-sm text-white">
                       {getUserInitials()}
                     </span>
@@ -557,7 +566,10 @@ const NavBar = () => {
                   )}
                 </motion.div>
                 <div>
-                  <p className="font-semibold text-sm" style={{ color: theme.text }}>
+                  <p
+                    className="font-semibold text-sm"
+                    style={{ color: theme.text }}
+                  >
                     {getUserFullName()}
                   </p>
                   <p className="text-xs" style={{ color: theme.textSecondary }}>
@@ -593,10 +605,7 @@ const NavBar = () => {
               </motion.button>
 
               {/* Mobile Notifications - Integrated with bell */}
-              <motion.div
-                variants={mobileItemVariants}
-                className="w-full"
-              >
+              <motion.div variants={mobileItemVariants} className="w-full">
                 <NotificationBell mobile />
               </motion.div>
 

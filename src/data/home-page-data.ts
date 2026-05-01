@@ -5,6 +5,7 @@ import {
   TRAVEL_MANAGEMENT_PRIVILEGE,
   VEHICLE_MANAGEMENT_PRIVILEGE,
   WEB_MANAGEMENT_PRIVILEGE,
+  WEB_PAGE_MANAGEMENT_PRIVILEGE,
 } from "@/utils/privileges";
 import {
   ERP_SYSTEM_URL,
@@ -12,6 +13,7 @@ import {
   TRAVEL_MANAGEMENT_URL,
   VEHICLE_MANAGEMENT_URL,
   WEB_MANAGEMENT_URL,
+  WEB_PAGE_MANAGEMENT_URL,
 } from "@/utils/urls";
 
 export const homeCardData: HomeCardType[] = [
@@ -43,6 +45,19 @@ export const homeCardData: HomeCardType[] = [
   },
   {
     id: 3,
+    name: "Web Page Management",
+    label: "Web Pages",
+    description:
+      "Manage website pages, banners, layouts, SEO content, and page configurations.",
+    color: "#EC4899", // pink
+    hoverColor: "#DB2777",
+    bgColor: "bg-pink-50",
+    linkTo: WEB_PAGE_MANAGEMENT_URL,
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/1055/1055687.png",
+    privilege: WEB_PAGE_MANAGEMENT_PRIVILEGE,
+  },
+  {
+    id: 4,
     name: "Employee Management",
     label: "Employees",
     description:
@@ -55,7 +70,7 @@ export const homeCardData: HomeCardType[] = [
     privilege: "EMPLOYEE_MANAGEMENT",
   },
   {
-    id: 4,
+    id: 5,
     name: "Hotel Management",
     label: "Hotels",
     description:
@@ -63,12 +78,12 @@ export const homeCardData: HomeCardType[] = [
     color: "#F59E0B", // amber
     hoverColor: "#D97706",
     bgColor: "bg-yellow-50",
-    linkTo: HOTEL_MANAGEMENT_URL, // ← was incorrectly set to HOTEL_MANAGEMENT_PRIVILEGE
+    linkTo: HOTEL_MANAGEMENT_URL,
     iconUrl: "https://cdn-icons-png.flaticon.com/512/1179/1179968.png",
     privilege: HOTEL_MANAGEMENT_PRIVILEGE,
   },
   {
-    id: 5,
+    id: 6,
     name: "Vehicle Management",
     label: "Vehicles",
     description:
@@ -81,7 +96,7 @@ export const homeCardData: HomeCardType[] = [
     privilege: VEHICLE_MANAGEMENT_PRIVILEGE,
   },
   {
-    id: 6,
+    id: 7,
     name: "ERP System",
     label: "ERP",
     description:
@@ -89,7 +104,7 @@ export const homeCardData: HomeCardType[] = [
     color: "#8B5CF6", // violet
     hoverColor: "#7C3AED",
     bgColor: "bg-purple-50",
-    linkTo: ERP_SYSTEM_URL, // ← was incorrectly set to ERP_SYSTEM_PRIVILEGE
+    linkTo: ERP_SYSTEM_URL,
     iconUrl: "https://cdn-icons-png.flaticon.com/512/1006/1006771.png",
     privilege: ERP_SYSTEM_PRIVILEGE,
   },

@@ -10,9 +10,17 @@ import {
   ActivityIdNameResponse,
   UpdateActivityRequest,
   UpdateActivityApiResponse,
+  ActivityStatisticsApiResponse,
 } from "@/types/activity-types";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import {
+  ADD_ACTIVITY_DATA_FE,
+  GET_ACTIVITIES_DETAILS_BY_REQUEST_DATA_FE,
+  GET_ACTIVITIES_NAMES_AND_IDS_DATA_FE,
+  GET_ACTIVITIES_STATISTICS_DATA_FE,
+  GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA_FE,
+  TERMINATE_ACTIVITY_DATA_FE,
+  UPDATE_ACTIVITY_DATA_FE,
+} from "@/utils/frontEndConstant";
 
 export class ActivityService {
   private static getAuthHeaders(): HeadersInit {
@@ -27,27 +35,26 @@ export class ActivityService {
 
   // Fetch activities with filters
   static async getActivities(
-    params: ActivityFilterParams
+    params: ActivityFilterParams,
   ): Promise<ApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/activities/activities`,
-        {
-          method: "POST",
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify({
-            name: params.name || null,
-            minPrice: params.minPrice || null,
-            maxPrice: params.maxPrice || null,
-            duration: params.duration || null,
-            activityCategory: params.activityCategory || null,
-            season: params.season || null,
-            status: params.status || null,
-            pageSize: params.pageSize,
-            pageNumber: params.pageNumber,
-          }),
-        }
-      );
+      const response = await fetch(GET_ACTIVITIES_DETAILS_BY_REQUEST_DATA_FE, {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({
+          name: params.name || null,
+          minPrice: params.minPrice || null,
+          maxPrice: params.maxPrice || null,
+          duration: params.duration || null,
+          activityCategory: params.activityCategory || null,
+          season: params.season || null,
+          status: params.status || null,
+          pageSize: params.pageSize,
+          pageNumber: params.pageNumber,
+          sortBy: params.sortBy || null,
+          sortDirection: params.sortDirection || null
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -65,11 +72,11 @@ export class ActivityService {
   static async getActivityById(id: number): Promise<SingleActivityApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/activities/${id}`,
+        `${GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA_FE}/${id}`,
         {
           method: "GET",
           headers: this.getAuthHeaders(),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -77,9 +84,6 @@ export class ActivityService {
       }
 
       const data: SingleActivityApiResponse = await response.json();
-      console.log("===============data=====================");
-      console.log(data);
-      console.log("====================================");
       return data;
     } catch (error) {
       console.error("Error fetching activity:", error);
@@ -123,46 +127,20 @@ export class ActivityService {
     return ["Summer", "Winter", "Spring", "Monsoon", "Fall", "Dry Season"];
   }
 
-  // Get activities for termination
-  static async getActivitiesForTerminate(): Promise<ActivitiesForTerminateResponse> {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/activities/activity-for-terminate`,
-        {
-          method: "GET",
-          headers: this.getAuthHeaders(),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: ActivitiesForTerminateResponse = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching activities for terminate:", error);
-      throw error;
-    }
-  }
-
   // Terminate activity
   static async terminateActivity(
-    activityId: number
+    activityId: number,
   ): Promise<TerminateActivityApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/activities/terminate-activity`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ activityId }),
-        }
-      );
+      const response = await fetch(TERMINATE_ACTIVITY_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ activityId }),
+      });
 
       const data: TerminateActivityApiResponse = await response.json();
 
@@ -177,23 +155,19 @@ export class ActivityService {
     }
   }
 
-
-    static async addActivity(
-    activityData: AddActivityRequest
+  static async addActivity(
+    activityData: AddActivityRequest,
   ): Promise<AddActivityApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/activities/add-activity`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(activityData),
-        }
-      );
+      const response = await fetch(ADD_ACTIVITY_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(activityData),
+      });
 
       const data: AddActivityApiResponse = await response.json();
 
@@ -208,19 +182,17 @@ export class ActivityService {
     }
   }
 
-    // Get activity IDs and names for search dropdown
+  // Get activity IDs and names for search dropdown
   static async getActivityIdsAndNames(): Promise<ActivityIdNameResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/activities/activityId-and-activityName`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",        }
-      );
+      const response = await fetch(GET_ACTIVITIES_NAMES_AND_IDS_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -236,20 +208,18 @@ export class ActivityService {
 
   // Update activity
   static async updateActivity(
-    activityData: UpdateActivityRequest
+    activityData: UpdateActivityRequest,
   ): Promise<UpdateActivityApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/activities/update-activity`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",          body: JSON.stringify(activityData),
-        }
-      );
+      const response = await fetch(UPDATE_ACTIVITY_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(activityData),
+      });
 
       const data: UpdateActivityApiResponse = await response.json();
 
@@ -264,37 +234,80 @@ export class ActivityService {
     }
   }
 
-    // Validate activity form data
+  // Add this method to the ActivityService class
+
+  static async getActivitiesStatistics(): Promise<ActivityStatisticsApiResponse> {
+    try {
+      const response = await fetch(GET_ACTIVITIES_STATISTICS_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ActivityStatisticsApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch activities statistics",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching activities statistics:", error);
+      throw error;
+    }
+  }
+
+  // Validate activity form data
   static validateActivityForm(formData: any): Record<string, string> {
     const errors: Record<string, string> = {};
 
     // Required fields validation
-    if (!formData.destinationId) errors.destinationId = "Destination is required";
+    if (!formData.destinationId)
+      errors.destinationId = "Destination is required";
     if (!formData.name?.trim()) errors.name = "Activity name is required";
-    if (!formData.description?.trim()) errors.description = "Description is required";
-    if (!formData.activitiesCategory) errors.activitiesCategory = "Category is required";
-    if (formData.durationHours === null || formData.durationHours <= 0) 
+    if (!formData.description?.trim())
+      errors.description = "Description is required";
+    if (!formData.activitiesCategory)
+      errors.activitiesCategory = "Category is required";
+    if (formData.durationHours === null || formData.durationHours <= 0)
       errors.durationHours = "Valid duration is required";
-    if (!formData.availableFrom) errors.availableFrom = "Start time is required";
+    if (!formData.availableFrom)
+      errors.availableFrom = "Start time is required";
     if (!formData.availableTo) errors.availableTo = "End time is required";
-    if (formData.priceLocal === null || formData.priceLocal < 0) 
+    if (formData.priceLocal === null || formData.priceLocal < 0)
       errors.priceLocal = "Valid local price is required";
-    if (formData.priceForeigners === null || formData.priceForeigners < 0) 
+    if (formData.priceForeigners === null || formData.priceForeigners < 0)
       errors.priceForeigners = "Valid foreigner price is required";
-    if (formData.minParticipate === null || formData.minParticipate < 1) 
+    if (formData.minParticipate === null || formData.minParticipate < 1)
       errors.minParticipate = "Minimum participants must be at least 1";
-    if (formData.maxParticipate === null || formData.maxParticipate < 1) 
+    if (formData.maxParticipate === null || formData.maxParticipate < 1)
       errors.maxParticipate = "Maximum participants must be at least 1";
-    
+
     // Validate min/max participants
-    if (formData.minParticipate && formData.maxParticipate && 
-        formData.minParticipate > formData.maxParticipate) {
-      errors.maxParticipate = "Maximum participants must be greater than or equal to minimum";
+    if (
+      formData.minParticipate &&
+      formData.maxParticipate &&
+      formData.minParticipate > formData.maxParticipate
+    ) {
+      errors.maxParticipate =
+        "Maximum participants must be greater than or equal to minimum";
     }
 
     // Validate time range
-    if (formData.availableFrom && formData.availableTo && 
-        formData.availableFrom >= formData.availableTo) {
+    if (
+      formData.availableFrom &&
+      formData.availableTo &&
+      formData.availableFrom >= formData.availableTo
+    ) {
       errors.availableTo = "End time must be after start time";
     }
 
@@ -358,9 +371,4 @@ export class ActivityService {
       requirements: [],
     };
   }
-
-
-
-
-
 }

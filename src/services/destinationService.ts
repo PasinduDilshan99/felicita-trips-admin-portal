@@ -19,10 +19,16 @@ import {
   UpdateDestinationCategoryRequest,
   UpdateDestinationCategoryApiResponse,
   TerminateDestinationCategoryApiResponse,
+  TrendingDestinationsApiResponse,
+  AddTrendingDestinationRequest,
+  AddTrendingDestinationApiResponse,
+  TerminateTrendingDestinationApiResponse,
+  TerminateTrendingDestinationRequest,
 } from "@/types/destination-types";
 import {
   ADD_DESTINATION_CATEGORY_FE,
   ADD_DESTINATION_DETAILS_DATA_FE,
+  ADD_TRENDING_DESTINATION_DATA_FE,
   GET_ACTIVE_DESTINATIONS_CATEGORIES_FE,
   GET_DESTINATION_CATEGORIES_STATISTICS_DATA_FE,
   GET_DESTINATION_CATEGORY_DETAILS_BY_ID_FE,
@@ -30,8 +36,10 @@ import {
   GET_DESTINATION_STATISTICS_DATA_FE,
   GET_DESTINATIONS_DETAILS_BY_ID_DATA_FE,
   GET_DESTINATIONS_DETAILS_BY_REQUEST_DATA_FE,
+  GET_TRENDING_DESTINATIONS_DATA_FE,
   TERMINATE_DESTINATION_CATEGORY_FE,
   TERMINATE_DESTINATION_DATA_FE,
+  TERMINATE_TRENDING_DESTINATION_DATA_FE,
   UPDATE_DESTINATION_CATEGORY_FE,
   UPDATE_DESTINATION_DETAILS_DATA_FE,
 } from "@/utils/frontEndConstant";
@@ -458,4 +466,97 @@ export class DestinationService {
       throw error;
     }
   }
+
+  // Add these methods to the DestinationService class
+
+static async getTrendingDestinations(): Promise<TrendingDestinationsApiResponse> {
+  try {
+    const response = await fetch(GET_TRENDING_DESTINATIONS_DATA_FE, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: TrendingDestinationsApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to fetch trending destinations");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching trending destinations:", error);
+    throw error;
+  }
+}
+
+static async addTrendingDestination(
+  destinationData: AddTrendingDestinationRequest,
+): Promise<AddTrendingDestinationApiResponse> {
+  try {
+    const response = await fetch(ADD_TRENDING_DESTINATION_DATA_FE, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(destinationData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: AddTrendingDestinationApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to add trending destination");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error adding trending destination:", error);
+    throw error;
+  }
+}
+
+static async terminateTrendingDestination(
+  destinationData: TerminateTrendingDestinationRequest,
+): Promise<TerminateTrendingDestinationApiResponse> {
+  try {
+    const response = await fetch(TERMINATE_TRENDING_DESTINATION_DATA_FE, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(destinationData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: TerminateTrendingDestinationApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to terminate trending destination");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error terminating trending destination:", error);
+    throw error;
+  }
+}
+
 }

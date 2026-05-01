@@ -29,7 +29,11 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { EmptyState } from "@/components/destinations-components/view-destinations-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import { DESTINATION_PAGE_URL, DESTINATIONS_VIEW_PAGE_URL, WEB_MANAGEMENT_URL } from "@/utils/urls";
+import {
+  DESTINATION_PAGE_URL,
+  DESTINATIONS_VIEW_PAGE_URL,
+  WEB_MANAGEMENT_URL,
+} from "@/utils/urls";
 
 // Sort options
 const SORT_OPTIONS = [
@@ -111,7 +115,7 @@ const DestinationsViewContent = () => {
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL},
+    { label: "Web Management", href: WEB_MANAGEMENT_URL },
     { label: "Destinations", href: `${DESTINATION_PAGE_URL}` },
     { label: "View", href: `${DESTINATIONS_VIEW_PAGE_URL}` },
   ];
@@ -503,6 +507,7 @@ const DestinationsViewContent = () => {
         {/* Results Header with View Toggle */}
         <div className="mb-6">
           <ResultsHeader
+            title="Destinations"
             currentStart={currentStart}
             currentEnd={currentEnd}
             totalItems={totalItems}

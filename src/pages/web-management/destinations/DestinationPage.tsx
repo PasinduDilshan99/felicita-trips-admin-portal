@@ -23,6 +23,8 @@ import { DestinationStatisticsData } from "@/types/destination-types";
 import { DestinationService } from "@/services/destinationService";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
+import { ActionCardSkeleton } from "@/components/common-components/management-components/ActionCardSkeleton";
+import { ActionCard } from "@/components/common-components/management-components/ActionCard";
 
 /* ─────────────────────────────────────────────
    Animated Counter  — eases out, starts from 0
@@ -76,144 +78,6 @@ const StatCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
     <div className="dp-skel dp-skel--label" />
   </div>
 );
-
-const ActionCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
-  <div
-    className="dp-action-card dp-skeleton-card"
-    style={{ animationDelay: `${delay}s`, pointerEvents: "none" }}
-  >
-    <div style={{ display: "flex", flexDirection: "column", gap: ".875rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div
-          className="dp-skel"
-          style={{ width: 46, height: 46, borderRadius: 12 }}
-        />
-        <div
-          className="dp-skel"
-          style={{ width: 56, height: 22, borderRadius: 999 }}
-        />
-      </div>
-      <div>
-        <div
-          className="dp-skel"
-          style={{ width: "70%", height: 14, marginBottom: 8 }}
-        />
-        <div className="dp-skel" style={{ width: "90%", height: 11 }} />
-        <div
-          className="dp-skel"
-          style={{ width: "60%", height: 11, marginTop: 5 }}
-        />
-      </div>
-    </div>
-  </div>
-);
-
-/* ─────────────────────────────────────────────
-   Action config
-───────────────────────────────────────────── */
-const ACTION_CONFIG: Record<
-  string,
-  { accent: string; icon: JSX.Element; pillLabel: string }
-> = {
-  view: {
-    accent: "blue",
-    pillLabel: "Browse",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-      </svg>
-    ),
-  },
-  add: {
-    accent: "emerald",
-    pillLabel: "Create",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 8v8M8 12h8" />
-      </svg>
-    ),
-  },
-  update: {
-    accent: "amber",
-    pillLabel: "Edit",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
-        <path d="M17.586 3.586a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-      </svg>
-    ),
-  },
-  remove: {
-    accent: "rose",
-    pillLabel: "Remove",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-        <path d="M10 11v6M14 11v6" />
-      </svg>
-    ),
-  },
-  default: {
-    accent: "violet",
-    pillLabel: "Manage",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="5" y="2" width="14" height="20" rx="2" />
-        <path d="M9 7h6M9 11h6M9 15h4" />
-      </svg>
-    ),
-  },
-};
-
-const getActionConfig = (name: string) => {
-  const lower = name.toLowerCase();
-  if (lower.includes("view") || lower.includes("all"))
-    return ACTION_CONFIG.view;
-  if (lower.includes("add") || lower.includes("create"))
-    return ACTION_CONFIG.add;
-  if (lower.includes("update") || lower.includes("edit"))
-    return ACTION_CONFIG.update;
-  if (lower.includes("remove") || lower.includes("delete"))
-    return ACTION_CONFIG.remove;
-  return ACTION_CONFIG.default;
-};
 
 /* ─────────────────────────────────────────────
    Custom Tooltips
@@ -315,6 +179,112 @@ const Reveal = ({
       {children}
     </div>
   );
+};
+
+/* ─────────────────────────────────────────────
+   Action config for getting icon and pill label
+───────────────────────────────────────────── */
+const ACTION_CONFIG: Record<
+  string,
+  { accent: string; icon: JSX.Element; pillLabel: string }
+> = {
+  view: {
+    accent: "blue",
+    pillLabel: "Browse",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      </svg>
+    ),
+  },
+  add: {
+    accent: "emerald",
+    pillLabel: "Create",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v8M8 12h8" />
+      </svg>
+    ),
+  },
+  update: {
+    accent: "amber",
+    pillLabel: "Edit",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
+        <path d="M17.586 3.586a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+    ),
+  },
+  remove: {
+    accent: "rose",
+    pillLabel: "Remove",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+        <path d="M10 11v6M14 11v6" />
+      </svg>
+    ),
+  },
+  default: {
+    accent: "violet",
+    pillLabel: "Manage",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="5" y="2" width="14" height="20" rx="2" />
+        <path d="M9 7h6M9 11h6M9 15h4" />
+      </svg>
+    ),
+  },
+};
+
+const getActionConfig = (name: string) => {
+  const lower = name.toLowerCase();
+  if (lower.includes("view") || lower.includes("all")) return ACTION_CONFIG.view;
+  if (lower.includes("add") || lower.includes("create"))
+    return ACTION_CONFIG.add;
+  if (lower.includes("update") || lower.includes("edit"))
+    return ACTION_CONFIG.update;
+  if (lower.includes("remove") || lower.includes("delete"))
+    return ACTION_CONFIG.remove;
+  return ACTION_CONFIG.default;
 };
 
 /* ─────────────────────────────────────────────
@@ -560,15 +530,6 @@ const DestinationPage = () => {
           0%,100% { opacity: 1; }
           50%     { opacity: 0.25; }
         }
-        @keyframes dp-icon-pop {
-          0%   { transform: scale(1) rotate(0); }
-          40%  { transform: scale(1.18) rotate(-6deg); }
-          100% { transform: scale(1) rotate(0); }
-        }
-        @keyframes dp-bar-shimmer {
-          from { transform: translateX(-120%) skewX(-12deg); }
-          to   { transform: translateX(260%)  skewX(-12deg); }
-        }
 
         /* ── Loading ── */
         .dp-loading {
@@ -694,180 +655,6 @@ const DestinationPage = () => {
         }
         @media (max-width: 1100px) { .dp-actions-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 580px)  { .dp-actions-grid { grid-template-columns: 1fr; } }
-
-        /* ── Action card ── */
-        .dp-action-card {
-          display: block;
-          text-decoration: none;
-          background: var(--surf);
-          border: 1.5px solid var(--border);
-          border-radius: 16px;
-          padding: 1.375rem 1.25rem 1.125rem;
-          position: relative;
-          overflow: hidden;
-          cursor: pointer;
-          transition:
-            transform .28s cubic-bezier(0.22,1,0.36,1),
-            box-shadow .28s cubic-bezier(0.22,1,0.36,1),
-            border-color .22s ease;
-        }
-        .dp-action-card:hover {
-          transform: translateY(-5px) scale(1.01);
-          box-shadow: 0 18px 42px rgba(15,23,42,.11), 0 4px 10px rgba(15,23,42,.06);
-        }
-
-        /* Per-accent hover border */
-        .dp-action-card--blue:hover    { border-color: var(--blue-border); }
-        .dp-action-card--emerald:hover { border-color: var(--em-border); }
-        .dp-action-card--amber:hover   { border-color: var(--am-border); }
-        .dp-action-card--rose:hover    { border-color: var(--ro-border); }
-        .dp-action-card--violet:hover  { border-color: var(--vi-border); }
-
-        /* Gradient tint layer */
-        .dp-action-card::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          opacity: 0;
-          transition: opacity .3s ease;
-          border-radius: inherit;
-          pointer-events: none;
-        }
-        .dp-action-card:hover::before { opacity: 1; }
-        .dp-action-card--blue::before    { background: linear-gradient(145deg, #eff6ff 0%, ${hexToRgba("#dbeafe", 0.7)} 100%); }
-        .dp-action-card--emerald::before { background: linear-gradient(145deg, #f0fdf4 0%, ${hexToRgba("#d1fae5", 0.7)} 100%); }
-        .dp-action-card--amber::before   { background: linear-gradient(145deg, #fffbeb 0%, ${hexToRgba("#fef3c7", 0.7)} 100%); }
-        .dp-action-card--rose::before    { background: linear-gradient(145deg, #fff1f2 0%, ${hexToRgba("#ffe4e6", 0.7)} 100%); }
-        .dp-action-card--violet::before  { background: linear-gradient(145deg, #f5f3ff 0%, ${hexToRgba("#ede9fe", 0.7)} 100%); }
-
-        /* Shimmer on hover */
-        .dp-action-card::after {
-          content: '';
-          position: absolute;
-          top: 0; bottom: 0;
-          width: 60%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
-          transform: translateX(-120%) skewX(-12deg);
-          pointer-events: none;
-          opacity: 0;
-          transition: opacity .1s ease;
-        }
-        .dp-action-card:hover::after {
-          opacity: 1;
-          animation: dp-bar-shimmer .65s ease-out forwards;
-        }
-
-        .dp-action-card__inner {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          flex-direction: column;
-          gap: .875rem;
-        }
-        .dp-action-card__top {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .dp-icon-wrap {
-          width: 46px; height: 46px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          transition: transform .22s cubic-bezier(0.22,1,0.36,1);
-        }
-        .dp-action-card:hover .dp-icon-wrap {
-          animation: dp-icon-pop .35s cubic-bezier(0.22,1,0.36,1) forwards;
-        }
-        .dp-icon-wrap svg { width: 21px; height: 21px; }
-        .dp-icon-wrap--blue    { background: var(--blue-bg); color: var(--blue-fg); }
-        .dp-icon-wrap--emerald { background: var(--em-bg);   color: var(--em-fg); }
-        .dp-icon-wrap--amber   { background: var(--am-bg);   color: var(--am-fg); }
-        .dp-icon-wrap--rose    { background: var(--ro-bg);   color: var(--ro-fg); }
-        .dp-icon-wrap--violet  { background: var(--vi-bg);   color: var(--vi-fg); }
-
-        .dp-pill {
-          font-size: .65rem;
-          font-weight: 700;
-          letter-spacing: .07em;
-          text-transform: uppercase;
-          padding: 3px 9px;
-          border-radius: 999px;
-          border: 1px solid transparent;
-        }
-        .dp-pill--blue    { background: var(--blue-bg); color: var(--blue-fg); border-color: var(--blue-border); }
-        .dp-pill--emerald { background: var(--em-bg);   color: var(--em-fg);   border-color: var(--em-border); }
-        .dp-pill--amber   { background: var(--am-bg);   color: var(--am-fg);   border-color: var(--am-border); }
-        .dp-pill--rose    { background: var(--ro-bg);   color: var(--ro-fg);   border-color: var(--ro-border); }
-        .dp-pill--violet  { background: var(--vi-bg);   color: var(--vi-fg);   border-color: var(--vi-border); }
-
-        .dp-action-card__name {
-          font-size: .9375rem;
-          font-weight: 700;
-          color: var(--text);
-          margin: 0 0 .2rem;
-          letter-spacing: -.012em;
-          transition: color .2s ease;
-        }
-        .dp-action-card--blue:hover    .dp-action-card__name { color: var(--blue-fg); }
-        .dp-action-card--emerald:hover .dp-action-card__name { color: var(--em-fg); }
-        .dp-action-card--amber:hover   .dp-action-card__name { color: var(--am-fg); }
-        .dp-action-card--rose:hover    .dp-action-card__name { color: var(--ro-fg); }
-        .dp-action-card--violet:hover  .dp-action-card__name { color: var(--vi-fg); }
-
-        .dp-action-card__desc {
-          font-size: .8125rem;
-          color: var(--muted);
-          margin: 0;
-          line-height: 1.55;
-        }
-        .dp-action-card__cta {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          font-size: .8rem;
-          font-weight: 600;
-          padding-top: .625rem;
-          border-top: 1px solid var(--border);
-          opacity: 0;
-          transform: translateY(5px);
-          transition: opacity .22s ease, transform .22s ease;
-        }
-        .dp-action-card:hover .dp-action-card__cta {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        .dp-action-card__cta svg {
-          width: 13px; height: 13px;
-          transition: transform .2s ease;
-        }
-        .dp-action-card:hover .dp-action-card__cta svg { transform: translateX(3px); }
-
-        .dp-cta--blue    { color: var(--blue-fg); }
-        .dp-cta--emerald { color: var(--em-fg); }
-        .dp-cta--amber   { color: var(--am-fg); }
-        .dp-cta--rose    { color: var(--ro-fg); }
-        .dp-cta--violet  { color: var(--vi-fg); }
-
-        /* Bottom accent bar — slides in on hover */
-        .dp-action-card__bar {
-          position: absolute;
-          bottom: 0;
-          left: 50%; right: 50%;
-          height: 3px;
-          border-radius: 0 0 16px 16px;
-          transition: left .32s cubic-bezier(0.22,1,0.36,1),
-                      right .32s cubic-bezier(0.22,1,0.36,1);
-        }
-        .dp-action-card:hover .dp-action-card__bar { left: 0; right: 0; }
-        .dp-action-card--blue    .dp-action-card__bar { background: var(--blue-mid); }
-        .dp-action-card--emerald .dp-action-card__bar { background: var(--em-mid); }
-        .dp-action-card--amber   .dp-action-card__bar { background: var(--am-mid); }
-        .dp-action-card--rose    .dp-action-card__bar { background: var(--ro-mid); }
-        .dp-action-card--violet  .dp-action-card__bar { background: var(--vi-mid); }
 
         /* ── Stat cards ── */
         .dp-stats-grid {
@@ -1224,58 +1011,31 @@ const DestinationPage = () => {
                   <div className="dp-actions-grid">
                     {loading
                       ? Array.from({ length: 4 }).map((_, i) => (
-                          <ActionCardSkeleton key={i} delay={i * 0.07} />
+                          <ActionCardSkeleton
+                            key={i}
+                            delay={i * 0.07}
+                            theme={theme}
+                            isDarkMode={isDarkMode}
+                          />
                         ))
                       : destinationsData?.subData.map((action, idx) => {
                           const { accent, icon, pillLabel } = getActionConfig(
                             action.name,
                           );
                           return (
-                            <a
+                            <ActionCard
                               key={action.id}
-                              href={action.url}
-                              className={`dp-action-card dp-action-card--${accent}`}
-                            >
-                              <div className="dp-action-card__inner">
-                                <div className="dp-action-card__top">
-                                  <div
-                                    className={`dp-icon-wrap dp-icon-wrap--${accent}`}
-                                  >
-                                    {icon}
-                                  </div>
-                                  <span
-                                    className={`dp-pill dp-pill--${accent}`}
-                                  >
-                                    {pillLabel}
-                                  </span>
-                                </div>
-                                <div>
-                                  <p className="dp-action-card__name">
-                                    {action.name}
-                                  </p>
-                                  <p className="dp-action-card__desc">
-                                    {action.description}
-                                  </p>
-                                </div>
-                                <div
-                                  className={`dp-action-card__cta dp-cta--${accent}`}
-                                >
-                                  <span>Open</span>
-                                  <svg
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth={2.5}
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path d="M5 12h14M12 5l7 7-7 7" />
-                                  </svg>
-                                </div>
-                              </div>
-                              {/* Bottom bar */}
-                              <div className="dp-action-card__bar" />
-                            </a>
+                              id={action.id}
+                              name={action.name}
+                              description={action.description}
+                              url={action.url}
+                              accent={accent}
+                              icon={icon}
+                              pillLabel={pillLabel}
+                              ctaText="Open"
+                              theme={theme}
+                              isDarkMode={isDarkMode}
+                            />
                           );
                         })}
                   </div>

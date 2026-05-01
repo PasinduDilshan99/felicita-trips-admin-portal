@@ -140,7 +140,7 @@ export const HeroImage: React.FC<HeroImageProps> = ({
                 </>
               ) : (
                 <>
-                  <XCircle size={12} /> Inactive
+                  <XCircle size={12} /> {statusName}
                 </>
               )}
             </span>

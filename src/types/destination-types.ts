@@ -426,3 +426,100 @@ export interface TerminateDestinationCategoryApiResponse {
   data: TerminateDestinationCategoryResponse;
   timestamp: string;
 }
+
+// Add these to your existing types/destination-types.ts file
+
+// Trending Destination Types
+export interface TrendingDestinationCategoryDetail {
+  id: number;
+  name: string;
+  description: string;
+  isPrimary: boolean;
+}
+
+export interface TrendingDestinationImage {
+  imageId: number;
+  imageName: string;
+  imageDescription: string | null;
+  imageUrl: string;
+  imageStatus: string | null;
+  imageCreatedAt: string | null;
+}
+
+export interface TrendingDestinationActivity {
+  activityId: number;
+  activityName: string;
+  activityDescription: string;
+  activityCategories: string[];
+  durationHours: number;
+  availableFrom: string;
+  availableTo: string;
+  priceLocal: number;
+  priceForeigners: number;
+  minParticipate: number;
+  maxParticipate: number | null;
+  season: string;
+}
+
+export interface TrendingDestination {
+  popularId: number;
+  rating: number;
+  popularity: number;
+  popularCreatedAt: string;
+  destinationId: number;
+  destinationName: string;
+  destinationDescription: string;
+  location: string;
+  latitude: number;
+  longitude: number;
+  destinationStatus: string;
+  destinationCategoryDetailsDtos: TrendingDestinationCategoryDetail[];
+  images: TrendingDestinationImage[];
+  activities: TrendingDestinationActivity[];
+}
+
+export interface TrendingDestinationsApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TrendingDestination[];
+  timestamp: string;
+}
+
+// Add Trending Destination Request
+export interface AddTrendingDestinationRequest {
+  destinationId: number;
+  destinationName: string;
+  status: string;
+}
+
+export interface AddTrendingDestinationResponse {
+  message: string;
+}
+
+export interface AddTrendingDestinationApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: AddTrendingDestinationResponse;
+  timestamp: string;
+}
+
+// Terminate Trending Destination Request
+export interface TerminateTrendingDestinationRequest {
+  destinationId: number;
+  destinationName: string;
+  status: string;
+}
+
+export interface TerminateTrendingDestinationResponse {
+  message: string;
+}
+
+export interface TerminateTrendingDestinationApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TerminateTrendingDestinationResponse;
+  timestamp: string;
+}

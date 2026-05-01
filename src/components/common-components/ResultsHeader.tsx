@@ -5,6 +5,7 @@ import { Grid, List } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface ResultsHeaderProps {
+  title:string;
   currentStart: number;
   currentEnd: number;
   totalItems: number;
@@ -13,6 +14,7 @@ interface ResultsHeaderProps {
 }
 
 export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
+  title,
   currentStart,
   currentEnd,
   totalItems,
@@ -32,7 +34,7 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-lg font-semibold" style={{ color: theme.text }}>
-            Destination Results
+            {title} Results
           </h2>
           <p className="text-sm mt-1" style={{ color: theme.textSecondary }}>
             Showing <span className="font-semibold" style={{ color: theme.primary }}>

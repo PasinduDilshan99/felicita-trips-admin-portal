@@ -130,6 +130,8 @@ export const GET_DESTINATION_CATEGORY_DETAILS_BY_ID_FE = `${API}${DESTINATIONS}/
 export const GET_POPULAR_DESTINATIONS_DATA_FE = `${API}${DESTINATIONS}/popular-destinations`;
 export const GET_NEW_DESTINATIONS_DATA_FE = `${API}${DESTINATIONS}/new-destinations`;
 export const GET_TRENDING_DESTINATIONS_DATA_FE = `${API}${DESTINATIONS}/trending-destinations`;
+export const ADD_TRENDING_DESTINATION_DATA_FE = `${API}${DESTINATIONS}/trending-destinations-add`;
+export const TERMINATE_TRENDING_DESTINATION_DATA_FE = `${API}${DESTINATIONS}/trending-destinations-terminate`;
 export const GET_ACTIVE_DESTINATIONS_FOR_TOUR_MAP_DATA_DE = `${API}${DESTINATIONS}/tour-map`;
 export const GET_DESTINATIONS_DETAILS_BY_TOUR_ID_DATA_FE = `${API}${DESTINATIONS}/destinations-by-tour-id`;
 export const GET_DESTINATIONS_DETAILS_BY_REQUEST_DATA_FE = `${API}${DESTINATIONS}/destinations-for-request`;
@@ -185,6 +187,11 @@ export const GET_ACTIVE_ACTIVITY_CATEGORIES_DATA_FE = `${API}${ACTIVITIES}/categ
 export const GET_ACTIVITY_REVIEWS_DETAILS_DATA_FE = `${API}${ACTIVITIES}/reviews-details`;
 export const GET_ACTIVITY_HISTORY_DETAILS_DATA_FE = `${API}${ACTIVITIES}/history-details`;
 export const GET_ACTIVITY_HISTORY_IMAGES_DETAILS_DATA_FE = `${API}${ACTIVITIES}/history-images`;
+export const GET_ACTIVITIES_NAMES_AND_IDS_DATA_FE = `${API}${ACTIVITIES}/activityId-and-activityName`;
+export const TERMINATE_ACTIVITY_DATA_FE = `${API}${ACTIVITIES}/terminate-activity`;
+export const ADD_ACTIVITY_DATA_FE = `${API}${ACTIVITIES}/add-activity`;
+export const UPDATE_ACTIVITY_DATA_FE = `${API}${ACTIVITIES}/update-activity`;
+export const GET_ACTIVITIES_STATISTICS_DATA_FE = `${API}${ACTIVITIES}/activities-statistics`;
 
 // Blogs
 export const GET_ALL_BLOGS_DETAILS_DATA_FE = `${API}${BLOGS}`;

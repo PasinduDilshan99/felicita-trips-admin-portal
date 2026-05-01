@@ -24,6 +24,8 @@ import { DestinationCategoriesStatisticsData } from "@/types/destination-types";
 import { DestinationService } from "@/services/destinationService";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
+import { ActionCard } from "@/components/common-components/management-components/ActionCard";
+
 
 /* ─────────────────────────────────────────────
    Animated Counter
@@ -68,7 +70,7 @@ const StatCardSkeleton = () => (
 );
 
 /* ─────────────────────────────────────────────
-   Action config
+   Action config for getting icon and pill label
 ───────────────────────────────────────────── */
 const ACTION_CONFIG: Record<
   string,
@@ -250,10 +252,8 @@ const DestinationCategoriesPage = () => {
     useState<DestinationCategoriesStatisticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [visibleCards, setVisibleCards] = useState(false);
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
   const [hoveredLinePoint, setHoveredLinePoint] = useState<string | null>(null);
-  const sectionRef = useRef<HTMLDivElement>(null);
 
   // Find Destinations -> Destination Categories subData
   const destinationsData = webManagementSideBarData.find(
@@ -281,18 +281,10 @@ const DestinationCategoriesPage = () => {
     fetchStatistics();
   }, []);
 
-  useEffect(() => {
-    if (!loading) {
-      const t = setTimeout(() => setVisibleCards(true), 80);
-      return () => clearTimeout(t);
-    }
-  }, [loading]);
-
   const fetchStatistics = async () => {
     try {
       setLoading(true);
       setError(null);
-      setVisibleCards(false);
       const response =
         await DestinationService.getDestinationCategoriesStatistics();
       if (response.data) setStatistics(response.data);
@@ -659,7 +651,7 @@ const DestinationCategoriesPage = () => {
           border: 1px solid ${hexToRgba(p, 0.18)};
         }
 
-        /* ── Action cards ── */
+        /* ── Action cards grid ── */
         .dpc-actions-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
@@ -667,142 +659,6 @@ const DestinationCategoriesPage = () => {
         }
         @media (max-width: 1100px) { .dpc-actions-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 580px)  { .dpc-actions-grid { grid-template-columns: 1fr; } }
-
-        .dpc-action-card {
-          display: block;
-          text-decoration: none;
-          background: var(--surf);
-          border: 1.5px solid var(--border);
-          border-radius: 16px;
-          padding: 1.375rem 1.25rem 1.125rem;
-          position: relative;
-          overflow: hidden;
-          transition: transform .24s cubic-bezier(0.22,1,0.36,1),
-                      box-shadow .24s cubic-bezier(0.22,1,0.36,1),
-                      border-color .24s ease;
-          box-shadow: 0 1px 3px rgba(15,23,42,.05), 0 1px 2px rgba(15,23,42,.03);
-        }
-
-        .dpc-action-card::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          opacity: 0;
-          transition: opacity .28s ease;
-          border-radius: inherit;
-          pointer-events: none;
-        }
-        .dpc-action-card::after {
-          content: '';
-          position: absolute;
-          inset: -1px;
-          border-radius: 17px;
-          opacity: 0;
-          transition: opacity .28s ease;
-          pointer-events: none;
-        }
-
-        .dpc-action-card:hover {
-          transform: translateY(-4px) scale(1.01);
-          box-shadow: 0 16px 40px rgba(15,23,42,.12), 0 4px 12px rgba(15,23,42,.06);
-        }
-        .dpc-action-card:hover::before { opacity: 1; }
-        .dpc-action-card:hover::after  { opacity: 1; }
-
-        .dpc-action-card--blue::before   { background: linear-gradient(145deg, #eff6ff, #dbeafe99); }
-        .dpc-action-card--blue::after    { border: 1.5px solid #93c5fd; }
-        .dpc-action-card--emerald::before{ background: linear-gradient(145deg, #f0fdf4, #d1fae599); }
-        .dpc-action-card--emerald::after { border: 1.5px solid #6ee7b7; }
-        .dpc-action-card--amber::before  { background: linear-gradient(145deg, #fffbeb, #fef3c799); }
-        .dpc-action-card--amber::after   { border: 1.5px solid #fcd34d; }
-        .dpc-action-card--rose::before   { background: linear-gradient(145deg, #fff1f2, #ffe4e699); }
-        .dpc-action-card--rose::after    { border: 1.5px solid #fda4af; }
-        .dpc-action-card--violet::before { background: linear-gradient(145deg, #f5f3ff, #ede9fe99); }
-        .dpc-action-card--violet::after  { border: 1.5px solid #c4b5fd; }
-
-        .dpc-action-card__inner {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          flex-direction: column;
-          gap: .875rem;
-        }
-
-        .dpc-action-card__top {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .dpc-icon-wrap {
-          width: 46px;
-          height: 46px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          transition: transform .22s cubic-bezier(0.22,1,0.36,1);
-        }
-        .dpc-action-card:hover .dpc-icon-wrap { transform: scale(1.1) rotate(-4deg); }
-        .dpc-icon-wrap svg { width: 21px; height: 21px; }
-
-        .dpc-icon-wrap--blue    { background: var(--blue-bg); color: var(--blue-fg); }
-        .dpc-icon-wrap--emerald { background: var(--em-bg);   color: var(--em-fg); }
-        .dpc-icon-wrap--amber   { background: var(--am-bg);   color: var(--am-fg); }
-        .dpc-icon-wrap--rose    { background: var(--ro-bg);   color: var(--ro-fg); }
-        .dpc-icon-wrap--violet  { background: var(--vi-bg);   color: var(--vi-fg); }
-
-        .dpc-pill {
-          font-size: .65rem;
-          font-weight: 700;
-          letter-spacing: .07em;
-          text-transform: uppercase;
-          padding: 3px 9px;
-          border-radius: 999px;
-        }
-        .dpc-pill--blue    { background: var(--blue-bg); color: var(--blue-fg); }
-        .dpc-pill--emerald { background: var(--em-bg);   color: var(--em-fg); }
-        .dpc-pill--amber   { background: var(--am-bg);   color: var(--am-fg); }
-        .dpc-pill--rose    { background: var(--ro-bg);   color: var(--ro-fg); }
-        .dpc-pill--violet  { background: var(--vi-bg);   color: var(--vi-fg); }
-
-        .dpc-action-card__name {
-          font-size: .9375rem;
-          font-weight: 700;
-          color: var(--text);
-          margin: 0 0 .2rem;
-          letter-spacing: -.01em;
-        }
-        .dpc-action-card__desc {
-          font-size: .8125rem;
-          color: var(--muted);
-          margin: 0;
-          line-height: 1.55;
-        }
-
-        .dpc-action-card__cta {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          font-size: .8125rem;
-          font-weight: 600;
-          padding-top: .25rem;
-          border-top: 1px solid var(--border);
-          opacity: 0;
-          transform: translateY(4px);
-          transition: opacity .22s ease, transform .22s ease;
-        }
-        .dpc-action-card:hover .dpc-action-card__cta {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        .dpc-action-card__cta svg { width: 13px; height: 13px; }
-        .dpc-cta--blue    { color: var(--blue-fg); }
-        .dpc-cta--emerald { color: var(--em-fg); }
-        .dpc-cta--amber   { color: var(--am-fg); }
-        .dpc-cta--rose    { color: var(--ro-fg); }
-        .dpc-cta--violet  { color: var(--vi-fg); }
 
         /* ── Stat cards ── */
         .dpc-stats-grid {
@@ -1102,48 +958,19 @@ const DestinationCategoriesPage = () => {
                       action.name,
                     );
                     return (
-                      <a
+                      <ActionCard
                         key={action.id}
-                        href={action.url}
-                        className={`dpc-action-card dpc-action-card--${accent}`}
-                        style={{ animationDelay: `${idx * 0.06}s` }}
-                      >
-                        <div className="dpc-action-card__inner">
-                          <div className="dpc-action-card__top">
-                            <div
-                              className={`dpc-icon-wrap dpc-icon-wrap--${accent}`}
-                            >
-                              {icon}
-                            </div>
-                            <span className={`dpc-pill dpc-pill--${accent}`}>
-                              {pillLabel}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="dpc-action-card__name">
-                              {action.name}
-                            </p>
-                            <p className="dpc-action-card__desc">
-                              {action.description}
-                            </p>
-                          </div>
-                          <div
-                            className={`dpc-action-card__cta dpc-cta--${accent}`}
-                          >
-                            <span>Open</span>
-                            <svg
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={2.5}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </div>
-                      </a>
+                        id={action.id}
+                        name={action.name}
+                        description={action.description}
+                        url={action.url}
+                        accent={accent}
+                        icon={icon}
+                        pillLabel={pillLabel}
+                        ctaText="Open"
+                        theme={theme}
+                        isDarkMode={isDarkMode}
+                      />
                     );
                   })}
                 </div>
@@ -1220,7 +1047,6 @@ const DestinationCategoriesPage = () => {
                     subtitle="Category usage distribution and image count breakdown"
                   />
                   <div className="dpc-charts-row">
-                    {/* Bar chart — Destinations by Category with per-category colors */}
                     {/* Bar chart — Destinations by Category with per-category colors */}
                     <div className="dpc-chart-card">
                       <div className="dpc-chart-header">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Search, X, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -143,11 +143,63 @@ const CommonSearch = <T extends SearchItem>({
 }: CommonSearchProps<T>) => {
   const { theme } = useTheme();
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-  const [filteredItems, setFilteredItems] = useState<T[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Create stable references for filtering functions
+  const stableGetItemId = useCallback(
+    (item: T) => getItemId(item),
+    [getItemId]
+  );
+
+  const stableGetItemName = useCallback(
+    (item: T) => getItemName(item),
+    [getItemName]
+  );
+
+  const stableGetItemDescription = useCallback(
+    (item: T) => getItemDescription(item),
+    [getItemDescription]
+  );
+
+  // Use useMemo instead of useEffect for filtering to prevent infinite loops
+  const filteredItems = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return items;
+    }
+    const searchLower = searchTerm.toLowerCase();
+    return items.filter((item) =>
+      stableGetItemName(item).toLowerCase().includes(searchLower)
+    );
+  }, [searchTerm, items, stableGetItemName]);
+
+  // Update search term when selected item changes
+  useEffect(() => {
+    if (selectedItem) {
+      setSearchTerm(stableGetItemName(selectedItem));
+    } else if (!initialSearchTerm) {
+      setSearchTerm("");
+    }
+  }, [selectedItem, stableGetItemName, initialSearchTerm]);
+
+  // Handle click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Get variant colors
   const getVariantColors = () => {
@@ -227,44 +279,6 @@ const CommonSearch = <T extends SearchItem>({
 
   const config = sizeConfig[size];
 
-  // Filter items based on search term
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredItems(items);
-      return;
-    }
-    const filtered = items.filter((item) =>
-      getItemName(item).toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-    setFilteredItems(filtered);
-  }, [searchTerm, items, getItemName]);
-
-  // Update search term when selected item changes
-  useEffect(() => {
-    if (selectedItem) {
-      setSearchTerm(getItemName(selectedItem));
-    } else if (!initialSearchTerm) {
-      setSearchTerm("");
-    }
-  }, [selectedItem, getItemName, initialSearchTerm]);
-
-  // Handle click outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     if (!showDropdown) setShowDropdown(true);
@@ -272,7 +286,7 @@ const CommonSearch = <T extends SearchItem>({
 
   const handleSelectItem = (item: T) => {
     onSelectItem(item);
-    setSearchTerm(getItemName(item));
+    setSearchTerm(stableGetItemName(item));
     setShowDropdown(false);
     setIsFocused(false);
   };
@@ -287,7 +301,8 @@ const CommonSearch = <T extends SearchItem>({
 
   const highlightMatch = (text: string, query: string) => {
     if (!query.trim()) return text;
-    const parts = text.split(new RegExp(`(${query})`, "gi"));
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parts = text.split(new RegExp(`(${escapedQuery})`, "gi"));
     return parts.map((part, i) =>
       part.toLowerCase() === query.toLowerCase() ? (
         <mark
@@ -328,13 +343,13 @@ const CommonSearch = <T extends SearchItem>({
       </motion.div>
       <div className="flex-1 min-w-0">
         <div className={`font-medium ${config.fontSize}`} style={{ color: theme.text }}>
-          {highlightMatch(getItemName(item), searchTerm)}
+          {highlightMatch(stableGetItemName(item), searchTerm)}
         </div>
-        {getItemDescription(item) && (
+        {stableGetItemDescription(item) && (
           <div className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-            {getItemDescription(item).length > 60
-              ? `${getItemDescription(item).substring(0, 60)}...`
-              : getItemDescription(item)}
+            {stableGetItemDescription(item).length > 60
+              ? `${stableGetItemDescription(item).substring(0, 60)}...`
+              : stableGetItemDescription(item)}
           </div>
         )}
       </div>
@@ -357,7 +372,7 @@ const CommonSearch = <T extends SearchItem>({
   // Get badge text
   const getBadgeTextValue = (item: T): string => {
     if (getBadgeText) return getBadgeText(item);
-    return `ID: ${getItemId(item)}`;
+    return `ID: ${stableGetItemId(item)}`;
   };
 
   return (
@@ -510,10 +525,10 @@ const CommonSearch = <T extends SearchItem>({
                 <div>
                   {filteredItems.map((item, idx) => {
                     const isActive =
-                      selectedItem && getItemId(item) === getItemId(selectedItem);
+                      selectedItem && stableGetItemId(item) === stableGetItemId(selectedItem);
                     return (
                       <motion.button
-                        key={getItemId(item)}
+                        key={stableGetItemId(item)}
                         custom={idx}
                         variants={itemVariants}
                         initial="hidden"
