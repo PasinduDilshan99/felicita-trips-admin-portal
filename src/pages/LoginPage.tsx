@@ -4,6 +4,16 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
+import { useTheme } from "@/contexts/ThemeContext";
+
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, opacity: number): string => {
+  hex = hex.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -14,6 +24,7 @@ export default function LoginPage() {
 
   const router = useRouter();
   const { login } = useAuth();
+  const { theme } = useTheme();
 
   const handleLogin = async () => {
     try {
@@ -37,19 +48,45 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="bg-slate-100 flex items-center justify-center p-4 relative overflow-hidden py-24">
+      <div 
+        className="flex items-center justify-center p-4 relative overflow-hidden py-24 min-h-screen transition-colors duration-300"
+        style={{ backgroundColor: theme.background }}
+      >
         {/* Subtle Background Pattern */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-100/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-50/30 rounded-full blur-3xl"></div>
+          <div 
+            className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl"
+            style={{ backgroundColor: hexToRgba(theme.primary, 0.05) }}
+          />
+          <div 
+            className="absolute bottom-0 left-0 w-96 h-96 rounded-full blur-3xl"
+            style={{ backgroundColor: hexToRgba(theme.accent, 0.05) }}
+          />
         </div>
 
         <div className="w-full max-w-md relative z-10">
           {/* Main Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div 
+            className="rounded-lg shadow-sm transition-colors duration-300"
+            style={{ 
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`
+            }}
+          >
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-700 to-purple-800 px-8 py-10 text-center">
-              <div className="inline-flex items-center justify-center mb-4 w-16 h-16 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+            <div 
+              className="px-8 py-10 text-center transition-colors duration-300"
+              style={{ 
+                background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
+              }}
+            >
+              <div 
+                className="inline-flex items-center justify-center mb-4 w-16 h-16 backdrop-blur-sm rounded-xl"
+                style={{ 
+                  backgroundColor: hexToRgba('#ffffff', 0.1),
+                  border: `1px solid ${hexToRgba('#ffffff', 0.2)}`
+                }}
+              >
                 <svg
                   className="w-8 h-8 text-white"
                   fill="none"
@@ -67,7 +104,7 @@ export default function LoginPage() {
               <h1 className="text-2xl font-semibold text-white mb-2">
                 Admin Portal
               </h1>
-              <p className="text-purple-100 text-sm">
+              <p className="text-purple-100 text-sm opacity-90">
                 Sign in to access your dashboard
               </p>
             </div>
@@ -75,9 +112,16 @@ export default function LoginPage() {
             {/* Form Section */}
             <div className="p-8">
               {error && (
-                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start space-x-3">
+                <div 
+                  className="mb-6 p-4 rounded-lg flex items-start space-x-3 transition-colors duration-300"
+                  style={{ 
+                    backgroundColor: hexToRgba(theme.error, 0.1),
+                    border: `1px solid ${hexToRgba(theme.error, 0.2)}`
+                  }}
+                >
                   <svg
-                    className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"
+                    className="w-5 h-5 flex-shrink-0 mt-0.5"
+                    style={{ color: theme.error }}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -87,20 +131,26 @@ export default function LoginPage() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <p className="text-sm text-amber-800 font-medium">{error}</p>
+                  <p className="text-sm font-medium" style={{ color: theme.error }}>
+                    {error}
+                  </p>
                 </div>
               )}
 
               <div className="space-y-5">
                 {/* Username Field */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label 
+                    className="block text-sm font-medium mb-2 transition-colors duration-300"
+                    style={{ color: theme.textSecondary }}
+                  >
                     Username
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg
-                        className="h-5 w-5 text-gray-400"
+                        className="h-5 w-5 transition-colors duration-300"
+                        style={{ color: theme.textSecondary }}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -115,7 +165,20 @@ export default function LoginPage() {
                     </div>
                     <input
                       type="text"
-                      className="w-full pl-10 pr-4 py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200"
+                      style={{ 
+                        backgroundColor: theme.background,
+                        border: `1px solid ${theme.border}`,
+                        color: theme.text
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = theme.primary;
+                        e.currentTarget.style.boxShadow = `0 0 0 2px ${hexToRgba(theme.primary, 0.2)}`;
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = theme.border;
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
                       value={username}
                       placeholder="Enter your username"
                       onChange={(e) => setUsername(e.target.value)}
@@ -127,13 +190,17 @@ export default function LoginPage() {
 
                 {/* Password Field */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label 
+                    className="block text-sm font-medium mb-2 transition-colors duration-300"
+                    style={{ color: theme.textSecondary }}
+                  >
                     Password
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg
-                        className="h-5 w-5 text-gray-400"
+                        className="h-5 w-5 transition-colors duration-300"
+                        style={{ color: theme.textSecondary }}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -148,7 +215,20 @@ export default function LoginPage() {
                     </div>
                     <input
                       type={showPassword ? "text" : "password"}
-                      className="w-full pl-10 pr-10 py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                      className="w-full pl-10 pr-10 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200"
+                      style={{ 
+                        backgroundColor: theme.background,
+                        border: `1px solid ${theme.border}`,
+                        color: theme.text
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = theme.primary;
+                        e.currentTarget.style.boxShadow = `0 0 0 2px ${hexToRgba(theme.primary, 0.2)}`;
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = theme.border;
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
                       value={password}
                       placeholder="Enter your password"
                       onChange={(e) => setPassword(e.target.value)}
@@ -158,7 +238,14 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center transition-colors duration-200"
+                      style={{ color: theme.textSecondary }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = theme.primary;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = theme.textSecondary;
+                      }}
                     >
                       {showPassword ? (
                         <svg
@@ -205,18 +292,24 @@ export default function LoginPage() {
                     <input
                       type="checkbox"
                       id="remember"
-                      className="h-4 w-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                      className="h-4 w-4 rounded border-gray-300 focus:ring-2 transition-colors duration-200"
+                      style={{ 
+                        accentColor: theme.primary,
+                        borderColor: theme.border
+                      }}
                     />
                     <label
                       htmlFor="remember"
-                      className="ml-2 text-sm text-gray-600"
+                      className="ml-2 text-sm transition-colors duration-300"
+                      style={{ color: theme.textSecondary }}
                     >
                       Remember me
                     </label>
                   </div>
                   <Link
                     href="/forgot-password"
-                    className="text-sm font-medium text-purple-600 hover:text-purple-700"
+                    className="text-sm font-medium transition-colors duration-200 hover:opacity-80"
+                    style={{ color: theme.primary }}
                   >
                     Forgot password?
                   </Link>
@@ -224,7 +317,11 @@ export default function LoginPage() {
 
                 {/* Login Button */}
                 <button
-                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                  className="w-full text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                  style={{ 
+                    background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
+                    boxShadow: `0 4px 14px ${hexToRgba(theme.primary, 0.3)}`
+                  }}
                   onClick={handleLogin}
                   disabled={isLoading || !username || !password}
                 >
@@ -262,12 +359,19 @@ export default function LoginPage() {
             </div>
 
             {/* Footer */}
-            <div className="px-8 py-6 bg-slate-50 border-t border-gray-200 rounded-b-lg">
-              <p className="text-center text-sm text-gray-600">
+            <div 
+              className="px-8 py-6 rounded-b-lg transition-colors duration-300"
+              style={{ 
+                backgroundColor: hexToRgba(theme.background, 0.5),
+                borderTop: `1px solid ${theme.border}`
+              }}
+            >
+              <p className="text-center text-sm" style={{ color: theme.textSecondary }}>
                 Need access?{" "}
                 <Link
                   href="/request-account"
-                  className="font-medium text-purple-600 hover:text-purple-700"
+                  className="font-medium transition-colors duration-200 hover:opacity-80"
+                  style={{ color: theme.primary }}
                 >
                   Request an account
                 </Link>
@@ -276,14 +380,15 @@ export default function LoginPage() {
           </div>
 
           {/* Security Info */}
-          <div className="mt-6 flex items-center justify-center space-x-6 text-xs text-gray-500">
+          <div className="mt-6 flex items-center justify-center space-x-6 text-xs">
             <div className="flex items-center space-x-1.5">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>Secure Connection</span>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: theme.success }}></div>
+              <span style={{ color: theme.textSecondary }}>Secure Connection</span>
             </div>
             <div className="flex items-center space-x-1.5">
               <svg
-                className="w-3.5 h-3.5 text-gray-400"
+                className="w-3.5 h-3.5"
+                style={{ color: theme.textSecondary }}
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -293,7 +398,7 @@ export default function LoginPage() {
                   clipRule="evenodd"
                 />
               </svg>
-              <span>256-bit Encryption</span>
+              <span style={{ color: theme.textSecondary }}>256-bit Encryption</span>
             </div>
           </div>
         </div>

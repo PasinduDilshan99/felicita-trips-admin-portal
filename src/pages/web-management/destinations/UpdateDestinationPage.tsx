@@ -9,6 +9,7 @@ import {
   WEB_MANAGEMENT_DESTINATION_PATH,
 } from "@/utils/constant";
 import { DestinationService } from "@/services/destinationService";
+import { OtherService } from "@/services/otherService";
 import {
   DestinationForTerminate,
   SingleDestinationResponse,
@@ -17,6 +18,7 @@ import {
   NewActivityRequest,
   NewImageRequest,
   UpdateDestinationRequest,
+  DestinationCategoryDetailsDtos,
 } from "@/types/destination-types";
 import {
   Search,
@@ -27,21 +29,55 @@ import {
   XCircle,
   Loader2,
   RefreshCw,
+  X,
 } from "lucide-react";
-import DestinationSearch from "@/components/destinations-components/update-destinations-components/DestinationSearch";
 import DestinationDetailsForm from "@/components/destinations-components/update-destinations-components/DestinationDetailsForm";
 import UpdateConfirmationModal from "@/components/destinations-components/update-destinations-components/UpdateConfirmationModal";
+import {
+  ActivityCategory,
+  DestinationCategory,
+  SeasonType,
+} from "@/types/common-types";
+import { useCommon } from "@/contexts/CommonContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
+import CommonLoading from "@/components/common-components/CommonLoading";
+import CommonErrorState from "@/components/common-components/CommonErrorState";
+import CommonSearch from "@/components/common-components/CommonSearch";
+import SelectedItemBar from "@/components/common-components/SelectedItemBar";
+import {
+  DESTINATION_CATEGORY_UPDATE_URL,
+  DESTINATION_PAGE_URL,
+  WEB_MANAGEMENT_URL,
+} from "@/utils/urls";
+
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, opacity: number): string => {
+  hex = hex.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
 const UpdateDestinationPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { theme } = useTheme();
+
+  // Use the common context
+  const {
+    categories,
+    loading: commonLoading,
+    error: commonError,
+  } = useCommon();
 
   const initialDestinationName = searchParams?.get("destination-name") || "";
   const initialDestinationId = searchParams?.get("destination-id") || "";
 
   // State for destinations list
   const [destinations, setDestinations] = useState<DestinationForTerminate[]>(
-    []
+    [],
   );
 
   // State for selected destination
@@ -52,7 +88,7 @@ const UpdateDestinationPage = () => {
             destinationId: parseInt(initialDestinationId),
             destinationName: initialDestinationName,
           }
-        : null
+        : null,
     );
 
   // State for original destination details
@@ -62,6 +98,10 @@ const UpdateDestinationPage = () => {
   // State for edited destination
   const [editedDestination, setEditedDestination] =
     useState<SingleDestinationResponse | null>(null);
+
+  // State for category changes
+  const [originalCategoryIds, setOriginalCategoryIds] = useState<number[]>([]);
+  const [currentCategoryIds, setCurrentCategoryIds] = useState<number[]>([]);
 
   // State for removed items
   const [removedImages, setRemovedImages] = useState<number[]>([]);
@@ -75,33 +115,54 @@ const UpdateDestinationPage = () => {
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    title: string;
+    message: string;
+    actionLink?: string;
+  } | null>(null);
+
+  // Derive available categories from context
+  const [availableCategories, setAvailableCategories] = useState<
+    DestinationCategory[]
+  >([]);
   const [availableActivityCategories, setAvailableActivityCategories] =
-    useState<string[]>([]);
-  const [availableSeasons, setAvailableSeasons] = useState<string[]>([]);
+    useState<ActivityCategory[]>([]);
+  const [availableSeasons, setAvailableSeasons] = useState<SeasonType[]>([]);
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
+    { label: "Web Management", href: WEB_MANAGEMENT_URL },
     {
       label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
+      href: DESTINATION_PAGE_URL,
     },
     {
       label: "Update",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/update`,
+      href: DESTINATION_CATEGORY_UPDATE_URL,
     },
   ];
+
+  // Extract categories from context data
+  useEffect(() => {
+    if (categories) {
+      setAvailableCategories(categories.destinationCategoryList);
+      setAvailableActivityCategories(categories.activityCategoryList);
+      setAvailableSeasons(categories.seasonsList);
+    }
+  }, [categories]);
 
   // Fetch destinations list on initial load
   useEffect(() => {
     if (!selectedDestination) {
       fetchDestinations();
     }
-    loadLookupData();
   }, []);
 
   // If initialDestinationId is provided, fetch details
@@ -109,24 +170,10 @@ const UpdateDestinationPage = () => {
     if (initialDestinationId && !originalDestination) {
       handleSelectDestination(
         parseInt(initialDestinationId),
-        initialDestinationName
+        initialDestinationName,
       );
     }
   }, [initialDestinationId, initialDestinationName]);
-
-  const loadLookupData = async () => {
-    try {
-      const [categories, activityCategories] = await Promise.all([
-        DestinationService.getCategories(),
-        DestinationService.getActivityCategories(),
-      ]);
-      setAvailableCategories(categories);
-      setAvailableActivityCategories(activityCategories);
-      setAvailableSeasons(DestinationService.getSeasons());
-    } catch (err) {
-      console.error("Error loading lookup data:", err);
-    }
-  };
 
   const fetchDestinations = async () => {
     setLoading(true);
@@ -136,6 +183,11 @@ const UpdateDestinationPage = () => {
       setDestinations(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load destinations");
+      setToast({
+        type: "error",
+        title: "Error",
+        message: err.message || "Failed to load destinations",
+      });
     } finally {
       setLoading(false);
     }
@@ -145,6 +197,60 @@ const UpdateDestinationPage = () => {
   const handleSelectDestination = async (id: number, name: string) => {
     setSelectedDestination({ destinationId: id, destinationName: name });
     await fetchDestinationDetails(id);
+  };
+
+  // Upload image to Cloudinary
+  const uploadImageToCloudinary = async (file: File): Promise<string> => {
+    try {
+      const response = await OtherService.uploadImage(file);
+      return response.data.secure_url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw new Error("Failed to upload image to Cloudinary");
+    }
+  };
+
+  // Handle new image addition with Cloudinary upload
+  const handleAddNewImage = async (
+    imageFile: File,
+    imageName: string,
+    imageDescription: string,
+  ) => {
+    setUploadingImages(true);
+    try {
+      const cloudinaryUrl = await uploadImageToCloudinary(imageFile);
+
+      const newImage: NewImageRequest = {
+        name: imageName,
+        description: imageDescription,
+        imageUrl: cloudinaryUrl,
+        status: "ACTIVE",
+      };
+
+      setNewImages((prev) => [...prev, newImage]);
+
+      if (editedDestination) {
+        const tempImage: Image = {
+          imageId: Date.now(),
+          imageName: imageName,
+          imageDescription: imageDescription,
+          imageUrl: cloudinaryUrl,
+        };
+        setEditedDestination({
+          ...editedDestination,
+          images: [...editedDestination.images, tempImage],
+        });
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to upload image");
+      setToast({
+        type: "error",
+        title: "Upload Failed",
+        message: error.message || "Failed to upload image",
+      });
+    } finally {
+      setUploadingImages(false);
+    }
   };
 
   // Fetch destination details
@@ -157,12 +263,28 @@ const UpdateDestinationPage = () => {
     setRemovedActivities([]);
     setNewImages([]);
     setNewActivities([]);
+    setOriginalCategoryIds([]);
+    setCurrentCategoryIds([]);
+
     try {
       const response = await DestinationService.getDestinationById(id);
-      setOriginalDestination(response.data);
-      setEditedDestination(response.data);
+      const destinationData = response.data;
+      setOriginalDestination(destinationData);
+      setEditedDestination(destinationData);
+
+      const categoryIds =
+        destinationData.destinationCategoryDetailsDtos?.map(
+          (cat: DestinationCategoryDetailsDtos) => cat.id,
+        ) || [];
+      setOriginalCategoryIds(categoryIds);
+      setCurrentCategoryIds(categoryIds);
     } catch (err: any) {
       setError(err.message || "Failed to load destination details");
+      setToast({
+        type: "error",
+        title: "Load Failed",
+        message: err.message || "Failed to load destination details",
+      });
     } finally {
       setLoadingDetails(false);
     }
@@ -178,14 +300,25 @@ const UpdateDestinationPage = () => {
     });
   };
 
+  // Handle category changes
+  const handleCategoryChange = (categoryId: number) => {
+    setCurrentCategoryIds((prev) => {
+      let newIds: number[];
+      if (prev.includes(categoryId)) {
+        newIds = prev.filter((id) => id !== categoryId);
+      } else {
+        newIds = [...prev, categoryId];
+      }
+      return newIds;
+    });
+  };
+
   // Handle image removal
   const handleRemoveImage = (imageId: number) => {
     if (!editedDestination) return;
 
-    // Add to removed images list
     setRemovedImages((prev) => [...prev, imageId]);
 
-    // Remove from edited destination
     setEditedDestination({
       ...editedDestination,
       images: editedDestination.images.filter((img) => img.imageId !== imageId),
@@ -196,21 +329,14 @@ const UpdateDestinationPage = () => {
   const handleRemoveActivity = (activityId: number) => {
     if (!editedDestination) return;
 
-    // Add to removed activities list
     setRemovedActivities((prev) => [...prev, activityId]);
 
-    // Remove from edited destination
     setEditedDestination({
       ...editedDestination,
       activities: editedDestination.activities.filter(
-        (act) => act.activityId !== activityId
+        (act) => act.activityId !== activityId,
       ),
     });
-  };
-
-  // Handle new image addition
-  const handleAddNewImage = (image: NewImageRequest) => {
-    setNewImages((prev) => [...prev, image]);
   };
 
   // Handle new activity addition
@@ -225,7 +351,7 @@ const UpdateDestinationPage = () => {
     setEditedDestination({
       ...editedDestination,
       activities: editedDestination.activities.map((act) =>
-        act.activityId === updatedActivity.activityId ? updatedActivity : act
+        act.activityId === updatedActivity.activityId ? updatedActivity : act,
       ),
     });
   };
@@ -237,16 +363,26 @@ const UpdateDestinationPage = () => {
     setEditedDestination({
       ...editedDestination,
       images: editedDestination.images.map((img) =>
-        img.imageId === updatedImage.imageId ? updatedImage : img
+        img.imageId === updatedImage.imageId ? updatedImage : img,
       ),
     });
   };
+
+  // Calculate category changes
+  const getCategoryChanges = useCallback(() => {
+    const removedCategoryIds = originalCategoryIds.filter(
+      (id) => !currentCategoryIds.includes(id),
+    );
+    const addedCategoryIds = currentCategoryIds.filter(
+      (id) => !originalCategoryIds.includes(id),
+    );
+    return { removedCategoryIds, addedCategoryIds };
+  }, [originalCategoryIds, currentCategoryIds]);
 
   // Check if there are any changes
   const hasChanges = useCallback(() => {
     if (!originalDestination || !editedDestination) return false;
 
-    // Check basic fields
     const basicFieldsChanged =
       originalDestination.destinationName !==
         editedDestination.destinationName ||
@@ -255,17 +391,19 @@ const UpdateDestinationPage = () => {
       originalDestination.location !== editedDestination.location ||
       originalDestination.latitude !== editedDestination.latitude ||
       originalDestination.longitude !== editedDestination.longitude ||
-      originalDestination.categoryName !== editedDestination.categoryName ||
       originalDestination.statusName !== editedDestination.statusName;
 
-    // Check if any items were removed or added
+    const { removedCategoryIds, addedCategoryIds } = getCategoryChanges();
+    const categoriesChanged =
+      removedCategoryIds.length > 0 || addedCategoryIds.length > 0;
+
     const itemsChanged =
       removedImages.length > 0 ||
       removedActivities.length > 0 ||
       newImages.length > 0 ||
       newActivities.length > 0;
 
-    return basicFieldsChanged || itemsChanged;
+    return basicFieldsChanged || categoriesChanged || itemsChanged;
   }, [
     originalDestination,
     editedDestination,
@@ -273,27 +411,31 @@ const UpdateDestinationPage = () => {
     removedActivities,
     newImages,
     newActivities,
+    getCategoryChanges,
   ]);
 
   // Prepare update data
   const prepareUpdateData = (): UpdateDestinationRequest | null => {
     if (!editedDestination || !selectedDestination) return null;
 
+    const { removedCategoryIds, addedCategoryIds } = getCategoryChanges();
+
     return {
       destinationId: selectedDestination.destinationId,
       name: editedDestination.destinationName,
       description: editedDestination.destinationDescription,
       status: editedDestination.statusName as "ACTIVE" | "INACTIVE",
-      destinationCategory: editedDestination.categoryName,
+      removedestinationCategoriesIdList: removedCategoryIds,
+      adddestinationCategoriesIdList: addedCategoryIds,
       location: editedDestination.location,
       latitude: editedDestination.latitude,
       longitude: editedDestination.longitude,
-      extraPrice: editedDestination.extraPrice || undefined, // Handle optional
+      extraPrice: editedDestination.extraPrice || undefined,
       extraPriceNote: editedDestination.extraPriceNote || "",
-      removeImages: removedImages, // Use the correct state variable name
-      newImages,
-      removeActivities: removedActivities, // Use the correct state variable name
-      newActivities,
+      removeImages: removedImages,
+      newImages: newImages,
+      removeActivities: removedActivities,
+      newActivities: newActivities,
     };
   };
 
@@ -309,10 +451,19 @@ const UpdateDestinationPage = () => {
     try {
       const response = await DestinationService.updateDestination(updateData);
 
-      setSuccess(`Destination updated successfully! ID: ${response.data.id}`);
+      const successMsg = `Destination "${editedDestination?.destinationName}" updated successfully!`;
+      setSuccess(successMsg);
+
+      // Show success toast with navigation link
+      setToast({
+        type: "success",
+        title: "Update Successful!",
+        message: `${editedDestination?.destinationName} has been updated successfully.`,
+        actionLink: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view?id=${selectedDestination?.destinationId}`,
+      });
+
       setShowConfirmModal(false);
 
-      // Refresh the data after successful update
       setTimeout(() => {
         if (selectedDestination) {
           fetchDestinationDetails(selectedDestination.destinationId);
@@ -320,6 +471,12 @@ const UpdateDestinationPage = () => {
       }, 2000);
     } catch (err: any) {
       setError(err.message || "Failed to update destination");
+      setToast({
+        type: "error",
+        title: "Update Failed",
+        message:
+          err.message || "Failed to update destination. Please try again.",
+      });
     } finally {
       setLoadingUpdate(false);
     }
@@ -333,9 +490,35 @@ const UpdateDestinationPage = () => {
       setRemovedActivities([]);
       setNewImages([]);
       setNewActivities([]);
+      setCurrentCategoryIds(originalCategoryIds);
       setError(null);
       setSuccess(null);
+
+      setToast({
+        type: "success",
+        title: "Changes Reset",
+        message: "All unsaved changes have been discarded.",
+      });
     }
+  };
+
+  const handleClearDestinationSelection = () => {
+    setSelectedDestination(null);
+    setOriginalDestination(null);
+    setEditedDestination(null);
+    setRemovedImages([]);
+    setRemovedActivities([]);
+    setNewImages([]);
+    setNewActivities([]);
+    setOriginalCategoryIds([]);
+    setCurrentCategoryIds([]);
+    setToast(null);
+
+    // Update URL to remove query params
+    const url = new URL(window.location.href);
+    url.searchParams.delete("destination-id");
+    url.searchParams.delete("destination-name");
+    router.replace(url.toString(), { scroll: false });
   };
 
   // Get changed fields for confirmation modal
@@ -348,14 +531,12 @@ const UpdateDestinationPage = () => {
       newValue: any;
     }> = [];
 
-    // Basic fields
     const fields = [
       { key: "destinationName", label: "Destination Name" },
       { key: "destinationDescription", label: "Description" },
       { key: "location", label: "Location" },
       { key: "latitude", label: "Latitude" },
       { key: "longitude", label: "Longitude" },
-      { key: "categoryName", label: "Category" },
       { key: "statusName", label: "Status" },
     ];
 
@@ -374,7 +555,22 @@ const UpdateDestinationPage = () => {
       }
     });
 
-    // Add counts of removed/added items
+    const { removedCategoryIds, addedCategoryIds } = getCategoryChanges();
+    if (removedCategoryIds.length > 0) {
+      changes.push({
+        field: "Categories to Remove",
+        oldValue: originalCategoryIds.length,
+        newValue: originalCategoryIds.length - removedCategoryIds.length,
+      });
+    }
+    if (addedCategoryIds.length > 0) {
+      changes.push({
+        field: "Categories to Add",
+        oldValue: originalCategoryIds.length,
+        newValue: originalCategoryIds.length + addedCategoryIds.length,
+      });
+    }
+
     if (removedImages.length > 0) {
       changes.push({
         field: "Images to Remove",
@@ -411,11 +607,73 @@ const UpdateDestinationPage = () => {
     return changes;
   };
 
+  // Convert destinations to search items format
+  const searchItems = destinations.map((dest) => ({
+    id: dest.destinationId,
+    name: dest.destinationName,
+  }));
+
+  const selectedSearchItem = selectedDestination
+    ? {
+        id: selectedDestination.destinationId,
+        name: selectedDestination.destinationName,
+      }
+    : null;
+
+  // Show loading state if common data is loading
+  if (commonLoading) {
+    return (
+      <CommonLoading
+        message="Loading categories..."
+        subMessage="Please wait while we fetch available categories"
+        size="lg"
+      />
+    );
+  }
+
+  // Show error state if common data failed to load
+  if (commonError) {
+    return (
+      <CommonErrorState
+        error={commonError}
+        title="Failed to Load Categories"
+        message="Unable to load destination categories. Please try again."
+        variant="error"
+        showBackButton={false}
+        showRetryButton={true}
+        onRetry={() => window.location.reload()}
+        retryButtonText="Retry"
+        fullScreen={true}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+    <div
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
+      {/* Toast Notifications */}
+      {toast && (
+        <ToastNotification
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={() => setToast(null)}
+          actionLink={toast.actionLink}
+          actionText="View Destination"
+        />
+      )}
+
       {/* Header with Breadcrumb */}
-      <div className="top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div
+        className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
+        style={{
+          backgroundColor: `${theme.surface}CC`,
+          borderColor: theme.border,
+        }}
+      >
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title="Update Destination"
             description="Edit and update existing destination information"
@@ -425,59 +683,67 @@ const UpdateDestinationPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Success Message */}
-        {success && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
-            <div className="flex items-center gap-4">
-              <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-green-800">
-                  Update Successful!
-                </h3>
-                <p className="text-green-600 mt-1">{success}</p>
-              </div>
-            </div>
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section - Only show when no destination is selected */}
+        {!selectedDestination && (
+          <div
+            className="rounded-2xl shadow-lg p-8 mb-8 transition-all duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            <h2
+              className="text-2xl font-bold mb-6 flex items-center gap-3"
+              style={{ color: theme.text }}
+            >
+              <Search className="w-6 h-6" style={{ color: theme.primary }} />
+              Select Destination to Update
+            </h2>
+
+            <CommonSearch
+              items={searchItems}
+              loading={loading}
+              selectedItem={selectedSearchItem}
+              onSelectItem={(item) =>
+                handleSelectDestination(item.id as number, item.name)
+              }
+              onClearSelection={handleClearDestinationSelection}
+              initialSearchTerm={initialDestinationName}
+              placeholder="Search destinations..."
+              title="Destinations"
+              variant="primary"
+              size="md"
+              getBadgeText={(item) => `ID: ${item.id}`}
+            />
           </div>
         )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-2xl">
-            <div className="flex items-center gap-4">
-              <XCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-red-800">Error</h3>
-                <p className="text-red-600 mt-1">{error}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Search Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <Search className="w-6 h-6 text-blue-600" />
-            Select Destination to Update
-          </h2>
-
-          <DestinationSearch
-            destinations={destinations}
-            loading={loading}
-            selectedDestination={selectedDestination}
-            onSelectDestination={handleSelectDestination}
-            initialSearchTerm={initialDestinationName}
-          />
-        </div>
-
-        {/* Loading State for Details */}
+        {/* Selected Destination Info Bar */}
+        <SelectedItemBar
+          item={
+            selectedDestination
+              ? {
+                  id: selectedDestination.destinationId,
+                  name: selectedDestination.destinationName,
+                }
+              : null
+          }
+          onClear={handleClearDestinationSelection}
+          variant="primary"
+          title="Currently Editing"
+          showId={true}
+          clearButtonText="Change Destination"
+          size="md"
+        />
         {loadingDetails && (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-            <p className="text-gray-600">Loading destination details...</p>
-          </div>
+          <CommonLoading
+            message="Loading destination details..."
+            subMessage="Please wait while we fetch the destination information"
+            size="lg"
+            fullScreen={false}
+            className="rounded-2xl shadow-lg border"
+          />
         )}
-
         {/* Destination Details Form */}
         {editedDestination && selectedDestination && (
           <DestinationDetailsForm
@@ -487,27 +753,52 @@ const UpdateDestinationPage = () => {
             removedActivities={removedActivities}
             newImages={newImages}
             newActivities={newActivities}
+            currentCategoryIds={currentCategoryIds}
+            originalCategoryIds={originalCategoryIds}
             availableCategories={availableCategories}
             availableActivityCategories={availableActivityCategories}
             availableSeasons={availableSeasons}
             onFieldChange={handleFieldChange}
+            onCategoryChange={handleCategoryChange}
             onRemoveImage={handleRemoveImage}
             onRemoveActivity={handleRemoveActivity}
             onAddNewImage={handleAddNewImage}
             onAddNewActivity={handleAddNewActivity}
             onUpdateActivity={handleUpdateActivity}
             onUpdateImage={handleUpdateImage}
+            uploadingImages={uploadingImages}
           />
         )}
-
         {/* Action Buttons */}
         {editedDestination && originalDestination && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 mt-8">
+          <div
+            className="rounded-2xl shadow-lg p-8 mt-8 transition-colors duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={handleResetChanges}
-                disabled={!hasChanges() || loadingUpdate}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:from-gray-100 hover:to-gray-200 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={!hasChanges() || loadingUpdate || uploadingImages}
+                className="cursor-pointer flex-1 px-6 py-4 rounded-xl border-2 transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: theme.background,
+                  borderColor: theme.border,
+                  color: theme.textSecondary,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = theme.primary;
+                  e.currentTarget.style.backgroundColor = hexToRgba(
+                    theme.primary,
+                    0.05,
+                  );
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = theme.border;
+                  e.currentTarget.style.backgroundColor = theme.background;
+                }}
               >
                 <RefreshCw className="w-5 h-5" />
                 Reset Changes
@@ -515,24 +806,66 @@ const UpdateDestinationPage = () => {
 
               <button
                 onClick={() => setShowConfirmModal(true)}
-                disabled={!hasChanges() || loadingUpdate}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl border-2 border-blue-500 hover:from-blue-700 hover:to-indigo-700 hover:border-blue-600 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={!hasChanges() || loadingUpdate || uploadingImages}
+                className="cursor-pointer flex-1 px-6 py-4 rounded-xl text-white font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`,
+                }}
               >
                 <Save className="w-5 h-5" />
                 {loadingUpdate ? "Updating..." : "Update Destination"}
               </button>
             </div>
 
-            {/* Change Indicator */}
-            {hasChanges() && (
-              <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+            {/* Uploading Indicator */}
+            {uploadingImages && (
+              <div
+                className="mt-6 p-4 rounded-xl transition-colors duration-300"
+                style={{
+                  backgroundColor: hexToRgba(theme.primary, 0.1),
+                  border: `1px solid ${hexToRgba(theme.primary, 0.2)}`,
+                }}
+              >
                 <div className="flex items-center gap-3">
-                  <Edit className="w-5 h-5 text-blue-600" />
+                  <Loader2
+                    className="w-5 h-5 animate-spin"
+                    style={{ color: theme.primary }}
+                  />
                   <div>
-                    <p className="text-blue-700 font-medium">
+                    <p className="font-medium" style={{ color: theme.primary }}>
+                      Uploading images to Cloudinary...
+                    </p>
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Please wait for all images to finish uploading before
+                      updating
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Change Indicator */}
+            {hasChanges() && !uploadingImages && (
+              <div
+                className="mt-6 p-4 rounded-xl transition-colors duration-300"
+                style={{
+                  backgroundColor: hexToRgba(theme.primary, 0.1),
+                  border: `1px solid ${hexToRgba(theme.primary, 0.2)}`,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <Edit className="w-5 h-5" style={{ color: theme.primary }} />
+                  <div>
+                    <p className="font-medium" style={{ color: theme.primary }}>
                       You have unsaved changes
                     </p>
-                    <p className="text-blue-600 text-sm mt-1">
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Click "Update Destination" to save your changes
                     </p>
                   </div>
@@ -541,7 +874,6 @@ const UpdateDestinationPage = () => {
             )}
           </div>
         )}
-
         {/* Confirmation Modal */}
         {showConfirmModal && originalDestination && editedDestination && (
           <UpdateConfirmationModal
@@ -556,6 +888,9 @@ const UpdateDestinationPage = () => {
             newImages={newImages}
             removedActivities={removedActivities}
             newActivities={newActivities}
+            removedCategoryIds={getCategoryChanges().removedCategoryIds}
+            addedCategoryIds={getCategoryChanges().addedCategoryIds}
+            availableCategories={availableCategories}
           />
         )}
       </div>

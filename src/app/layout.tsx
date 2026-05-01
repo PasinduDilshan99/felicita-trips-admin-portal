@@ -1,30 +1,25 @@
-"use client";
-
-import { AuthProvider } from "@/contexts/AuthContext";
-import { useAuthCheck } from "@/hooks/useAuthCheck";
 import "./globals.css";
-import NavBar from "@/components/common-components/NavBar";
-import Footer from "@/components/common-components/Footer";
-import { CommonProvider } from "@/contexts/CommonContext";
+import AppProviders from "@/components/providers/AppProviders";
+import { Metadata } from "next";
+import { MAIN_PAGE_PAGE_TITLE } from "@/utils/pagesHeaderTitles";
+
+export const metadata: Metadata = {
+  title: {
+    default: MAIN_PAGE_PAGE_TITLE,
+    template: "%s | Felicita Trips",
+  },
+  description: "Travel Agency in sri lanka",
+};
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  // Use the auth check hook
-  useAuthCheck();
-
+}) {
   return (
     <html lang="en">
-      <body className="">
-        <CommonProvider>
-          <AuthProvider>
-            <NavBar />
-            <div>{children}</div>
-            <Footer />
-          </AuthProvider>
-        </CommonProvider>
+      <body>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

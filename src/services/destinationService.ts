@@ -10,42 +10,77 @@ import {
   DestinationsForTerminateResponse,
   UpdateDestinationRequest,
   UpdateDestinationApiResponse,
+  DestinationStatisticsApiResponse,
+  DestinationCategoriesStatisticsApiResponse,
+  ActiveCategoriesApiResponse,
+  CategoryDetailsByIdApiResponse,
+  AddDestinationCategoryRequest,
+  AddDestinationCategoryApiResponse,
+  UpdateDestinationCategoryRequest,
+  UpdateDestinationCategoryApiResponse,
+  TerminateDestinationCategoryApiResponse,
+  TrendingDestinationsApiResponse,
+  AddTrendingDestinationRequest,
+  AddTrendingDestinationApiResponse,
+  TerminateTrendingDestinationApiResponse,
+  TerminateTrendingDestinationRequest,
 } from "@/types/destination-types";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import {
+  ADD_DESTINATION_CATEGORY_FE,
+  ADD_DESTINATION_DETAILS_DATA_FE,
+  ADD_TRENDING_DESTINATION_DATA_FE,
+  GET_ACTIVE_DESTINATIONS_CATEGORIES_FE,
+  GET_DESTINATION_CATEGORIES_STATISTICS_DATA_FE,
+  GET_DESTINATION_CATEGORY_DETAILS_BY_ID_FE,
+  GET_DESTINATION_DETAILS_FOR_TERMINATE_DATA_FE,
+  GET_DESTINATION_STATISTICS_DATA_FE,
+  GET_DESTINATIONS_DETAILS_BY_ID_DATA_FE,
+  GET_DESTINATIONS_DETAILS_BY_REQUEST_DATA_FE,
+  GET_TRENDING_DESTINATIONS_DATA_FE,
+  TERMINATE_DESTINATION_CATEGORY_FE,
+  TERMINATE_DESTINATION_DATA_FE,
+  TERMINATE_TRENDING_DESTINATION_DATA_FE,
+  UPDATE_DESTINATION_CATEGORY_FE,
+  UPDATE_DESTINATION_DETAILS_DATA_FE,
+} from "@/utils/frontEndConstant";
 
 export class DestinationService {
-  private static getAuthHeaders(): HeadersInit {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("auth-token") : null;
-
-    return {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
-    };
-  }
-
   static async getDestinations(
-    params: DestinationFilterParams
+    params: DestinationFilterParams,
   ): Promise<DestinationApiResponse> {
     try {
+      // Prepare the request body
+      const requestBody: any = {
+        name: params.name || null,
+        minPrice: params.minPrice || null,
+        maxPrice: params.maxPrice || null,
+        duration: params.duration || null,
+        destinationCategory: params.destinationCategory || null,
+        season: params.season || null,
+        status: params.status || null,
+        pageSize: params.pageSize,
+        pageNumber: params.pageNumber,
+      };
+
+      // Add sorting parameters if provided
+      if (params.sortBy) {
+        requestBody.sortBy = params.sortBy;
+      }
+      if (params.sortDirection) {
+        requestBody.sortDirection = params.sortDirection;
+      }
+
       const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/destination/destinations`,
+        GET_DESTINATIONS_DETAILS_BY_REQUEST_DATA_FE,
         {
           method: "POST",
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify({
-            name: params.name || null,
-            minPrice: params.minPrice || null,
-            maxPrice: params.maxPrice || null,
-            duration: params.duration || null,
-            destinationCategory: params.destinationCategory || null,
-            season: params.season || null,
-            status: params.status || null,
-            pageSize: params.pageSize,
-            pageNumber: params.pageNumber,
-          }),
-        }
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(requestBody),
+        },
       );
 
       if (!response.ok) {
@@ -60,7 +95,6 @@ export class DestinationService {
     }
   }
 
-  // Helper method to get unique categories from destinations
   // static extractCategories(destinations: Destination[]): string[] {
   //   const categories = destinations.map((dest) => dest.categoryName);
   //   return Array.from(new Set(categories));
@@ -79,15 +113,19 @@ export class DestinationService {
   }
 
   static async getDestinationById(
-    id: number
+    id: number,
   ): Promise<SingleDestinationApiResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/destination/${id}`,
+        `${GET_DESTINATIONS_DETAILS_BY_ID_DATA_FE}/${id}`,
         {
           method: "GET",
-          headers: this.getAuthHeaders(),
-        }
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        },
       );
 
       if (!response.ok) {
@@ -103,21 +141,18 @@ export class DestinationService {
   }
 
   static async addDestination(
-    destinationData: AddDestinationRequest
+    destinationData: AddDestinationRequest,
   ): Promise<AddDestinationApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/destination/add-destination`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(destinationData),
-        }
-      );
+      const response = await fetch(ADD_DESTINATION_DETAILS_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(destinationData),
+      });
 
       const data: AddDestinationApiResponse = await response.json();
 
@@ -135,11 +170,15 @@ export class DestinationService {
   static async getDestinationsForTerminate(): Promise<DestinationsForTerminateResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/destination/destination-for-terminate`,
+        GET_DESTINATION_DETAILS_FOR_TERMINATE_DATA_FE,
         {
           method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
           credentials: "include",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -155,21 +194,18 @@ export class DestinationService {
   }
 
   static async terminateDestination(
-    destinationId: number
+    destinationId: number,
   ): Promise<TerminateDestinationApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/destination/terminate-destination`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ destinationId }),
-        }
-      );
+      const response = await fetch(TERMINATE_DESTINATION_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ destinationId }),
+      });
       const data: TerminateDestinationApiResponse = await response.json();
 
       if (data.code !== 200) {
@@ -184,21 +220,18 @@ export class DestinationService {
   }
 
   static async updateDestination(
-    destinationData: UpdateDestinationRequest
+    destinationData: UpdateDestinationRequest,
   ): Promise<UpdateDestinationApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/destination/update-destination`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(destinationData),
-        }
-      );
+      const response = await fetch(UPDATE_DESTINATION_DETAILS_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(destinationData),
+      });
 
       const data: UpdateDestinationApiResponse = await response.json();
 
@@ -213,26 +246,317 @@ export class DestinationService {
     }
   }
 
-  // Get available activity categories
-  static async getActivityCategories(): Promise<string[]> {
-    // Implement based on your API
-    return [
-      "Adventure",
-      "Hiking",
-      "Cultural",
-      "Wildlife",
-      "Water Sports",
-      "Photography",
-      "Food & Dining",
-    ];
+  static async getDestinationStatistics(): Promise<DestinationStatisticsApiResponse> {
+    try {
+      const response = await fetch(GET_DESTINATION_STATISTICS_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: DestinationStatisticsApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch destination statistics",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching destination statistics:", error);
+      throw error;
+    }
   }
 
-  // Get available seasons
-  static getSeasons(): string[] {
-    return ["Summer", "Winter", "Spring", "Monsoon"];
+  static async getDestinationCategoriesStatistics(): Promise<DestinationCategoriesStatisticsApiResponse> {
+    try {
+      const response = await fetch(
+        GET_DESTINATION_CATEGORIES_STATISTICS_DATA_FE,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: DestinationCategoriesStatisticsApiResponse =
+        await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch destination categories statistics",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching destination categories statistics:", error);
+      throw error;
+    }
   }
 
-  static async getCategories(): Promise<string[]> {
-    return ["Adventure", "Wildlife", "Cultural", "Beach", "Historical"];
+  static async getActiveCategories(): Promise<ActiveCategoriesApiResponse> {
+    try {
+      const response = await fetch(GET_ACTIVE_DESTINATIONS_CATEGORIES_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ActiveCategoriesApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to fetch active categories");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching active categories:", error);
+      throw error;
+    }
   }
+
+  static async getCategoryDetailsById(
+    categoryId: number,
+  ): Promise<CategoryDetailsByIdApiResponse> {
+    try {
+      const response = await fetch(GET_DESTINATION_CATEGORY_DETAILS_BY_ID_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ destinationCategoryId: categoryId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: CategoryDetailsByIdApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to fetch category details");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching category details by ID:", error);
+      throw error;
+    }
+  }
+
+  static async addDestinationCategory(
+    categoryData: AddDestinationCategoryRequest,
+  ): Promise<AddDestinationCategoryApiResponse> {
+    try {
+      const response = await fetch(ADD_DESTINATION_CATEGORY_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(categoryData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: AddDestinationCategoryApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to add destination category");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error adding destination category:", error);
+      throw error;
+    }
+  }
+
+  static async updateDestinationCategory(
+    categoryData: UpdateDestinationCategoryRequest,
+  ): Promise<UpdateDestinationCategoryApiResponse> {
+    try {
+      const response = await fetch(UPDATE_DESTINATION_CATEGORY_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(categoryData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: UpdateDestinationCategoryApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to update destination category",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error updating destination category:", error);
+      throw error;
+    }
+  }
+
+  static async terminateDestinationCategory(
+    destinationCategoryId: number,
+  ): Promise<TerminateDestinationCategoryApiResponse> {
+    try {
+      const response = await fetch(TERMINATE_DESTINATION_CATEGORY_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ destinationCategoryId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TerminateDestinationCategoryApiResponse =
+        await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to terminate destination category",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error terminating destination category:", error);
+      throw error;
+    }
+  }
+
+  // Add these methods to the DestinationService class
+
+static async getTrendingDestinations(): Promise<TrendingDestinationsApiResponse> {
+  try {
+    const response = await fetch(GET_TRENDING_DESTINATIONS_DATA_FE, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: TrendingDestinationsApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to fetch trending destinations");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching trending destinations:", error);
+    throw error;
+  }
+}
+
+static async addTrendingDestination(
+  destinationData: AddTrendingDestinationRequest,
+): Promise<AddTrendingDestinationApiResponse> {
+  try {
+    const response = await fetch(ADD_TRENDING_DESTINATION_DATA_FE, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(destinationData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: AddTrendingDestinationApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to add trending destination");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error adding trending destination:", error);
+    throw error;
+  }
+}
+
+static async terminateTrendingDestination(
+  destinationData: TerminateTrendingDestinationRequest,
+): Promise<TerminateTrendingDestinationApiResponse> {
+  try {
+    const response = await fetch(TERMINATE_TRENDING_DESTINATION_DATA_FE, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(destinationData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: TerminateTrendingDestinationApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to terminate trending destination");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error terminating trending destination:", error);
+    throw error;
+  }
+}
+
 }

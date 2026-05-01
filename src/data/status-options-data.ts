@@ -1,0 +1,29 @@
+export const COMMON_STATUS_OPTIONS = [
+  {
+    value: "ACTIVE",
+    label: "Active",
+    description: "Visible to customers",
+    color: "#16a34a",
+  },
+  {
+    value: "INACTIVE",
+    label: "Inactive",
+    description: "Hidden from customers",
+    color: "#6b7280",
+  },
+  {
+    value: "TERMINATED",
+    label: "Terminated",
+    description: "Permanently discontinued",
+    color: "#dc2626",
+  },
+  {
+    value: "ARCHIVED",
+    label: "Archived",
+    description: "Stored for reference only",
+    color: "#9333ea",
+  },
+];
+
+export const DESTINATION_STATUS_OPTIONS = [...COMMON_STATUS_OPTIONS];
+export const DESTINATION_CATEGORIES_STATUS_OPTIONS = [...COMMON_STATUS_OPTIONS];

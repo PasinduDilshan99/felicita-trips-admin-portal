@@ -10,120 +10,131 @@ import {
   WEB_MANAGEMENT_TOURS_SCHEDULES_PATH,
   TRAVEL_MANAGEMENT_PATH,
   TRAVEL_MANAGEMENT_BOOKINGS_PATH,
+  WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH,
 } from "@/utils/constant";
-import {
-  ACTIVITY_CREATE_PRIVILEGE,
-  ACTIVITY_PRIVILEGE,
-  ACTIVITY_SCHEDULE_CREATE_PRIVILEGE,
-  ACTIVITY_SCHEDULE_PRIVILEGE,
-  ACTIVITY_SCHEDULE_TERMINATE_PRIVILEGE,
-  ACTIVITY_SCHEDULE_UPDATE_PRIVILEGE,
-  ACTIVITY_SCHEDULE_VIEW_PRIVILEGE,
-  ACTIVITY_TERMINATE_PRIVILEGE,
-  ACTIVITY_UPDATE_PRIVILEGE,
-  ACTIVITY_VIEW_PRIVILEGE,
-  DESTINATION_CREATE_PRIVILEGE,
-  DESTINATION_PRIVILEGE,
-  DESTINATION_TERMINATE_PRIVILEGE,
-  DESTINATION_UPDATE_PRIVILEGE,
-  DESTINATION_VIEW_PRIVILEGE,
-  PACKAGE_CREATE_PRIVILEGE,
-  PACKAGE_PRIVILEGE,
-  PACKAGE_SCHEDULE_CREATE_PRIVILEGE,
-  PACKAGE_SCHEDULE_PRIVILEGE,
-  PACKAGE_SCHEDULE_TERMINATE_PRIVILEGE,
-  PACKAGE_SCHEDULE_UPDATE_PRIVILEGE,
-  PACKAGE_SCHEDULE_VIEW_PRIVILEGE,
-  PACKAGE_TERMINATE_PRIVILEGE,
-  PACKAGE_UPDATE_PRIVILEGE,
-  PACKAGE_VIEW_PRIVILEGE,
-  TOUR_CREATE_PRIVILEGE,
-  TOUR_PRIVILEGE,
-  TOUR_SCHEDULE_CREATE_PRIVILEGE,
-  TOUR_SCHEDULE_PRIVILEGE,
-  TOUR_SCHEDULE_TERMINATE_PRIVILEGE,
-  TOUR_SCHEDULE_UPDATE_PRIVILEGE,
-  TOUR_SCHEDULE_VIEW_PRIVILEGE,
-  TOUR_TERMINATE_PRIVILEGE,
-  TOUR_UPDATE_PRIVILEGE,
-  TOUR_VIEW_PRIVILEGE,
-} from "@/utils/privileges";
+import * as PRIVILEGES from "@/utils/privileges";
+import { WEB_PAGE_MANAGEMENT_URL } from "@/utils/urls";
 
 export const webManagementSideBarData: SideBarDataType[] = [
   {
     id: 1,
     name: "Destinations",
     description: "Manage destination locations",
-    color: "#3B82F6", // Blue
+    color: "#3B82F6", // Blue - Primary
     url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    privilege: DESTINATION_PRIVILEGE,
+    privilege: PRIVILEGES.DESTINATION_PRIVILEGE,
     subData: [
       {
         id: 101,
         name: "View Destinations",
         description: "View all destination locations",
+        color: "#60A5FA", // Light Blue
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view`,
-        privilege: DESTINATION_VIEW_PRIVILEGE,
+        privilege: PRIVILEGES.DESTINATION_VIEW_PRIVILEGE,
       },
       {
         id: 102,
         name: "Add Destination",
         description: "Add a new destination location",
+        color: "#34D399", // Green
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/add-new`,
-        privilege: DESTINATION_CREATE_PRIVILEGE,
+        privilege: PRIVILEGES.DESTINATION_CREATE_PRIVILEGE,
       },
       {
         id: 103,
         name: "Update Destination",
         description: "Update existing destination information",
+        color: "#FBBF24", // Amber
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/update`,
-        privilege: DESTINATION_UPDATE_PRIVILEGE,
+        privilege: PRIVILEGES.DESTINATION_UPDATE_PRIVILEGE,
       },
       {
         id: 104,
         name: "Remove Destination",
         description: "Delete destination locations",
+        color: "#EF4444", // Red
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/terminate`,
-        privilege: DESTINATION_TERMINATE_PRIVILEGE,
+        privilege: PRIVILEGES.DESTINATION_TERMINATE_PRIVILEGE,
+      },
+      {
+        id: 105,
+        name: "Destination Categories",
+        description: "Manage destination categories",
+        color: "#8B5CF6", // Purple
+        url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}`,
+        privilege: PRIVILEGES.DESTINATION_CATEGORY_PRIVILEGE,
+        grandSubData: [
+          {
+            id: 1051,
+            name: "View Categories",
+            description: "View all destination categories",
+            color: "#A78BFA", // Light Purple
+            url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}/view`,
+            privilege: PRIVILEGES.DESTINATION_CATEGORY_VIEW_PRIVILEGE,
+          },
+          {
+            id: 1052,
+            name: "Add Category",
+            description: "Add a new destination category",
+            color: "#6EE7B7", // Mint Green
+            url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}/add-new`,
+            privilege: PRIVILEGES.DESTINATION_CATEGORY_CREATE_PRIVILEGE,
+          },
+          {
+            id: 1053,
+            name: "Update Category",
+            description: "Update existing destination category",
+            color: "#FCD34D", // Yellow
+            url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}/update`,
+            privilege: PRIVILEGES.DESTINATION_CATEGORY_UPDATE_PRIVILEGE,
+          },
+          {
+            id: 1054,
+            name: "Remove Category",
+            description: "Delete destination categories",
+            color: "#F87171", // Light Red
+            url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH}/terminate`,
+            privilege: PRIVILEGES.DESTINATION_CATEGORY_TERMINATE_PRIVILEGE,
+          },
+        ],
       },
     ],
   },
-
   {
     id: 2,
     name: "Activities",
     description: "Manage tour activities",
     color: "#10B981", // Green
     url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}`,
-    privilege: ACTIVITY_PRIVILEGE,
+    privilege: PRIVILEGES.ACTIVITY_PRIVILEGE,
     subData: [
       {
         id: 201,
         name: "View Activities",
         description: "View all available activities",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/view`,
-        privilege: ACTIVITY_VIEW_PRIVILEGE,
+        privilege: PRIVILEGES.ACTIVITY_VIEW_PRIVILEGE,
       },
       {
         id: 202,
         name: "Add Activity",
         description: "Add a new activity",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/add-new`,
-        privilege: ACTIVITY_CREATE_PRIVILEGE,
+        privilege: PRIVILEGES.ACTIVITY_CREATE_PRIVILEGE,
       },
       {
         id: 203,
         name: "Update Activity",
         description: "Update existing activity information",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/update`,
-        privilege: ACTIVITY_UPDATE_PRIVILEGE,
+        privilege: PRIVILEGES.ACTIVITY_UPDATE_PRIVILEGE,
       },
       {
         id: 204,
         name: "Remove Activity",
         description: "Delete activities",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/terminate`,
-        privilege: ACTIVITY_TERMINATE_PRIVILEGE,
+        privilege: PRIVILEGES.ACTIVITY_TERMINATE_PRIVILEGE,
       },
     ],
   },
@@ -133,35 +144,35 @@ export const webManagementSideBarData: SideBarDataType[] = [
     description: "Manage tour activities schedules",
     color: "#10B984", // Green
     url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_SCHEDULES_PATH}`,
-    privilege: ACTIVITY_SCHEDULE_PRIVILEGE,
+    privilege: PRIVILEGES.ACTIVITY_SCHEDULE_PRIVILEGE,
     subData: [
       {
         id: 301,
         name: "View Activities Schedules",
         description: "View all available activities schedules",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_SCHEDULES_PATH}/view`,
-        privilege: ACTIVITY_SCHEDULE_VIEW_PRIVILEGE,
+        privilege: PRIVILEGES.ACTIVITY_SCHEDULE_VIEW_PRIVILEGE,
       },
       {
         id: 302,
         name: "Add Activity Schedule",
         description: "Add a new activity schedule",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_SCHEDULES_PATH}/add-new`,
-        privilege: ACTIVITY_SCHEDULE_CREATE_PRIVILEGE,
+        privilege: PRIVILEGES.ACTIVITY_SCHEDULE_CREATE_PRIVILEGE,
       },
       {
         id: 303,
         name: "Update Activity Schedule",
         description: "Update existing activity schedule information",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_SCHEDULES_PATH}/update`,
-        privilege: ACTIVITY_SCHEDULE_UPDATE_PRIVILEGE,
+        privilege: PRIVILEGES.ACTIVITY_SCHEDULE_UPDATE_PRIVILEGE,
       },
       {
         id: 304,
         name: "Remove Activity Schedule",
         description: "Delete activities schedule",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_SCHEDULES_PATH}/terminate`,
-        privilege: ACTIVITY_SCHEDULE_TERMINATE_PRIVILEGE,
+        privilege: PRIVILEGES.ACTIVITY_SCHEDULE_TERMINATE_PRIVILEGE,
       },
     ],
   },
@@ -171,35 +182,35 @@ export const webManagementSideBarData: SideBarDataType[] = [
     description: "Manage tour packages",
     color: "#F59E0B", // Amber
     url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}`,
-    privilege: TOUR_PRIVILEGE,
+    privilege: PRIVILEGES.TOUR_PRIVILEGE,
     subData: [
       {
         id: 401,
         name: "View Tours",
         description: "View all tour packages",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/view`,
-        privilege: TOUR_VIEW_PRIVILEGE,
+        privilege: PRIVILEGES.TOUR_VIEW_PRIVILEGE,
       },
       {
         id: 402,
         name: "Add Tour",
         description: "Create a new tour package",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/add-new`,
-        privilege: TOUR_CREATE_PRIVILEGE,
+        privilege: PRIVILEGES.TOUR_CREATE_PRIVILEGE,
       },
       {
         id: 403,
         name: "Update Tour",
         description: "Update existing tour information",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/update`,
-        privilege: TOUR_UPDATE_PRIVILEGE,
+        privilege: PRIVILEGES.TOUR_UPDATE_PRIVILEGE,
       },
       {
         id: 404,
         name: "Remove Tour",
         description: "Delete tour packages",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/terminate`,
-        privilege: TOUR_TERMINATE_PRIVILEGE,
+        privilege: PRIVILEGES.TOUR_TERMINATE_PRIVILEGE,
       },
     ],
   },
@@ -209,35 +220,35 @@ export const webManagementSideBarData: SideBarDataType[] = [
     description: "Manage tour schedule packages",
     color: "#F59E0B", // Amber
     url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_SCHEDULES_PATH}`,
-    privilege: TOUR_SCHEDULE_PRIVILEGE,
+    privilege: PRIVILEGES.TOUR_SCHEDULE_PRIVILEGE,
     subData: [
       {
         id: 501,
         name: "View Tours Schedules",
         description: "View all tour packages schedules",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_SCHEDULES_PATH}/view`,
-        privilege: TOUR_SCHEDULE_VIEW_PRIVILEGE,
+        privilege: PRIVILEGES.TOUR_SCHEDULE_VIEW_PRIVILEGE,
       },
       {
         id: 502,
         name: "Add Tour Schedule",
         description: "Create a new tour package schedule",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_SCHEDULES_PATH}/add-new`,
-        privilege: TOUR_SCHEDULE_CREATE_PRIVILEGE,
+        privilege: PRIVILEGES.TOUR_SCHEDULE_CREATE_PRIVILEGE,
       },
       {
         id: 503,
         name: "Update Tour Schedule",
         description: "Update existing tour schedule information",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_SCHEDULES_PATH}/update`,
-        privilege: TOUR_SCHEDULE_UPDATE_PRIVILEGE,
+        privilege: PRIVILEGES.TOUR_SCHEDULE_UPDATE_PRIVILEGE,
       },
       {
         id: 504,
         name: "Remove Tour Schedule",
         description: "Delete tour schedule packages",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_SCHEDULES_PATH}/terminate`,
-        privilege: TOUR_SCHEDULE_TERMINATE_PRIVILEGE,
+        privilege: PRIVILEGES.TOUR_SCHEDULE_TERMINATE_PRIVILEGE,
       },
     ],
   },
@@ -247,35 +258,35 @@ export const webManagementSideBarData: SideBarDataType[] = [
     description: "Manage holiday packages",
     color: "#8B5CF6", // Violet
     url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}`,
-    privilege: PACKAGE_PRIVILEGE,
+    privilege: PRIVILEGES.PACKAGE_PRIVILEGE,
     subData: [
       {
         id: 601,
         name: "View Packages",
         description: "View all holiday packages",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/view`,
-        privilege: PACKAGE_VIEW_PRIVILEGE,
+        privilege: PRIVILEGES.PACKAGE_VIEW_PRIVILEGE,
       },
       {
         id: 602,
         name: "Add Package",
         description: "Create a new holiday package",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/add-new`,
-        privilege: PACKAGE_CREATE_PRIVILEGE,
+        privilege: PRIVILEGES.PACKAGE_CREATE_PRIVILEGE,
       },
       {
         id: 603,
         name: "Update Package",
         description: "Update existing package information",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/update`,
-        privilege: PACKAGE_UPDATE_PRIVILEGE,
+        privilege: PRIVILEGES.PACKAGE_UPDATE_PRIVILEGE,
       },
       {
         id: 604,
         name: "Remove Package",
         description: "Delete holiday packages",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/terminate`,
-        privilege: PACKAGE_TERMINATE_PRIVILEGE,
+        privilege: PRIVILEGES.PACKAGE_TERMINATE_PRIVILEGE,
       },
     ],
   },
@@ -285,35 +296,35 @@ export const webManagementSideBarData: SideBarDataType[] = [
     description: "Manage holiday packages schedules",
     color: "#8B5CF6", // Violet
     url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_SCHEDULES_PATH}`,
-    privilege: PACKAGE_SCHEDULE_PRIVILEGE,
+    privilege: PRIVILEGES.PACKAGE_SCHEDULE_PRIVILEGE,
     subData: [
       {
         id: 701,
         name: "View Packages Schedules",
         description: "View all holiday packages schedules",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_SCHEDULES_PATH}/view`,
-        privilege: PACKAGE_SCHEDULE_VIEW_PRIVILEGE,
+        privilege: PRIVILEGES.PACKAGE_SCHEDULE_VIEW_PRIVILEGE,
       },
       {
         id: 702,
         name: "Add Package Schedule",
         description: "Create a new holiday package schedule",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_SCHEDULES_PATH}/add-new`,
-        privilege: PACKAGE_SCHEDULE_CREATE_PRIVILEGE,
+        privilege: PRIVILEGES.PACKAGE_SCHEDULE_CREATE_PRIVILEGE,
       },
       {
         id: 703,
         name: "Update Package Schedule",
         description: "Update existing package schedule information",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_SCHEDULES_PATH}/update`,
-        privilege: PACKAGE_SCHEDULE_UPDATE_PRIVILEGE,
+        privilege: PRIVILEGES.PACKAGE_SCHEDULE_UPDATE_PRIVILEGE,
       },
       {
         id: 704,
         name: "Remove Package Schedule",
         description: "Delete holiday packages schedules",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/terminate`,
-        privilege: PACKAGE_SCHEDULE_TERMINATE_PRIVILEGE,
+        privilege: PRIVILEGES.PACKAGE_SCHEDULE_TERMINATE_PRIVILEGE,
       },
     ],
   },
@@ -326,36 +337,544 @@ export const travelManagementSideBarData: SideBarDataType[] = [
     description: "Manage destination locations",
     color: "#3B82F6", // Blue
     url: `${TRAVEL_MANAGEMENT_PATH}${TRAVEL_MANAGEMENT_BOOKINGS_PATH}`,
-    privilege: DESTINATION_PRIVILEGE,
+    privilege: PRIVILEGES.DESTINATION_PRIVILEGE,
     subData: [
       {
         id: 101,
         name: "View Bookings",
         description: "View all destination locations",
         url: `${TRAVEL_MANAGEMENT_PATH}${TRAVEL_MANAGEMENT_BOOKINGS_PATH}/view`,
-        privilege: DESTINATION_VIEW_PRIVILEGE,
+        privilege: PRIVILEGES.DESTINATION_VIEW_PRIVILEGE,
       },
       {
         id: 102,
         name: "Add Booking",
         description: "Add a new destination location",
         url: `${TRAVEL_MANAGEMENT_PATH}${TRAVEL_MANAGEMENT_BOOKINGS_PATH}/add-new`,
-        privilege: DESTINATION_CREATE_PRIVILEGE,
+        privilege: PRIVILEGES.DESTINATION_CREATE_PRIVILEGE,
       },
       {
         id: 103,
         name: "Update Booking",
         description: "Update existing destination information",
         url: `${TRAVEL_MANAGEMENT_PATH}${TRAVEL_MANAGEMENT_BOOKINGS_PATH}/update`,
-        privilege: DESTINATION_UPDATE_PRIVILEGE,
+        privilege: PRIVILEGES.DESTINATION_UPDATE_PRIVILEGE,
       },
       {
         id: 104,
         name: "Remove Booking",
         description: "Delete destination locations",
         url: `${TRAVEL_MANAGEMENT_PATH}${TRAVEL_MANAGEMENT_BOOKINGS_PATH}/terminate`,
-        privilege: DESTINATION_TERMINATE_PRIVILEGE,
+        privilege: PRIVILEGES.DESTINATION_TERMINATE_PRIVILEGE,
       },
+    ],
+  },
+];
+
+export const webPageManagementSideBarData: SideBarDataType[] = [
+  // =========================================================
+  // HOME PAGE
+  // =========================================================
+  {
+    id: 1,
+    name: "Home Page",
+    description: "Manage homepage sections and content",
+    color: "#3B82F6",
+    url: `${WEB_PAGE_MANAGEMENT_URL}/home-page`,
+    privilege: PRIVILEGES.HOME_PAGE_PRIVILEGE,
+    subData: [
+      {
+        id: 101,
+        name: "Hero Section",
+        description: "Manage homepage hero banner section",
+        color: "#60A5FA",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/hero-section`,
+        privilege: PRIVILEGES.HOME_HERO_SECTION_PRIVILEGE,
+      },
+      {
+        id: 102,
+        name: "Why Choose Us",
+        description: "Manage why choose us section",
+        color: "#34D399",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/why-choose-us`,
+        privilege: PRIVILEGES.HOME_WHY_CHOOSE_US_PRIVILEGE,
+      },
+      {
+        id: 103,
+        name: "Our Services",
+        description: "Manage services section",
+        color: "#FBBF24",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/our-services`,
+        privilege: PRIVILEGES.HOME_OUR_SERVICES_PRIVILEGE,
+      },
+      {
+        id: 104,
+        name: "Trending Destinations",
+        description: "Manage trending destinations section",
+        color: "#F87171",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/trending-destinations`,
+        privilege: PRIVILEGES.HOME_TRENDING_DESTINATIONS_PRIVILEGE,
+      },
+      {
+        id: 105,
+        name: "Active Tours",
+        description: "Manage active tours section",
+        color: "#8B5CF6",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/active-tours`,
+        privilege: PRIVILEGES.HOME_ACTIVE_TOURS_PRIVILEGE,
+      },
+      {
+        id: 106,
+        name: "Tour Map",
+        description: "Manage tour map section",
+        color: "#14B8A6",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/tour-map`,
+        privilege: PRIVILEGES.HOME_TOUR_MAP_PRIVILEGE,
+      },
+      {
+        id: 107,
+        name: "Activity Categories",
+        description: "Manage activity categories section",
+        color: "#F97316",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/activity-categories`,
+        privilege: PRIVILEGES.HOME_ACTIVITY_CATEGORIES_PRIVILEGE,
+      },
+      {
+        id: 108,
+        name: "Gallery",
+        description: "Manage homepage gallery section",
+        color: "#EC4899",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/gallery`,
+        privilege: PRIVILEGES.HOME_GALLERY_PRIVILEGE,
+      },
+      {
+        id: 109,
+        name: "Contact Form",
+        description: "Manage homepage contact form section",
+        color: "#6366F1",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/contact-form`,
+        privilege: PRIVILEGES.HOME_CONTACT_FORM_PRIVILEGE,
+      },
+
+      // {
+      //   id: 110,
+      //   name: "Partners",
+      //   description: "Manage partners section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/partners`,
+      //   privilege: PRIVILEGES.HOME_PARTNERS_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 111,
+      //   name: "Popular Destinations",
+      //   description: "Manage popular destinations section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/popular-destinations`,
+      //   privilege: PRIVILEGES.HOME_POPULAR_DESTINATIONS_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 112,
+      //   name: "New Destinations",
+      //   description: "Manage new destinations section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/new-destinations`,
+      //   privilege: PRIVILEGES.HOME_NEW_DESTINATIONS_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 113,
+      //   name: "Popular Tours",
+      //   description: "Manage popular tours section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/popular-tours`,
+      //   privilege: PRIVILEGES.HOME_POPULAR_TOURS_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 114,
+      //   name: "Activities",
+      //   description: "Manage activities section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/activities`,
+      //   privilege: PRIVILEGES.HOME_ACTIVITIES_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 115,
+      //   name: "Packages",
+      //   description: "Manage packages section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/packages`,
+      //   privilege: PRIVILEGES.HOME_PACKAGES_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 116,
+      //   name: "Accommodations",
+      //   description: "Manage accommodations section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/accommodations`,
+      //   privilege: PRIVILEGES.HOME_ACCOMMODATIONS_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 117,
+      //   name: "Destination Categories",
+      //   description: "Manage destination categories section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/destination-categories`,
+      //   privilege: PRIVILEGES.HOME_DESTINATION_CATEGORIES_PRIVILEGE,
+      // },
+
+      // User Benefits & Loyalty
+
+      // {
+      //   id: 118,
+      //   name: "User Levels",
+      //   description: "Manage user levels section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/user-levels`,
+      //   privilege: PRIVILEGES.HOME_USER_LEVELS_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 119,
+      //   name: "User Levels With Benefits",
+      //   description: "Manage user levels with benefits section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/user-levels-benefits`,
+      //   privilege: PRIVILEGES.HOME_USER_LEVELS_BENEFITS_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 120,
+      //   name: "User Benefits",
+      //   description: "Manage user benefits section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/user-benefits`,
+      //   privilege: PRIVILEGES.HOME_USER_BENEFITS_PRIVILEGE,
+      // },
+
+      // Social Proof & Content
+
+      // {
+      //   id: 121,
+      //   name: "Reviews",
+      //   description: "Manage reviews section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/reviews`,
+      //   privilege: PRIVILEGES.HOME_REVIEWS_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 122,
+      //   name: "Blogs Summary",
+      //   description: "Manage blogs summary section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/blogs-summary`,
+      //   privilege: PRIVILEGES.HOME_BLOGS_SUMMARY_PRIVILEGE,
+      // },
+
+      // Process & Promotions
+
+      // {
+      //   id: 123,
+      //   name: "Workflow",
+      //   description: "Manage workflow section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/workflow`,
+      //   privilege: PRIVILEGES.HOME_WORKFLOW_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 124,
+      //   name: "Promotions",
+      //   description: "Manage promotions section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/promotions`,
+      //   privilege: PRIVILEGES.HOME_PROMOTIONS_PRIVILEGE,
+      // },
+
+      // Support & Information
+
+      // {
+      //   id: 125,
+      //   name: "FAQ",
+      //   description: "Manage FAQ section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/faq`,
+      //   privilege: PRIVILEGES.HOME_FAQ_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 126,
+      //   name: "Inquire",
+      //   description: "Manage inquire section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/home-page/inquire`,
+      //   privilege: PRIVILEGES.HOME_INQUIRE_PRIVILEGE,
+      // },
+    ],
+  },
+
+  // =========================================================
+  // ABOUT US PAGE
+  // =========================================================
+  {
+    id: 2,
+    name: "About Us Page",
+    description: "Manage about us page sections",
+    color: "#10B981",
+    url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page`,
+    privilege: PRIVILEGES.ABOUT_US_PAGE_PRIVILEGE,
+    subData: [
+      {
+        id: 201,
+        name: "Hero Section",
+        description: "Manage about us hero section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/hero-section`,
+        privilege: PRIVILEGES.ABOUT_US_HERO_SECTION_PRIVILEGE,
+      },
+      {
+        id: 202,
+        name: "Our Story",
+        description: "Manage our story section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/our-story`,
+        privilege: PRIVILEGES.ABOUT_US_OUR_STORY_PRIVILEGE,
+      },
+      {
+        id: 203,
+        name: "CEO Speech",
+        description: "Manage CEO speech section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/ceo-speech`,
+        privilege: PRIVILEGES.ABOUT_US_CEO_SPEECH_PRIVILEGE,
+      },
+      {
+        id: 204,
+        name: "Why Choose Us",
+        description: "Manage why choose us section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/why-choose-us`,
+        privilege: PRIVILEGES.ABOUT_US_WHY_CHOOSE_US_PRIVILEGE,
+      },
+
+      // {
+      //   id: 205,
+      //   name: "All Employees",
+      //   description: "Manage all employees section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/all-employees`,
+      //   privilege: PRIVILEGES.ABOUT_US_ALL_EMPLOYEES_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 206,
+      //   name: "About Us Statistics",
+      //   description: "Manage statistics section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/statistics`,
+      //   privilege: PRIVILEGES.ABOUT_US_STATISTICS_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 207,
+      //   name: "Employee Social Media",
+      //   description: "Manage employee social media section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/employee-social-media`,
+      //   privilege: PRIVILEGES.ABOUT_US_EMPLOYEE_SOCIAL_MEDIA_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 208,
+      //   name: "Tour Guides",
+      //   description: "Manage tour guides section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/tour-guides`,
+      //   privilege: PRIVILEGES.ABOUT_US_TOUR_GUIDES_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 209,
+      //   name: "Our Office",
+      //   description: "Manage office section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/our-office`,
+      //   privilege: PRIVILEGES.ABOUT_US_OUR_OFFICE_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 210,
+      //   name: "Our Features",
+      //   description: "Manage features section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/our-features`,
+      //   privilege: PRIVILEGES.ABOUT_US_OUR_FEATURES_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 211,
+      //   name: "Achievements",
+      //   description: "Manage achievements section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/about-us-page/achievements`,
+      //   privilege: PRIVILEGES.ABOUT_US_ACHIEVEMENTS_PRIVILEGE,
+      // },
+    ],
+  },
+
+  // =========================================================
+  // DESTINATIONS PAGE
+  // =========================================================
+  {
+    id: 3,
+    name: "Destinations Page",
+    description: "Manage destinations page sections",
+    color: "#F59E0B",
+    url: `${WEB_PAGE_MANAGEMENT_URL}/destinations-page`,
+    privilege: PRIVILEGES.DESTINATIONS_PAGE_PRIVILEGE,
+    subData: [
+      {
+        id: 301,
+        name: "Hero Section",
+        description: "Manage destinations hero section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/destinations-page/hero-section`,
+        privilege: PRIVILEGES.DESTINATIONS_HERO_SECTION_PRIVILEGE,
+      },
+      {
+        id: 302,
+        name: "Reviews Section",
+        description: "Manage reviews section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/destinations-page/reviews-section`,
+        privilege: PRIVILEGES.DESTINATIONS_REVIEWS_SECTION_PRIVILEGE,
+      },
+      {
+        id: 303,
+        name: "Destination History",
+        description: "Manage destination history section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/destinations-page/destination-history`,
+        privilege: PRIVILEGES.DESTINATIONS_HISTORY_PRIVILEGE,
+      },
+      {
+        id: 304,
+        name: "Destination History Gallery",
+        description: "Manage destination gallery section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/destinations-page/destination-history-gallery`,
+        privilege: PRIVILEGES.DESTINATIONS_HISTORY_GALLERY_PRIVILEGE,
+      },
+    ],
+  },
+
+  // =========================================================
+  // DESTINATION DETAILS PAGE
+  // =========================================================
+  {
+    id: 4,
+    name: "Destination Details Page",
+    description: "Manage destination details page sections",
+    color: "#8B5CF6",
+    url: `${WEB_PAGE_MANAGEMENT_URL}/destination-details-page`,
+    privilege: PRIVILEGES.DESTINATION_DETAILS_PAGE_PRIVILEGE,
+    subData: [
+      {
+        id: 401,
+        name: "Destination Details Hero Section",
+        description: "Manage destination details hero section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/destination-details-page/hero-section`,
+        privilege: PRIVILEGES.DESTINATION_DETAILS_HERO_SECTION_PRIVILEGE,
+      },
+      {
+        id: 402,
+        name: "Destination History",
+        description: "Manage destination history section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/destination-details-page/destination-history`,
+        privilege: PRIVILEGES.DESTINATION_DETAILS_HISTORY_PRIVILEGE,
+      },
+      {
+        id: 403,
+        name: "Reviews Section",
+        description: "Manage reviews section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/destination-details-page/reviews-section`,
+        privilege: PRIVILEGES.DESTINATION_DETAILS_REVIEWS_SECTION_PRIVILEGE,
+      },
+      {
+        id: 404,
+        name: "Destination History Gallery",
+        description: "Manage destination history gallery section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/destination-details-page/destination-history-gallery`,
+        privilege: PRIVILEGES.DESTINATION_DETAILS_HISTORY_GALLERY_PRIVILEGE,
+      },
+    ],
+  },
+
+  // =========================================================
+  // FAQ PAGE
+  // =========================================================
+  {
+    id: 5,
+    name: "FAQ Page",
+    description: "Manage FAQ page sections",
+    color: "#EF4444",
+    url: `${WEB_PAGE_MANAGEMENT_URL}/faq-page`,
+    privilege: PRIVILEGES.FAQ_PAGE_PRIVILEGE,
+    subData: [
+      {
+        id: 501,
+        name: "FAQ Hero Section",
+        description: "Manage FAQ hero section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/faq-page/hero-section`,
+        privilege: PRIVILEGES.FAQ_HERO_SECTION_PRIVILEGE,
+      },
+      {
+        id: 502,
+        name: "FAQ Questions And Answers",
+        description: "Manage FAQ questions and answers",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/faq-page/questions-and-answers`,
+        privilege: PRIVILEGES.FAQ_QUESTIONS_ANSWERS_PRIVILEGE,
+      },
+    ],
+  },
+
+  // =========================================================
+  // CONTACT US PAGE
+  // =========================================================
+  {
+    id: 6,
+    name: "Contact Us Page",
+    description: "Manage contact us page sections",
+    color: "#06B6D4",
+    url: `${WEB_PAGE_MANAGEMENT_URL}/contact-us-page`,
+    privilege: PRIVILEGES.CONTACT_US_PAGE_PRIVILEGE,
+    subData: [
+      {
+        id: 601,
+        name: "Contact Us Hero Section",
+        description: "Manage contact us hero section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/contact-us-page/hero-section`,
+        privilege: PRIVILEGES.CONTACT_US_HERO_SECTION_PRIVILEGE,
+      },
+      {
+        id: 602,
+        name: "Contact Highlights",
+        description: "Manage contact highlights section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/contact-us-page/contact-highlights`,
+        privilege: PRIVILEGES.CONTACT_HIGHLIGHTS_PRIVILEGE,
+      },
+      {
+        id: 603,
+        name: "Contact Form",
+        description: "Manage contact form section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/contact-us-page/contact-form`,
+        privilege: PRIVILEGES.CONTACT_FORM_PRIVILEGE,
+      },
+      {
+        id: 604,
+        name: "Call To Action",
+        description: "Manage call to action section",
+        url: `${WEB_PAGE_MANAGEMENT_URL}/contact-us-page/call-to-action`,
+        privilege: PRIVILEGES.CONTACT_CALL_TO_ACTION_PRIVILEGE,
+      },
+
+      // {
+      //   id: 605,
+      //   name: "Contact Us Office",
+      //   description: "Manage office section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/contact-us-page/contact-us-office`,
+      //   privilege: PRIVILEGES.CONTACT_US_OFFICE_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 606,
+      //   name: "Business Information",
+      //   description: "Manage business information section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/contact-us-page/business-information`,
+      //   privilege: PRIVILEGES.BUSINESS_INFORMATION_PRIVILEGE,
+      // },
+
+      // {
+      //   id: 607,
+      //   name: "Contact Us Social Media",
+      //   description: "Manage contact us social media section",
+      //   url: `${WEB_PAGE_MANAGEMENT_URL}/contact-us-page/social-media`,
+      //   privilege: PRIVILEGES.CONTACT_US_SOCIAL_MEDIA_PRIVILEGE,
+      // },
     ],
   },
 ];

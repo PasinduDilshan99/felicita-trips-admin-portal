@@ -152,15 +152,27 @@ export const GET_ACTIVE_OUR_SERVICES_DATA = `${BASE_PATH}${API}${VERSION}${OUR_S
 export const GET_DESTINATIONS_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}`;
 export const GET_ACTIVE_DESTINATIONS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/active-destinations`;
 export const GET_ACTIVE_DESTINATIONS_CATEGORIES_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/active-categories`;
+export const GET_DESTINATION_CATEGORY_DETAILS_BY_ID = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/category-details-by-id`;
 export const GET_POPULAR_DESTINATIONS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/popular-destinations`;
 export const GET_NEW_DESTINATIONS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/new-destinations`;
 export const GET_TRENDING_DESTINATIONS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/trending-destinations`;
+export const ADD_TRENDING_DESTINATIONS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/trending-destinations-add`;
+export const TERMINATE_TRENDING_DESTINATIONS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/trending-destinations-terminate`;
 export const GET_ACTIVE_DESTINATIONS_FOR_TOUR_MAP_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/tour-map`;
 export const GET_DESTINATIONS_DETAILS_BY_TOUR_ID_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/tour-id`;
 export const GET_DESTINATIONS_DETAILS_BY_REQUEST_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/destinations`;
 export const GET_DESTINATIONS_HISTORY_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/history`;
 export const GET_DESTINATIONS_HISTORY_IMAGES_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/history-images`;
 export const GET_DESTINATIONS_REVIEWS_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/reviews`;
+export const ADD_DESTINATION_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/add-destination`;
+export const UPDATE_DESTINATION_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/update-destination`;
+export const GET_DESTINATION_DETAILS_FOR_TERMINATE_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/destination-for-terminate`;
+export const TERMINATE_DESTINATION_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/terminate-destination`;
+export const GET_DESTINATION_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/destination-statistics`;
+export const GET_DESTINATION_CATEGORIES_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/destination-categories-statistics`;
+export const ADD_DESTINATION_CATEGORY = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/add-destination-category`;
+export const UPDATE_DESTINATION_CATEGORY = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/update-destination-category`;
+export const TERMINATE_DESTINATION_CATEGORY = `${BASE_PATH}${API}${VERSION}${DESTINATIONS}/terminate-destination-category`;
 
 // Tours
 export const GET_TOUR_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}`;
@@ -202,6 +214,11 @@ export const GET_ACTIVE_ACTIVITY_CATEGORIES_DATA = `${BASE_PATH}${API}${VERSION}
 export const GET_ACTIVITY_REVIEWS_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/reviews`;
 export const GET_ACTIVITY_HISTORY_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/history`;
 export const GET_ACTIVITY_HISTORY_IMAGES_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/history-images`;
+export const GET_ACTIVITIES_NAMES_AND_IDS_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/activityId-and-activityName`;
+export const TERMINATE_ACTIVITY_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/terminate-activity`;
+export const ADD_ACTIVITY_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/add-activity`;
+export const UPDATE_ACTIVITY_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/update-activity`;
+export const GET_ACTIVITIES_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/activities-statistics`;
 
 // Blogs
 export const GET_ALL_BLOGS_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${BLOG}/all`;
@@ -257,11 +274,15 @@ export const ADD_BROWSER_HISTORY_REQUEST_DATA = `${BASE_PATH}${API}${VERSION}${B
 
 // Common
 export const GET_ALL_CATEGORIES_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/all-categories`;
+export const GET_NOTIFICATIONS_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/notifications`;
+export const UPDATE_NOTIFICATIONS_READ_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/notifications-read`;
+export const GET_ALL_UNREAD_NOTIFICATION_COUNT_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/unread-notification-count`;
+export const UPDATE_ALL_UNREAD_NOTIFICATIONS_READ_DATA = `${BASE_PATH}${API}${VERSION}${COMMON}/read-all-unread-notifications`;
 
 // Others
 export const UPLOAD_IMAGE_TO_CLOUDINARY =
-  "https://api.cloudinary.com/v1_1/dtzrivqye/image/upload";
-  export const WHETHER_DETAILS = `${BASE_PATH}${API}${VERSION}${COMMON}/weather`
+  "https://api.cloudinary.com/v1_1/dnsenutq2/image/upload";
+export const WHETHER_DETAILS = `${BASE_PATH}${API}${VERSION}${COMMON}/weather`;
 
 // Vehicles
 export const GET_VEHICLE_SPECIFICATION_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${VEHICLES}/specification`;
@@ -273,9 +294,6 @@ export const GET_VEHICLE_TYPES_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION
 // Seasons
 export const GET_ACTIVE_SEASONS_BASIC_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${SEASONS}/basic-details`;
 export const GET_SEASONS_DETAILS_BY_SEASON_ID_DATA = `${BASE_PATH}${API}${VERSION}${SEASONS}`;
-
-
-  
 
 export const GET_TOUR_DETAILS_BY_ID_BE = `${BASE_PATH}${VERSION}${API}${TOUR}`;
 

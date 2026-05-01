@@ -10,6 +10,15 @@ export interface SideBarDataType {
     name: string;
     description: string;
     url: string;
+    color?: string;
     privilege: string;
+    grandSubData?: {
+      id: number;
+      name: string;
+      description: string;
+      url: string;
+      color?: string;
+      privilege: string;
+    }[];
   }[];
 }

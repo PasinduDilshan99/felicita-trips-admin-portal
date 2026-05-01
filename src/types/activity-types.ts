@@ -1,6 +1,5 @@
 // types/activity-types.ts
 
-// Schedule Interface
 export interface Schedule {
   id: number;
   name: string;
@@ -38,12 +37,12 @@ export interface Activity {
   name: string;
   description: string;
   season: string;
-  status: 'ACTIVE' | 'INACTIVE' | string;
+  status: "ACTIVE" | "INACTIVE" | string;
   schedules: Schedule[];
   requirements: Requirement[];
   images: ActivityImage[];
   destination_id: number;
-  activities_category: string;
+  activities_category: ActivitiesCategory[];
   duration_hours: number;
   available_from: string;
   available_to: string;
@@ -53,8 +52,13 @@ export interface Activity {
   max_participate: number;
   created_at: string;
   updated_at: string;
-  category_name: string;
-  category_description: string;
+}
+
+export interface ActivitiesCategory {
+  id: number;
+  name: string;
+  description: string;
+  is_primary: boolean;
 }
 
 // Filter Parameters
@@ -68,6 +72,8 @@ export interface ActivityFilterParams {
   status: string | null;
   pageSize: number;
   pageNumber: number;
+  sortBy?: string; // Optional: "name", "ratings", "location", "destination_id", "created_at", "updated_at"
+  sortDirection?: "ASC" | "DESC"; // Optional: "ASC" or "DESC"
 }
 
 export interface ActivityForTerminate {
@@ -129,7 +135,7 @@ export interface ActivityImageRequest {
   name: string;
   description: string;
   imageUrl: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface ActivityRequirementRequest {
@@ -137,7 +143,7 @@ export interface ActivityRequirementRequest {
   value: string;
   description: string;
   color: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface AddActivityRequest {
@@ -153,7 +159,7 @@ export interface AddActivityRequest {
   minParticipate: number;
   maxParticipate: number;
   season: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
   images: ActivityImageRequest[];
   requirements: ActivityRequirementRequest[];
 }
@@ -183,7 +189,7 @@ export interface AddActivityFormData {
   minParticipate: number | null;
   maxParticipate: number | null;
   season: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
   images: ActivityImageRequest[];
   requirements: ActivityRequirementRequest[];
 }
@@ -216,7 +222,7 @@ export interface UpdateImageRequest {
   name: string;
   description: string;
   imageUrl: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface UpdateRequirementRequest {
@@ -225,7 +231,7 @@ export interface UpdateRequirementRequest {
   value: string;
   description: string;
   color: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface UpdateActivityRequest {
@@ -242,12 +248,12 @@ export interface UpdateActivityRequest {
   minParticipate: number;
   maxParticipate: number;
   season: string;
-  status: 'ACTIVE' | 'INACTIVE';
-  
+  status: "ACTIVE" | "INACTIVE";
+
   removeImagesIds: number[];
   addImages: UpdateImageRequest[];
   updatedImages: UpdateImageRequest[];
-  
+
   removeRequirementsIds: number[];
   addRequirements: UpdateRequirementRequest[];
   updatedRequirements: UpdateRequirementRequest[];
@@ -263,5 +269,39 @@ export interface UpdateActivityApiResponse {
   status: string;
   message: string;
   data: UpdateActivityResponse;
+  timestamp: string;
+}
+
+export interface ActivityDetails {
+  totalActivitiesCount: number;
+  activeActivities: number;
+  inActiveActivities: number;
+  hiddenActivities: number;
+  recentlyUpdateActivities: number;
+  recentlyAddedActivities: number;
+}
+
+export interface ActivityWishDetails {
+  wishListCount: number;
+  notWishListCount: number;
+}
+
+export interface ActivityCategoryDetail {
+  categoryId: number;
+  categoryName: string;
+  count: number;
+}
+
+export interface ActivityStatisticsData {
+  activityDetails: ActivityDetails;
+  wishDetails: ActivityWishDetails;
+  categoryDetails: ActivityCategoryDetail[];
+}
+
+export interface ActivityStatisticsApiResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: ActivityStatisticsData;
   timestamp: string;
 }
