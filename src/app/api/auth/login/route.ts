@@ -15,9 +15,6 @@ export async function POST(request: Request) {
     });
 
     const data = await backendResponse.json();
-    console.log("=================log===================");
-    console.log(data);
-    console.log("====================================");
     const res = NextResponse.json(data);
 
     const cookies = backendResponse.headers.getSetCookie();

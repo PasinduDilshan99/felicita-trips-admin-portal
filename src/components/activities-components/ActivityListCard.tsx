@@ -1,7 +1,7 @@
-// components/activities-components/ActivityListCard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   MapPin,
   Tag,
@@ -16,6 +16,8 @@ import {
   Camera,
   Star,
   Check,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
@@ -24,16 +26,156 @@ import NavigationButton from "@/components/common-components/NavigationButton";
 import ImageModal, {
   ImageModalImage,
 } from "@/components/common-components/ImageModal";
-import { ACTIVITY_DETAILS_VIEW_PAGE_URL } from "@/utils/urls";
+import {
+  ACTIVITY_DETAILS_VIEW_PAGE_URL,
+  ACTIVITY_CATEGORY_VIEW_DETAILS_URL,
+  SEASONS_VIEW_PAGE_URL,
+  DESTINATION_DETAILS_VIEW_PAGE_URL,
+} from "@/utils/urls";
+import { Activity, ActivityImage, Requirement } from "@/types/activity-types";
+import { hexToRgba } from "@/utils/functions";
 
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+/* ─── Animation Variants ─────────────────────────────────────────────────── */
+
+const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: EASE_OUT },
+  },
+  hover: {
+    y: -4,
+    transition: { duration: 0.2, ease: "easeOut" },
+  },
+};
+
+const imageVariants: Variants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.05, transition: { duration: 0.4 } },
+};
+
+const overlayVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.3 } },
+};
+
+const quickViewVariants: Variants = {
+  hidden: { opacity: 0, y: -10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.1 } },
+};
+
+const thumbnailVariants: Variants = {
+  rest: { scale: 1, opacity: 0.7 },
+  active: { scale: 1.05, opacity: 1 },
+  hover: { scale: 1.02, transition: { duration: 0.15 } },
+};
+
+const contentVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: EASE_OUT },
+  },
+};
+
+const statVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.25, ease: EASE_OUT },
+  },
+  hover: {
+    y: -2,
+    transition: { duration: 0.15 },
+  },
+};
+
+const requirementsVariants: Variants = {
+  hidden: { opacity: 0, height: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    transition: { duration: 0.3, ease: EASE_OUT, staggerChildren: 0.03 },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    transition: { duration: 0.25, ease: "easeIn" },
+  },
+};
+
+const requirementItemVariants: Variants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    x: -10,
+    transition: { duration: 0.15 },
+  },
+};
+
+const seasonVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+  hover: {
+    scale: 1.05,
+    transition: { duration: 0.15 },
+  },
+};
+
+const buttonVariants: Variants = {
+  rest: { scale: 1, y: 0 },
+  hover: {
+    scale: 1.02,
+    y: -2,
+    boxShadow: "0 8px 25px -4px rgba(0,0,0,0.2)",
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+  tap: {
+    scale: 0.98,
+    y: 0,
+    transition: { duration: 0.1 },
+  },
+};
+
+const shineVariants: Variants = {
+  rest: { x: "-100%" },
+  hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
+};
+
+const categoryBadgeVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+  hover: {
+    scale: 1.05,
+    x: 2,
+    transition: { duration: 0.15 },
+  },
 };
 
 // Helper to safely get string value from any type
@@ -42,13 +184,9 @@ const getSafeString = (value: any, fallback: string = ""): string => {
   if (typeof value === "string") return value;
   if (typeof value === "number") return value.toString();
   if (typeof value === "object") {
-    // If it's an object with a name property, return that
     if (value.name) return getSafeString(value.name, fallback);
-    // If it's an object with a label property, return that
     if (value.label) return getSafeString(value.label, fallback);
-    // If it's an object with a value property, return that
     if (value.value) return getSafeString(value.value, fallback);
-    // Otherwise return fallback
     return fallback;
   }
   return fallback;
@@ -71,8 +209,18 @@ const getSafeArray = (value: any, fallback: any[] = []): any[] => {
   return fallback;
 };
 
+// Helper to format time from HH:MM:SS to HH:MM
+const formatTime = (timeString: string): string => {
+  if (!timeString) return "N/A";
+  if (timeString.match(/^\d{2}:\d{2}$/)) return timeString;
+  if (timeString.match(/^\d{2}:\d{2}:\d{2}$/)) {
+    return timeString.substring(0, 5);
+  }
+  return timeString;
+};
+
 interface ActivityListCardProps {
-  activity: any;
+  activity: Activity;
   onImageClick?: (imageIndex: number) => void;
 }
 
@@ -87,6 +235,8 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
+  const [showAllRequirements, setShowAllRequirements] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -94,94 +244,101 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
 
   // Safely extract all data
   const images = getSafeArray(activity?.images);
-  const activityId = activity?.id || activity?.activityId || "unknown";
-  const activityName = getSafeString(
-    activity?.name || activity?.activityName,
-    "Unnamed Activity",
-  );
+  const activityId = activity?.id || "unknown";
+  const activityName = getSafeString(activity?.name, "Unnamed Activity");
   const description = getSafeString(
     activity?.description,
     "No description available",
   );
 
-  // Handle season - could be string, array, or object
-  // In the ActivityListCard component, update the seasons handling section:
-
-  // Handle season - could be string, array, or object
+  // Handle season - parse comma-separated string or array
   let seasons: string[] = [];
-  if (activity?.season) {
-    if (typeof activity.season === "string") {
-      seasons = activity.season.split(",").map((s: string) => s.trim());
-    } else if (Array.isArray(activity.season)) {
-      seasons = activity.season.map((s: any) => getSafeString(s));
-    } else if (typeof activity.season === "object") {
-      seasons = [getSafeString(activity.season)];
+  const seasonData = activity?.season as any;
+  if (seasonData) {
+    if (typeof seasonData === "string") {
+      seasons = seasonData.split(",").map((s: string) => s.trim());
+    } else if (Array.isArray(seasonData)) {
+      seasons = seasonData.map((s: any) => getSafeString(s));
+    } else if (typeof seasonData === "object") {
+      seasons = [getSafeString(seasonData.name || seasonData)];
     }
   }
 
-  // Handle category - could be string or object
-  const categoryValue =
-    activity?.activities_category || activity?.activityCategory;
-  const categoryName = getSafeString(categoryValue, "Uncategorized");
+  // Handle categories
+  const categories = activity?.activities_category || [];
+  const primaryCategory = categories.find((cat) => cat.is_primary);
+  const displayCategory = primaryCategory || categories[0];
+  const categoryName = displayCategory?.name || "Uncategorized";
+  const categoryId = displayCategory?.id;
 
   // Handle status
-  const status = activity?.status || activity?.statusName || "INACTIVE";
+  const status = activity?.status || "INACTIVE";
 
-  // Handle destination ID
-  const destinationId = getSafeString(
-    activity?.destination_id || activity?.destinationId,
-    "N/A",
-  );
+  // Handle destination
+  const destinationId = activity?.destination_id || "N/A";
+  const destinationName = activity?.destinationName || "N/A";
 
   // Handle duration
-  const duration = getSafeNumber(
-    activity?.duration_hours || activity?.durationHours,
-    0,
-  );
+  const duration = activity?.duration_hours || 0;
 
   // Handle participants
-  const minParticipate = getSafeNumber(
-    activity?.min_participate || activity?.minParticipate,
-    1,
-  );
-  const maxParticipate = getSafeNumber(
-    activity?.max_participate || activity?.maxParticipate,
-    10,
-  );
+  const minParticipate = activity?.min_participate || 1;
+  const maxParticipate = activity?.max_participate || 10;
 
-  // Handle prices
-  const priceLocal = getSafeNumber(
-    activity?.price_local || activity?.priceLocal,
-    0,
-  );
-  const priceForeigners = getSafeNumber(
-    activity?.price_foreigners || activity?.priceForeigners,
-    0,
-  );
-
-  // Handle availability times
-  const availableFrom =
-    activity?.available_from || activity?.availableFrom || "00:00";
-  const availableTo =
-    activity?.available_to || activity?.availableTo || "23:59";
+  // Handle availability times - format them
+  const availableFrom = formatTime(activity?.available_from || "00:00:00");
+  const availableTo = formatTime(activity?.available_to || "23:59:59");
 
   // Handle schedules
   const schedulesCount = getSafeArray(activity?.schedules).length;
 
   // Handle requirements
   const requirements = getSafeArray(activity?.requirements);
+  const visibleRequirements = showAllRequirements
+    ? requirements
+    : requirements.slice(0, 3);
+  const hasMoreRequirements = requirements.length > 3;
 
   // Handle updated at
-  const updatedAt = activity?.updated_at || activity?.updatedAt;
+  const updatedAt = activity?.updated_at;
+
+  // Navigation handlers
+  const handleCategoryClick = (
+    e: React.MouseEvent,
+    categoryId: number,
+    categoryName: string,
+  ) => {
+    e.stopPropagation();
+    router.push(
+      `${ACTIVITY_CATEGORY_VIEW_DETAILS_URL}/${categoryId}?name=${encodeURIComponent(categoryName)}`,
+    );
+  };
+
+  const handleSeasonClick = (e: React.MouseEvent, season: string) => {
+    e.stopPropagation();
+    router.push(`${SEASONS_VIEW_PAGE_URL}?name=${encodeURIComponent(season)}`);
+  };
+
+  const handleDestinationClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (destinationId && destinationId !== "N/A") {
+      router.push(`${DESTINATION_DETAILS_VIEW_PAGE_URL}/${destinationId}`);
+    }
+  };
+
+  const toggleRequirements = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAllRequirements(!showAllRequirements);
+  };
 
   // Prepare images for modal
   const getModalImages = (): ImageModalImage[] => {
     if (!images || !Array.isArray(images)) return [];
-    return images.map((img: any, idx: number) => ({
-      url: img?.image_url || img?.imageUrl || "",
-      name: img?.name || img?.imageName || `Image ${idx + 1}`,
-      description: img?.description || img?.imageDescription || "",
-      id: img?.id || img?.imageId || idx,
+    return images.map((img: ActivityImage, idx: number) => ({
+      url: img?.image_url || "",
+      name: img?.name || `Image ${idx + 1}`,
+      description: img?.description || "",
+      id: img?.id || idx,
     }));
   };
 
@@ -242,17 +399,15 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
   };
 
   const currentImage =
-    images?.[currentImageIndex]?.image_url ||
-    images?.[currentImageIndex]?.imageUrl ||
-    PLACE_HOLDER_IMAGE;
+    images?.[currentImageIndex]?.image_url || PLACE_HOLDER_IMAGE;
 
   // Calculate availability status
   const isAvailableToday = () => {
     try {
       const now = new Date();
       const currentTime = now.getHours() * 60 + now.getMinutes();
-      const [fromHour, fromMin] = String(availableFrom).split(":").map(Number);
-      const [toHour, toMin] = String(availableTo).split(":").map(Number);
+      const [fromHour, fromMin] = availableFrom.split(":").map(Number);
+      const [toHour, toMin] = availableTo.split(":").map(Number);
       const startMinutes = fromHour * 60 + fromMin;
       const endMinutes = toHour * 60 + toMin;
 
@@ -263,39 +418,34 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
   };
 
   // If no activity, return null
-  if (!activity) return null;
+  if (!activity || !activity.id) return null;
 
   return (
     <>
-      <style>{`
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-
-      <div
-        className="group rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300"
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        whileHover="hover"
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="group rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
         style={{
           backgroundColor: theme.surface,
           border: `1px solid ${theme.border}`,
-          boxShadow: `0 10px 15px -3px ${hexToRgba(theme.text, 0.1)}, 0 4px 6px -2px ${hexToRgba(theme.text, 0.05)}`,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = theme.primary;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = theme.border;
         }}
       >
         <div className="flex flex-col lg:flex-row">
           {/* Image Gallery Section */}
-          <div className="lg:w-2/5 xl:w-1/3 relative h-64 lg:h-auto">
+          <div className="lg:w-2/5 xl:w-1/3 relative h-64 lg:h-auto overflow-hidden">
             <div className="relative w-full h-full">
-              <img
+              <motion.img
                 src={currentImage}
                 alt={activityName}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
+                className="w-full h-full object-cover cursor-pointer"
+                variants={imageVariants}
+                initial="rest"
+                animate={isHovered ? "hover" : "rest"}
                 onClick={() => handleImageClick(currentImageIndex)}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = PLACE_HOLDER_IMAGE;
@@ -303,10 +453,20 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
               />
 
               {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+              <motion.div
+                variants={overlayVariants}
+                initial="hidden"
+                animate={isHovered ? "visible" : "hidden"}
+                className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"
+              />
 
               {/* Status Badge */}
-              <div className="absolute top-4 left-4">
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="absolute top-4 left-4"
+              >
                 <span
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${
                     status === "ACTIVE"
@@ -318,37 +478,48 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                 >
                   {status === "ACTIVE" ? (
                     <>
-                      <div
-                        className={`w-1.5 h-1.5 bg-white rounded-full ${isAvailableToday() ? "animate-pulse" : ""}`}
-                      ></div>
+                      <motion.div
+                        className="w-1.5 h-1.5 bg-white rounded-full"
+                        animate={isAvailableToday() ? { scale: [1, 1.2, 1] } : {}}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      />
                       {isAvailableToday() ? "Available Now" : "Available"}
                     </>
                   ) : (
                     "Inactive"
                   )}
                 </span>
-              </div>
+              </motion.div>
 
               {/* Primary Image Indicator */}
               {primaryImageIndex === currentImageIndex &&
                 images &&
                 images.length > 0 && (
-                  <div className="absolute top-12 right-4">
-                    <span className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="absolute top-12 right-4"
+                  >
+                    <span className="px-2 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
                       <Star className="w-3 h-3" />
                       Primary
                     </span>
-                  </div>
+                  </motion.div>
                 )}
 
               {/* Quick View Button */}
-              <button
+              <motion.button
+                variants={quickViewVariants}
+                initial="hidden"
+                animate={isHovered ? "visible" : "hidden"}
                 onClick={handleViewDetails}
-                className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-white/90 hover:text-gray-900 hover:scale-105 active:scale-95 cursor-pointer"
+                className="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+                whileHover={{ scale: 1.05, backgroundColor: "white", color: "#1f2937" }}
+                whileTap={{ scale: 0.95 }}
               >
-                <Eye className="w-4 h-4" />
+                <Eye className="w-3.5 h-3.5" />
                 <span>Quick View</span>
-              </button>
+              </motion.button>
 
               {/* Navigation Arrows */}
               {images && images.length > 1 && (
@@ -368,31 +539,40 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
 
               {/* Image Counter */}
               {images && images.length > 0 && (
-                <div className="absolute bottom-4 left-4">
-                  <span className="px-3 py-1.5 bg-black/60 backdrop-blur-sm text-white rounded-full text-xs font-medium flex items-center gap-2">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute bottom-4 left-4"
+                >
+                  <span className="px-2 py-1 bg-black/60 backdrop-blur-sm text-white rounded-full text-xs font-medium flex items-center gap-1.5">
                     <Camera className="w-3 h-3" />
                     {currentImageIndex + 1} / {images.length}
                   </span>
-                </div>
+                </motion.div>
               )}
             </div>
 
             {/* Thumbnail Strip */}
             {images && images.length > 1 && (
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                <div className="flex space-x-2 overflow-x-auto">
-                  {images.map((image: any, index: number) => {
-                    const imageUrl = image?.image_url || image?.imageUrl;
-                    const imageName =
-                      image?.name ||
-                      image?.imageName ||
-                      `Thumbnail ${index + 1}`;
-                    const imageId = image?.id || image?.imageId || index;
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3"
+              >
+                <div className="flex gap-2 overflow-x-auto">
+                  {images.map((image: ActivityImage, index: number) => {
+                    const imageUrl = image?.image_url;
+                    const imageName = image?.name || `Thumbnail ${index + 1}`;
+                    const imageId = image?.id || index;
 
                     return (
-                      <div
+                      <motion.div
                         key={imageId}
-                        className="relative flex-shrink-0 group/thumb"
+                        variants={thumbnailVariants}
+                        initial="rest"
+                        animate={currentImageIndex === index ? "active" : "rest"}
+                        whileHover="hover"
+                        className="relative flex-shrink-0"
                         onClick={() => handleImageClick(index)}
                       >
                         <img
@@ -401,7 +581,7 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                           className={`w-12 h-12 rounded-lg object-cover border-2 cursor-pointer transition-all duration-200 ${
                             currentImageIndex === index
                               ? "border-white scale-110"
-                              : "border-transparent hover:border-white/50"
+                              : "border-transparent"
                           }`}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src =
@@ -410,143 +590,154 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                         />
 
                         {/* Primary Selection Button */}
-                        <button
+                        <motion.button
                           onClick={(e) => handleSelectPrimary(index, e)}
                           className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
                             primaryImageIndex === index
                               ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
-                              : "bg-gray-800/80 backdrop-blur-sm text-gray-300 opacity-0 group-hover/thumb:opacity-100 hover:bg-blue-500 hover:text-white"
+                              : "bg-gray-800/80 backdrop-blur-sm text-gray-300 opacity-0 group-hover/thumb:opacity-100"
                           }`}
                           title={
                             primaryImageIndex === index
                               ? "Primary Image"
                               : "Set as Primary"
                           }
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
                         >
                           {primaryImageIndex === index ? (
                             <Check className="w-2.5 h-2.5" />
                           ) : (
                             <Star className="w-2.5 h-2.5" />
                           )}
-                        </button>
-                      </div>
+                        </motion.button>
+                      </motion.div>
                     );
                   })}
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
 
           {/* Content Section */}
-          <div className="lg:w-3/5 xl:w-2/3 p-6">
+          <motion.div
+            variants={contentVariants}
+            initial="hidden"
+            animate="visible"
+            className="lg:w-3/5 xl:w-2/3 p-5 sm:p-6"
+          >
             {/* Header with Title and Category */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-              <div className="flex-1">
-                <h3
-                  className="text-2xl font-bold mb-2 transition-colors duration-200 cursor-pointer line-clamp-2"
-                  style={{ color: theme.text }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = theme.primary;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = theme.text;
-                  }}
-                  onClick={handleViewDetails}
-                >
-                  {activityName}
-                </h3>
-                <div className="flex items-center flex-wrap gap-4">
-                  <div className="flex items-center">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
-                      style={{
-                        background: `linear-gradient(135deg, ${hexToRgba(theme.success, 0.1)}, ${hexToRgba(theme.success, 0.05)})`,
-                      }}
-                    >
-                      <Tag
-                        className="w-5 h-5"
-                        style={{ color: theme.success }}
-                      />
-                    </div>
-                    <div>
-                      <div
-                        className="text-sm"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        Category
-                      </div>
-                      <div
-                        className="text-lg font-semibold"
-                        style={{ color: theme.success }}
-                      >
-                        {categoryName}
-                      </div>
-                    </div>
-                  </div>
+            <motion.div variants={itemVariants} className="mb-6">
+              <motion.h3
+                className="text-xl sm:text-2xl font-bold mb-3 transition-colors duration-200 cursor-pointer line-clamp-2"
+                style={{ color: theme.text }}
+                whileHover={{ color: theme.primary }}
+                onClick={handleViewDetails}
+              >
+                {activityName}
+              </motion.h3>
 
-                  <div className="flex items-center">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
-                      style={{
-                        background: `linear-gradient(135deg, ${hexToRgba(theme.primary, 0.1)}, ${hexToRgba(theme.accent, 0.1)})`,
-                      }}
-                    >
-                      <MapPin
-                        className="w-5 h-5"
-                        style={{ color: theme.primary }}
-                      />
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                {/* Primary Category */}
+                <div className="flex items-center">
+                  <motion.div
+                    className="w-10 h-10 rounded-full flex items-center justify-center mr-3 cursor-pointer"
+                    style={{
+                      background: `linear-gradient(135deg, ${hexToRgba(theme.success, 0.1)}, ${hexToRgba(theme.success, 0.05)})`,
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    onClick={(e) =>
+                      categoryId &&
+                      handleCategoryClick(e, categoryId, categoryName)
+                    }
+                  >
+                    <Tag className="w-5 h-5" style={{ color: theme.success }} />
+                  </motion.div>
+                  <div>
+                    <div className="text-xs sm:text-sm" style={{ color: theme.textSecondary }}>
+                      Category
                     </div>
-                    <div>
-                      <div
-                        className="text-sm"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        Destination ID
-                      </div>
-                      <div
-                        className="text-lg font-semibold"
-                        style={{ color: theme.text }}
-                      >
-                        {destinationId}
-                      </div>
+                    <div
+                      className="text-base sm:text-lg font-semibold cursor-pointer"
+                      style={{ color: theme.success }}
+                      onClick={(e) =>
+                        categoryId &&
+                        handleCategoryClick(e, categoryId, categoryName)
+                      }
+                    >
+                      {categoryName}
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Price */}
-              <div className="mt-4 md:mt-0 md:ml-6">
-                <div className="text-right">
+                {/* Destination */}
+                <motion.div
+                  className="flex items-center cursor-pointer"
+                  whileHover={{ x: 2 }}
+                  onClick={handleDestinationClick}
+                >
                   <div
-                    className="text-sm mb-1"
-                    style={{ color: theme.textSecondary }}
-                  >
-                    Local Price
-                  </div>
-                  <div
-                    className="text-2xl font-bold"
+                    className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
                     style={{
-                      background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`,
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
+                      background: `linear-gradient(135deg, ${hexToRgba(theme.primary, 0.1)}, ${hexToRgba(theme.accent, 0.1)})`,
                     }}
                   >
-                    LKR {priceLocal.toLocaleString()}
+                    <MapPin className="w-5 h-5" style={{ color: theme.primary }} />
                   </div>
-                  <div
-                    className="text-xs"
-                    style={{ color: theme.textSecondary }}
-                  >
-                    Foreign: LKR {priceForeigners.toLocaleString()}
+                  <div>
+                    <div className="text-xs sm:text-sm" style={{ color: theme.textSecondary }}>
+                      Destination
+                    </div>
+                    <div className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+                      {destinationName}
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* All Categories Section */}
+              {categories.length > 1 && (
+                <div className="mt-4">
+                  <div className="flex items-center mb-2">
+                    <Target className="w-4 h-4 mr-2" style={{ color: theme.accent }} />
+                    <span className="text-xs" style={{ color: theme.textSecondary }}>
+                      All Categories ({categories.length})
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((category) => (
+                      <motion.span
+                        key={category.id}
+                        variants={categoryBadgeVariants}
+                        initial="hidden"
+                        animate="visible"
+                        whileHover="hover"
+                        className="px-2 py-1 rounded-lg text-xs cursor-pointer transition-all duration-200"
+                        style={{
+                          background: hexToRgba(theme.primary, 0.1),
+                          color: theme.primary,
+                        }}
+                        onClick={(e) =>
+                          handleCategoryClick(e, category.id, category.name)
+                        }
+                      >
+                        {category.name}
+                        {category.is_primary && (
+                          <span className="ml-1 text-[10px] opacity-75">
+                            (Primary)
+                          </span>
+                        )}
+                      </motion.span>
+                    ))}
                   </div>
                 </div>
-              </div>
-            </div>
+              )}
+            </motion.div>
 
             {/* Description */}
-            <p
-              className="mb-6 leading-relaxed pl-4 py-2 rounded-r-lg line-clamp-3"
+            <motion.p
+              variants={itemVariants}
+              className="mb-6 leading-relaxed pl-4 py-2 rounded-r-lg line-clamp-3 text-sm"
               style={{
                 color: theme.textSecondary,
                 borderLeft: `4px solid ${hexToRgba(theme.primary, 0.3)}`,
@@ -554,237 +745,174 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
               }}
             >
               {description}
-            </p>
+            </motion.p>
 
             {/* Stats Grid */}
-            <div
-              className="grid grid-cols-2 md:grid-cols-4 gap-4 py-5 mb-6"
+            <motion.div
+              variants={itemVariants}
+              className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-5 mb-6"
               style={{
                 borderTop: `1px solid ${theme.border}`,
                 borderBottom: `1px solid ${theme.border}`,
               }}
             >
-              <div className="flex items-center">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
-                  style={{
-                    background: `linear-gradient(135deg, ${hexToRgba(theme.accent, 0.1)}, ${hexToRgba(theme.accent, 0.05)})`,
-                  }}
+              {[
+                { icon: Clock, label: "Duration", value: `${duration}h`, color: theme.accent },
+                { icon: Users, label: "Group Size", value: `${minParticipate}-${maxParticipate}`, color: theme.warning },
+                { icon: Calendar, label: "Seasons", value: seasons.length, color: theme.success },
+                { icon: Target, label: "Schedules", value: schedulesCount, color: theme.error },
+              ].map((stat, idx) => (
+                <motion.div
+                  key={stat.label}
+                  variants={statVariants}
+                  whileHover="hover"
+                  className="flex items-center"
                 >
-                  <Clock className="w-5 h-5" style={{ color: theme.accent }} />
-                </div>
-                <div>
                   <div
-                    className="text-xs"
-                    style={{ color: theme.textSecondary }}
+                    className="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0"
+                    style={{
+                      background: `linear-gradient(135deg, ${hexToRgba(stat.color, 0.1)}, ${hexToRgba(stat.color, 0.05)})`,
+                    }}
                   >
-                    Duration
+                    <stat.icon className="w-5 h-5" style={{ color: stat.color }} />
                   </div>
-                  <div
-                    className="text-sm font-semibold"
-                    style={{ color: theme.text }}
-                  >
-                    {duration}h
+                  <div>
+                    <div className="text-xs" style={{ color: theme.textSecondary }}>
+                      {stat.label}
+                    </div>
+                    <div className="text-sm font-semibold" style={{ color: theme.text }}>
+                      {stat.value}
+                    </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
-                  style={{
-                    background: `linear-gradient(135deg, ${hexToRgba(theme.warning, 0.1)}, ${hexToRgba(theme.warning, 0.05)})`,
-                  }}
-                >
-                  <Users className="w-5 h-5" style={{ color: theme.warning }} />
-                </div>
-                <div>
-                  <div
-                    className="text-xs"
-                    style={{ color: theme.textSecondary }}
-                  >
-                    Group Size
-                  </div>
-                  <div
-                    className="text-sm font-semibold"
-                    style={{ color: theme.text }}
-                  >
-                    {minParticipate}-{maxParticipate}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
-                  style={{
-                    background: `linear-gradient(135deg, ${hexToRgba(theme.success, 0.1)}, ${hexToRgba(theme.success, 0.05)})`,
-                  }}
-                >
-                  <Calendar
-                    className="w-5 h-5"
-                    style={{ color: theme.success }}
-                  />
-                </div>
-                <div>
-                  <div
-                    className="text-xs"
-                    style={{ color: theme.textSecondary }}
-                  >
-                    Seasons
-                  </div>
-                  <div
-                    className="text-sm font-semibold"
-                    style={{ color: theme.text }}
-                  >
-                    {seasons.length}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
-                  style={{
-                    background: `linear-gradient(135deg, ${hexToRgba(theme.error, 0.1)}, ${hexToRgba(theme.error, 0.05)})`,
-                  }}
-                >
-                  <Target className="w-5 h-5" style={{ color: theme.error }} />
-                </div>
-                <div>
-                  <div
-                    className="text-xs"
-                    style={{ color: theme.textSecondary }}
-                  >
-                    Schedules
-                  </div>
-                  <div
-                    className="text-sm font-semibold"
-                    style={{ color: theme.text }}
-                  >
-                    {schedulesCount}
-                  </div>
-                </div>
-              </div>
-            </div>
+                </motion.div>
+              ))}
+            </motion.div>
 
             {/* Seasons and Requirements */}
             <div className="flex flex-col md:flex-row gap-6 mb-6">
               {/* Seasons */}
               {seasons.length > 0 && (
-                <div className="flex-1">
+                <motion.div variants={itemVariants} className="flex-1">
                   <div className="flex items-center mb-3">
-                    <Calendar
-                      className="w-4 h-4 mr-3"
-                      style={{ color: theme.textSecondary }}
-                    />
-                    <span
-                      className="text-sm font-semibold"
-                      style={{ color: theme.textSecondary }}
-                    >
+                    <Calendar className="w-4 h-4 mr-2" style={{ color: theme.textSecondary }} />
+                    <span className="text-xs font-semibold" style={{ color: theme.textSecondary }}>
                       Best Seasons:
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {seasons.slice(0, 4).map((season, index) => (
-                      <span
+                      <motion.span
                         key={index}
-                        className="px-3 py-1.5 text-sm rounded-lg transition-colors"
+                        variants={seasonVariants}
+                        initial="hidden"
+                        animate="visible"
+                        whileHover="hover"
+                        className="px-2 py-1 text-xs rounded-lg cursor-pointer transition-all duration-200"
                         style={{
                           background: hexToRgba(theme.primary, 0.1),
                           color: theme.primary,
                           border: `1px solid ${hexToRgba(theme.primary, 0.2)}`,
                         }}
+                        onClick={(e) => handleSeasonClick(e, season)}
                       >
                         {season}
-                      </span>
+                      </motion.span>
                     ))}
                     {seasons.length > 4 && (
                       <span
-                        className="px-3 py-1.5 text-sm rounded-lg"
+                        className="px-2 py-1 text-xs rounded-lg"
                         style={{
                           background: hexToRgba(theme.textSecondary, 0.08),
                           color: theme.textSecondary,
-                          border: `1px solid ${hexToRgba(theme.textSecondary, 0.2)}`,
                         }}
                       >
                         +{seasons.length - 4} more
                       </span>
                     )}
                   </div>
-                </div>
+                </motion.div>
               )}
 
-              {/* Requirements */}
+              {/* Requirements with Expand/Collapse */}
               {requirements.length > 0 && (
-                <div className="flex-1">
-                  <div className="flex items-center mb-3">
-                    <AlertCircle
-                      className="w-4 h-4 mr-3"
-                      style={{ color: theme.textSecondary }}
-                    />
-                    <span
-                      className="text-sm font-semibold"
-                      style={{ color: theme.textSecondary }}
-                    >
+                <motion.div variants={itemVariants} className="flex-1">
+                  <div className="flex items-center mb-3 flex-wrap gap-2">
+                    <AlertCircle className="w-4 h-4" style={{ color: theme.textSecondary }} />
+                    <span className="text-xs font-semibold" style={{ color: theme.textSecondary }}>
                       Requirements:
                     </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {requirements.slice(0, 3).map((req: any, index: number) => {
-                      const reqName = getSafeString(req?.name);
-                      const reqValue = getSafeString(req?.value);
-                      const reqColor = req?.color || theme.error;
-
-                      return (
-                        <span
-                          key={req?.id || index}
-                          className="px-3 py-1.5 text-sm rounded-lg transition-colors"
-                          style={{
-                            background: hexToRgba(theme.error, 0.1),
-                            color: theme.error,
-                            border: `1px solid ${hexToRgba(theme.error, 0.2)}`,
-                            borderLeftColor: reqColor,
-                            borderLeftWidth: "4px",
-                          }}
-                        >
-                          {reqName}: {reqValue}
-                        </span>
-                      );
-                    })}
-                    {requirements.length > 3 && (
-                      <span
-                        className="px-3 py-1.5 text-sm rounded-lg"
-                        style={{
-                          background: hexToRgba(theme.textSecondary, 0.08),
-                          color: theme.textSecondary,
-                          border: `1px solid ${hexToRgba(theme.textSecondary, 0.2)}`,
-                        }}
+                    {hasMoreRequirements && (
+                      <motion.button
+                        onClick={toggleRequirements}
+                        className="flex items-center gap-1 text-xs transition-all duration-200 cursor-pointer"
+                        style={{ color: theme.primary }}
+                        whileHover={{ x: 2 }}
+                        whileTap={{ scale: 0.98 }}
                       >
-                        +{requirements.length - 3} more
-                      </span>
+                        {showAllRequirements ? (
+                          <>
+                            Show less <ChevronUp className="w-3 h-3" />
+                          </>
+                        ) : (
+                          <>
+                            Show all ({requirements.length}){" "}
+                            <ChevronDown className="w-3 h-3" />
+                          </>
+                        )}
+                      </motion.button>
                     )}
                   </div>
-                </div>
+
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={showAllRequirements ? "all" : "limited"}
+                      variants={requirementsVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="flex flex-wrap gap-2"
+                    >
+                      {visibleRequirements.map((req: Requirement, index: number) => {
+                        const reqName = req?.name;
+                        const reqValue = req?.value;
+                        const reqColor = req?.color || theme.error;
+
+                        return (
+                          <motion.span
+                            key={req?.id || index}
+                            variants={requirementItemVariants}
+                            className="px-2 py-1 text-xs rounded-lg transition-all duration-200"
+                            style={{
+                              background: hexToRgba(theme.error, 0.1),
+                              color: theme.error,
+                              border: `1px solid ${hexToRgba(theme.error, 0.2)}`,
+                              borderLeftColor: reqColor,
+                              borderLeftWidth: "4px",
+                            }}
+                          >
+                            {reqName}: {reqValue}
+                          </motion.span>
+                        );
+                      })}
+                    </motion.div>
+                  </AnimatePresence>
+                </motion.div>
               )}
             </div>
 
             {/* Availability and View Button */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
               <div className="flex-1">
                 <div className="flex items-center mb-2">
-                  <Clock
-                    className="w-4 h-4 mr-3"
-                    style={{ color: theme.textSecondary }}
-                  />
+                  <Clock className="w-4 h-4 mr-2" style={{ color: theme.textSecondary }} />
                   <div>
-                    <span
-                      className="text-sm font-semibold"
-                      style={{ color: theme.textSecondary }}
-                    >
+                    <span className="text-xs font-semibold" style={{ color: theme.textSecondary }}>
                       Available:{" "}
                     </span>
-                    <span className="text-sm" style={{ color: theme.text }}>
+                    <span className="text-xs" style={{ color: theme.text }}>
                       {availableFrom} - {availableTo}
                     </span>
                   </div>
@@ -796,56 +924,37 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
               </div>
 
               {/* View Details Button */}
-              <button
+              <motion.button
+                variants={buttonVariants}
+                initial="rest"
+                whileHover="hover"
+                whileTap="tap"
                 onClick={handleViewDetails}
-                className="group/btn relative cursor-pointer font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 ease-out whitespace-nowrap"
+                className="relative cursor-pointer font-semibold py-2.5 px-5 rounded-xl flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap w-full sm:w-auto"
                 style={{
                   background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.accent || theme.primary} 100%)`,
                   color: "#fff",
-                  boxShadow: `0 4px 15px -3px ${theme.primary}55, 0 2px 6px -2px ${theme.accent || theme.primary}33`,
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                    `0 8px 25px -4px ${theme.primary}70, 0 4px 10px -3px ${theme.accent || theme.primary}50`;
-                  (e.currentTarget as HTMLButtonElement).style.transform =
-                    "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                    `0 4px 15px -3px ${theme.primary}55, 0 2px 6px -2px ${theme.accent || theme.primary}33`;
-                  (e.currentTarget as HTMLButtonElement).style.transform =
-                    "translateY(0)";
-                }}
-                onMouseDown={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.transform =
-                    "translateY(0) scale(0.97)";
-                }}
-                onMouseUp={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.transform =
-                    "translateY(-2px) scale(1)";
+                  boxShadow: `0 4px 15px -3px ${theme.primary}55`,
                 }}
               >
-                <span
-                  className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out"
+                <motion.span
+                  variants={shineVariants}
+                  initial="rest"
+                  animate={isHovered ? "hover" : "rest"}
+                  className="absolute inset-0"
                   style={{
-                    background:
-                      "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
+                    background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
                   }}
                 />
-                <span
-                  className="absolute inset-x-0 top-0 h-px"
-                  style={{ background: "rgba(255,255,255,0.35)" }}
-                />
+                <span className="absolute inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.35)" }} />
                 <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:scale-110" />
-                <span className="relative tracking-wide text-sm">
-                  View Details
-                </span>
-                <ArrowRight className="relative w-4 h-4 ml-1 transition-transform duration-300 group-hover/btn:translate-x-1.5" />
-              </button>
-            </div>
-          </div>
+                <span className="relative tracking-wide text-sm">View Details</span>
+                <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1.5" />
+              </motion.button>
+            </motion.div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Image Modal */}
       {!onImageClick && getModalImages().length > 0 && (

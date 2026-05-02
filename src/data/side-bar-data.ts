@@ -13,7 +13,7 @@ import {
   WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH,
 } from "@/utils/constant";
 import * as PRIVILEGES from "@/utils/privileges";
-import { WEB_PAGE_MANAGEMENT_URL } from "@/utils/urls";
+import { EMPLOYEE_MANAGEMENT_URL, WEB_PAGE_MANAGEMENT_URL } from "@/utils/urls";
 
 export const webManagementSideBarData: SideBarDataType[] = [
   {
@@ -875,6 +875,137 @@ export const webPageManagementSideBarData: SideBarDataType[] = [
       //   url: `${WEB_PAGE_MANAGEMENT_URL}/contact-us-page/social-media`,
       //   privilege: PRIVILEGES.CONTACT_US_SOCIAL_MEDIA_PRIVILEGE,
       // },
+    ],
+  },
+];
+
+export const employeeManagementSideBarData: SideBarDataType[] = [
+  {
+    id: 1,
+    name: "Employee Management",
+    description: "Manage employee records and staff operations",
+    color: "#3B82F6",
+    url: `${EMPLOYEE_MANAGEMENT_URL}/employees`,
+    privilege: PRIVILEGES.EMPLOYEE_MANAGEMENT_PRIVILEGE,
+    subData: [
+      {
+        id: 101,
+        name: "View Employees",
+        description: "View all employee records",
+        color: "#60A5FA",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/employees/view`,
+        privilege: PRIVILEGES.EMPLOYEE_VIEW_PRIVILEGE,
+      },
+      {
+        id: 102,
+        name: "Add Employee",
+        description: "Add a new employee record",
+        color: "#34D399",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/employees/add-new`,
+        privilege: PRIVILEGES.EMPLOYEE_CREATE_PRIVILEGE,
+      },
+      {
+        id: 103,
+        name: "Update Employee",
+        description: "Update existing employee information",
+        color: "#FBBF24",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/employees/update`,
+        privilege: PRIVILEGES.EMPLOYEE_UPDATE_PRIVILEGE,
+      },
+      {
+        id: 104,
+        name: "Resign Employee",
+        description: "Mark employees as resigned",
+        color: "#EF4444",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/employees/resign`,
+        privilege: PRIVILEGES.EMPLOYEE_RESIGN_PRIVILEGE,
+      },
+    ],
+  },
+
+  {
+    id: 2,
+    name: "Role Management",
+    description: "Manage system roles and access levels",
+    color: "#10B981",
+    url: `${EMPLOYEE_MANAGEMENT_URL}/roles`,
+    privilege: PRIVILEGES.ROLE_MANAGEMENT_PRIVILEGE,
+    subData: [
+      {
+        id: 201,
+        name: "View Roles",
+        description: "View all system roles",
+        color: "#6EE7B7",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/roles/view`,
+        privilege: PRIVILEGES.ROLE_VIEW_PRIVILEGE,
+      },
+      {
+        id: 202,
+        name: "Add Role",
+        description: "Create a new system role",
+        color: "#34D399",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/roles/add-new`,
+        privilege: PRIVILEGES.ROLE_CREATE_PRIVILEGE,
+      },
+      {
+        id: 203,
+        name: "Update Role",
+        description: "Update existing role information",
+        color: "#FBBF24",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/roles/update`,
+        privilege: PRIVILEGES.ROLE_UPDATE_PRIVILEGE,
+      },
+      {
+        id: 204,
+        name: "Terminate Role",
+        description: "Deactivate or terminate system roles",
+        color: "#EF4444",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/roles/terminate`,
+        privilege: PRIVILEGES.ROLE_TERMINATE_PRIVILEGE,
+      },
+    ],
+  },
+
+  {
+    id: 3,
+    name: "Privilege Management",
+    description: "Manage system privileges and permissions",
+    color: "#8B5CF6",
+    url: `${EMPLOYEE_MANAGEMENT_URL}/privileges`,
+    privilege: PRIVILEGES.PRIVILEGE_MANAGEMENT_PRIVILEGE,
+    subData: [
+      {
+        id: 301,
+        name: "View Privileges",
+        description: "View all system privileges",
+        color: "#A78BFA",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/privileges/view`,
+        privilege: PRIVILEGES.PRIVILEGE_VIEW_PRIVILEGE,
+      },
+      {
+        id: 302,
+        name: "Add Privilege",
+        description: "Create a new system privilege",
+        color: "#6EE7B7",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/privileges/add-new`,
+        privilege: PRIVILEGES.PRIVILEGE_CREATE_PRIVILEGE,
+      },
+      {
+        id: 303,
+        name: "Update Privilege",
+        description: "Update existing privilege information",
+        color: "#FCD34D",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/privileges/update`,
+        privilege: PRIVILEGES.PRIVILEGE_UPDATE_PRIVILEGE,
+      },
+      {
+        id: 304,
+        name: "Terminate Privilege",
+        description: "Deactivate or terminate privileges",
+        color: "#F87171",
+        url: `${EMPLOYEE_MANAGEMENT_URL}/privileges/terminate`,
+        privilege: PRIVILEGES.PRIVILEGE_TERMINATE_PRIVILEGE,
+      },
     ],
   },
 ];

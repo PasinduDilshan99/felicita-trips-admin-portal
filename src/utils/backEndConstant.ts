@@ -64,6 +64,10 @@ const BOOKING = "/booking";
 const BROWSER_HISTORY = "/browser-history";
 const COMMON = "/common";
 const SEASONS = "/seasons";
+const PRIVILEGES = "/privileges";
+const ROLES = "/roles";
+const USERS = "/users";
+
 
 // Auth
 export const LOGIN = `${BASE_PATH}${API}${VERSION}${AUTH}/login`;
@@ -259,8 +263,14 @@ export const GET_FAQ_OPTIONS_DATA = `${BASE_PATH}${API}${VERSION}${FAQ}/options`
 export const ADD_FAQ_REQUEST_DATA = `${BASE_PATH}${API}${VERSION}${FAQ}/insert-faq-request`;
 
 // Employees
-export const GET_EMPLOYEE_DETAILS_BY_TOUR_ID_DATA = `${BASE_PATH}${API}${VERSION}${EMPLOYEE}/employee-details`;
 export const GET_CEO_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${EMPLOYEE}/ceo-details`;
+export const GET_EMPLOYEE_BASIC_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${EMPLOYEE}/employee-basic-details`;
+export const GET_EMPLOYEE_BASIC_DETAILS_PARAMS_DATA = `${BASE_PATH}${API}${VERSION}${EMPLOYEE}/employee-basic-details-params`;
+export const GET_EMPLOYEE_FULL_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${EMPLOYEE}/employee-full-details`;
+export const GET_EMPLOYEE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${EMPLOYEE}/employee-statistics`;
+export const CREATE_EMPLOYEE_DATA = `${BASE_PATH}${API}${VERSION}${EMPLOYEE}/create-employee`;
+export const GET_EMPLOYEE_CREATE_DATA = `${BASE_PATH}${API}${VERSION}${EMPLOYEE}/create-employee-data`;
+
 
 // Wish List
 export const ADD_ACTIVITY_WISH_LIST_DATA = `${BASE_PATH}${API}${VERSION}${WISH_LIST}/add-activity-wish-list`;
@@ -325,3 +335,26 @@ export const GET_SERVICE_PROVIDER_DETAILS = (id: string) =>
 export const GET_ACTIVE_VEHICLES_BE = `${BASE_PATH}${API}${VERSION}${VEHICLES}/active-vehicles`;
 export const GET_VEHICLES_BY_ID_BE = (id: string) =>
   `${BASE_PATH}${API}${VERSION}${VEHICLES}/${id}`;
+
+// Privileges
+export const GET_ALL_PRIVILEGES_DATA = `${BASE_PATH}${API}${VERSION}${PRIVILEGES}/all-privileges`;
+export const GET_PRIVILEGES_NAMES_AND_IDS_DATA = `${BASE_PATH}${API}${VERSION}${PRIVILEGES}/privileges-names-and-ids`;
+export const GET_PRIVILEGE_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${PRIVILEGES}/privilege-details-by-id`;
+export const GET_PRIVILEGE_BASIC_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${PRIVILEGES}/privilege-basic-details-by-id`;
+export const CREATE_PRIVILEGE_DATA = `${BASE_PATH}${API}${VERSION}${PRIVILEGES}/create-privilege`;
+export const UPDATE_PRIVILEGE_DATA = `${BASE_PATH}${API}${VERSION}${PRIVILEGES}/update-privilege`;
+export const TERMINATE_PRIVILEGE_DATA = `${BASE_PATH}${API}${VERSION}${PRIVILEGES}/terminate-privilege`;
+export const GET_PRIVILEGES_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${PRIVILEGES}/privileges-statistics`;
+
+export const GET_ALL_ROLES_DATA = `${BASE_PATH}${API}${VERSION}${ROLES}/all-roles`;
+export const GET_ROLES_NAMES_AND_IDS_DATA = `${BASE_PATH}${API}${VERSION}${ROLES}/role-names-and-ids`;
+export const GET_ROLE_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${ROLES}/role-details-by-id`;
+export const GET_ROLE_BASIC_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${ROLES}/role-basic-details-by-id`;
+export const CREATE_ROLE_DATA = `${BASE_PATH}${API}${VERSION}${ROLES}/create-role`;
+export const UPDATE_ROLE_DATA = `${BASE_PATH}${API}${VERSION}${ROLES}/update-role`;
+export const TERMINATE_ROLE_DATA = `${BASE_PATH}${API}${VERSION}${ROLES}/terminate-role`;
+export const GET_ROLES_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${ROLES}/roles-statistics`;
+
+// Users
+export const GET_USER_NAMES_AND_IDS_WITHOUT_EMPLOYEES_DATA = `${BASE_PATH}${API}${VERSION}${USERS}/user-names-and-ids-without-employees`;
+export const GET_USER_BASIC_DETAILS_BY_USER_ID_DATA = `${BASE_PATH}${API}${VERSION}${USERS}/user-basic-details-by-user-id`;

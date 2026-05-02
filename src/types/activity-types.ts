@@ -35,6 +35,7 @@ export interface ActivityImage {
 export interface Activity {
   id: number;
   name: string;
+  destinationName: string;
   description: string;
   season: string;
   status: "ACTIVE" | "INACTIVE" | string;

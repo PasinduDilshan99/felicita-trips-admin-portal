@@ -1,7 +1,7 @@
-// components/activities-components/ActivityCard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   MapPin,
   Tag,
@@ -23,16 +23,119 @@ import NavigationButton from "@/components/common-components/NavigationButton";
 import ImageModal, {
   ImageModalImage,
 } from "@/components/common-components/ImageModal";
-import { ACTIVITY_DETAILS_VIEW_PAGE_URL } from "@/utils/urls";
+import {
+  ACTIVITY_DETAILS_VIEW_PAGE_URL,
+  ACTIVITY_CATEGORY_VIEW_DETAILS_URL,
+  SEASONS_VIEW_PAGE_URL,
+  DESTINATION_DETAILS_VIEW_PAGE_URL,
+} from "@/utils/urls";
+import { hexToRgba } from "@/utils/functions";
+import {
+  ActivitiesCategory,
+  Activity,
+  ActivityImage,
+} from "@/types/activity-types";
 
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+/* ─── Animation Variants ─────────────────────────────────────────────────── */
+
+const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: EASE_OUT },
+  },
+  hover: {
+    y: -4,
+    transition: { duration: 0.2, ease: "easeOut" },
+  },
+};
+
+const imageVariants: Variants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.05, transition: { duration: 0.4 } },
+};
+
+const overlayVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.3 } },
+};
+
+const quickViewVariants: Variants = {
+  hidden: { opacity: 0, y: -10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.1 } },
+};
+
+const thumbnailVariants: Variants = {
+  rest: { scale: 1, opacity: 0.7 },
+  active: { scale: 1.05, opacity: 1 },
+  hover: { scale: 1.02, transition: { duration: 0.15 } },
+};
+
+const contentVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: EASE_OUT },
+  },
+};
+
+const descriptionVariants: Variants = {
+  hidden: { opacity: 0, height: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    transition: { duration: 0.3, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    transition: { duration: 0.25, ease: "easeIn" },
+  },
+};
+
+const buttonVariants: Variants = {
+  rest: { scale: 1, y: 0 },
+  hover: {
+    scale: 1.02,
+    y: -2,
+    boxShadow: "0 8px 25px -4px rgba(0,0,0,0.2)",
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+  tap: {
+    scale: 0.98,
+    y: 0,
+    transition: { duration: 0.1 },
+  },
+};
+
+const shineVariants: Variants = {
+  rest: { x: "-100%" },
+  hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
+};
+
+const statCardVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.25, ease: EASE_OUT },
+  },
+  hover: {
+    y: -2,
+    transition: { duration: 0.15 },
+  },
 };
 
 // Helper function to truncate description
@@ -60,11 +163,8 @@ const getSafeString = (value: any, fallback: string = ""): string => {
   if (typeof value === "string") return value;
   if (typeof value === "number") return value.toString();
   if (typeof value === "object") {
-    // If it's an object with a name property, return that
     if (value.name) return getSafeString(value.name, fallback);
-    // If it's an object with a label property, return that
     if (value.label) return getSafeString(value.label, fallback);
-    // Otherwise stringify (but don't for complex objects)
     try {
       const stringified = JSON.stringify(value);
       if (stringified.length > 50) return fallback;
@@ -84,7 +184,7 @@ const getSafeNumber = (value: any, fallback: number = 0): number => {
 };
 
 interface ActivityCardProps {
-  activity: any; // Use any temporarily to debug
+  activity: Activity;
   onImageClick?: (imageIndex: number) => void;
 }
 
@@ -100,6 +200,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -107,11 +208,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
   // Safely extract data with fallbacks
   const images = activity?.images || [];
-  const activityId = activity?.id || activity?.activityId || "unknown";
-  const activityName = getSafeString(
-    activity?.name || activity?.activityName,
-    "Unnamed Activity",
-  );
+  const activityId = activity?.id || "unknown";
+  const activityName = getSafeString(activity?.name, "Unnamed Activity");
   const description = getSafeString(activity?.description, "");
   const fullDescription = description;
   const truncatedDesc = truncateDescription(fullDescription, 120);
@@ -120,70 +218,71 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     ? fullDescription
     : truncatedDesc;
 
-  // Handle season - could be string or array
+  // Handle season - parse comma-separated string
   let seasons: string[] = [];
   if (activity?.season) {
     if (typeof activity.season === "string") {
-      const seasons: string[] = activity.season
-        ? activity.season.split(",").map((s: string) => s.trim())
-        : [];
+      seasons = activity.season.split(",").map((s: string) => s.trim());
     } else if (Array.isArray(activity.season)) {
       seasons = activity.season;
     }
   }
 
-  // Handle category - could be string or object
-  const categoryName = getSafeString(
-    activity?.activities_category || activity?.activityCategory,
-    "Uncategorized",
-  );
+  // Handle categories - get all categories
+  const categories = activity?.activities_category || [];
+
+  // Get primary category for badge display
+  const primaryCategory = categories.find((cat) => cat.is_primary);
+  const displayCategory = primaryCategory || categories[0];
+  const categoryName = displayCategory?.name || "Uncategorized";
+  const categoryId = displayCategory?.id;
 
   // Handle status
-  const status = activity?.status || activity?.statusName || "INACTIVE";
+  const status = activity?.status || "INACTIVE";
 
   // Handle destination ID
-  const destinationId =
-    activity?.destination_id ||
-    activity?.destinationId ||
-    activity?.destination?.id ||
-    "N/A";
+  const destinationId = activity?.destination_id || "N/A";
+  const destinationName = activity?.destinationName || "N/A";
 
   // Handle duration
-  const duration = getSafeNumber(
-    activity?.duration_hours || activity?.durationHours,
-    0,
-  );
+  const duration = activity?.duration_hours || 0;
 
   // Handle participants
-  const minParticipate = getSafeNumber(
-    activity?.min_participate || activity?.minParticipate,
-    1,
-  );
-  const maxParticipate = getSafeNumber(
-    activity?.max_participate || activity?.maxParticipate,
-    10,
-  );
+  const minParticipate = activity?.min_participate || 1;
+  const maxParticipate = activity?.max_participate || 10;
 
   // Handle prices
-  const priceLocal = getSafeNumber(
-    activity?.price_local || activity?.priceLocal,
-    0,
-  );
+  const priceLocal = activity?.price_local || 0;
 
   // Handle availability times
-  const availableFrom =
-    activity?.available_from || activity?.availableFrom || "00:00";
-  const availableTo =
-    activity?.available_to || activity?.availableTo || "23:59";
+  const availableFrom = activity?.available_from || "00:00";
+  const availableTo = activity?.available_to || "23:59";
+
+  // Navigation handlers
+  const handleCategoryClick = (
+    e: React.MouseEvent,
+    categoryId: number,
+    categoryName: string,
+  ) => {
+    e.stopPropagation();
+    router.push(
+      `${ACTIVITY_CATEGORY_VIEW_DETAILS_URL}/${categoryId}?name=${encodeURIComponent(categoryName)}`,
+    );
+  };
+
+  const handleSeasonClick = (e: React.MouseEvent, season: string) => {
+    e.stopPropagation();
+    router.push(`${SEASONS_VIEW_PAGE_URL}?name=${encodeURIComponent(season)}`);
+  };
 
   // Prepare images for modal
   const getModalImages = (): ImageModalImage[] => {
     if (!images || !Array.isArray(images)) return [];
-    return images.map((img: any, idx: number) => ({
-      url: img?.image_url || img?.imageUrl || "",
-      name: img?.name || img?.imageName || `Image ${idx + 1}`,
-      description: img?.description || img?.imageDescription || "",
-      id: img?.id || img?.imageId || idx,
+    return images.map((img: ActivityImage, idx: number) => ({
+      url: img?.image_url || "",
+      name: img?.name || `Image ${idx + 1}`,
+      description: img?.description || "",
+      id: img?.id || idx,
     }));
   };
 
@@ -255,9 +354,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   };
 
   const currentImage =
-    images?.[currentImageIndex]?.image_url ||
-    images?.[currentImageIndex]?.imageUrl ||
-    PLACE_HOLDER_IMAGE;
+    images?.[currentImageIndex]?.image_url || PLACE_HOLDER_IMAGE;
 
   // Calculate availability status
   const isAvailableToday = () => {
@@ -276,56 +373,36 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   };
 
   // If activity is not valid, show nothing
-  if (!activity) {
+  if (!activity || !activity.id) {
     return null;
   }
 
   return (
     <>
-      <style>{`
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .description-text {
-          transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        
-        .read-more-btn {
-          transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        
-        .read-more-btn:hover {
-          transform: translateX(2px);
-        }
-        
-        .expanded-description {
-          animation: slideDown 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-      `}</style>
-
-      <div
-        className="group rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 h-full flex flex-col"
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        whileHover="hover"
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="group rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer"
         style={{
           backgroundColor: theme.surface,
           border: `1px solid ${theme.border}`,
-          boxShadow: `0 10px 15px -3px ${hexToRgba(theme.text, 0.1)}, 0 4px 6px -2px ${hexToRgba(theme.text, 0.05)}`,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = theme.primary;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = theme.border;
+          transition: "border-color 0.2s ease, box-shadow 0.2s ease",
         }}
       >
         {/* Image Section */}
-        <div className="relative h-56 overflow-hidden">
+        <div className="relative h-56 sm:h-64 overflow-hidden">
           <div className="relative w-full h-full">
-            <img
+            <motion.img
               src={currentImage}
               alt={activityName}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
+              className="w-full h-full object-cover cursor-pointer"
+              variants={imageVariants}
+              initial="rest"
+              animate={isHovered ? "hover" : "rest"}
               onError={(e) => {
                 (e.target as HTMLImageElement).src = PLACE_HOLDER_IMAGE;
               }}
@@ -333,10 +410,20 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
             />
 
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <motion.div
+              variants={overlayVariants}
+              initial="hidden"
+              animate={isHovered ? "visible" : "hidden"}
+              className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"
+            />
 
             {/* Status Badge */}
-            <div className="absolute top-4 left-4">
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="absolute top-4 left-4"
+            >
               <span
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${
                   status === "ACTIVE"
@@ -348,36 +435,47 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
               >
                 {status === "ACTIVE" ? (
                   <>
-                    <div
-                      className={`w-1.5 h-1.5 bg-white rounded-full ${isAvailableToday() ? "animate-pulse" : ""}`}
-                    ></div>
+                    <motion.div
+                      className="w-1.5 h-1.5 bg-white rounded-full"
+                      animate={isAvailableToday() ? { scale: [1, 1.2, 1] } : {}}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    />
                     {isAvailableToday() ? "Available Now" : "Available"}
                   </>
                 ) : (
                   "Inactive"
                 )}
               </span>
-            </div>
+            </motion.div>
 
             {/* Quick View Button */}
-            <button
+            <motion.button
+              variants={quickViewVariants}
+              initial="hidden"
+              animate={isHovered ? "visible" : "hidden"}
               onClick={handleQuickView}
-              className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-white/90 hover:text-gray-900 hover:scale-105 active:scale-95 cursor-pointer"
+              className="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+              whileHover={{ scale: 1.05, backgroundColor: "white", color: "#1f2937" }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Eye className="w-4 h-4" />
+              <Eye className="w-3.5 h-3.5" />
               <span>Quick View</span>
-            </button>
+            </motion.button>
 
             {/* Primary Image Indicator */}
             {primaryImageIndex === currentImageIndex &&
               images &&
               images.length > 0 && (
-                <div className="absolute top-12 right-4">
-                  <span className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="absolute top-12 right-4"
+                >
+                  <span className="px-2 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
                     <Star className="w-3 h-3" />
                     Primary
                   </span>
-                </div>
+                </motion.div>
               )}
 
             {/* Navigation Arrows */}
@@ -398,11 +496,15 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
             {/* Image Counter */}
             {images && images.length > 0 && (
-              <div className="absolute bottom-4 right-4">
-                <span className="px-3 py-1.5 bg-black/60 backdrop-blur-sm text-white rounded-full text-xs font-medium">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute bottom-4 right-4"
+              >
+                <span className="px-2 py-1 bg-black/60 backdrop-blur-sm text-white rounded-full text-xs font-medium">
                   {currentImageIndex + 1} / {images.length}
                 </span>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
@@ -410,29 +512,25 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
         {/* Thumbnail Gallery */}
         {images && images.length > 1 && (
           <div
-            className="px-4 pt-4"
+            className="px-4 pt-4 pb-2"
             style={{ borderBottom: `1px solid ${theme.border}` }}
           >
-            <div className="flex space-x-2 overflow-x-auto pb-2">
-              {images.map((image: any, index: number) => (
-                <div
-                  key={image?.id || image?.imageId || index}
-                  className="relative flex-shrink-0 group/thumb"
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {images.map((image: ActivityImage, index: number) => (
+                <motion.div
+                  key={image?.id || index}
+                  variants={thumbnailVariants}
+                  initial="rest"
+                  animate={currentImageIndex === index ? "active" : "rest"}
+                  whileHover="hover"
+                  className="relative flex-shrink-0"
                   onClick={() => handleImageClick(index)}
                 >
                   <img
-                    src={
-                      image?.image_url || image?.imageUrl || PLACE_HOLDER_IMAGE
-                    }
-                    alt={
-                      image?.name ||
-                      image?.imageName ||
-                      `Thumbnail ${index + 1}`
-                    }
-                    className={`w-16 h-16 rounded-lg object-cover border-2 cursor-pointer transition-all duration-200 ${
-                      currentImageIndex === index
-                        ? "scale-105"
-                        : "hover:opacity-80"
+                    src={image?.image_url || PLACE_HOLDER_IMAGE}
+                    alt={image?.name || `Thumbnail ${index + 1}`}
+                    className={`w-14 h-14 rounded-lg object-cover border-2 cursor-pointer transition-all duration-200 ${
+                      currentImageIndex === index ? "scale-105" : ""
                     }`}
                     style={{
                       borderColor:
@@ -446,9 +544,9 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                   />
 
                   {/* Primary Selection Button */}
-                  <button
+                  <motion.button
                     onClick={(e) => handleSelectPrimary(index, e)}
-                    className={`absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
                       primaryImageIndex === index
                         ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
                         : "bg-white/90 backdrop-blur-sm text-gray-600 opacity-0 group-hover/thumb:opacity-100 hover:bg-blue-500 hover:text-white"
@@ -458,84 +556,155 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                         ? "Primary Image"
                         : "Set as Primary"
                     }
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
                     {primaryImageIndex === index ? (
-                      <Check className="w-3 h-3" />
+                      <Check className="w-2.5 h-2.5" />
                     ) : (
-                      <Star className="w-3 h-3" />
+                      <Star className="w-2.5 h-2.5" />
                     )}
-                  </button>
-                </div>
+                  </motion.button>
+                </motion.div>
               ))}
             </div>
           </div>
         )}
 
         {/* Content Section */}
-        <div className="p-5 flex-grow flex flex-col">
+        <motion.div
+          variants={contentVariants}
+          initial="hidden"
+          animate="visible"
+          className="p-5 flex-grow flex flex-col"
+        >
           {/* Title and Category */}
-          <div className="mb-4">
-            <h3
-              className="text-xl font-bold mb-2 line-clamp-1 transition-colors duration-200 cursor-pointer"
+          <motion.div variants={itemVariants} className="mb-4">
+            <motion.h3
+              className="text-lg sm:text-xl font-bold mb-2 line-clamp-1 transition-colors duration-200 cursor-pointer"
               style={{ color: theme.text }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = theme.primary;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = theme.text;
-              }}
+              whileHover={{ color: theme.primary }}
               onClick={handleViewDetails}
             >
               {activityName}
-            </h3>
-            <div className="flex items-center justify-between">
+            </motion.h3>
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
+                <motion.div
+                  className="w-7 h-7 rounded-full flex items-center justify-center mr-2 cursor-pointer"
                   style={{
                     background: `linear-gradient(135deg, ${hexToRgba(theme.success, 0.1)}, ${hexToRgba(theme.success, 0.05)})`,
                   }}
+                  whileHover={{ scale: 1.05 }}
+                  onClick={(e) =>
+                    categoryId &&
+                    handleCategoryClick(e, categoryId, categoryName)
+                  }
                 >
-                  <Tag className="w-4 h-4" style={{ color: theme.success }} />
-                </div>
+                  <Tag className="w-3.5 h-3.5" style={{ color: theme.success }} />
+                </motion.div>
                 <span
-                  className="text-sm font-medium"
+                  className="text-xs sm:text-sm font-medium cursor-pointer"
                   style={{ color: theme.success }}
+                  onClick={(e) =>
+                    categoryId &&
+                    handleCategoryClick(e, categoryId, categoryName)
+                  }
                 >
                   {categoryName}
                 </span>
               </div>
               <div className="flex items-center">
-                <MapPin
-                  className="w-3 h-3 mr-1"
-                  style={{ color: theme.textSecondary }}
-                />
-                <span
-                  className="text-xs"
-                  style={{ color: theme.textSecondary }}
+                <motion.div
+                  className="flex items-center cursor-pointer"
+                  whileHover={{ x: 2 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(
+                      `${DESTINATION_DETAILS_VIEW_PAGE_URL}/${destinationId}`,
+                    );
+                  }}
                 >
-                  ID: {destinationId}
-                </span>
+                  <MapPin
+                    className="w-3 h-3 mr-1"
+                    style={{ color: theme.textSecondary }}
+                  />
+                  <span
+                    className="text-xs truncate max-w-[120px] sm:max-w-[200px]"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    {destinationName}
+                  </span>
+                </motion.div>
               </div>
             </div>
-          </div>
+          </motion.div>
+
+          {/* All Categories Section */}
+          {categories.length > 1 && (
+            <motion.div variants={itemVariants} className="mb-4">
+              <div className="flex items-center mb-2">
+                <Tag
+                  className="w-3.5 h-3.5 mr-1.5"
+                  style={{ color: theme.textSecondary }}
+                />
+                <span className="text-xs" style={{ color: theme.textSecondary }}>
+                  All Categories:
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {categories.slice(0, 3).map((category: ActivitiesCategory) => (
+                  <motion.span
+                    key={category.id}
+                    className="px-2 py-1 rounded text-xs cursor-pointer transition-all duration-200"
+                    style={{
+                      background: hexToRgba(theme.primary, 0.1),
+                      color: theme.primary,
+                    }}
+                    whileHover={{ scale: 1.05, x: 1 }}
+                    onClick={(e) =>
+                      handleCategoryClick(e, category.id, category.name)
+                    }
+                  >
+                    {category.name}
+                    {category.is_primary && (
+                      <span className="ml-1 text-[10px] opacity-75">
+                        (Primary)
+                      </span>
+                    )}
+                  </motion.span>
+                ))}
+                {categories.length > 3 && (
+                  <span
+                    className="px-2 py-1 rounded text-xs"
+                    style={{
+                      background: hexToRgba(theme.textSecondary, 0.08),
+                      color: theme.textSecondary,
+                    }}
+                  >
+                    +{categories.length - 3} more
+                  </span>
+                )}
+              </div>
+            </motion.div>
+          )}
 
           {/* Description with Read More */}
           {fullDescription && (
-            <div className="mb-4">
+            <motion.div variants={itemVariants} className="mb-4">
               <p
-                className={`text-sm leading-relaxed description-text ${
-                  isDescriptionExpanded ? "expanded-description" : ""
-                }`}
+                className="text-sm leading-relaxed"
                 style={{ color: theme.textSecondary }}
               >
                 {displayedDescription}
               </p>
               {needsTruncation && (
-                <button
+                <motion.button
                   onClick={toggleDescription}
-                  className="cursor-pointer read-more-btn text-xs font-medium mt-1.5 inline-flex items-center gap-1 transition-all duration-200"
+                  className="cursor-pointer text-xs font-medium mt-1.5 inline-flex items-center gap-1 transition-all duration-200"
                   style={{ color: theme.primary }}
+                  whileHover={{ x: 2 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   {isDescriptionExpanded ? (
                     <>
@@ -546,115 +715,77 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                       Read more <ChevronDown className="w-3 h-3" />
                     </>
                   )}
-                </button>
+                </motion.button>
               )}
-            </div>
+            </motion.div>
           )}
 
           {/* Stats Grid */}
-          <div
-            className="grid grid-cols-3 gap-3 py-4 rounded-xl mb-4"
+          <motion.div
+            variants={itemVariants}
+            className="grid grid-cols-2 gap-3 py-4 rounded-xl mb-4"
             style={{
               background: `linear-gradient(135deg, ${hexToRgba(theme.primary, 0.05)}, ${hexToRgba(theme.accent, 0.05)})`,
               borderTop: `1px solid ${theme.border}`,
               marginTop: "auto",
             }}
           >
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-1">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{
-                    background: `linear-gradient(135deg, ${hexToRgba(theme.accent, 0.1)}, ${hexToRgba(theme.accent, 0.05)})`,
-                  }}
-                >
-                  <Clock className="w-4 h-4" style={{ color: theme.accent }} />
-                </div>
-              </div>
-              <div
-                className="text-xs mb-1"
-                style={{ color: theme.textSecondary }}
+            {[
+              { icon: Clock, label: "Duration", value: `${duration}h`, color: theme.accent },
+              { icon: Users, label: "Group Size", value: `${minParticipate}-${maxParticipate}`, color: theme.warning },
+            ].map((stat, idx) => (
+              <motion.div
+                key={stat.label}
+                variants={statCardVariants}
+                whileHover="hover"
+                className="text-center"
               >
-                Duration
-              </div>
-              <div className="text-sm font-bold" style={{ color: theme.text }}>
-                {duration}h
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-1">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{
-                    background: `linear-gradient(135deg, ${hexToRgba(theme.warning, 0.1)}, ${hexToRgba(theme.warning, 0.05)})`,
-                  }}
-                >
-                  <Users className="w-4 h-4" style={{ color: theme.warning }} />
+                <div className="flex items-center justify-center mb-1">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{
+                      background: `linear-gradient(135deg, ${hexToRgba(stat.color, 0.1)}, ${hexToRgba(stat.color, 0.05)})`,
+                    }}
+                  >
+                    <stat.icon className="w-4 h-4" style={{ color: stat.color }} />
+                  </div>
                 </div>
-              </div>
-              <div
-                className="text-xs mb-1"
-                style={{ color: theme.textSecondary }}
-              >
-                Group Size
-              </div>
-              <div className="text-sm font-bold" style={{ color: theme.text }}>
-                {minParticipate}-{maxParticipate}
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-1">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{
-                    background: `linear-gradient(135deg, ${hexToRgba(theme.error, 0.1)}, ${hexToRgba(theme.error, 0.05)})`,
-                  }}
-                >
-                  <DollarSign
-                    className="w-4 h-4"
-                    style={{ color: theme.error }}
-                  />
+                <div className="text-xs mb-1" style={{ color: theme.textSecondary }}>
+                  {stat.label}
                 </div>
-              </div>
-              <div
-                className="text-xs mb-1"
-                style={{ color: theme.textSecondary }}
-              >
-                Price
-              </div>
-              <div className="text-sm font-bold" style={{ color: theme.text }}>
-                LKR {priceLocal.toLocaleString()}
-              </div>
-            </div>
-          </div>
+                <div className="text-sm font-bold" style={{ color: theme.text }}>
+                  {stat.value}
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
 
           {/* Seasons */}
           {seasons.length > 0 && (
-            <div className="mb-4">
+            <motion.div variants={itemVariants} className="mb-4">
               <div className="flex items-center mb-2">
                 <Calendar
-                  className="w-4 h-4 mr-2"
+                  className="w-3.5 h-3.5 mr-1.5"
                   style={{ color: theme.textSecondary }}
                 />
-                <span
-                  className="text-xs"
-                  style={{ color: theme.textSecondary }}
-                >
+                <span className="text-xs" style={{ color: theme.textSecondary }}>
                   Best Seasons:
                 </span>
               </div>
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1.5">
                 {seasons.slice(0, 3).map((season: string, index: number) => (
-                  <span
+                  <motion.span
                     key={index}
-                    className="px-2 py-1 rounded text-xs"
+                    className="px-2 py-1 rounded text-xs cursor-pointer transition-all duration-200"
                     style={{
                       background: hexToRgba(theme.primary, 0.1),
                       color: theme.primary,
                     }}
+                    whileHover={{ scale: 1.05, x: 1 }}
+                    onClick={(e) => handleSeasonClick(e, season)}
                   >
                     {season}
-                  </span>
+                  </motion.span>
                 ))}
                 {seasons.length > 3 && (
                   <span
@@ -668,56 +799,39 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                   </span>
                 )}
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* View Details Button */}
-          <button
+          <motion.button
+            variants={buttonVariants}
+            initial="rest"
+            whileHover="hover"
+            whileTap="tap"
             onClick={handleViewDetails}
-            className="group/btn relative cursor-pointer w-full mt-auto font-semibold py-3 px-5 rounded-xl flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 ease-out"
+            className="relative w-full mt-auto font-semibold py-3 px-5 rounded-xl flex items-center justify-center gap-2 overflow-hidden cursor-pointer"
             style={{
               background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.accent || theme.primary} 100%)`,
               color: "#fff",
-              boxShadow: `0 4px 15px -3px ${theme.primary}55, 0 2px 6px -2px ${theme.accent || theme.primary}33`,
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                `0 8px 25px -4px ${theme.primary}70, 0 4px 10px -3px ${theme.accent || theme.primary}50`;
-              (e.currentTarget as HTMLButtonElement).style.transform =
-                "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                `0 4px 15px -3px ${theme.primary}55, 0 2px 6px -2px ${theme.accent || theme.primary}33`;
-              (e.currentTarget as HTMLButtonElement).style.transform =
-                "translateY(0)";
-            }}
-            onMouseDown={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform =
-                "translateY(0) scale(0.97)";
-            }}
-            onMouseUp={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform =
-                "translateY(-2px) scale(1)";
+              boxShadow: `0 4px 15px -3px ${theme.primary}55`,
             }}
           >
-            <span
-              className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out"
+            <motion.span
+              variants={shineVariants}
+              initial="rest"
+              animate={isHovered ? "hover" : "rest"}
+              className="absolute inset-0"
               style={{
-                background:
-                  "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
+                background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
               }}
             />
-            <span
-              className="absolute inset-x-0 top-0 h-px"
-              style={{ background: "rgba(255,255,255,0.35)" }}
-            />
-            <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:scale-110" />
+            <span className="absolute inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.35)" }} />
+            <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
             <span className="relative tracking-wide text-sm">View Details</span>
-            <ArrowRight className="relative w-4 h-4 ml-1 transition-transform duration-300 group-hover/btn:translate-x-1.5" />
-          </button>
-        </div>
-      </div>
+            <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+          </motion.button>
+        </motion.div>
+      </motion.div>
 
       {/* Internal Image Modal */}
       {!onImageClick && getModalImages().length > 0 && (

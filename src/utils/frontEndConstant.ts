@@ -21,7 +21,7 @@ const GALLERY = "/gallery";
 const ACTIVITIES = "/activities";
 const FOOTER = "/footer";
 const PLAN_YOUR_TRIP = "/plan-your-trip";
-const EMPLOYEES = "/employees";
+const EMPLOYEES = "/employee";
 const INQUIRY = "/inquiry";
 const OUR_STORY = "/our-story";
 const CONTACT_US = "/contact-us";
@@ -39,6 +39,9 @@ const COMMON = "/common";
 const NOTIFICATIONS = "/notifications";
 const VEHICLES = "/vehicles";
 const SEASONS = "/seasons";
+const PRIVILEGES = "/privileges";
+const ROLES = "/roles";
+const USERS = "/users";
 
 // Auth
 export const LOGIN_FE = `${API}${AUTH}/login`;
@@ -225,8 +228,13 @@ export const GET_OUR_STORY_DETAILS_DATA_FE = `${API}${OUR_STORY}/details`;
 export const GET_CONTACT_US_CONTACT_METHODS_DATA_FE = `${API}${CONTACT_US}/contact-methods`;
 
 // Employees
-export const GET_EMPLOYEE_DETAILS_BY_TOUR_ID_DATA_FE = `${API}${EMPLOYEES}/employees-details-by-tour-id`;
 export const GET_CEO_DETAILS_DATA_FE = `${API}${EMPLOYEES}/ceo-details`;
+export const GET_EMPLOYEE_BASIC_DETAILS_DATA_FE = `${API}${EMPLOYEES}/employee-basic-details`;
+export const GET_EMPLOYEE_BASIC_DETAILS_PARAMS_DATA_FE = `${API}${EMPLOYEES}/employee-basic-details-params`;
+export const GET_EMPLOYEE_FULL_DETAILS_DATA_FE = `${API}${EMPLOYEES}/employee-full-details`;
+export const GET_EMPLOYEE_STATISTICS_DATA_FE = `${API}${EMPLOYEES}/employee-statistics`;
+export const CREATE_EMPLOYEE_DATA_FE = `${API}${EMPLOYEES}/create-employee`;
+export const GET_EMPLOYEE_CREATE_DATA_FE = `${API}${EMPLOYEES}/create-employee-data`;
 
 // FAQ
 export const GET_ALL_FAQ_DATA_FE = `${API}${FAQ}`;
@@ -292,3 +300,29 @@ export const GET_RESORT_DETAILS_SECTION_FE = `${API}${ACCOMMODATION}/resorts/dea
 export const GET_VILLA_DETAILS_SECTION_FE = `${API}${ACCOMMODATION}/villas/deatils-for-section`;
 export const GET_HOSTEL_DETAILS_SECTION_FE = `${API}${ACCOMMODATION}/hostels/deatils-for-section`;
 export const GET_RESTAURANT_DETAILS_SECTION_FE = `${API}${ACCOMMODATION}/restaurants/deatils-for-section`;
+
+
+// Privileges
+export const GET_ALL_PRIVILEGES_DATA_FE = `${API}${PRIVILEGES}/all-privileges`;
+export const GET_PRIVILEGES_NAMES_AND_IDS_DATA_FE = `${API}${PRIVILEGES}/privileges-names-and-ids`;
+export const GET_PRIVILEGE_DETAILS_BY_ID_DATA_FE = `${API}${PRIVILEGES}/privilege-details-by-id`;
+export const GET_PRIVILEGE_BASIC_DETAILS_BY_ID_DATA_FE = `${API}${PRIVILEGES}/privilege-basic-details-by-id`;
+export const CREATE_PRIVILEGE_DATA_FE = `${API}${PRIVILEGES}/create-privilege`;
+export const UPDATE_PRIVILEGE_DATA_FE = `${API}${PRIVILEGES}/update-privilege`;
+export const TERMINATE_PRIVILEGE_DATA_FE = `${API}${PRIVILEGES}/terminate-privilege`;
+export const GET_PRIVILEGES_STATISTICS_DATA_FE = `${API}${PRIVILEGES}/privileges-statistics`;
+
+
+// Role endpoints
+export const GET_ALL_ROLES_DATA_FE = `${API}${ROLES}/all-roles`;
+export const GET_ROLES_NAMES_AND_IDS_DATA_FE = `${API}${ROLES}/role-names-and-ids`;
+export const GET_ROLE_DETAILS_BY_ID_DATA_FE = `${API}${ROLES}/role-details-by-id`;
+export const GET_ROLE_BASIC_DETAILS_BY_ID_DATA_FE = `${API}${ROLES}/role-basic-details-by-id`;
+export const CREATE_ROLE_DATA_FE = `${API}${ROLES}/create-role`;
+export const UPDATE_ROLE_DATA_FE = `${API}${ROLES}/update-role`;
+export const TERMINATE_ROLE_DATA_FE = `${API}${ROLES}/terminate-role`;
+export const GET_ROLES_STATISTICS_DATA_FE = `${API}${ROLES}/roles-statistics`;
+
+// Users
+export const GET_USER_NAMES_AND_IDS_WITHOUT_EMPLOYEES_DATA_FE = `${API}${USERS}/user-names-and-ids-without-employees`;
+export const GET_USER_BASIC_DETAILS_BY_USER_ID_DATA_FE = `${API}${USERS}/user-basic-details-by-user-id`;
