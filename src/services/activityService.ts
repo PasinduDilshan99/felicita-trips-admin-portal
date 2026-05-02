@@ -1,9 +1,7 @@
 // services/activityService.ts
 import {
   ActivityFilterParams,
-  ApiResponse,
   SingleActivityApiResponse,
-  ActivitiesForTerminateResponse,
   TerminateActivityApiResponse,
   AddActivityRequest,
   AddActivityApiResponse,
@@ -11,11 +9,16 @@ import {
   UpdateActivityRequest,
   UpdateActivityApiResponse,
   ActivityStatisticsApiResponse,
+  ActivityFilterApiResponse,
+  ActivityScheduleStatisticsApiResponse,
+  ActivityCategoriesStatisticsApiResponse,
 } from "@/types/activity-types";
 import {
   ADD_ACTIVITY_DATA_FE,
+  GET_ACTIVITIES_CATEGORIES_STATISTICS_DATA_FE,
   GET_ACTIVITIES_DETAILS_BY_REQUEST_DATA_FE,
   GET_ACTIVITIES_NAMES_AND_IDS_DATA_FE,
+  GET_ACTIVITIES_SCHEDULE_STATISTICS_DATA_FE,
   GET_ACTIVITIES_STATISTICS_DATA_FE,
   GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA_FE,
   TERMINATE_ACTIVITY_DATA_FE,
@@ -36,7 +39,7 @@ export class ActivityService {
   // Fetch activities with filters
   static async getActivities(
     params: ActivityFilterParams,
-  ): Promise<ApiResponse> {
+  ): Promise<ActivityFilterApiResponse> {
     try {
       const response = await fetch(GET_ACTIVITIES_DETAILS_BY_REQUEST_DATA_FE, {
         method: "POST",
@@ -52,7 +55,7 @@ export class ActivityService {
           pageSize: params.pageSize,
           pageNumber: params.pageNumber,
           sortBy: params.sortBy || null,
-          sortDirection: params.sortDirection || null
+          sortDirection: params.sortDirection || null,
         }),
       });
 
@@ -60,7 +63,7 @@ export class ActivityService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: ApiResponse = await response.json();
+      const data: ActivityFilterApiResponse = await response.json();
       return data;
     } catch (error) {
       console.error("Error fetching activities:", error);
@@ -262,6 +265,80 @@ export class ActivityService {
       return data;
     } catch (error) {
       console.error("Error fetching activities statistics:", error);
+      throw error;
+    }
+  }
+
+  // Add these methods to the ActivityService class
+
+  /**
+   * Get activity schedule statistics including participation trends,
+   * popular activities, activity ratings, schedule timelines, and summary
+   */
+  static async getActivityScheduleStatistics(): Promise<ActivityScheduleStatisticsApiResponse> {
+    try {
+      const response = await fetch(GET_ACTIVITIES_SCHEDULE_STATISTICS_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ActivityScheduleStatisticsApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch activity schedule statistics",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching activity schedule statistics:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get activity categories statistics including category counts,
+   * participation performance, ratings, distributions, and usage metrics
+   */
+  static async getActivityCategoriesStatistics(): Promise<ActivityCategoriesStatisticsApiResponse> {
+    try {
+      const response = await fetch(
+        GET_ACTIVITIES_CATEGORIES_STATISTICS_DATA_FE,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ActivityCategoriesStatisticsApiResponse =
+        await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch activity categories statistics",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching activity categories statistics:", error);
       throw error;
     }
   }

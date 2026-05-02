@@ -13,7 +13,14 @@ import {
   WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH,
 } from "@/utils/constant";
 import * as PRIVILEGES from "@/utils/privileges";
-import { EMPLOYEE_MANAGEMENT_URL, WEB_PAGE_MANAGEMENT_URL } from "@/utils/urls";
+import {
+  ACTIVITY_CATEGORIES_PAGE_URL,
+  EMPLOYEE_MANAGEMENT_URL,
+  PACKAGE_TYPES_PAGE_URL,
+  TOUR_CATEGORIES_PAGE_URL,
+  TOUR_TYPES_PAGE_URL,
+  WEB_PAGE_MANAGEMENT_URL,
+} from "@/utils/urls";
 
 export const webManagementSideBarData: SideBarDataType[] = [
   {
@@ -112,6 +119,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 201,
         name: "View Activities",
         description: "View all available activities",
+        color: "#34D399", // Green Light
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/view`,
         privilege: PRIVILEGES.ACTIVITY_VIEW_PRIVILEGE,
       },
@@ -119,6 +127,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 202,
         name: "Add Activity",
         description: "Add a new activity",
+        color: "#60A5FA", // Blue
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/add-new`,
         privilege: PRIVILEGES.ACTIVITY_CREATE_PRIVILEGE,
       },
@@ -126,6 +135,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 203,
         name: "Update Activity",
         description: "Update existing activity information",
+        color: "#FBBF24", // Amber
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/update`,
         privilege: PRIVILEGES.ACTIVITY_UPDATE_PRIVILEGE,
       },
@@ -133,8 +143,51 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 204,
         name: "Remove Activity",
         description: "Delete activities",
+        color: "#EF4444", // Red
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/terminate`,
         privilege: PRIVILEGES.ACTIVITY_TERMINATE_PRIVILEGE,
+      },
+      {
+        id: 205,
+        name: "Activity Categories",
+        description: "Manage activity categories",
+        color: "#8B5CF6", // Purple
+        url: `${ACTIVITY_CATEGORIES_PAGE_URL}`,
+        privilege: PRIVILEGES.ACTIVITY_CATEGORY_PRIVILEGE,
+        grandSubData: [
+          {
+            id: 2051,
+            name: "View Categories",
+            description: "View all activity categories",
+            color: "#A78BFA", // Light Purple
+            url: `${ACTIVITY_CATEGORIES_PAGE_URL}/view`,
+            privilege: PRIVILEGES.ACTIVITY_CATEGORY_VIEW_PRIVILEGE,
+          },
+          {
+            id: 2052,
+            name: "Add Category",
+            description: "Add a new activity category",
+            color: "#6EE7B7", // Mint Green
+            url: `${ACTIVITY_CATEGORIES_PAGE_URL}/add-new`,
+            privilege: PRIVILEGES.ACTIVITY_CATEGORY_CREATE_PRIVILEGE,
+          },
+          {
+            id: 2053,
+            name: "Update Category",
+            description: "Update existing activity category",
+            color: "#FCD34D", // Yellow
+            url: `${ACTIVITY_CATEGORIES_PAGE_URL}/update`,
+            privilege: PRIVILEGES.ACTIVITY_CATEGORY_UPDATE_PRIVILEGE,
+          },
+          {
+            id: 2054,
+            name: "Remove Category",
+            description: "Delete activity categories",
+            color: "#F87171", // Light Red
+            url: `${ACTIVITY_CATEGORIES_PAGE_URL}/terminate`,
+            privilege: PRIVILEGES.ACTIVITY_CATEGORY_TERMINATE_PRIVILEGE,
+          },
+        ],
       },
     ],
   },
@@ -188,6 +241,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 401,
         name: "View Tours",
         description: "View all tour packages",
+        color: "#FBBF24",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/view`,
         privilege: PRIVILEGES.TOUR_VIEW_PRIVILEGE,
       },
@@ -195,6 +249,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 402,
         name: "Add Tour",
         description: "Create a new tour package",
+        color: "#34D399",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/add-new`,
         privilege: PRIVILEGES.TOUR_CREATE_PRIVILEGE,
       },
@@ -202,6 +257,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 403,
         name: "Update Tour",
         description: "Update existing tour information",
+        color: "#60A5FA",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/update`,
         privilege: PRIVILEGES.TOUR_UPDATE_PRIVILEGE,
       },
@@ -209,8 +265,101 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 404,
         name: "Remove Tour",
         description: "Delete tour packages",
+        color: "#EF4444",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/terminate`,
         privilege: PRIVILEGES.TOUR_TERMINATE_PRIVILEGE,
+      },
+
+      // =========================
+      // TOUR TYPES
+      // =========================
+      {
+        id: 405,
+        name: "Tour Types",
+        description: "Manage tour types",
+        color: "#8B5CF6", // Purple
+        url: `${TOUR_TYPES_PAGE_URL}`,
+        privilege: PRIVILEGES.TOUR_TYPE_PRIVILEGE,
+        grandSubData: [
+          {
+            id: 4051,
+            name: "View Tour Types",
+            description: "View all tour types",
+            color: "#A78BFA",
+            url: `${TOUR_TYPES_PAGE_URL}/view`,
+            privilege: PRIVILEGES.TOUR_TYPE_VIEW_PRIVILEGE,
+          },
+          {
+            id: 4052,
+            name: "Add Tour Type",
+            description: "Add a new tour type",
+            color: "#6EE7B7",
+            url: `${TOUR_TYPES_PAGE_URL}/add-new`,
+            privilege: PRIVILEGES.TOUR_TYPE_CREATE_PRIVILEGE,
+          },
+          {
+            id: 4053,
+            name: "Update Tour Type",
+            description: "Update existing tour type",
+            color: "#FCD34D",
+            url: `${TOUR_TYPES_PAGE_URL}/update`,
+            privilege: PRIVILEGES.TOUR_TYPE_UPDATE_PRIVILEGE,
+          },
+          {
+            id: 4054,
+            name: "Remove Tour Type",
+            description: "Delete tour types",
+            color: "#F87171",
+            url: `${TOUR_TYPES_PAGE_URL}/terminate`,
+            privilege: PRIVILEGES.TOUR_TYPE_TERMINATE_PRIVILEGE,
+          },
+        ],
+      },
+
+      // =========================
+      // TOUR CATEGORIES
+      // =========================
+      {
+        id: 406,
+        name: "Tour Categories",
+        description: "Manage tour categories",
+        color: "#3B82F6", // Blue
+        url: `${TOUR_CATEGORIES_PAGE_URL}`,
+        privilege: PRIVILEGES.TOUR_CATEGORY_PRIVILEGE,
+        grandSubData: [
+          {
+            id: 4061,
+            name: "View Categories",
+            description: "View all tour categories",
+            color: "#93C5FD",
+            url: `${TOUR_CATEGORIES_PAGE_URL}/view`,
+            privilege: PRIVILEGES.TOUR_CATEGORY_VIEW_PRIVILEGE,
+          },
+          {
+            id: 4062,
+            name: "Add Category",
+            description: "Add a new tour category",
+            color: "#34D399",
+            url: `${TOUR_CATEGORIES_PAGE_URL}/add-new`,
+            privilege: PRIVILEGES.TOUR_CATEGORY_CREATE_PRIVILEGE,
+          },
+          {
+            id: 4063,
+            name: "Update Category",
+            description: "Update existing tour category",
+            color: "#FBBF24",
+            url: `${TOUR_CATEGORIES_PAGE_URL}/update`,
+            privilege: PRIVILEGES.TOUR_CATEGORY_UPDATE_PRIVILEGE,
+          },
+          {
+            id: 4064,
+            name: "Remove Category",
+            description: "Delete tour categories",
+            color: "#EF4444",
+            url: `${TOUR_CATEGORIES_PAGE_URL}/terminate`,
+            privilege: PRIVILEGES.TOUR_CATEGORY_TERMINATE_PRIVILEGE,
+          },
+        ],
       },
     ],
   },
@@ -264,6 +413,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 601,
         name: "View Packages",
         description: "View all holiday packages",
+        color: "#A78BFA",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/view`,
         privilege: PRIVILEGES.PACKAGE_VIEW_PRIVILEGE,
       },
@@ -271,6 +421,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 602,
         name: "Add Package",
         description: "Create a new holiday package",
+        color: "#34D399",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/add-new`,
         privilege: PRIVILEGES.PACKAGE_CREATE_PRIVILEGE,
       },
@@ -278,6 +429,7 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 603,
         name: "Update Package",
         description: "Update existing package information",
+        color: "#FBBF24",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/update`,
         privilege: PRIVILEGES.PACKAGE_UPDATE_PRIVILEGE,
       },
@@ -285,8 +437,55 @@ export const webManagementSideBarData: SideBarDataType[] = [
         id: 604,
         name: "Remove Package",
         description: "Delete holiday packages",
+        color: "#EF4444",
         url: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/terminate`,
         privilege: PRIVILEGES.PACKAGE_TERMINATE_PRIVILEGE,
+      },
+
+      // =========================
+      // PACKAGE TYPES
+      // =========================
+      {
+        id: 605,
+        name: "Package Types",
+        description: "Manage package types",
+        color: "#3B82F6", // Blue
+        url: `${PACKAGE_TYPES_PAGE_URL}`,
+        privilege: PRIVILEGES.PACKAGE_TYPE_PRIVILEGE,
+        grandSubData: [
+          {
+            id: 6051,
+            name: "View Package Types",
+            description: "View all package types",
+            color: "#93C5FD",
+            url: `${PACKAGE_TYPES_PAGE_URL}/view`,
+            privilege: PRIVILEGES.PACKAGE_TYPE_VIEW_PRIVILEGE,
+          },
+          {
+            id: 6052,
+            name: "Add Package Type",
+            description: "Create a new package type",
+            color: "#6EE7B7",
+            url: `${PACKAGE_TYPES_PAGE_URL}/add-new`,
+            privilege: PRIVILEGES.PACKAGE_TYPE_CREATE_PRIVILEGE,
+          },
+          {
+            id: 6053,
+            name: "Update Package Type",
+            description: "Update existing package type",
+            color: "#FCD34D",
+            url: `${PACKAGE_TYPES_PAGE_URL}/update`,
+            privilege: PRIVILEGES.PACKAGE_TYPE_UPDATE_PRIVILEGE,
+          },
+          {
+            id: 6054,
+            name: "Remove Package Type",
+            description: "Delete package types",
+            color: "#F87171",
+            url: `${PACKAGE_TYPES_PAGE_URL}/terminate`,
+            privilege: PRIVILEGES.PACKAGE_TYPE_TERMINATE_PRIVILEGE,
+          },
+        ],
       },
     ],
   },

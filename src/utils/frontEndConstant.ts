@@ -150,6 +150,7 @@ export const GET_DESTINATION_CATEGORIES_STATISTICS_DATA_FE = `${API}${DESTINATIO
 export const ADD_DESTINATION_CATEGORY_FE = `${API}${DESTINATIONS}/add-destination-category`;
 export const UPDATE_DESTINATION_CATEGORY_FE = `${API}${DESTINATIONS}/update-destination-category`;
 export const TERMINATE_DESTINATION_CATEGORY_FE = `${API}${DESTINATIONS}/terminate-destination-category`;
+export const GET_DESTINATIONS_NAMES_FOR_TOUR_DATA_FE = `${API}${DESTINATIONS}/destination-names`;
 
 // Tours
 export const GET_TOUR_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}`;
@@ -164,6 +165,17 @@ export const GET_TOUR_EXTRA_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}/extra-details
 export const GET_TOUR_DAY_TO_DAY_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}/day-to-day-details`;
 export const GET_ALL_TOURS_BASIC_DETAILS_DATA_FE = `${API}${TOUR}/basic-details`;
 export const GET_TOUR_MAP_DETAILS_DATA_FE = `${API}${TOUR}/tour-map`;
+export const GET_TOURS_FOR_TERMINATE_DATA_FE = `${API}${TOUR}/tour-for-terminate`;
+export const TERMINATE_TOUR_DATA_FE = `${API}${TOUR}/terminate-tour`;
+export const UPDATE_TOUR_DATA_FE = `${API}${TOUR}/update-tour`;
+export const CREATE_TOUR_DATA_FE = `${API}${TOUR}/add-tour`;
+export const GET_TOUR_ALL_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}/tout-all-details`;
+export const GET_TOUR_IDS_AND_NAMES_DATA_FE = `${API}${TOUR}/tourId-and-tourName`;
+export const GET_TOUR_STATISTICS_DATA_FE = `${API}${TOUR}/tour-statistics`;
+export const GET_TOUR_SCHEDULE_STATISTICS_DATA_FE = `${API}${TOUR}/tour-schedule-statistics`;
+export const GET_TOUR_CATEGORY_STATISTICS_DATA_FE = `${API}${TOUR}/tour-category-statistics`;
+export const GET_TOUR_TYPE_STATISTICS_DATA_FE = `${API}${TOUR}/tour-type-statistics`;
+export const GET_TOUR_DETAILS_FOR_PACKAGE_DATA_FE = `${API}${TOUR}/tour-details-for-add-package`;
 
 // Packages
 export const GET_ALL_PACKAGES_DETAILS_DATA_FE = `${API}${PACKAGES}`;
@@ -179,6 +191,14 @@ export const GET_PACKAGE_EXTRA_DETAILS_BY_TOUR_ID_DATA_FE = `${API}${PACKAGES}/p
 export const GET_PACKAGE_SCHEDULES_DETAILS_BY_TOUR_ID_DATA_FE = `${API}${PACKAGES}/package-schedules-by-tour-id`;
 export const GET_PACKAGE_DETAILS_FOR_COMPARE_BY_TOUR_ID_DATA_FE = `${API}${PACKAGES}/compare`;
 export const GET_PACKAGE_SCHEDULES_DETAILS_BY_PACKAGE_ID_DATA_FE = `${API}${PACKAGES}/schedule-details`;
+export const GET_PACKAGES_FOR_TERMINATE_DATA_FE = `${API}${PACKAGES}/package-for-terminate`;
+export const TERMINATE_PACKAGE_DATA_FE = `${API}${PACKAGES}/terminate-package`;
+export const CREATE_PACKAGE_DATA_FE = `${API}${PACKAGES}/add-package`;
+export const UPDATE_PACKAGE_DATA_FE = `${API}${PACKAGES}/update-package`;
+export const GET_PACKAGE_NAMES_AND_IDS_DATA_FE = `${API}${PACKAGES}/packageId-and-packageName`;
+export const GET_PACKAGE_STATISTICS_DATA_FE = `${API}${PACKAGES}/package-statistics`;
+export const GET_PACKAGE_SCHEDULE_STATISTICS_DATA_FE = `${API}${PACKAGES}/package-schedule-statistics`;
+export const GET_PACKAGE_TYPE_STATISTICS_DATA_FE = `${API}${PACKAGES}/package-type-statistics`;
 
 // Activities
 export const GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA_FE = `${API}${ACTIVITIES}`;
@@ -195,6 +215,8 @@ export const TERMINATE_ACTIVITY_DATA_FE = `${API}${ACTIVITIES}/terminate-activit
 export const ADD_ACTIVITY_DATA_FE = `${API}${ACTIVITIES}/add-activity`;
 export const UPDATE_ACTIVITY_DATA_FE = `${API}${ACTIVITIES}/update-activity`;
 export const GET_ACTIVITIES_STATISTICS_DATA_FE = `${API}${ACTIVITIES}/activities-statistics`;
+export const GET_ACTIVITIES_SCHEDULE_STATISTICS_DATA_FE = `${API}${ACTIVITIES}/activities-schedule-statistics`;
+export const GET_ACTIVITIES_CATEGORIES_STATISTICS_DATA_FE = `${API}${ACTIVITIES}/activities-categories-statistics`;
 
 // Blogs
 export const GET_ALL_BLOGS_DETAILS_DATA_FE = `${API}${BLOGS}`;
@@ -235,6 +257,7 @@ export const GET_EMPLOYEE_FULL_DETAILS_DATA_FE = `${API}${EMPLOYEES}/employee-fu
 export const GET_EMPLOYEE_STATISTICS_DATA_FE = `${API}${EMPLOYEES}/employee-statistics`;
 export const CREATE_EMPLOYEE_DATA_FE = `${API}${EMPLOYEES}/create-employee`;
 export const GET_EMPLOYEE_CREATE_DATA_FE = `${API}${EMPLOYEES}/create-employee-data`;
+export const GET_EMPLOYEE_DETAILS_FOR_ASSIGN_TOUR_DATA_FE = `${API}${EMPLOYEES}/employee-details-for-assign-tour`;
 
 // FAQ
 export const GET_ALL_FAQ_DATA_FE = `${API}${FAQ}`;

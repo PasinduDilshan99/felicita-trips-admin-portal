@@ -26,6 +26,20 @@ export const ACTIVITY_CATEGORIES_PAGE_URL = `${ACTIVITIES_PAGE_URL}/categories`;
 export const ACTIVITY_CATEGORY_VIEW_PAGE_URL = `${ACTIVITY_CATEGORIES_PAGE_URL}/view`;
 export const ACTIVITY_CATEGORY_VIEW_DETAILS_URL = `${ACTIVITY_CATEGORY_VIEW_PAGE_URL}`;
 
+export const TOURS_PAGE_URL = `${WEB_MANAGEMENT_URL}/tours`;
+export const TOURS_VIEW_PAGE_URL = `${TOURS_PAGE_URL}/view`;
+
+export const TOUR_CATEGORIES_PAGE_URL = `${TOURS_PAGE_URL}/categories`;
+
+export const TOUR_TYPES_PAGE_URL = `${TOURS_PAGE_URL}/types`;
+
+export const PACKAGES_PAGE_URL = `${WEB_MANAGEMENT_URL}/packages`;
+export const PACKAGES_VIEW_PAGE_URL = `${PACKAGES_PAGE_URL}/view`;
+
+export const PACKAGE_TYPES_PAGE_URL = `${PACKAGES_PAGE_URL}/types`;
+
+
+
 export const SEASONS_PAGE_URL = `${WEB_MANAGEMENT_URL}/seasons`;
 export const SEASONS_VIEW_PAGE_URL = `${SEASONS_PAGE_URL}/view`;
 export const SEASON_DETAILS_VIEW_PAGE_URL = `${SEASONS_VIEW_PAGE_URL}`;

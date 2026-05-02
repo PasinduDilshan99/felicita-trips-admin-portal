@@ -1,5 +1,7 @@
 // types/activity-types.ts
 
+import { ApiResponse } from "./common-types";
+
 export interface Schedule {
   id: number;
   name: string;
@@ -111,7 +113,7 @@ export interface ActivityResponse {
   activityResponseDtos: Activity[];
 }
 
-export interface ApiResponse {
+export interface ActivityFilterApiResponse {
   code: number;
   status: string;
   message: string;
@@ -306,3 +308,108 @@ export interface ActivityStatisticsApiResponse {
   data: ActivityStatisticsData;
   timestamp: string;
 }
+
+// Add these to your existing types/activity-types.ts file
+
+// Activity Schedule Statistics Types
+export interface ParticipationTrend {
+  activityDate: string;
+  totalParticipants: number;
+}
+
+export interface PopularActivity {
+  activityId: number;
+  activityName: string;
+  totalParticipants: number;
+}
+
+export interface ActivityRating {
+  activityId: number;
+  activityName: string;
+  averageRating: number;
+  totalReviews: number;
+}
+
+export interface ScheduleTimeline {
+  scheduleId: number;
+  scheduleName: string;
+  activityName: string;
+  assumeStartDate: string;
+  assumeEndDate: string;
+  durationHoursStart: number;
+  durationHoursEnd: number;
+  specialNote: string;
+  status: number;
+}
+
+export interface StatusDistribution {
+  statusName: string;
+  totalCount: number;
+}
+
+export interface ActivityScheduleSummary {
+  totalActivities: number;
+  totalActiveSchedules: number;
+  totalParticipants: number;
+  overallAverageRating: number;
+}
+
+export interface ActivityScheduleStatisticsData {
+  participationTrends: ParticipationTrend[];
+  popularActivities: PopularActivity[];
+  activityRatings: ActivityRating[];
+  scheduleTimelines: ScheduleTimeline[];
+  statusDistributions: StatusDistribution[];
+  summary: ActivityScheduleSummary;
+}
+
+export type ActivityScheduleStatisticsApiResponse = ApiResponse<ActivityScheduleStatisticsData>;
+
+// Activity Categories Statistics Types
+export interface CategoryActivityCount {
+  categoryId: number;
+  categoryName: string;
+  totalActivities: number;
+}
+
+export interface CategoryParticipationPerformance {
+  categoryId: number;
+  categoryName: string;
+  totalParticipants: number;
+}
+
+export interface CategoryRatingOverview {
+  categoryId: number;
+  categoryName: string;
+  averageRating: number;
+  totalReviews: number;
+}
+
+export interface CategoryDistribution {
+  categoryName: string;
+  activityCount: number;
+}
+
+export interface CategoryPrimarySecondaryUsage {
+  categoryName: string;
+  primaryCount: number;
+  secondaryCount: number;
+}
+
+export interface ActivityCategoriesSummary {
+  totalCategories: number;
+  totalActivities: number;
+  mostUsedCategory: string;
+  overallAverageRating: number;
+}
+
+export interface ActivityCategoriesStatisticsData {
+  categoryActivityCounts: CategoryActivityCount[];
+  categoryParticipationPerformances: CategoryParticipationPerformance[];
+  categoryRatingOverviews: CategoryRatingOverview[];
+  categoryDistributions: CategoryDistribution[];
+  categoryPrimarySecondaryUsages: CategoryPrimarySecondaryUsage[];
+  summary: ActivityCategoriesSummary;
+}
+
+export type ActivityCategoriesStatisticsApiResponse = ApiResponse<ActivityCategoriesStatisticsData>;

@@ -1,3 +1,5 @@
+import { ApiResponse } from "./common-types";
+
 // types/package-types.ts
 export interface PackageSchedule {
   scheduleId: number;
@@ -85,7 +87,7 @@ export interface PackageResponse {
   packageResponseDtos: TourPackage[];
 }
 
-export interface ApiResponse {
+export interface PackageFilterApiResponse {
   code: number;
   status: string;
   message: string;
@@ -152,69 +154,11 @@ export interface TourIdNameResponse {
   data: TourIdName[];
   timestamp: string;
 }
-
-// Activity Interface
-export interface Activity {
-  activityId: number;
-  name: string;
-  description: string;
-}
-
-// Destination Interface
-export interface Destination {
-  destinationId: number;
-  name: string;
-  description: string;
-  activities: Activity[];
-}
-
-// Day Interface
-export interface TourDay {
-  day: number;
-  destinations: Destination[];
-}
-
-// Travel Tip Interface
 export interface TravelTip {
   tipTitle: string;
   tipDescription: string;
 }
 
-// Assigned User Interface
-export interface AssignedUser {
-  userId: number;
-  firstName: string;
-  lastName: string;
-  username: string;
-}
-
-// Tour Details for Add Package
-export interface TourDetailsForPackage {
-  tourId: number;
-  name: string;
-  description: string;
-  tourType: string;
-  tourCategory: string;
-  startLocation: string;
-  endLocation: string;
-  status: string;
-  season: string;
-  assignedUser: AssignedUser;
-  assignMessage: string;
-  days: TourDay[];
-  inclusions: string[];
-  exclusions: string[];
-  conditions: string[];
-  travelTips: TravelTip[];
-}
-
-export interface TourDetailsResponse {
-  code: number;
-  status: string;
-  message: string;
-  data: TourDetailsForPackage;
-  timestamp: string;
-}
 
 // Add Package Request Types
 export interface PackageImageRequest {
@@ -602,3 +546,172 @@ export interface UpdatePackageApiResponse {
   data: UpdatePackageResponse;
   timestamp: string;
 }
+
+// Add these to your existing types/package-types.ts file
+
+// Package Statistics Types
+export interface PackageStatisticsSummary {
+  totalPackages: number;
+  activePackages: number;
+  averagePackageRating: number;
+  totalParticipants: number;
+  averagePackagePrice: number;
+}
+
+export interface PackagePopularity {
+  packageId: number;
+  packageName: string;
+  totalSchedules: number;
+  totalParticipants: number;
+}
+
+export interface PackageRatingOverview {
+  packageId: number;
+  packageName: string;
+  averageRating: number;
+  totalReviews: number;
+}
+
+export interface PackagePriceDistribution {
+  packageId: number;
+  packageName: string;
+  totalPrice: number;
+  pricePerPerson: number;
+  totalParticipants: number;
+}
+
+export interface PackageCapacityUtilization {
+  packageId: number;
+  packageName: string;
+  minPersonCount: number;
+  maxPersonCount: number;
+  averageParticipants: number;
+}
+
+export interface PackageTypeDistribution {
+  packageTypeName: string;
+  totalPackages: number;
+}
+
+export interface PackageStatisticsData {
+  summary: PackageStatisticsSummary;
+  packagePopularities: PackagePopularity[];
+  packageRatingOverviews: PackageRatingOverview[];
+  packagePriceDistributions: PackagePriceDistribution[];
+  packageCapacityUtilizations: PackageCapacityUtilization[];
+  packageTypeDistributions: PackageTypeDistribution[];
+}
+
+export type PackageStatisticsApiResponse = ApiResponse<PackageStatisticsData>;
+
+// Package Schedule Statistics Types
+export interface PackageScheduleSummary {
+  totalSchedules: number;
+  activeSchedules: number;
+  averageScheduleRating: number;
+  totalParticipants: number;
+  averageDuration: number;
+}
+
+export interface ScheduleTimeline {
+  timeline: string;
+  totalSchedules: number;
+}
+
+export interface ScheduleStatusDistribution {
+  statusId: number;
+  totalSchedules: number;
+}
+
+export interface DurationDistribution {
+  scheduleId: number;
+  scheduleName: string;
+  durationStart: number;
+  durationEnd: number;
+  averageDuration: number;
+}
+
+export interface ScheduleParticipationPerformance {
+  scheduleId: number;
+  scheduleName: string;
+  totalParticipants: number;
+  averageParticipants: number;
+}
+
+export interface ScheduleRatingOverview {
+  scheduleId: number;
+  scheduleName: string;
+  averageRating: number;
+  totalReviews: number;
+}
+
+export interface PackageScheduleStatisticsData {
+  summary: PackageScheduleSummary;
+  scheduleTimelines: ScheduleTimeline[];
+  scheduleStatusDistributions: ScheduleStatusDistribution[];
+  durationDistributions: DurationDistribution[];
+  scheduleParticipationPerformances: ScheduleParticipationPerformance[];
+  scheduleRatingOverviews: ScheduleRatingOverview[];
+}
+
+export type PackageScheduleStatisticsApiResponse = ApiResponse<PackageScheduleStatisticsData>;
+
+// Package Type Statistics Types
+export interface PackageTypeStatisticsSummary {
+  totalPackageTypes: number;
+  mostUsedTypeCount: number;
+  mostPopularTypeName: string | null;
+  highestRatedTypeRating: number;
+  highestRevenueTypeValue: number;
+}
+
+export interface PackageTypeDistribution {
+  typeId: number;
+  typeName: string;
+  totalPackages: number;
+}
+
+export interface TypeRevenuePerformance {
+  typeId: number;
+  typeName: string;
+  totalRevenue: number;
+  averagePackagePrice: number;
+}
+
+export interface TypeParticipationImpact {
+  typeName: string;
+  month: string | null;
+  totalParticipants: number;
+}
+
+export interface TypePrimarySecondaryUsage {
+  typeId: number;
+  typeName: string;
+  primaryCount: number;
+  secondaryCount: number;
+}
+
+export interface TypeBookingPerformance {
+  typeId: number;
+  typeName: string;
+  totalParticipants: number | null;
+}
+
+export interface TypeRatingOverview {
+  typeId: number;
+  typeName: string;
+  averageRating: number;
+  totalReviews: number;
+}
+
+export interface PackageTypeStatisticsData {
+  summary: PackageTypeStatisticsSummary;
+  typeDistributions: PackageTypeDistribution[];
+  typeRevenuePerformances: TypeRevenuePerformance[];
+  typeParticipationImpacts: TypeParticipationImpact[];
+  typePrimarySecondaryUsages: TypePrimarySecondaryUsage[];
+  typeBookingPerformances: TypeBookingPerformance[];
+  typeRatingOverviews: TypeRatingOverview[];
+}
+
+export type PackageTypeStatisticsApiResponse = ApiResponse<PackageTypeStatisticsData>;

@@ -23,6 +23,9 @@ export const ADD_ACTIVITY_PAGE_TITLE = "Add New Activity";
 export const UPDATE_ACTIVITY_PAGE_TITLE = "Update Activity";
 export const REMOVE_ACTIVITY_PAGE_TITLE = "Terminate Activity";
 
+export const ACTIVITY_CATEGORY_PAGE_TITLE = "Activity Categories";
+
+
 export const WEB_PAGE_MANAGEMENT_PAGE_TITLE = "Web Page Management";
 export const HOME_PAGE_MANAGEMENT_PAGE_TITLE = "Home Page Management";
 export const HOME_PAGE_TRENDING_DESTINATION_MANAGEMENT_PAGE_TITLE = "Trending Destination Management";

@@ -449,3 +449,25 @@ export interface EmployeeCreateData {
 }
 
 export type EmployeeCreateDataApiResponse = ApiResponse<EmployeeCreateData>;
+
+export interface TourAssignmentEmployee {
+  employeeId: number;
+  firstName: string;
+  lastName: string;
+  imageUrl: string;
+  email: string;
+  mobileNumber1: string;
+  designationName: string;
+  tours: {
+    name: string | null;
+    tour_id: number | null;
+  }[];
+}
+
+export interface EmployeeAssignResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: TourAssignmentEmployee[];
+  timestamp: string;
+}

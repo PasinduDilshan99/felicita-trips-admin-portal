@@ -1,24 +1,39 @@
 // services/tourService.ts
 import {
   TourFilterParams,
-  ApiResponse,
   SingleTourApiResponse,
   Tour,
   Schedule,
   ToursForTerminateResponse,
   TerminateTourApiResponse,
   AddTourRequest,
-  DestinationDetailsResponse,
   AddTourApiResponse,
-  EmployeeAssignResponse,
-  DestinationsForTourResponse,
   TourAllDetailsResponse,
   UpdateTourRequest,
   UpdateTourApiResponse,
   TourNameIdResponse,
+  TourFilterApiResponse,
+  TourTypeStatisticsApiResponse,
+  TourCategoryStatisticsApiResponse,
+  TourStatisticsApiResponse,
+  TourScheduleStatisticsApiResponse,
+  TourDetailsResponse,
 } from "@/types/tour-types";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import {
+  CREATE_TOUR_DATA_FE,
+  GET_TOUR_ALL_DETAILS_BY_ID_DATA_FE,
+  GET_TOUR_CATEGORY_STATISTICS_DATA_FE,
+  GET_TOUR_DETAILS_BY_ID_DATA_FE,
+  GET_TOUR_DETAILS_FOR_PACKAGE_DATA_FE,
+  GET_TOUR_IDS_AND_NAMES_DATA_FE,
+  GET_TOUR_SCHEDULE_STATISTICS_DATA_FE,
+  GET_TOUR_STATISTICS_DATA_FE,
+  GET_TOUR_TYPE_STATISTICS_DATA_FE,
+  GET_TOURS_DETAILS_BY_REQUEST_DATA_FE,
+  GET_TOURS_FOR_TERMINATE_DATA_FE,
+  TERMINATE_TOUR_DATA_FE,
+  UPDATE_TOUR_DATA_FE,
+} from "@/utils/frontEndConstant";
 
 export class TourService {
   private static getAuthHeaders(): HeadersInit {
@@ -32,33 +47,32 @@ export class TourService {
   }
 
   // Fetch tours with filters
-  static async getTours(params: TourFilterParams): Promise<ApiResponse> {
+  static async getTours(
+    params: TourFilterParams,
+  ): Promise<TourFilterApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/tour/tours`,
-        {
-          method: "POST",
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify({
-            name: params.name || null,
-            minPrice: params.minPrice || null,
-            maxPrice: params.maxPrice || null,
-            duration: params.duration || null,
-            tourType: params.tourType || null,
-            tourCategory: params.tourCategory || null,
-            season: params.season || null,
-            location: params.location || null,
-            pageNumber: params.pageNumber,
-            pageSize: params.pageSize,
-          }),
-        }
-      );
+      const response = await fetch(GET_TOURS_DETAILS_BY_REQUEST_DATA_FE, {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({
+          name: params.name || null,
+          minPrice: params.minPrice || null,
+          maxPrice: params.maxPrice || null,
+          duration: params.duration || null,
+          tourType: params.tourType || null,
+          tourCategory: params.tourCategory || null,
+          season: params.season || null,
+          location: params.location || null,
+          pageNumber: params.pageNumber,
+          pageSize: params.pageSize,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: ApiResponse = await response.json();
+      const data: TourFilterApiResponse = await response.json();
       return data;
     } catch (error) {
       console.error("Error fetching tours:", error);
@@ -69,16 +83,14 @@ export class TourService {
   // Get single tour by ID
   static async getTourById(id: number): Promise<SingleTourApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/tour/${id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",        }
-      );
+      const response = await fetch(`${GET_TOUR_DETAILS_BY_ID_DATA_FE}/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -167,16 +179,14 @@ export class TourService {
   // Get tours for termination
   static async getToursForTerminate(): Promise<ToursForTerminateResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/tour/tour-for-terminate`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",        }
-      );
+      const response = await fetch(GET_TOURS_FOR_TERMINATE_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -192,21 +202,18 @@ export class TourService {
 
   // Terminate tour
   static async terminateTour(
-    tourId: number
+    tourId: number,
   ): Promise<TerminateTourApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/tour/terminate-tour`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ tourId }),
-        }
-      );
+      const response = await fetch(TERMINATE_TOUR_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ tourId }),
+      });
 
       const data: TerminateTourApiResponse = await response.json();
 
@@ -221,106 +228,18 @@ export class TourService {
     }
   }
 
-  // services/tourService.ts - Add these methods to your existing TourService class
-
-  // Get employees for tour assignment
-  static async getEmployeesForTourAssignment(): Promise<EmployeeAssignResponse> {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/employee/employee-details-for-assign-tour`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: EmployeeAssignResponse = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching employees for tour assignment:", error);
-      throw error;
-    }
-  }
-
-  // Get destination names for tour creation
-  static async getDestinationNames(): Promise<DestinationsForTourResponse> {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/destination/destination-names`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: DestinationsForTourResponse = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching destination names:", error);
-      throw error;
-    }
-  }
-
-  // Get destination details with activities
-  static async getDestinationDetails(
-    destinationId: number
-  ): Promise<DestinationDetailsResponse> {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/destination/${destinationId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: DestinationDetailsResponse = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching destination details:", error);
-      throw error;
-    }
-  }
-
   // Add new tour
   static async addTour(tourData: AddTourRequest): Promise<AddTourApiResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/felicita/api/v0/tour/add-tour`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(tourData),
-        }
-      );
+      const response = await fetch(CREATE_TOUR_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(tourData),
+      });
 
       const data: AddTourApiResponse = await response.json();
 
@@ -358,91 +277,244 @@ export class TourService {
 
   // Add these methods to your existing TourService class
 
-// Get all tour names and IDs for search
-static async getAllTourNames(): Promise<TourNameIdResponse> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/felicita/api/v0/tour/tourId-and-tourName`,
-      {
-        method: 'GET',
+  // Get all tour names and IDs for search
+  static async getAllTourNames(): Promise<TourNameIdResponse> {
+    try {
+      const response = await fetch(GET_TOUR_IDS_AND_NAMES_DATA_FE, {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const data: TourNameIdResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching tour names:", error);
+      throw error;
     }
-
-    const data: TourNameIdResponse = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching tour names:', error);
-    throw error;
   }
-}
 
-// Get all tour details by ID
-static async getTourAllDetails(id: number): Promise<TourAllDetailsResponse> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/felicita/api/v0/tour/tout-all-details/${id}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+  // Get all tour details by ID
+  static async getTourAllDetails(id: number): Promise<TourAllDetailsResponse> {
+    try {
+      const response = await fetch(
+        `${GET_TOUR_ALL_DETAILS_BY_ID_DATA_FE}/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
         },
-        credentials: 'include',
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const data: TourAllDetailsResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching tour all details:", error);
+      throw error;
     }
-
-    const data: TourAllDetailsResponse = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching tour all details:', error);
-    throw error;
   }
-}
 
-// Update tour
-static async updateTour(tourData: UpdateTourRequest): Promise<UpdateTourApiResponse> {
-  try {
-    console.log('===================tourData=================');
-    console.log(tourData);
-    console.log('====================================');
-    const response = await fetch(
-      `${API_BASE_URL}/felicita/api/v0/tour/update-tour`,
-      {
-        method: 'POST',
+  // Update tour
+  static async updateTour(
+    tourData: UpdateTourRequest,
+  ): Promise<UpdateTourApiResponse> {
+    try {
+      const response = await fetch(UPDATE_TOUR_DATA_FE, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(tourData),
+      });
+
+      const data: UpdateTourApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to update tour");
       }
-    );
 
-    const data: UpdateTourApiResponse = await response.json();
-
-    if (data.code !== 200) {
-      throw new Error(data.message || 'Failed to update tour');
+      return data;
+    } catch (error) {
+      console.error("Error updating tour:", error);
+      throw error;
     }
-
-    return data;
-  } catch (error) {
-    console.error('Error updating tour:', error);
-    throw error;
   }
-}
 
+  // Add these methods to the TourService class
 
+  /**
+   * Get tour statistics including popularity, booking status, category performance,
+   * type distribution, location distribution, and summary
+   */
+  static async getTourStatistics(): Promise<TourStatisticsApiResponse> {
+    try {
+      const response = await fetch(GET_TOUR_STATISTICS_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TourStatisticsApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to fetch tour statistics");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching tour statistics:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get tour schedule statistics including timeline, duration distribution,
+   * execution performance, rating overview, and participation trends
+   */
+  static async getTourScheduleStatistics(): Promise<TourScheduleStatisticsApiResponse> {
+    try {
+      const response = await fetch(GET_TOUR_SCHEDULE_STATISTICS_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TourScheduleStatisticsApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch tour schedule statistics",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching tour schedule statistics:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get tour category statistics including distribution, booking performance,
+   * rating overview, primary/secondary usage, and participation impact
+   */
+  static async getTourCategoryStatistics(): Promise<TourCategoryStatisticsApiResponse> {
+    try {
+      const response = await fetch(GET_TOUR_CATEGORY_STATISTICS_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TourCategoryStatisticsApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch tour category statistics",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching tour category statistics:", error);
+      throw error;
+    }
+  }
+
+  static async getTourDetailsForPackage(
+    tourId: number,
+  ): Promise<TourDetailsResponse> {
+    try {
+      const response = await fetch(
+        `${GET_TOUR_DETAILS_FOR_PACKAGE_DATA_FE}/${tourId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TourDetailsResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching tour details:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get tour type statistics including distribution, booking performance,
+   * rating overview, participation impact, and primary/secondary usage
+   */
+  static async getTourTypeStatistics(): Promise<TourTypeStatisticsApiResponse> {
+    try {
+      const response = await fetch(GET_TOUR_TYPE_STATISTICS_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TourTypeStatisticsApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to fetch tour type statistics");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching tour type statistics:", error);
+      throw error;
+    }
+  }
 }

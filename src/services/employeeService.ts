@@ -4,6 +4,7 @@ import {
   CeoDetailsApiResponse,
   CreateEmployeeApiResponse,
   CreateEmployeeRequest,
+  EmployeeAssignResponse,
   EmployeeBasicListApiResponse,
   EmployeeCreateDataApiResponse,
   EmployeeFilterOptionsApiResponse,
@@ -17,6 +18,7 @@ import {
   GET_EMPLOYEE_BASIC_DETAILS_DATA_FE,
   GET_EMPLOYEE_BASIC_DETAILS_PARAMS_DATA_FE,
   GET_EMPLOYEE_CREATE_DATA_FE,
+  GET_EMPLOYEE_DETAILS_FOR_ASSIGN_TOUR_DATA_FE,
   GET_EMPLOYEE_FULL_DETAILS_DATA_FE,
   GET_EMPLOYEE_STATISTICS_DATA_FE,
 } from "@/utils/frontEndConstant";
@@ -275,6 +277,32 @@ export class EmployeeService {
       return data;
     } catch (error) {
       console.error("Error fetching employee create data:", error);
+      throw error;
+    }
+  }
+
+  static async getEmployeesForTourAssignment(): Promise<EmployeeAssignResponse> {
+    try {
+      const response = await fetch(
+        GET_EMPLOYEE_DETAILS_FOR_ASSIGN_TOUR_DATA_FE,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: EmployeeAssignResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching employees for tour assignment:", error);
       throw error;
     }
   }

@@ -24,6 +24,8 @@ import {
   AddTrendingDestinationApiResponse,
   TerminateTrendingDestinationApiResponse,
   TerminateTrendingDestinationRequest,
+  DestinationDetailsResponse,
+  DestinationsForTourResponse,
 } from "@/types/destination-types";
 import {
   ADD_DESTINATION_CATEGORY_FE,
@@ -36,6 +38,7 @@ import {
   GET_DESTINATION_STATISTICS_DATA_FE,
   GET_DESTINATIONS_DETAILS_BY_ID_DATA_FE,
   GET_DESTINATIONS_DETAILS_BY_REQUEST_DATA_FE,
+  GET_DESTINATIONS_NAMES_FOR_TOUR_DATA_FE,
   GET_TRENDING_DESTINATIONS_DATA_FE,
   TERMINATE_DESTINATION_CATEGORY_FE,
   TERMINATE_DESTINATION_DATA_FE,
@@ -469,94 +472,122 @@ export class DestinationService {
 
   // Add these methods to the DestinationService class
 
-static async getTrendingDestinations(): Promise<TrendingDestinationsApiResponse> {
-  try {
-    const response = await fetch(GET_TRENDING_DESTINATIONS_DATA_FE, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      credentials: "include",
-    });
+  static async getTrendingDestinations(): Promise<TrendingDestinationsApiResponse> {
+    try {
+      const response = await fetch(GET_TRENDING_DESTINATIONS_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TrendingDestinationsApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch trending destinations",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching trending destinations:", error);
+      throw error;
     }
-
-    const data: TrendingDestinationsApiResponse = await response.json();
-
-    if (data.code !== 200) {
-      throw new Error(data.message || "Failed to fetch trending destinations");
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error fetching trending destinations:", error);
-    throw error;
   }
-}
 
-static async addTrendingDestination(
-  destinationData: AddTrendingDestinationRequest,
-): Promise<AddTrendingDestinationApiResponse> {
-  try {
-    const response = await fetch(ADD_TRENDING_DESTINATION_DATA_FE, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(destinationData),
-    });
+  static async addTrendingDestination(
+    destinationData: AddTrendingDestinationRequest,
+  ): Promise<AddTrendingDestinationApiResponse> {
+    try {
+      const response = await fetch(ADD_TRENDING_DESTINATION_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(destinationData),
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: AddTrendingDestinationApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to add trending destination");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error adding trending destination:", error);
+      throw error;
     }
-
-    const data: AddTrendingDestinationApiResponse = await response.json();
-
-    if (data.code !== 200) {
-      throw new Error(data.message || "Failed to add trending destination");
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error adding trending destination:", error);
-    throw error;
   }
-}
 
-static async terminateTrendingDestination(
-  destinationData: TerminateTrendingDestinationRequest,
-): Promise<TerminateTrendingDestinationApiResponse> {
-  try {
-    const response = await fetch(TERMINATE_TRENDING_DESTINATION_DATA_FE, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(destinationData),
-    });
+  static async terminateTrendingDestination(
+    destinationData: TerminateTrendingDestinationRequest,
+  ): Promise<TerminateTrendingDestinationApiResponse> {
+    try {
+      const response = await fetch(TERMINATE_TRENDING_DESTINATION_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(destinationData),
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TerminateTrendingDestinationApiResponse =
+        await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to terminate trending destination",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error terminating trending destination:", error);
+      throw error;
     }
-
-    const data: TerminateTrendingDestinationApiResponse = await response.json();
-
-    if (data.code !== 200) {
-      throw new Error(data.message || "Failed to terminate trending destination");
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error terminating trending destination:", error);
-    throw error;
   }
-}
+
+  static async getDestinationNames(): Promise<DestinationsForTourResponse> {
+    try {
+      const response = await fetch(GET_DESTINATIONS_NAMES_FOR_TOUR_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: DestinationsForTourResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching destination names:", error);
+      throw error;
+    }
+  }
 
 }
