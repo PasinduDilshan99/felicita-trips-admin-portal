@@ -1,20 +1,20 @@
 // DEV
-const PROTOCOL = "http";
-const DOMAIN = "localhost";
-const PORT = "8080";
-const CONTEXT_ROOT = "felicita";
-const VERSION = "/v0";
-const API = "/api";
-export const BASE_PATH = `${PROTOCOL}://${DOMAIN}:${PORT}/${CONTEXT_ROOT}`;
-
-// Staging
 // const PROTOCOL = "http";
-// const DOMAIN = "stg-api.felicitatrips.com"; // staging backend domain
-// const PORT = "443"; // HTTPS
+// const DOMAIN = "localhost";
+// const PORT = "8080";
 // const CONTEXT_ROOT = "felicita";
 // const VERSION = "/v0";
 // const API = "/api";
-// export const BASE_PATH = `${PROTOCOL}://${DOMAIN}/${CONTEXT_ROOT}`;
+// export const BASE_PATH = `${PROTOCOL}://${DOMAIN}:${PORT}/${CONTEXT_ROOT}`;
+
+// Staging
+const PROTOCOL = "http";
+const DOMAIN = "stg-api.felicitatrips.com"; // staging backend domain
+const PORT = "443"; // HTTPS
+const CONTEXT_ROOT = "felicita";
+const VERSION = "/v0";
+const API = "/api";
+export const BASE_PATH = `${PROTOCOL}://${DOMAIN}/${CONTEXT_ROOT}`;
 
 // Production
 // const PROTOCOL = "https";
