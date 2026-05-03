@@ -151,8 +151,6 @@ export interface TravelTipInput {
 export interface AddTourRequest {
   name: string;
   description: string;
-  tourType: number;
-  tourCategory: number;
   duration: number;
   latitude: number;
   longitude: number;
@@ -162,12 +160,24 @@ export interface AddTourRequest {
   status: "ACTIVE" | "INACTIVE";
   assignTo: number;
   assignMessage: string;
-  destinations: TourDestinationInput[];
+  tourTypes: number[];
+  tourCategories: number[];
+  itinerary: TourDays[];
   images: TourImageInput[];
   inclusions: InclusionInput[];
   exclusions: ExclusionInput[];
   conditions: ConditionInput[];
   travelTips: TravelTipInput[];
+}
+
+export interface TourDayDestination {
+  destinationId: number;
+  activities: number[];
+}
+
+export interface TourDays {
+  dayNumber: number;
+  destinations: TourDayDestination[];
 }
 
 export interface AddTourResponse {
@@ -311,11 +321,9 @@ export interface TourAllDetailsResponse {
 }
 
 // Update tour interfaces
-export interface TourBasicDetails {
+export interface UpdateTourBasicDetails {
   tourName: string;
   tourDescription: string;
-  tourType: number;
-  tourCategory: number;
   duration: number;
   latitude: number;
   longitude: number;
@@ -325,6 +333,18 @@ export interface TourBasicDetails {
   status: "ACTIVE" | "INACTIVE";
   assignTo: number;
   assignMessage: string;
+}
+
+export interface UpdateTourType {
+  tourTypeId: number;
+  isPrimary: boolean;
+  status: "ACTIVE" | "INACTIVE";
+}
+
+export interface UpdateTourCategory {
+  tourCategoryId: number;
+  isPrimary: boolean;
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface UpdateDestinationInput {
@@ -374,9 +394,16 @@ export interface UpdateTravelTipInput {
 
 export interface UpdateTourRequest {
   tourId: number;
-  tourBasicDetails: TourBasicDetails;
+  tourBasicDetails: UpdateTourBasicDetails;
+  addTourTypes: number[];
+  removeTourTypes: number[];
+  updateTourTypes: UpdateTourType[];
+  addTourCategories: number[];
+  removeTourCategories: number[];
+  updateTourCategories: UpdateTourCategory[];
   addDestinations: TourDestinationInput[];
   removeDestinations: number[];
+  removeActivities: number[];
   updateDestinations: UpdateDestinationInput[];
   addImages: TourImageInput[];
   removeImages: number[];

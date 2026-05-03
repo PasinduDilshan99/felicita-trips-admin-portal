@@ -10,6 +10,8 @@ interface FormActionsProps {
   onSubmit: () => void;
   onReset: () => void;
   errors?: Record<string, string>;
+  submitText?: string;
+  resetText?: string;
 }
 
 export const FormActions: React.FC<FormActionsProps> = ({
@@ -18,6 +20,8 @@ export const FormActions: React.FC<FormActionsProps> = ({
   onSubmit,
   onReset,
   errors = {},
+  submitText = "Create",
+  resetText = "Reset Form",
 }) => {
   const { theme } = useTheme();
   
@@ -29,17 +33,12 @@ export const FormActions: React.FC<FormActionsProps> = ({
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
-        .spinner-white { 
-          animation: spin 0.8s linear infinite; 
-        }
-        
+        .spinner-white { animation: spin 0.8s linear infinite; }
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.7; }
         }
-        .error-pulse {
-          animation: pulse 1.5s ease-in-out infinite;
-        }
+        .error-pulse { animation: pulse 1.5s ease-in-out infinite; }
       `}</style>
 
       <div
@@ -50,7 +49,6 @@ export const FormActions: React.FC<FormActionsProps> = ({
           boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
         }}
       >
-        {/* Error Summary (if any errors exist) */}
         {hasErrors && (
           <div
             className="px-6 py-4 border-b"
@@ -74,9 +72,7 @@ export const FormActions: React.FC<FormActionsProps> = ({
                     </li>
                   ))}
                   {Object.keys(errors).length > 5 && (
-                    <li className="mt-1">
-                      • And {Object.keys(errors).length - 5} more error(s)
-                    </li>
+                    <li className="mt-1">• And {Object.keys(errors).length - 5} more error(s)</li>
                   )}
                 </ul>
               </div>
@@ -84,10 +80,8 @@ export const FormActions: React.FC<FormActionsProps> = ({
           </div>
         )}
 
-        {/* Actions */}
         <div className="px-6 py-6">
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* Reset Button */}
             <button
               type="button"
               onClick={onReset}
@@ -109,10 +103,9 @@ export const FormActions: React.FC<FormActionsProps> = ({
               }}
             >
               <RotateCcw className="w-4 h-4" />
-              Reset Form
+              {resetText}
             </button>
 
-            {/* Submit Button */}
             <button
               type="submit"
               onClick={onSubmit}
@@ -125,31 +118,25 @@ export const FormActions: React.FC<FormActionsProps> = ({
             >
               {(loading || uploadingImages) ? (
                 <>
-                  <div
-                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner-white"
-                  />
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner-white" />
                   <span>
                     {uploadingImages 
                       ? "Uploading Images..." 
                       : loading 
-                        ? "Adding Destination..." 
+                        ? `Adding ${submitText}...` 
                         : "Processing..."}
                   </span>
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  Add Destination
+                  Add {submitText}
                 </>
               )}
             </button>
           </div>
 
-          {/* Helper text */}
-          <p 
-            className="text-xs text-center mt-4"
-            style={{ color: theme.textSecondary }}
-          >
+          <p className="text-xs text-center mt-4" style={{ color: theme.textSecondary }}>
             All fields marked with <span style={{ color: theme.error }}>*</span> are required
           </p>
         </div>

@@ -1,10 +1,12 @@
-// Updated AddNewDestinationPage.tsx - Key modifications
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/common-components/Breadcrumb";
-import { ToastNotification, ToastType } from "@/components/common-components/ToastNotification";
+import {
+  ToastNotification,
+  ToastType,
+} from "@/components/common-components/ToastNotification";
 import {
   WEB_MANAGEMENT_PATH,
   WEB_MANAGEMENT_DESTINATION_PATH,
@@ -19,14 +21,15 @@ import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Loader } from "lucide-react";
 
-// Import components
-import { CategorySelector } from "@/components/destinations-components/add-destination-components/CategorySelector";
-import { LocationForm } from "@/components/destinations-components/add-destination-components/LocationForm";
-import { PricingForm } from "@/components/destinations-components/add-destination-components/PricingForm";
-import { ImageUploader } from "@/components/destinations-components/add-destination-components/ImageUploader";
-import { FormActions } from "@/components/destinations-components/add-destination-components/FormActions";
-import { FormSummary } from "@/components/destinations-components/add-destination-components/FormSummary";
+// Import common components
+import { FormActions } from "@/components/common-components/FormActions";
+import { FormSummary } from "@/components/common-components/FormSummary";
+import { ImageUploader } from "@/components/common-components/ImageUploader";
 import { DestinationInfoForm } from "@/components/destinations-components/add-destination-components/DestinationInfoForm";
+import { LocationForm } from "@/components/destinations-components/add-destination-components/LocationForm";
+import { CategorySelector } from "@/components/common-components/CategorySelector";
+import { adaptDestinationCategories } from "@/utils/category-adapters";
+import { PricingForm } from "@/components/common-components/PricingForm";
 
 // Toast state interface
 interface ToastState {
@@ -73,12 +76,6 @@ const AddNewDestinationPage = () => {
   const [imagePreviews, setImagePreviews] = useState<
     { url: string; file?: File; uploading?: boolean; uploadError?: string }[]
   >([]);
-  const [newImage, setNewImage] = useState<DestinationImageRequest>({
-    name: "",
-    description: "",
-    imageUrl: "",
-    status: "ACTIVE",
-  });
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -92,10 +89,15 @@ const AddNewDestinationPage = () => {
     message: "",
     destinationId: undefined,
   });
-  const [lastCreatedDestinationId, setLastCreatedDestinationId] = useState<number | null>(null);
+
+  const destinationCategories = categories?.destinationCategoryList || [];
+
+  const normalizedCategories = adaptDestinationCategories(
+    destinationCategories,
+  );
+  const selectedItems = selectedCategoryIds.map((id) => ({ id }));
 
   // Get destination categories from context
-  const destinationCategories = categories?.destinationCategoryList || [];
 
   // Helper functions
   const getCategoryName = (categoryId: number): string => {
@@ -170,116 +172,17 @@ const AddNewDestinationPage = () => {
     }
   };
 
-  // Handle file upload
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    setUploadingImages(true);
-
-    for (const file of Array.from(files)) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors((prev) => ({
-          ...prev,
-          image: `File ${file.name} exceeds 5MB limit`,
-        }));
-        continue;
-      }
-      if (!file.type.startsWith("image/")) {
-        setErrors((prev) => ({
-          ...prev,
-          image: `File ${file.name} is not an image`,
-        }));
-        continue;
-      }
-
-      const tempPreview = {
-        url: URL.createObjectURL(file),
-        file: file,
-        uploading: true,
-      };
-      setImagePreviews((prev) => [...prev, tempPreview]);
-
-      try {
-        const cloudinaryUrl = await uploadImageToCloudinary(file);
-        setImagePreviews((prev) =>
-          prev.map((preview) =>
-            preview.file === file
-              ? { ...preview, url: cloudinaryUrl, uploading: false }
-              : preview,
-          ),
-        );
-
-        const newImageData: DestinationImageRequest = {
-          name: file.name.split(".")[0],
-          description: `Uploaded image: ${file.name}`,
-          imageUrl: cloudinaryUrl,
-          status: "ACTIVE",
-        };
-
-        setFormData((prev) => ({
-          ...prev,
-          images: [...prev.images, newImageData],
-        }));
-        if (errors.images) setErrors((prev) => ({ ...prev, images: "" }));
-      } catch (error: any) {
-        setImagePreviews((prev) =>
-          prev.filter((preview) => preview.file !== file),
-        );
-        setErrors((prev) => ({
-          ...prev,
-          image: `Failed to upload ${file.name}: ${error.message}`,
-        }));
-      }
-    }
-
-    setUploadingImages(false);
+  // Image handling
+  const handleImagePreviewsChange = (previews: typeof imagePreviews) => {
+    setImagePreviews(previews);
   };
 
-  // Handle manual image addition
-  const handleAddImage = () => {
-    if (!newImage.name.trim() || !newImage.imageUrl.trim()) {
-      setErrors((prev) => ({
-        ...prev,
-        image: "Image name and URL are required",
-      }));
-      return;
-    }
-    try {
-      new URL(newImage.imageUrl);
-    } catch {
-      setErrors((prev) => ({ ...prev, image: "Please enter a valid URL" }));
-      return;
-    }
-
-    setImagePreviews((prev) => [
-      ...prev,
-      { url: newImage.imageUrl, uploading: false },
-    ]);
-    setFormData((prev) => ({
-      ...prev,
-      images: [...prev.images, { ...newImage }],
-    }));
-    setNewImage({ name: "", description: "", imageUrl: "", status: "ACTIVE" });
-    if (errors.image) setErrors((prev) => ({ ...prev, image: "" }));
+  const handleImagesChange = (images: DestinationImageRequest[]) => {
+    setFormData({ ...formData, images });
   };
 
-  // Handle image removal
-  const handleRemoveImage = (index: number) => {
-    const previewToRemove = imagePreviews[index];
-    if (previewToRemove?.url && previewToRemove.url.startsWith("blob:")) {
-      URL.revokeObjectURL(previewToRemove.url);
-    }
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
-    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // Handle new image field changes
-  const handleNewImageChange = (field: string, value: string) => {
-    setNewImage((prev) => ({ ...prev, [field]: value }));
+  const handleUploadingImagesChange = (uploading: boolean) => {
+    setUploadingImages(uploading);
   };
 
   // Get current location
@@ -323,7 +226,7 @@ const AddNewDestinationPage = () => {
     }
   };
 
-  // Validate form - MODIFIED: images and extra price are NOT required
+  // Validate form
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = "Destination name is required";
@@ -337,8 +240,6 @@ const AddNewDestinationPage = () => {
       newErrors.latitude = "Latitude must be between -90 and 90";
     if (formData.longitude < -180 || formData.longitude > 180)
       newErrors.longitude = "Longitude must be between -180 and 180";
-    // REMOVED: images validation - now optional
-    // REMOVED: extra price validation - now optional
 
     const hasUploadingImages = imagePreviews.some(
       (preview) => preview.uploading,
@@ -350,7 +251,7 @@ const AddNewDestinationPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission - MODIFIED: shows toast notification instead of inline success
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -364,8 +265,11 @@ const AddNewDestinationPage = () => {
 
     try {
       const preparedImages = formData.images.map((image) => {
-        // Skip URL validation if no image URL (optional images)
-        if (image.imageUrl && !image.imageUrl.startsWith("http") && !image.imageUrl.startsWith("https")) {
+        if (
+          image.imageUrl &&
+          !image.imageUrl.startsWith("http") &&
+          !image.imageUrl.startsWith("https")
+        ) {
           throw new Error(
             `Invalid image URL for "${image.name}". Please use HTTP/HTTPS URLs.`,
           );
@@ -396,33 +300,25 @@ const AddNewDestinationPage = () => {
       const response = await DestinationService.addDestination(submissionData);
 
       if (response.code === 200) {
-        // Store the created destination ID for navigation
-        // const destinationId = response.data?.destinationId || response.data?.id;
-        const destinationId = 1;
-        setLastCreatedDestinationId(destinationId);
-        
-        // Show success toast
         setToast({
           show: true,
           type: "success",
           title: "Destination Created Successfully!",
           message: `${formData.name} has been added to your destinations.`,
-          destinationId: destinationId,
         });
-        
-        // Reset form
+
         handleReset();
       } else {
         throw new Error(response.message || "Failed to add destination");
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      // Show error toast
       setToast({
         show: true,
         type: "error",
         title: "Submission Failed",
-        message: error.message || "Failed to add destination. Please try again.",
+        message:
+          error.message || "Failed to add destination. Please try again.",
         destinationId: undefined,
       });
     } finally {
@@ -496,7 +392,9 @@ const AddNewDestinationPage = () => {
           title={toast.title}
           message={toast.message}
           onClose={handleCloseToast}
-          actionLink={toast.type === "success" ? getDestinationLink() : undefined}
+          actionLink={
+            toast.type === "success" ? getDestinationLink() : undefined
+          }
           actionText="View Destination"
         />
       )}
@@ -531,10 +429,21 @@ const AddNewDestinationPage = () => {
               />
 
               <CategorySelector
-                categories={destinationCategories}
-                selectedCategoryIds={selectedCategoryIds}
-                onCategoryChange={handleCategoryChange}
+                categories={normalizedCategories}
+                selectedItems={selectedItems}
+                onCategoryAdd={(categoryId) => {
+                  setSelectedCategoryIds([...selectedCategoryIds, categoryId]);
+                }}
+                onCategoryRemove={(categoryId) => {
+                  setSelectedCategoryIds(
+                    selectedCategoryIds.filter((id) => id !== categoryId),
+                  );
+                }}
+                mode="simple"
+                title="Destination Categories"
+                description="Select categories for your destination"
                 error={errors.destinationCategoriesIdList}
+                showDescriptions
               />
 
               <LocationForm
@@ -544,10 +453,13 @@ const AddNewDestinationPage = () => {
                 onInputChange={handleInputChange}
                 onGetCurrentLocation={handleGetCurrentLocation}
               />
-
               <PricingForm
                 formData={formData}
+                errors={errors}
                 onInputChange={handleInputChange}
+                mode="destination"
+                title="Pricing Information"
+                description="Optional pricing details for customers"
               />
 
               <FormActions
@@ -556,6 +468,7 @@ const AddNewDestinationPage = () => {
                 onSubmit={() => {}}
                 onReset={handleReset}
                 errors={errors}
+                submitText="Destination"
               />
             </form>
           </div>
@@ -565,20 +478,81 @@ const AddNewDestinationPage = () => {
             <ImageUploader
               images={formData.images}
               imagePreviews={imagePreviews}
-              newImage={newImage}
-              uploadingImages={uploadingImages}
+              onImagePreviewsChange={handleImagePreviewsChange}
+              onImagesChange={handleImagesChange}
+              onUploadingChange={handleUploadingImagesChange}
               errors={errors}
-              onNewImageChange={handleNewImageChange}
-              onAddImage={handleAddImage}
-              onFileUpload={handleFileUpload}
-              onRemoveImage={handleRemoveImage}
             />
 
             <FormSummary
-              formData={formData}
-              categories={destinationCategories}
-              getCategoryName={getCategoryName}
-              getCategoryColor={getCategoryColor}
+              title="Destination Summary"
+              sections={[
+                {
+                  label: "Destination",
+                  value: formData.name || "Not set",
+                  icon: "eye",
+                  color: theme.primary,
+                },
+                {
+                  label: "Categories",
+                  value:
+                    formData.destinationCategoriesIdList?.length > 0
+                      ? formData.destinationCategoriesIdList
+                          .map((id) => getCategoryName(id))
+                          .join(", ")
+                      : "Not set",
+                  icon: "tag",
+                  color: theme.success,
+                },
+                {
+                  label: "Location",
+                  value: formData.location || "Not set",
+                  icon: "map",
+                  color: theme.accent,
+                },
+                {
+                  label: "Coordinates",
+                  value:
+                    formData.latitude && formData.longitude
+                      ? `${formData.latitude.toFixed(4)}°, ${formData.longitude.toFixed(4)}°`
+                      : "Not set",
+                  icon: "map",
+                  color: theme.warning,
+                },
+                {
+                  label: "Status",
+                  value: formData.status || "Not set",
+                  icon: "eye",
+                  color:
+                    formData.status === "ACTIVE"
+                      ? theme.success
+                      : theme.textSecondary,
+                },
+                {
+                  label: "Extra Price",
+                  value: formData.extraPrice
+                    ? `$${formData.extraPrice.toFixed(2)}`
+                    : "No extra price",
+                  icon: "dollar",
+                  color: theme.success,
+                },
+                {
+                  label: "Images",
+                  value:
+                    formData.images.length > 0
+                      ? `${formData.images.length} image(s)`
+                      : "No images (optional)",
+                  icon: "image",
+                  color: theme.error,
+                },
+              ]}
+              tips={[
+                "Images are automatically uploaded to Cloudinary for optimal performance",
+                "Use descriptive names and detailed descriptions (max 1000 characters)",
+                "Add high-quality images (max 5MB each) for better presentation",
+                "You can select multiple categories for better discoverability",
+                "Verify coordinates for accurate location mapping",
+              ]}
             />
           </div>
         </div>

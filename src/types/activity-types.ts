@@ -1,18 +1,17 @@
-// types/activity-types.ts
+// types/activity-types.ts - Updated types
 
 import { ApiResponse } from "./common-types";
 
-export interface Schedule {
-  id: number;
-  name: string;
-  description: string;
-  status: number;
-  assume_start_date: string;
-  assume_end_date: string;
-  duration_hours_start: number;
-  duration_hours_end: number;
-  special_note: string;
+// Category Interface for Add/Update
+export interface ActivityCategory {
+  categoryId: number;
+  isPrimary: boolean;
+  status: "ACTIVE" | "INACTIVE";
 }
+
+// Update Category Interfaces
+export interface AddCategoryRequest extends ActivityCategory {}
+export interface UpdateCategoryRequest extends ActivityCategory {}
 
 // Requirement Interface
 export interface Requirement {
@@ -33,19 +32,20 @@ export interface ActivityImage {
   image_url: string;
 }
 
-// Activity Interface
+// Activity Interface (updated)
 export interface Activity {
   id: number;
   name: string;
   destinationName: string;
   description: string;
-  season: string;
+  seasonId: number;
+  seasonName?: string;
   status: "ACTIVE" | "INACTIVE" | string;
   schedules: Schedule[];
   requirements: Requirement[];
   images: ActivityImage[];
   destination_id: number;
-  activities_category: ActivitiesCategory[];
+  categories: ActivityCategoryDetail[];
   duration_hours: number;
   available_from: string;
   available_to: string;
@@ -55,6 +55,25 @@ export interface Activity {
   max_participate: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface Schedule {
+  id: number;
+  name: string;
+  description: string;
+  status: number;
+  assume_start_date: string;
+  assume_end_date: string;
+  duration_hours_start: number;
+  duration_hours_end: number;
+  special_note: string;
+}
+
+export interface ActivityCategoryDetail {
+  id: number;
+  name: string;
+  description: string;
+  is_primary: boolean;
 }
 
 export interface ActivitiesCategory {
@@ -75,14 +94,15 @@ export interface ActivityFilterParams {
   status: string | null;
   pageSize: number;
   pageNumber: number;
-  sortBy?: string; // Optional: "name", "ratings", "location", "destination_id", "created_at", "updated_at"
-  sortDirection?: "ASC" | "DESC"; // Optional: "ASC" or "DESC"
+  sortBy?: string;
+  sortDirection?: "ASC" | "DESC";
 }
 
 export interface ActivityForTerminate {
   activityId: number;
   activityName: string;
 }
+
 export interface ActivitiesForTerminateResponse {
   code: number;
   status: string;
@@ -134,6 +154,7 @@ export interface SingleActivityApiResponse {
   timestamp: string;
 }
 
+// Image Request (updated)
 export interface ActivityImageRequest {
   name: string;
   description: string;
@@ -141,6 +162,12 @@ export interface ActivityImageRequest {
   status: "ACTIVE" | "INACTIVE";
 }
 
+// Update Image Request
+export interface UpdateImageRequest extends ActivityImageRequest {
+  imageId?: number;
+}
+
+// Requirement Request (updated)
 export interface ActivityRequirementRequest {
   name: string;
   value: string;
@@ -149,11 +176,17 @@ export interface ActivityRequirementRequest {
   status: "ACTIVE" | "INACTIVE";
 }
 
+// Update Requirement Request
+export interface UpdateRequirementRequest extends ActivityRequirementRequest {
+  requirementId?: number;
+}
+
+// Add Activity Request (updated with categories array)
 export interface AddActivityRequest {
   destinationId: number;
   name: string;
   description: string;
-  activitiesCategory: string;
+  categories: ActivityCategory[];
   durationHours: number;
   availableFrom: string;
   availableTo: string;
@@ -161,10 +194,42 @@ export interface AddActivityRequest {
   priceForeigners: number;
   minParticipate: number;
   maxParticipate: number;
-  season: string;
+  seasonId: number;
   status: "ACTIVE" | "INACTIVE";
   images: ActivityImageRequest[];
   requirements: ActivityRequirementRequest[];
+}
+
+// Update Activity Request (updated with category operations)
+export interface UpdateActivityRequest {
+  activityId: number;
+  destinationId: number;
+  name: string;
+  description: string;
+  durationHours: number;
+  availableFrom: string;
+  availableTo: string;
+  priceLocal: number;
+  priceForeigners: number;
+  minParticipate: number;
+  maxParticipate: number;
+  seasonId: number;
+  status: "ACTIVE" | "INACTIVE";
+  
+  // Category operations
+  removeCategoryIds: number[];
+  addCategories: AddCategoryRequest[];
+  updatedCategories: UpdateCategoryRequest[];
+  
+  // Image operations
+  removeImagesIds: number[];
+  addImages: UpdateImageRequest[];
+  updatedImages: UpdateImageRequest[];
+  
+  // Requirement operations
+  removeRequirementsIds: number[];
+  addRequirements: UpdateRequirementRequest[];
+  updatedRequirements: UpdateRequirementRequest[];
 }
 
 export interface AddActivityResponse {
@@ -183,7 +248,7 @@ export interface AddActivityFormData {
   destinationId: number | null;
   name: string;
   description: string;
-  activitiesCategory: string;
+  categories: ActivityCategory[];
   durationHours: number | null;
   availableFrom: string;
   availableTo: string;
@@ -191,7 +256,7 @@ export interface AddActivityFormData {
   priceForeigners: number | null;
   minParticipate: number | null;
   maxParticipate: number | null;
-  season: string;
+  seasonId: number | null;
   status: "ACTIVE" | "INACTIVE";
   images: ActivityImageRequest[];
   requirements: ActivityRequirementRequest[];
@@ -203,7 +268,11 @@ export interface DestinationOption {
   destinationName: string;
 }
 
-// Add these new types for update functionality
+// Season option
+export interface SeasonOption {
+  id: number;
+  name: string;
+}
 
 // Activity ID and Name for dropdown
 export interface ActivityIdName {
@@ -219,49 +288,7 @@ export interface ActivityIdNameResponse {
   timestamp: string;
 }
 
-// Update Activity Types
-export interface UpdateImageRequest {
-  imageId?: number;
-  name: string;
-  description: string;
-  imageUrl: string;
-  status: "ACTIVE" | "INACTIVE";
-}
-
-export interface UpdateRequirementRequest {
-  requirementId?: number;
-  name: string;
-  value: string;
-  description: string;
-  color: string;
-  status: "ACTIVE" | "INACTIVE";
-}
-
-export interface UpdateActivityRequest {
-  activityId: number;
-  destinationId: number;
-  name: string;
-  description: string;
-  activitiesCategory: string;
-  durationHours: number;
-  availableFrom: string;
-  availableTo: string;
-  priceLocal: number;
-  priceForeigners: number;
-  minParticipate: number;
-  maxParticipate: number;
-  season: string;
-  status: "ACTIVE" | "INACTIVE";
-
-  removeImagesIds: number[];
-  addImages: UpdateImageRequest[];
-  updatedImages: UpdateImageRequest[];
-
-  removeRequirementsIds: number[];
-  addRequirements: UpdateRequirementRequest[];
-  updatedRequirements: UpdateRequirementRequest[];
-}
-
+// Update Activity Response
 export interface UpdateActivityResponse {
   message: string;
   id: number;
@@ -275,6 +302,7 @@ export interface UpdateActivityApiResponse {
   timestamp: string;
 }
 
+// Statistics Types (unchanged)
 export interface ActivityDetails {
   totalActivitiesCount: number;
   activeActivities: number;
@@ -309,9 +337,7 @@ export interface ActivityStatisticsApiResponse {
   timestamp: string;
 }
 
-// Add these to your existing types/activity-types.ts file
-
-// Activity Schedule Statistics Types
+// Activity Schedule Statistics Types (unchanged)
 export interface ParticipationTrend {
   activityDate: string;
   totalParticipants: number;
@@ -365,7 +391,6 @@ export interface ActivityScheduleStatisticsData {
 
 export type ActivityScheduleStatisticsApiResponse = ApiResponse<ActivityScheduleStatisticsData>;
 
-// Activity Categories Statistics Types
 export interface CategoryActivityCount {
   categoryId: number;
   categoryName: string;
@@ -413,3 +438,45 @@ export interface ActivityCategoriesStatisticsData {
 }
 
 export type ActivityCategoriesStatisticsApiResponse = ApiResponse<ActivityCategoriesStatisticsData>;
+
+// Add these to your existing types/activity-types.ts file
+
+// Activity by Destination Response Types
+export interface ActivityCategoryDetail {
+  categoryId: number;
+  categoryName: string;
+  isPrimary: boolean;
+}
+
+export interface ActivityImageDetail {
+  imageId: number;
+  name: string;
+  description: string | null;
+  imageUrl: string;
+}
+
+export interface ActivityByDestination {
+  activityId: number;
+  destinationId: number;
+  name: string;
+  description: string;
+  durationHours: number;
+  availableFrom: string;
+  availableTo: string;
+  priceLocal: number;
+  priceForeigners: number;
+  minParticipate: number;
+  maxParticipate: number;
+  season: string;
+  seasonId: number;
+  statusId: number;
+  categories: ActivityCategoryDetail[];
+  images: ActivityImageDetail[];
+}
+
+export type ActivitiesByDestinationResponse = ApiResponse<ActivityByDestination[]>;
+
+// Request type
+export interface GetActivitiesByDestinationRequest {
+  destinationId: number;
+}

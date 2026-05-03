@@ -241,6 +241,10 @@ export class TourService {
         body: JSON.stringify(tourData),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data: AddTourApiResponse = await response.json();
 
       if (data.code !== 200) {
@@ -342,6 +346,10 @@ export class TourService {
         credentials: "include",
         body: JSON.stringify(tourData),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const data: UpdateTourApiResponse = await response.json();
 

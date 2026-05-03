@@ -217,6 +217,7 @@ export const UPDATE_ACTIVITY_DATA_FE = `${API}${ACTIVITIES}/update-activity`;
 export const GET_ACTIVITIES_STATISTICS_DATA_FE = `${API}${ACTIVITIES}/activities-statistics`;
 export const GET_ACTIVITIES_SCHEDULE_STATISTICS_DATA_FE = `${API}${ACTIVITIES}/activities-schedule-statistics`;
 export const GET_ACTIVITIES_CATEGORIES_STATISTICS_DATA_FE = `${API}${ACTIVITIES}/activities-categories-statistics`;
+export const GET_ACTIVITIES_BY_DESTINATION_ID_DATA_FE = `${API}${ACTIVITIES}/activities-by-destinationId`;
 
 // Blogs
 export const GET_ALL_BLOGS_DETAILS_DATA_FE = `${API}${BLOGS}`;

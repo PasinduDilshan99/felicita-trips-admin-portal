@@ -246,6 +246,7 @@ export const UPDATE_ACTIVITY_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/u
 export const GET_ACTIVITIES_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/activities-statistics`;
 export const GET_ACTIVITIES_SCHEDULE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/activities-schedule-statistics`;
 export const GET_ACTIVITIES_CATEGORIES_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/activities-categories-statistics`;
+export const GET_ACTIVITIES_BY_DESTINATION_ID_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/activities-by-destinationId`;
 
 // Blogs
 export const GET_ALL_BLOGS_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${BLOG}/all`;

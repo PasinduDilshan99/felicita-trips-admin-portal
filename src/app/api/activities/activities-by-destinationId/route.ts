@@ -1,27 +1,23 @@
-import { CREATE_TOUR_DATA } from "@/utils/backEndConstant";
+import { GET_ACTIVITIES_BY_DESTINATION_ID_DATA } from "@/utils/backEndConstant";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    if (!CREATE_TOUR_DATA) {
+    if (!GET_ACTIVITIES_BY_DESTINATION_ID_DATA) {
       throw new Error("Backend URL is not defined");
     }
 
     const body = await request.json();
 
-    console.log('====================================');
-    console.log(body);
-    console.log('====================================');
-
     // Get cookies from the incoming request
     const cookieHeader = request.headers.get("cookie") || "";
 
-    const response = await fetch(CREATE_TOUR_DATA, {
+    const response = await fetch(GET_ACTIVITIES_BY_DESTINATION_ID_DATA, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         // Forward cookies
-        Cookie: cookieHeader,
+        "Cookie": cookieHeader,
       },
       body: JSON.stringify(body),
       // credentials is ignored in server-side fetch, headers already include cookies
@@ -32,7 +28,7 @@ export async function POST(request: NextRequest) {
       console.error("Backend returned error:", text);
       return NextResponse.json(
         { error: "Failed to fetch activities" },
-        { status: response.status },
+        { status: response.status }
       );
     }
 
@@ -42,7 +38,7 @@ export async function POST(request: NextRequest) {
     console.error("Error fetching activities:", error);
     return NextResponse.json(
       { error: "Something went wrong while fetching activities" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
