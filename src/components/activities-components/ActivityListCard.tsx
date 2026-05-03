@@ -253,7 +253,7 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
 
   // Handle season - parse comma-separated string or array
   let seasons: string[] = [];
-  const seasonData = activity?.season as any;
+  const seasonData = activity?.seasonName as any;
   if (seasonData) {
     if (typeof seasonData === "string") {
       seasons = seasonData.split(",").map((s: string) => s.trim());
@@ -265,7 +265,7 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
   }
 
   // Handle categories
-  const categories = activity?.activities_category || [];
+  const categories = activity?.categories || [];
   const primaryCategory = categories.find((cat) => cat.is_primary);
   const displayCategory = primaryCategory || categories[0];
   const categoryName = displayCategory?.name || "Uncategorized";

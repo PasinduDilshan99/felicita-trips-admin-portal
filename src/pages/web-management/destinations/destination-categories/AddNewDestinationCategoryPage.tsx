@@ -22,7 +22,7 @@ import {
   DESTINATION_PAGE_URL,
   WEB_MANAGEMENT_URL,
 } from "@/utils/urls";
-import { CategoryFormActions } from "./CategoryFormActions";
+import { CategoryFormActions } from "@/components/destination-categories-components/destination-categories-add-components/CategoryFormActions";
 
 interface CategoryImage {
   name: string;

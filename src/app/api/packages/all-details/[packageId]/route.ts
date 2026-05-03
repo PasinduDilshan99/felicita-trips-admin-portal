@@ -7,12 +7,12 @@ interface PackageParams {
 
 export async function GET(
   request: NextRequest,
-  context: { params: PackageParams | Promise<PackageParams> },
+  context: { params: Promise<PackageParams> },
 ) {
   try {
     const { packageId } = await context.params;
 
-    console.log("package  API - packageId:", packageId);
+    console.log("package API - packageId:", packageId);
 
     if (!packageId) {
       return NextResponse.json(

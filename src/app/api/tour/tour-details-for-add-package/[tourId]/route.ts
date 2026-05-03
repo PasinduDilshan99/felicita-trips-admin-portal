@@ -7,7 +7,7 @@ interface TourParams {
 
 export async function GET(
   request: NextRequest,
-  context: { params: TourParams | Promise<TourParams> },
+  context: { params: Promise<TourParams> },
 ) {
   try {
     const { tourId } = await context.params;

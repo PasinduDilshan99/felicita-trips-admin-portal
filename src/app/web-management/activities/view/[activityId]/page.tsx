@@ -10,14 +10,13 @@ import {
   WEB_MANAGEMENT_DESTINATION_PATH,
 } from "@/utils/constant";
 import { ActivityService } from "@/services/activityService";
-import { Activity } from "@/types/activity-types";
+import { Activity, ActivityCategoryDetail } from "@/types/activity-types";
 import {
   MapPin,
   Tag,
   Clock,
   Users,
   Image as ImageIcon,
-  Star,
   ChevronLeft,
   ChevronRight,
   Globe,
@@ -31,10 +30,8 @@ import {
   Trash2,
   Share2,
   Bookmark,
-  Navigation,
   Phone,
   Mail,
-  ExternalLink,
   ArrowLeft,
   Target,
   AlertCircle,
@@ -43,13 +40,12 @@ import {
   UserCheck,
   Award,
   Thermometer,
-  Heart,
-  Trophy,
   Zap,
   Mountain,
   Waves,
   Castle,
   Trees,
+  Package,
 } from "lucide-react";
 import { Loader2 } from "lucide-react";
 
@@ -64,7 +60,6 @@ const ActivityDetailsPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedSchedule, setSelectedSchedule] = useState<number | null>(null);
 
-
   useEffect(() => {
     if (activityId) {
       fetchActivity();
@@ -78,24 +73,11 @@ const ActivityDetailsPage = () => {
       console.log('Fetching activity with ID:', activityId);
       const response = await ActivityService.getActivityById(activityId);
       console.log('Full API Response:', response);
-      console.log('Response data:', response.data);
       
-      // Check response structure
       if (response && response.data) {
-        // Check if response.data is the activity object directly
-        if (response.data.id) {
-          console.log('Setting activity from response.data directly');
-          setActivity(response.data);
-        } else if (response.data && response.data.id) {
-          console.log('Setting activity from response.data.activity');
-          setActivity(response.data);
-        } else {
-          console.log('Invalid response structure:', response.data);
-          throw new Error('Invalid response structure');
-        }
+        setActivity(response.data);
       } else {
-        console.log('No data in response');
-        throw new Error('No data received from server');
+        throw new Error('Invalid response structure');
       }
     } catch (err) {
       console.error("Error fetching activity:", err);
@@ -105,7 +87,6 @@ const ActivityDetailsPage = () => {
     }
   };
 
-  // Rest of the component remains the same...
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
     { label: "Web Management", href: WEB_MANAGEMENT_PATH },
@@ -185,9 +166,15 @@ const ActivityDetailsPage = () => {
     return currentTime >= startMinutes && currentTime <= endMinutes;
   };
 
+  // Get primary category
+  const getPrimaryCategory = (): ActivityCategoryDetail | null => {
+    if (!activity?.categories) return null;
+    return activity.categories.find(cat => cat.is_primary) || activity.categories[0] || null;
+  };
+
   // Get icon based on category
-  const getCategoryIcon = (category: string) => {
-    const lowerCategory = category.toLowerCase();
+  const getCategoryIcon = (categoryName: string) => {
+    const lowerCategory = categoryName.toLowerCase();
     if (lowerCategory.includes('adventure') || lowerCategory.includes('hiking')) {
       return <Mountain className="w-5 h-5" />;
     }
@@ -215,10 +202,6 @@ const ActivityDetailsPage = () => {
   }
 
   if (error || !activity) {
-    console.log('====================================');
-    console.log('Error state - activity:', activity);
-    console.log('Error message:', error);
-    console.log('====================================');
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
@@ -241,8 +224,8 @@ const ActivityDetailsPage = () => {
     );
   }
 
+  const primaryCategory = getPrimaryCategory();
   const currentImage = activity.images[currentImageIndex];
-  const seasons = activity.season.split(',').map(s => s.trim());
   const totalSchedules = activity.schedules.length;
   const totalRequirements = activity.requirements.length;
   const totalImages = activity.images.length;
@@ -279,13 +262,6 @@ const ActivityDetailsPage = () => {
             >
               <Share2 className="w-4 h-4" />
               Share
-            </button>
-            <button
-              onClick={() => {}}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 rounded-lg border border-amber-100 hover:border-amber-300 transition-all duration-200"
-            >
-              <Bookmark className="w-4 h-4" />
-              Save
             </button>
             <button
               onClick={handleEdit}
@@ -426,22 +402,24 @@ const ActivityDetailsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                      {getCategoryIcon(activity.activities_category)}
+                      <Package className="w-5 h-5 text-emerald-600" />
                       Category Information
                     </h3>
-                    <div className="space-y-2">
-                      <p className="text-gray-600">
-                        <span className="font-medium">Category:</span> {activity.activities_category}
-                      </p>
-                      <p className="text-gray-600">
-                        <span className="font-medium">Description:</span> {activity.category_description}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Tag className="w-4 h-4 text-emerald-600" />
-                        <span className="text-sm font-medium text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-                          {activity.category_name}
-                        </span>
-                      </div>
+                    <div className="space-y-3">
+                      {activity.categories.map((category) => (
+                        <div key={category.id} className="p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100">
+                          <div className="flex items-center gap-2 mb-1">
+                            {getCategoryIcon(category.name)}
+                            <span className="font-medium text-gray-800">{category.name}</span>
+                            {category.is_primary && (
+                              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                Primary
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500">{category.description}</p>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -458,27 +436,14 @@ const ActivityDetailsPage = () => {
                         <span className="font-medium">Duration:</span> {activity.duration_hours} hours
                       </p>
                       <p className="text-gray-600">
-                        <span className="font-medium">Destination ID:</span> {activity.destination_id}
+                        <span className="font-medium">Destination:</span> {activity.destinationName}
                       </p>
+                      {activity.seasonName && (
+                        <p className="text-gray-600">
+                          <span className="font-medium">Season:</span> {activity.seasonName}
+                        </p>
+                      )}
                     </div>
-                  </div>
-                </div>
-
-                {/* Seasons */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                    <Thermometer className="w-5 h-5 text-orange-600" />
-                    Best Seasons
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {seasons.map((season, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 rounded-lg border border-amber-100 hover:border-amber-300 transition-colors"
-                      >
-                        {season}
-                      </span>
-                    ))}
                   </div>
                 </div>
               </div>
@@ -507,9 +472,7 @@ const ActivityDetailsPage = () => {
                     }`}
                     onClick={() =>
                       setSelectedSchedule(
-                        selectedSchedule === schedule.id
-                          ? null
-                          : schedule.id
+                        selectedSchedule === schedule.id ? null : schedule.id
                       )
                     }
                   >
@@ -535,19 +498,6 @@ const ActivityDetailsPage = () => {
                           }`}>
                             {schedule.status === 1 ? 'Active' : 'Inactive'}
                           </span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col items-end">
-                        <div className="text-right mb-2">
-                          <div className="text-sm text-gray-500">
-                            Status
-                          </div>
-                          <div className={`text-lg font-semibold ${
-                            schedule.status === 1 ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {schedule.status === 1 ? 'Active' : 'Inactive'}
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -687,17 +637,12 @@ const ActivityDetailsPage = () => {
                   <span className="font-bold text-gray-900">{activity.min_participate}-{activity.max_participate}</span>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg">
-                  <span className="text-gray-600">Local Price</span>
-                  <span className="font-bold text-gray-900">LKR {activity.price_local.toLocaleString()}</span>
-                </div>
-                
                 <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg">
-                  <span className="text-gray-600">Foreign Price</span>
-                  <span className="font-bold text-gray-900">LKR {activity.price_foreigners.toLocaleString()}</span>
+                  <span className="text-gray-600">Destination</span>
+                  <span className="font-bold text-gray-900">{activity.destinationName}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg">
                   <span className="text-gray-600">Total Schedules</span>
                   <span className="font-bold text-gray-900">{totalSchedules}</span>
                 </div>
@@ -771,19 +716,19 @@ const ActivityDetailsPage = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 rounded-lg">
-                  <Calendar className="w-5 h-5 text-emerald-600" />
+                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50/50 to-violet-50/50 rounded-lg">
+                  <Package className="w-5 h-5 text-purple-600" />
                   <div>
-                    <span className="font-medium text-gray-700">Best Seasons</span>
-                    <p className="text-sm text-gray-500">{seasons.join(', ')}</p>
+                    <span className="font-medium text-gray-700">Categories</span>
+                    <p className="text-sm text-gray-500">{activity.categories.map(c => c.name).join(', ')}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50/50 to-violet-50/50 rounded-lg">
-                  <Users className="w-5 h-5 text-purple-600" />
+                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 rounded-lg">
+                  <Users className="w-5 h-5 text-emerald-600" />
                   <div>
                     <span className="font-medium text-gray-700">Group Friendly</span>
-                    <p className="text-sm text-gray-500">Suitable for groups</p>
+                    <p className="text-sm text-gray-500">Suitable for groups of {activity.min_participate}-{activity.max_participate}</p>
                   </div>
                 </div>
                 
@@ -791,13 +736,13 @@ const ActivityDetailsPage = () => {
                   <Shield className="w-5 h-5 text-rose-600" />
                   <div>
                     <span className="font-medium text-gray-700">Safety</span>
-                    <p className="text-sm text-gray-500">Requirements specified</p>
+                    <p className="text-sm text-gray-500">{totalRequirements} requirements specified</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Contact & Actions */}
+            {/* Quick Actions */}
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
                 <Phone className="w-5 h-5 text-green-600" />
@@ -871,15 +816,6 @@ const ActivityDetailsPage = () => {
                   </div>
                 )}
               </div>
-              
-              {activity.images.length > 0 && (
-                <button
-                  onClick={() => setCurrentImageIndex(0)}
-                  className="w-full mt-4 text-center text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  View All Images
-                </button>
-              )}
             </div>
 
             {/* Metadata */}

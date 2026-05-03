@@ -148,7 +148,7 @@ const TourDetailsPage = () => {
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this tour?")) {
       try {
-        await TourService.deleteTour(tourId);
+        await TourService.terminateTour(tourId);
         router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/view`);
       } catch (error) {
         console.error("Error deleting tour:", error);

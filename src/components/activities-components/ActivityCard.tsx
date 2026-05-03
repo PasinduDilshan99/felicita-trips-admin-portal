@@ -26,14 +26,13 @@ import ImageModal, {
 import {
   ACTIVITY_DETAILS_VIEW_PAGE_URL,
   ACTIVITY_CATEGORY_VIEW_DETAILS_URL,
-  SEASONS_VIEW_PAGE_URL,
   DESTINATION_DETAILS_VIEW_PAGE_URL,
 } from "@/utils/urls";
 import { hexToRgba } from "@/utils/functions";
 import {
-  ActivitiesCategory,
   Activity,
   ActivityImage,
+  ActivityCategoryDetail,
 } from "@/types/activity-types";
 
 /* ─── Animation Variants ─────────────────────────────────────────────────── */
@@ -176,13 +175,6 @@ const getSafeString = (value: any, fallback: string = ""): string => {
   return fallback;
 };
 
-// Helper to safely get number value
-const getSafeNumber = (value: any, fallback: number = 0): number => {
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return parseFloat(value) || fallback;
-  return fallback;
-};
-
 interface ActivityCardProps {
   activity: Activity;
   onImageClick?: (imageIndex: number) => void;
@@ -208,7 +200,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
   // Safely extract data with fallbacks
   const images = activity?.images || [];
-  const activityId = activity?.id || "unknown";
+  const activityId = activity?.id;
   const activityName = getSafeString(activity?.name, "Unnamed Activity");
   const description = getSafeString(activity?.description, "");
   const fullDescription = description;
@@ -218,18 +210,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     ? fullDescription
     : truncatedDesc;
 
-  // Handle season - parse comma-separated string
-  let seasons: string[] = [];
-  if (activity?.season) {
-    if (typeof activity.season === "string") {
-      seasons = activity.season.split(",").map((s: string) => s.trim());
-    } else if (Array.isArray(activity.season)) {
-      seasons = activity.season;
-    }
-  }
+  // Handle season - use seasonName if available
+  const seasonName = activity?.seasonName || null;
 
-  // Handle categories - get all categories
-  const categories = activity?.activities_category || [];
+  // Handle categories - categories is an array of ActivityCategoryDetail
+  const categories = activity?.categories || [];
 
   // Get primary category for badge display
   const primaryCategory = categories.find((cat) => cat.is_primary);
@@ -240,8 +225,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   // Handle status
   const status = activity?.status || "INACTIVE";
 
-  // Handle destination ID
-  const destinationId = activity?.destination_id || "N/A";
+  // Handle destination ID and name
+  const destinationId = activity?.destination_id;
   const destinationName = activity?.destinationName || "N/A";
 
   // Handle duration
@@ -268,11 +253,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     router.push(
       `${ACTIVITY_CATEGORY_VIEW_DETAILS_URL}/${categoryId}?name=${encodeURIComponent(categoryName)}`,
     );
-  };
-
-  const handleSeasonClick = (e: React.MouseEvent, season: string) => {
-    e.stopPropagation();
-    router.push(`${SEASONS_VIEW_PAGE_URL}?name=${encodeURIComponent(season)}`);
   };
 
   // Prepare images for modal
@@ -653,7 +633,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {categories.slice(0, 3).map((category: ActivitiesCategory) => (
+                {categories.slice(0, 3).map((category: ActivityCategoryDetail) => (
                   <motion.span
                     key={category.id}
                     className="px-2 py-1 rounded text-xs cursor-pointer transition-all duration-200"
@@ -760,8 +740,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
             ))}
           </motion.div>
 
-          {/* Seasons */}
-          {seasons.length > 0 && (
+          {/* Season (if available) */}
+          {seasonName && (
             <motion.div variants={itemVariants} className="mb-4">
               <div className="flex items-center mb-2">
                 <Calendar
@@ -769,35 +749,19 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                   style={{ color: theme.textSecondary }}
                 />
                 <span className="text-xs" style={{ color: theme.textSecondary }}>
-                  Best Seasons:
+                  Best Season:
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {seasons.slice(0, 3).map((season: string, index: number) => (
-                  <motion.span
-                    key={index}
-                    className="px-2 py-1 rounded text-xs cursor-pointer transition-all duration-200"
-                    style={{
-                      background: hexToRgba(theme.primary, 0.1),
-                      color: theme.primary,
-                    }}
-                    whileHover={{ scale: 1.05, x: 1 }}
-                    onClick={(e) => handleSeasonClick(e, season)}
-                  >
-                    {season}
-                  </motion.span>
-                ))}
-                {seasons.length > 3 && (
-                  <span
-                    className="px-2 py-1 rounded text-xs"
-                    style={{
-                      background: hexToRgba(theme.textSecondary, 0.08),
-                      color: theme.textSecondary,
-                    }}
-                  >
-                    +{seasons.length - 3} more
-                  </span>
-                )}
+                <span
+                  className="px-2 py-1 rounded text-xs"
+                  style={{
+                    background: hexToRgba(theme.primary, 0.1),
+                    color: theme.primary,
+                  }}
+                >
+                  {seasonName}
+                </span>
               </div>
             </motion.div>
           )}

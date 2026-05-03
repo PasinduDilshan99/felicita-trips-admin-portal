@@ -158,7 +158,7 @@ const PackageDetailsPage = () => {
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this package?")) {
       try {
-        await PackageService.deletePackage(packageId);
+        await PackageService.terminatePackage(packageId);
         router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/view`);
       } catch (error) {
         console.error("Error deleting package:", error);

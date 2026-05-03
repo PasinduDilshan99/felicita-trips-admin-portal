@@ -7,9 +7,9 @@ interface ActivityParams {
 
 export async function GET(
   request: NextRequest,
-  context: { params: ActivityParams | Promise<ActivityParams> }
+  context: { params: Promise<ActivityParams> }
 ) {
-  // handle possible Promise
+  // params is always a Promise in Next.js 15
   const { activityId } = await context.params;
 
   if (!activityId) {
