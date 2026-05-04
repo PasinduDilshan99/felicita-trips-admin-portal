@@ -1,20 +1,20 @@
 // DEV
-// const PROTOCOL = "http";
-// const DOMAIN = "localhost";
-// const PORT = "8080";
-// const CONTEXT_ROOT = "felicita";
-// const VERSION = "/v0";
-// const API = "/api";
-// export const BASE_PATH = `${PROTOCOL}://${DOMAIN}:${PORT}/${CONTEXT_ROOT}`;
-
-// Staging
 const PROTOCOL = "http";
-const DOMAIN = "stg-api.felicitatrips.com"; // staging backend domain
-const PORT = "443"; // HTTPS
+const DOMAIN = "localhost";
+const PORT = "8080";
 const CONTEXT_ROOT = "felicita";
 const VERSION = "/v0";
 const API = "/api";
-export const BASE_PATH = `${PROTOCOL}://${DOMAIN}/${CONTEXT_ROOT}`;
+export const BASE_PATH = `${PROTOCOL}://${DOMAIN}:${PORT}/${CONTEXT_ROOT}`;
+
+// Staging
+// const PROTOCOL = "http";
+// const DOMAIN = "stg-api.felicitatrips.com"; // staging backend domain
+// const PORT = "443"; // HTTPS
+// const CONTEXT_ROOT = "felicita";
+// const VERSION = "/v0";
+// const API = "/api";
+// export const BASE_PATH = `${PROTOCOL}://${DOMAIN}/${CONTEXT_ROOT}`;
 
 // Production
 // const PROTOCOL = "https";
@@ -228,6 +228,8 @@ export const GET_PACKAGE_NAMES_AND_IDS_DATA = `${BASE_PATH}${API}${VERSION}${PAC
 export const GET_PACKAGE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-statistics`;
 export const GET_PACKAGE_SCHEDULE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-schedule-statistics`;
 export const GET_PACKAGE_TYPE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-type-statistics`;
+export const GET_PACKAGE_PARAMETERS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/add-package-params`;
+
 
 // Activities
 export const GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}`;

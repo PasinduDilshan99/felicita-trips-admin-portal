@@ -164,10 +164,9 @@ export interface TravelTip {
 export interface PackageImageRequest {
   name: string;
   description: string;
-  status: string;
+  status: "ACTIVE" | "INACTIVE";
   imageUrl: string;
   color: string;
-  createdBy: number;
 }
 
 export interface DayAccommodation {
@@ -230,6 +229,7 @@ export interface AddPackageRequest {
   maxPersonCount: number;
   pricePerPerson: number;
   images: PackageImageRequest[];
+  addFeatures: AddFeatureRequest[];
   dayAccommodations: DayAccommodation[];
   inclusions: Inclusion[];
   exclusions: Exclusion[];
@@ -715,3 +715,40 @@ export interface PackageTypeStatisticsData {
 }
 
 export type PackageTypeStatisticsApiResponse = ApiResponse<PackageTypeStatisticsData>;
+
+// Add these to your existing types/package-types.ts file
+
+// Package Parameters Types
+export interface HotelNameId {
+  hotelId: number;
+  hotelName: string;
+  starRating: number;
+}
+
+export interface VehicleNumberIdType {
+  vehicleId: number;
+  vehicleNumber: string | null;
+  vehicleType: string;
+  specificationId: number;
+}
+
+export interface TravelTipParam {
+  title: string;
+  description: string;
+}
+
+export interface PackageParametersData {
+  hotelsNamesAndIdsDtos: HotelNameId[];
+  vehicleNumberIdTypeDtos: VehicleNumberIdType[];
+  inclusions: string[];
+  exclusions: string[];
+  conditions: string[];
+  travelTips: TravelTipParam[];
+}
+
+export type PackageParametersApiResponse = ApiResponse<PackageParametersData>;
+
+// Request type
+export interface GetPackageParametersRequest {
+  tourId: number;
+}

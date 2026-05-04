@@ -16,12 +16,15 @@ import {
   PackageStatisticsApiResponse,
   PackageScheduleStatisticsApiResponse,
   PackageTypeStatisticsApiResponse,
+  GetPackageParametersRequest,
+  PackageParametersApiResponse,
 } from "@/types/package-types";
 import {
   CREATE_PACKAGE_DATA_FE,
   GET_PACKAGE_ALL_DETAILS_BY_ID_DATA_FE,
   GET_PACKAGE_DETAILS_BY_ID_DATA_FE,
   GET_PACKAGE_NAMES_AND_IDS_DATA_FE,
+  GET_PACKAGE_PARAMETERS_DATA_FE,
   GET_PACKAGE_SCHEDULE_STATISTICS_DATA_FE,
   GET_PACKAGE_STATISTICS_DATA_FE,
   GET_PACKAGE_TYPE_STATISTICS_DATA_FE,
@@ -461,6 +464,39 @@ export class PackageService {
       return data;
     } catch (error) {
       console.error("Error fetching package type statistics:", error);
+      throw error;
+    }
+  }
+
+  static async getPackageParameters(
+    tourId: number,
+  ): Promise<PackageParametersApiResponse> {
+    try {
+      const requestBody: GetPackageParametersRequest = { tourId };
+
+      const response = await fetch(GET_PACKAGE_PARAMETERS_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: PackageParametersApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "Failed to fetch package parameters");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching package parameters:", error);
       throw error;
     }
   }

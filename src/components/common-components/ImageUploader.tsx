@@ -4,12 +4,15 @@ import React, { useId, useState, useRef, useEffect } from "react";
 import { ImageIcon, CloudUpload, Loader, Plus, X, AlertCircle, Camera, Trash2 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { OtherService } from "@/services/otherService";
+import { useAuth } from "@/contexts/AuthContext";
 
-interface ImageData {
+export interface BaseImageData {
   name: string;
   description: string;
   imageUrl: string;
   status: "ACTIVE" | "INACTIVE";
+  color?: string;
+  createdBy?: number;
 }
 
 interface ImagePreview {
@@ -19,36 +22,68 @@ interface ImagePreview {
   uploadError?: string;
 }
 
-interface ImageUploaderProps {
-  images: ImageData[];
-  imagePreviews: ImagePreview[];
-  onImagePreviewsChange: (previews: ImagePreview[]) => void;
-  onImagesChange: (images: ImageData[]) => void;
+interface ImageUploaderProps<T extends BaseImageData = BaseImageData> {
+  images: T[];
+  imagePreviews?: ImagePreview[];
+  onImagePreviewsChange?: (previews: ImagePreview[]) => void;
+  onImagesChange: (images: T[]) => void;
   onUploadingChange: (uploading: boolean) => void;
   errors?: Record<string, string>;
   maxImages?: number;
+  showColorPicker?: boolean;
+  showCreatedBy?: boolean;
+  defaultColor?: string;
+  title?: string;
+  description?: string;
 }
 
-export const ImageUploader: React.FC<ImageUploaderProps> = ({
+export const ImageUploader = <T extends BaseImageData = BaseImageData>({
   images,
-  imagePreviews,
-  onImagePreviewsChange,
+  imagePreviews: externalImagePreviews,
+  onImagePreviewsChange: externalOnImagePreviewsChange,
   onImagesChange,
   onUploadingChange,
   errors = {},
   maxImages = 20,
-}) => {
+  showColorPicker = false,
+  showCreatedBy = false,
+  defaultColor = "#10b981",
+  title = "Images",
+  description = "Upload images or add by URL",
+}: ImageUploaderProps<T>) => {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const uid = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [newImage, setNewImage] = useState<ImageData>({
+  
+  // Internal state for previews if not provided externally
+  const [internalImagePreviews, setInternalImagePreviews] = useState<ImagePreview[]>([]);
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [localUploading, setLocalUploading] = useState(false);
+  
+  const [newImage, setNewImage] = useState<Partial<T>>({
     name: "",
     description: "",
     imageUrl: "",
     status: "ACTIVE",
-  });
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [localUploading, setLocalUploading] = useState(false);
+    ...(showColorPicker && { color: defaultColor }),
+  } as Partial<T>);
+
+  // Use external or internal previews
+  const imagePreviews = externalImagePreviews || internalImagePreviews;
+  const onImagePreviewsChange = externalOnImagePreviewsChange || setInternalImagePreviews;
+
+  // Sync previews when images change (for URL additions and removals)
+  useEffect(() => {
+    // Only sync if we're using internal previews or if external previews are not being managed
+    if (!externalOnImagePreviewsChange) {
+      const previewsFromImages = images.map(img => ({
+        url: img.imageUrl,
+        uploading: false,
+      }));
+      setInternalImagePreviews(previewsFromImages);
+    }
+  }, [images, externalOnImagePreviewsChange]);
 
   const uploadImageToCloudinary = async (file: File): Promise<string> => {
     try {
@@ -65,7 +100,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     if (!files) return;
 
     if (images.length + files.length > maxImages) {
-      // Show error or toast
       console.error(`Maximum ${maxImages} images allowed`);
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
@@ -74,8 +108,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     setLocalUploading(true);
     onUploadingChange(true);
 
+    const newImages: T[] = [];
     const newPreviews: ImagePreview[] = [];
-    const newImages: ImageData[] = [];
 
     for (const file of Array.from(files)) {
       if (file.size > 5 * 1024 * 1024) {
@@ -94,6 +128,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         uploading: true,
       };
       newPreviews.push(tempPreview);
+      
+      // Update previews immediately to show uploading state
       onImagePreviewsChange([...imagePreviews, ...newPreviews]);
 
       try {
@@ -107,16 +143,18 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         );
         onImagePreviewsChange(updatedPreviews);
 
-        const newImageData: ImageData = {
+        const baseImageData = {
           name: file.name.split(".")[0],
           description: `Uploaded image: ${file.name}`,
           imageUrl: cloudinaryUrl,
-          status: "ACTIVE",
+          status: "ACTIVE" as const,
+          ...(showColorPicker && { color: defaultColor }),
+          ...(showCreatedBy && { createdBy: user?.id || 0 }),
         };
-        newImages.push(newImageData);
-        onImagesChange([...images, ...newImages]);
         
-        // Remove from newPreviews array
+        newImages.push(baseImageData as T);
+        
+        // Remove from newPreviews array after successful upload
         const index = newPreviews.findIndex(p => p.file === file);
         if (index !== -1) newPreviews.splice(index, 1);
       } catch (error: any) {
@@ -129,6 +167,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       }
     }
 
+    // Add all successfully uploaded images
+    onImagesChange([...images, ...newImages]);
     setLocalUploading(false);
     onUploadingChange(false);
     
@@ -137,24 +177,40 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const handleAddImageByUrl = () => {
-    if (!newImage.name.trim() || !newImage.imageUrl.trim()) {
-      return;
-    }
+    if (!newImage.name?.trim() || !newImage.imageUrl?.trim()) return;
     try {
       new URL(newImage.imageUrl);
     } catch {
       return;
     }
 
-    // Check if we've reached max images
     if (images.length + 1 > maxImages) {
       console.error(`Maximum ${maxImages} images allowed`);
       return;
     }
 
+    const imageData = {
+      name: newImage.name,
+      description: newImage.description || "",
+      imageUrl: newImage.imageUrl,
+      status: "ACTIVE" as const,
+      ...(showColorPicker && { color: newImage.color || defaultColor }),
+      ...(showCreatedBy && { createdBy: user?.id || 0 }),
+    } as T;
+
+    // Add preview first
     onImagePreviewsChange([...imagePreviews, { url: newImage.imageUrl, uploading: false }]);
-    onImagesChange([...images, { ...newImage }]);
-    setNewImage({ name: "", description: "", imageUrl: "", status: "ACTIVE" });
+    // Then add to images
+    onImagesChange([...images, imageData]);
+    
+    // Reset form
+    setNewImage({
+      name: "",
+      description: "",
+      imageUrl: "",
+      status: "ACTIVE",
+      ...(showColorPicker && { color: defaultColor }),
+    } as Partial<T>);
   };
 
   const handleRemoveImage = (index: number) => {
@@ -229,10 +285,10 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               </span>
               <div>
                 <h2 className="text-base font-semibold leading-tight" style={{ color: theme.text }}>
-                  Images
+                  {title}
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-                  Upload images or add by URL
+                  {description}
                 </p>
               </div>
             </div>
@@ -317,7 +373,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                   <div className="mb-3">
                     <input
                       type="text"
-                      value={newImage.imageUrl}
+                      value={newImage.imageUrl || ""}
                       onChange={(e) => setNewImage({ ...newImage, imageUrl: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl border-2 text-sm"
                       style={{
@@ -331,7 +387,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                   <div className="mb-3">
                     <input
                       type="text"
-                      value={newImage.name}
+                      value={newImage.name || ""}
                       onChange={(e) => setNewImage({ ...newImage, name: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl border-2 text-sm"
                       style={{
@@ -344,7 +400,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                   
                   <div className="mb-4">
                     <textarea
-                      value={newImage.description}
+                      value={newImage.description || ""}
                       onChange={(e) => setNewImage({ ...newImage, description: e.target.value })}
                       rows={2}
                       className="w-full px-4 py-2.5 rounded-xl border-2 text-sm resize-none"
@@ -355,6 +411,35 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                       placeholder="Image Description (Optional)"
                     />
                   </div>
+
+                  {/* Optional Color Picker for Package Images */}
+                  {showColorPicker && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
+                        Accent Color
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={(newImage.color as string) || defaultColor}
+                          onChange={(e) => setNewImage({ ...newImage, color: e.target.value })}
+                          className="w-12 h-10 rounded border cursor-pointer"
+                          style={{ borderColor: theme.border }}
+                        />
+                        <input
+                          type="text"
+                          value={(newImage.color as string) || defaultColor}
+                          onChange={(e) => setNewImage({ ...newImage, color: e.target.value })}
+                          className="flex-1 px-4 py-2 rounded-xl border-2 text-sm"
+                          style={{
+                            ...fieldBase,
+                            borderColor: theme.border,
+                          }}
+                          placeholder="#000000"
+                        />
+                      </div>
+                    </div>
+                  )}
                   
                   <button
                     type="button"
@@ -468,6 +553,17 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                         <p className="text-white/70 text-xs truncate">
                           {images[index]?.description || "No description"}
                         </p>
+                        {showColorPicker && (images[index] as any)?.color && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <span
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: (images[index] as any).color }}
+                            />
+                            <span className="text-white/60 text-[10px]">
+                              {(images[index] as any).color}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     

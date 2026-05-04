@@ -199,6 +199,7 @@ export const GET_PACKAGE_NAMES_AND_IDS_DATA_FE = `${API}${PACKAGES}/packageId-an
 export const GET_PACKAGE_STATISTICS_DATA_FE = `${API}${PACKAGES}/package-statistics`;
 export const GET_PACKAGE_SCHEDULE_STATISTICS_DATA_FE = `${API}${PACKAGES}/package-schedule-statistics`;
 export const GET_PACKAGE_TYPE_STATISTICS_DATA_FE = `${API}${PACKAGES}/package-type-statistics`;
+export const GET_PACKAGE_PARAMETERS_DATA_FE = `${API}${PACKAGES}/add-package-params`;
 
 // Activities
 export const GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA_FE = `${API}${ACTIVITIES}`;

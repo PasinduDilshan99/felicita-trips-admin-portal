@@ -1,11 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { MapPin, Plus, X, AlertCircle, ChevronDown, Calendar, Trash2 } from "lucide-react";
+import {
+  MapPin,
+  Plus,
+  X,
+  AlertCircle,
+  ChevronDown,
+  Calendar,
+  Trash2,
+  Check,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DestinationSelector } from "@/components/common-components/DestinationSelector";
-import { ActivitySelector } from "./ActivitySelector";
 import { TourDays } from "@/types/tour-types";
+import { ActivityMultiSelector } from "./ActivityMultiSelector";
 
 interface TourDestinationsFormProps {
   days: TourDays[];
@@ -20,7 +29,9 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
 }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(true);
-  const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set(days.map(d => d.dayNumber)));
+  const [expandedDays, setExpandedDays] = useState<Set<number>>(
+    new Set(days.map((d) => d.dayNumber)),
+  );
 
   const toggleDay = (dayNumber: number) => {
     const newExpanded = new Set(expandedDays);
@@ -51,8 +62,8 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
       dayNumber: idx + 1,
     }));
     onDaysChange(reorderedDays);
-    
-    const newExpanded = new Set(reorderedDays.map(d => d.dayNumber));
+
+    const newExpanded = new Set(reorderedDays.map((d) => d.dayNumber));
     setExpandedDays(newExpanded);
   };
 
@@ -71,39 +82,36 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
     onDaysChange(updatedDays);
   };
 
-  const updateDestinationInDay = (dayIndex: number, destIndex: number, destinationId: number) => {
-    const updatedDays = [...days];
-    updatedDays[dayIndex].destinations[destIndex].destinationId = destinationId;
-    onDaysChange(updatedDays);
-  };
-
-  const addActivityToDestination = (dayIndex: number, destIndex: number) => {
-    const updatedDays = [...days];
-    updatedDays[dayIndex].destinations[destIndex].activities.push(0); // Push number, not object
-    onDaysChange(updatedDays);
-  };
-
-  const removeActivityFromDestination = (dayIndex: number, destIndex: number, activityIndex: number) => {
-    const updatedDays = [...days];
-    updatedDays[dayIndex].destinations[destIndex].activities.splice(activityIndex, 1);
-    onDaysChange(updatedDays);
-  };
-
-  const updateActivityInDestination = (
+  const updateDestinationInDay = (
     dayIndex: number,
     destIndex: number,
-    activityIndex: number,
-    activityId: number
+    destinationId: number,
   ) => {
     const updatedDays = [...days];
-    updatedDays[dayIndex].destinations[destIndex].activities[activityIndex] = activityId; // Assign number directly
+    updatedDays[dayIndex].destinations[destIndex].destinationId = destinationId;
+    // Reset activities when destination changes
+    updatedDays[dayIndex].destinations[destIndex].activities = [];
     onDaysChange(updatedDays);
   };
 
-  const totalDestinations = days.reduce((sum, day) => sum + day.destinations.length, 0);
+  const updateActivitiesInDestination = (
+    dayIndex: number,
+    destIndex: number,
+    activities: number[],
+  ) => {
+    const updatedDays = [...days];
+    updatedDays[dayIndex].destinations[destIndex].activities = activities;
+    onDaysChange(updatedDays);
+  };
+
+  const totalDestinations = days.reduce(
+    (sum, day) => sum + day.destinations.length,
+    0,
+  );
   const totalActivities = days.reduce(
-    (sum, day) => sum + day.destinations.reduce((s, d) => s + d.activities.length, 0),
-    0
+    (sum, day) =>
+      sum + day.destinations.reduce((s, d) => s + d.activities.length, 0),
+    0,
   );
 
   return (
@@ -133,11 +141,18 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
             <Calendar className="w-4 h-4" />
           </span>
           <div>
-            <h2 className="text-base font-semibold leading-tight" style={{ color: theme.text }}>
+            <h2
+              className="text-base font-semibold leading-tight"
+              style={{ color: theme.text }}
+            >
               Tour Itinerary
             </h2>
-            <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-              {days.length} day(s), {totalDestinations} destination(s), {totalActivities} activity(ies)
+            <p
+              className="text-xs mt-0.5"
+              style={{ color: theme.textSecondary }}
+            >
+              {days.length} day(s), {totalDestinations} destination(s),{" "}
+              {totalActivities} activity(ies)
             </p>
           </div>
         </div>
@@ -182,7 +197,9 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
                     className="flex items-center justify-between px-4 py-3 cursor-pointer"
                     style={{
                       backgroundColor: `${theme.primary}08`,
-                      borderBottom: expandedDays.has(day.dayNumber) ? `1px solid ${theme.border}` : "none",
+                      borderBottom: expandedDays.has(day.dayNumber)
+                        ? `1px solid ${theme.border}`
+                        : "none",
                     }}
                     onClick={() => toggleDay(day.dayNumber)}
                   >
@@ -196,10 +213,16 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
                       >
                         {day.dayNumber}
                       </span>
-                      <span className="text-sm font-semibold" style={{ color: theme.text }}>
+                      <span
+                        className="text-sm font-semibold"
+                        style={{ color: theme.text }}
+                      >
                         Day {day.dayNumber}
                       </span>
-                      <span className="text-xs" style={{ color: theme.textSecondary }}>
+                      <span
+                        className="text-xs"
+                        style={{ color: theme.textSecondary }}
+                      >
                         {day.destinations.length} destination(s)
                       </span>
                     </div>
@@ -219,7 +242,9 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
                         className="w-4 h-4 transition-transform duration-200"
                         style={{
                           color: theme.textSecondary,
-                          transform: expandedDays.has(day.dayNumber) ? "rotate(180deg)" : "rotate(0deg)",
+                          transform: expandedDays.has(day.dayNumber)
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
                         }}
                       />
                     </div>
@@ -240,14 +265,22 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
                         >
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4" style={{ color: theme.accent }} />
-                              <span className="text-sm font-medium" style={{ color: theme.text }}>
+                              <MapPin
+                                className="w-4 h-4"
+                                style={{ color: theme.accent }}
+                              />
+                              <span
+                                className="text-sm font-medium"
+                                style={{ color: theme.text }}
+                              >
                                 Destination {destIndex + 1}
                               </span>
                             </div>
                             <button
                               type="button"
-                              onClick={() => removeDestinationFromDay(dayIndex, destIndex)}
+                              onClick={() =>
+                                removeDestinationFromDay(dayIndex, destIndex)
+                              }
                               className="p-1 rounded-lg hover:bg-opacity-20 transition-colors"
                               style={{ color: theme.error }}
                             >
@@ -255,7 +288,7 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
                             </button>
                           </div>
 
-                          <div className="space-y-3">
+                          <div className="space-y-4">
                             <DestinationSelector
                               value={destination.destinationId}
                               onChange={(id) =>
@@ -265,59 +298,19 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
                               required
                             />
 
-                            {/* Activities for this destination */}
-                            {destination.activities.length > 0 && (
-                              <div className="pl-4 space-y-2">
-                                <p className="text-xs font-medium" style={{ color: theme.textSecondary }}>
-                                  Activities:
-                                </p>
-                                {destination.activities.map((activityId, activityIndex) => (
-                                  <div key={activityIndex} className="flex items-center gap-2">
-                                    <ActivitySelector
-                                      destinationId={destination.destinationId}
-                                      value={activityId}
-                                      onChange={(id) =>
-                                        updateActivityInDestination(
-                                          dayIndex,
-                                          destIndex,
-                                          activityIndex,
-                                          id
-                                        )
-                                      }
-                                      placeholder="Select activity"
-                                      showDetails
-                                      className="flex-1"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        removeActivityFromDestination(dayIndex, destIndex, activityIndex)
-                                      }
-                                      className="p-1.5 rounded-lg hover:bg-opacity-20 transition-colors flex-shrink-0"
-                                      style={{ color: theme.error }}
-                                    >
-                                      <X className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Add Activity Button */}
-                            <button
-                              type="button"
-                              onClick={() => addActivityToDestination(dayIndex, destIndex)}
+                            {/* Multi-select Activities */}
+                            <ActivityMultiSelector
+                              destinationId={destination.destinationId}
+                              selectedActivities={destination.activities}
+                              onActivitiesChange={(activities) =>
+                                updateActivitiesInDestination(
+                                  dayIndex,
+                                  destIndex,
+                                  activities,
+                                )
+                              }
                               disabled={!destination.destinationId}
-                              className="w-full px-3 py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-                              style={{
-                                backgroundColor: `${theme.success}10`,
-                                border: `1px solid ${theme.success}30`,
-                                color: theme.success,
-                              }}
-                            >
-                              <Plus className="w-3 h-3" />
-                              Add Activity
-                            </button>
+                            />
                           </div>
                         </div>
                       ))}
@@ -349,7 +342,10 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
                 border: `1px dashed ${theme.border}`,
               }}
             >
-              <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: theme.textSecondary }} />
+              <Calendar
+                className="w-12 h-12 mx-auto mb-3 opacity-30"
+                style={{ color: theme.textSecondary }}
+              />
               <p className="text-sm" style={{ color: theme.textSecondary }}>
                 No days added yet. Click below to create your tour itinerary.
               </p>
@@ -372,7 +368,10 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
           </button>
 
           {error && (
-            <p className="text-xs flex items-center gap-1" style={{ color: theme.error }}>
+            <p
+              className="text-xs flex items-center gap-1"
+              style={{ color: theme.error }}
+            >
               <AlertCircle className="w-3.5 h-3.5" />
               {error}
             </p>
