@@ -8,7 +8,7 @@
 // export const BASE_PATH = `${PROTOCOL}://${DOMAIN}:${PORT}/${CONTEXT_ROOT}`;
 
 // Staging
-const PROTOCOL = "http";
+const PROTOCOL = "https";
 const DOMAIN = "stg-api.felicitatrips.com"; // staging backend domain
 const PORT = "443"; // HTTPS
 const CONTEXT_ROOT = "felicita";
