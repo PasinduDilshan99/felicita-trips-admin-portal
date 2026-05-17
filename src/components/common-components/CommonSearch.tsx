@@ -4,16 +4,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Search, X, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { hexToRgba } from "@/utils/functions";
 
 /* ─── Animation Variants ─────────────────────────────────────────────────── */
 
@@ -175,14 +166,12 @@ const CommonSearch = <T extends SearchItem>({
     );
   }, [searchTerm, items, stableGetItemName]);
 
-  // Update search term when selected item changes
+  // Only clear search term when selected item is cleared externally
   useEffect(() => {
-    if (selectedItem) {
-      setSearchTerm(stableGetItemName(selectedItem));
-    } else if (!initialSearchTerm) {
+    if (!selectedItem && !initialSearchTerm && searchTerm !== "") {
       setSearchTerm("");
     }
-  }, [selectedItem, stableGetItemName, initialSearchTerm]);
+  }, [selectedItem, initialSearchTerm]); // Remove searchTerm from dependencies to prevent loops
 
   // Handle click outside
   useEffect(() => {

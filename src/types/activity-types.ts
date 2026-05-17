@@ -45,7 +45,7 @@ export interface Activity {
   requirements: Requirement[];
   images: ActivityImage[];
   destination_id: number;
-  categories: ActivityCategoryDetail[];
+  activities_category: ActivityCategoryDetail[];
   duration_hours: number;
   available_from: string;
   available_to: string;

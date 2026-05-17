@@ -206,8 +206,6 @@ export const GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA_FE = `${API}${ACTIVITIES}`
 export const GET_ALL_ACTIVITIES_DETAILS_DATA_FE = `${API}${ACTIVITIES}`;
 export const GET_ACTIVE_ACTIVITIES_DETAILS_DATA_FE = `${API}${ACTIVITIES}/active-activities`;
 export const GET_ACTIVITIES_DETAILS_BY_REQUEST_DATA_FE = `${API}${ACTIVITIES}/activities-for-request`;
-export const GET_ALL_ACTIVITY_CATEGORIES_DATA_FE = `${API}${ACTIVITIES}/category`;
-export const GET_ACTIVE_ACTIVITY_CATEGORIES_DATA_FE = `${API}${ACTIVITIES}/category-active`;
 export const GET_ACTIVITY_REVIEWS_DETAILS_DATA_FE = `${API}${ACTIVITIES}/reviews-details`;
 export const GET_ACTIVITY_HISTORY_DETAILS_DATA_FE = `${API}${ACTIVITIES}/history-details`;
 export const GET_ACTIVITY_HISTORY_IMAGES_DETAILS_DATA_FE = `${API}${ACTIVITIES}/history-images`;
@@ -219,6 +217,13 @@ export const GET_ACTIVITIES_STATISTICS_DATA_FE = `${API}${ACTIVITIES}/activities
 export const GET_ACTIVITIES_SCHEDULE_STATISTICS_DATA_FE = `${API}${ACTIVITIES}/activities-schedule-statistics`;
 export const GET_ACTIVITIES_CATEGORIES_STATISTICS_DATA_FE = `${API}${ACTIVITIES}/activities-categories-statistics`;
 export const GET_ACTIVITIES_BY_DESTINATION_ID_DATA_FE = `${API}${ACTIVITIES}/activities-by-destinationId`;
+
+// Activity Categories
+export const GET_ALL_ACTIVITY_CATEGORIES_DATA_FE = `${API}${ACTIVITIES}/category`;
+export const GET_ACTIVITY_CATEGORY_DETAILS_BY_ID_DATA_FE = `${API}${ACTIVITIES}/category/details`;
+export const ADD_ACTIVITY_CATEGORY_DATA_FE = `${API}${ACTIVITIES}/category/add`;
+export const UPDATE_ACTIVITY_CATEGORY_DATA_FE = `${API}${ACTIVITIES}/category/update`;
+export const TERMINATE_ACTIVITY_CATEGORY_DATA_FE = `${API}${ACTIVITIES}/category/terminate`;
 
 // Blogs
 export const GET_ALL_BLOGS_DETAILS_DATA_FE = `${API}${BLOGS}`;
@@ -326,7 +331,6 @@ export const GET_VILLA_DETAILS_SECTION_FE = `${API}${ACCOMMODATION}/villas/deati
 export const GET_HOSTEL_DETAILS_SECTION_FE = `${API}${ACCOMMODATION}/hostels/deatils-for-section`;
 export const GET_RESTAURANT_DETAILS_SECTION_FE = `${API}${ACCOMMODATION}/restaurants/deatils-for-section`;
 
-
 // Privileges
 export const GET_ALL_PRIVILEGES_DATA_FE = `${API}${PRIVILEGES}/all-privileges`;
 export const GET_PRIVILEGES_NAMES_AND_IDS_DATA_FE = `${API}${PRIVILEGES}/privileges-names-and-ids`;
@@ -336,7 +340,6 @@ export const CREATE_PRIVILEGE_DATA_FE = `${API}${PRIVILEGES}/create-privilege`;
 export const UPDATE_PRIVILEGE_DATA_FE = `${API}${PRIVILEGES}/update-privilege`;
 export const TERMINATE_PRIVILEGE_DATA_FE = `${API}${PRIVILEGES}/terminate-privilege`;
 export const GET_PRIVILEGES_STATISTICS_DATA_FE = `${API}${PRIVILEGES}/privileges-statistics`;
-
 
 // Role endpoints
 export const GET_ALL_ROLES_DATA_FE = `${API}${ROLES}/all-roles`;

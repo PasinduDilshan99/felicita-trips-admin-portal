@@ -214,14 +214,13 @@ export interface DayToDayDestinationActivity {
   destinationId: number;
   activityName: string;
   activityDescription: string;
-  activitiesCategory: string;
+  activitiesCategory: ActivityCategory[];
   durationHours: number;
   availableFrom: string;
   availableTo: string;
   minParticipate: number;
   maxParticipate: number;
   season: string;
-  categoryName: string;
   images: {
     imageId: number;
     imageName: string;
@@ -230,12 +229,19 @@ export interface DayToDayDestinationActivity {
   }[];
 }
 
+export interface ActivityCategory {
+  id: number;
+  name: string;
+  description: string;
+  is_primary: boolean;
+}
+
 export interface DayToDayDestination {
   destination: {
     destinationId: number;
     destinationName: string;
     destinationDescription: string;
-    category: string;
+    category: DestinationCategory[];
     location: string;
     latitude: number;
     longitude: number;
@@ -248,6 +254,13 @@ export interface DayToDayDestination {
     }[];
   };
   activities: DayToDayDestinationActivity[];
+}
+
+export interface DestinationCategory {
+  id: number;
+  name: string;
+  description: string;
+  isPrimary: boolean;
 }
 
 export interface DayToDayResponse {
@@ -293,10 +306,8 @@ export interface TourAllDetails {
   longitude: number;
   startLocation: string;
   endLocation: string;
-  tourTypeName: string;
-  tourTypeDescription: string;
-  tourCategoryName: string;
-  tourCategoryDescription: string;
+  tourTypeDtos: TourType[];
+  tourCategoryDto: TourCategory[];
   seasonName: string;
   seasonDescription: string;
   statusName: "ACTIVE" | "INACTIVE";
@@ -310,6 +321,18 @@ export interface TourAllDetails {
   conditions: Condition[];
   travelTips: TravelTip[];
   dayToDayResponses: DayToDayResponse[];
+}
+
+export interface TourType {
+  tourTypeId: number;
+  tourTypeName: string;
+  tourTypeDescription: string;
+}
+
+export interface TourCategory {
+  tourCategoryId: number;
+  tourCategoryName: string;
+  tourCategoryDescription: string;
 }
 
 export interface TourAllDetailsResponse {

@@ -232,9 +232,9 @@ const AddNewDestinationPage = () => {
     if (!formData.name.trim()) newErrors.name = "Destination name is required";
     if (!formData.description.trim())
       newErrors.description = "Description is required";
-    if (formData.destinationCategoriesIdList.length === 0)
-      newErrors.destinationCategoriesIdList =
-        "At least one category is required";
+    // if (formData.destinationCategoriesIdList.length === 0)
+    //   newErrors.destinationCategoriesIdList =
+    //     "At least one category is required";
     if (!formData.location.trim()) newErrors.location = "Location is required";
     if (formData.latitude < -90 || formData.latitude > 90)
       newErrors.latitude = "Latitude must be between -90 and 90";
