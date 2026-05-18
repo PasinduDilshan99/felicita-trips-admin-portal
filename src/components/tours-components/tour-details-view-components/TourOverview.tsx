@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
+  ChevronRight,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { TourType, TourCategory } from "@/types/tour-types";
@@ -52,14 +53,16 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
 }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showAllTourTypes, setShowAllTourTypes] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   const truncatedDescription =
     description?.length > 400 && !isExpanded
       ? description.slice(0, 400) + "..."
       : description;
 
-  const primaryTourType = tourTypeDtos?.[0];
-  const primaryTourCategory = tourCategoryDto?.[0];
+  const visibleTourTypes = showAllTourTypes ? tourTypeDtos : tourTypeDtos?.slice(0, 2);
+  const visibleCategories = showAllCategories ? tourCategoryDto : tourCategoryDto?.slice(0, 2);
 
   return (
     <div
@@ -94,19 +97,17 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
             </div>
           </div>
 
-          {primaryTourType && (
-            <div className="flex items-start gap-3">
-              <Tag className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
-              <div>
-                <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
-                  Tour Type
-                </p>
-                <p className="text-sm sm:text-base font-medium mt-0.5" style={{ color: theme.text }}>
-                  {primaryTourType.tourTypeName}
-                </p>
-              </div>
+          <div className="flex items-start gap-3">
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+            <div>
+              <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+                Season
+              </p>
+              <p className="text-sm sm:text-base font-medium mt-0.5" style={{ color: theme.text }}>
+                {seasonName}
+              </p>
             </div>
-          )}
+          </div>
 
           <div className="flex items-start gap-3">
             <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
@@ -133,18 +134,6 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
           </div>
 
           <div className="flex items-start gap-3">
-            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
-            <div>
-              <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
-                Season
-              </p>
-              <p className="text-sm sm:text-base font-medium mt-0.5" style={{ color: theme.text }}>
-                {seasonName}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
             <User className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
             <div>
               <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
@@ -157,45 +146,101 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
           </div>
         </div>
 
-        {/* Tour Type Description */}
-        {primaryTourType?.tourTypeDescription && (
-          <div
-            className="rounded-xl p-3 sm:p-4"
-            style={{
-              backgroundColor: hexToRgba(theme.primary, 0.04),
-              border: `1px solid ${hexToRgba(theme.primary, 0.1)}`,
-            }}
-          >
+        {/* Tour Types Section */}
+        {tourTypeDtos && tourTypeDtos.length > 0 && (
+          <div>
             <div className="flex items-center gap-2 mb-2">
-              <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: theme.primary }} />
+              <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: theme.primary }} />
               <p className="text-xs font-semibold" style={{ color: theme.primary }}>
-                About {primaryTourType.tourTypeName}
+                Tour Types ({tourTypeDtos.length})
               </p>
             </div>
-            <p className="text-xs sm:text-sm" style={{ color: theme.textSecondary }}>
-              {primaryTourType.tourTypeDescription}
-            </p>
+            <div className="space-y-2">
+              {visibleTourTypes?.map((tourType) => (
+                <div
+                  key={tourType.tourTypeId}
+                  className="rounded-xl p-3"
+                  style={{
+                    backgroundColor: hexToRgba(theme.primary, 0.04),
+                    border: `1px solid ${hexToRgba(theme.primary, 0.1)}`,
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: theme.primary }}
+                    />
+                    <h4 className="text-sm font-semibold" style={{ color: theme.text }}>
+                      {tourType.tourTypeName}
+                    </h4>
+                  </div>
+                  {tourType.tourTypeDescription && (
+                    <p className="text-xs sm:text-sm pl-4" style={{ color: theme.textSecondary }}>
+                      {tourType.tourTypeDescription}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+            {tourTypeDtos.length > 2 && (
+              <button
+                onClick={() => setShowAllTourTypes(!showAllTourTypes)}
+                className="flex items-center gap-1 text-xs font-medium mt-2 transition-colors hover:opacity-80"
+                style={{ color: theme.primary }}
+              >
+                {showAllTourTypes ? "Show Less" : `Show All ${tourTypeDtos.length} Tour Types`}
+                <ChevronRight className={`w-3 h-3 transition-transform ${showAllTourTypes ? "rotate-90" : ""}`} />
+              </button>
+            )}
           </div>
         )}
 
-        {/* Tour Category Description */}
-        {primaryTourCategory?.tourCategoryDescription && (
-          <div
-            className="rounded-xl p-3 sm:p-4"
-            style={{
-              backgroundColor: hexToRgba(theme.accent || theme.primary, 0.04),
-              border: `1px solid ${hexToRgba(theme.accent || theme.primary, 0.1)}`,
-            }}
-          >
+        {/* Tour Categories Section */}
+        {tourCategoryDto && tourCategoryDto.length > 0 && (
+          <div>
             <div className="flex items-center gap-2 mb-2">
               <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: theme.accent || theme.primary }} />
               <p className="text-xs font-semibold" style={{ color: theme.accent || theme.primary }}>
-                Category: {primaryTourCategory.tourCategoryName}
+                Categories ({tourCategoryDto.length})
               </p>
             </div>
-            <p className="text-xs sm:text-sm" style={{ color: theme.textSecondary }}>
-              {primaryTourCategory.tourCategoryDescription}
-            </p>
+            <div className="space-y-2">
+              {visibleCategories?.map((category) => (
+                <div
+                  key={category.tourCategoryId}
+                  className="rounded-xl p-3"
+                  style={{
+                    backgroundColor: hexToRgba(theme.accent || theme.primary, 0.04),
+                    border: `1px solid ${hexToRgba(theme.accent || theme.primary, 0.1)}`,
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: theme.accent || theme.primary }}
+                    />
+                    <h4 className="text-sm font-semibold" style={{ color: theme.text }}>
+                      {category.tourCategoryName}
+                    </h4>
+                  </div>
+                  {category.tourCategoryDescription && (
+                    <p className="text-xs sm:text-sm pl-4" style={{ color: theme.textSecondary }}>
+                      {category.tourCategoryDescription}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+            {tourCategoryDto.length > 2 && (
+              <button
+                onClick={() => setShowAllCategories(!showAllCategories)}
+                className="flex items-center gap-1 text-xs font-medium mt-2 transition-colors hover:opacity-80"
+                style={{ color: theme.accent || theme.primary }}
+              >
+                {showAllCategories ? "Show Less" : `Show All ${tourCategoryDto.length} Categories`}
+                <ChevronRight className={`w-3 h-3 transition-transform ${showAllCategories ? "rotate-90" : ""}`} />
+              </button>
+            )}
           </div>
         )}
 

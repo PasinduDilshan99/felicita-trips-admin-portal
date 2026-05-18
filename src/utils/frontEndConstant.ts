@@ -177,6 +177,22 @@ export const GET_TOUR_CATEGORY_STATISTICS_DATA_FE = `${API}${TOUR}/tour-category
 export const GET_TOUR_TYPE_STATISTICS_DATA_FE = `${API}${TOUR}/tour-type-statistics`;
 export const GET_TOUR_DETAILS_FOR_PACKAGE_DATA_FE = `${API}${TOUR}/tour-details-for-add-package`;
 
+// Tour Types
+export const GET_TOUR_TYPES_DATA_FE = `${API}${TOUR}/tour-types`;
+export const GET_TOUR_TYPE_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}/types/details`;
+export const GET_TOUR_TYPE_BASIC_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}/types/basic-details`;
+export const ADD_TOUR_TYPE_DATA_FE = `${API}${TOUR}/types/add`;
+export const UPDATE_TOUR_TYPE_DATA_FE = `${API}${TOUR}/types/update`;
+export const TERMINATE_TOUR_TYPE_DATA_FE = `${API}${TOUR}/types/terminate`;
+
+// Tour Category
+export const GET_TOUR_CATEGORY_DATA_FE = `${API}${TOUR}/categories`;
+export const GET_TOUR_CATEGORY_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}/categories/details`;
+export const GET_TOUR_CATEGORY_BASIC_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}/categories/basic-details`;
+export const ADD_TOUR_CATEGORY_DATA_FE = `${API}${TOUR}/categories/add`;
+export const UPDATE_TOUR_CATEGORY_DATA_FE = `${API}${TOUR}/categories/update`;
+export const TERMINATE_TOUR_CATEGORY_DATA_FE = `${API}${TOUR}/categories/terminate`;
+
 // Packages
 export const GET_ALL_PACKAGES_DETAILS_DATA_FE = `${API}${PACKAGES}`;
 export const GET_ACTIVE_PACKAGE_DETAILS_DATA_FE = `${API}${PACKAGES}/active-packages`;

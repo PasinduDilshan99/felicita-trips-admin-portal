@@ -204,6 +204,23 @@ export const GET_TOUR_CATEGORY_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${
 export const GET_TOUR_TYPE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-type-statistics`;
 export const GET_TOUR_DETAILS_FOR_PACKAGE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-details-for-add-package`;
 
+// Tour Types
+export const GET_TOUR_TYPES_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-types`;
+export const GET_TOUR_TYPE_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-type-details`;
+export const GET_TOUR_TYPE_BASIC_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-type-basic-details`;
+export const ADD_TOUR_TYPE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/add-tour-type`;
+export const UPDATE_TOUR_TYPE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/update-tour-type`;
+export const TERMINATE_TOUR_TYPE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/terminate-tour-type`;
+
+// Tour Category
+export const GET_TOUR_CATEGORY_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-categories`;
+export const GET_TOUR_CATEGORY_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-category-details`;
+export const GET_TOUR_CATEGORY_BASIC_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-category-basic-details`;
+export const ADD_TOUR_CATEGORY_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/add-tour-category`;
+export const UPDATE_TOUR_CATEGORY_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/update-tour-category`;
+export const TERMINATE_TOUR_CATEGORY_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/terminate-tour-category`;
+
+
 
 // Packages
 export const GET_PACKAGE_DETAILS_BY_PACKAGE_ID_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}`;
