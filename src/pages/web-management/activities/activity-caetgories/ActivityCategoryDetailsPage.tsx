@@ -1,3 +1,4 @@
+// app/activity-categories/view/[categoryId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -13,19 +14,41 @@ import { useImageGallery } from "@/hooks/useImageGallery";
 import ImageModal, {
   ImageModalImage,
 } from "@/components/common-components/ImageModal";
+import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
+import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
+import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
+import { CommonQuickStats } from "@/components/common-components/details-view/CommonQuickStats";
+import { CommonMetadata } from "@/components/common-components/details-view/CommonMetadata";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
 
-// Import other sub-components
-import { CategoryActivitiesList } from "@/components/activity-categories-components/activity-category-details-view-components/CategoryActivitiesList";
-import { CategoryQuickStats } from "@/components/activity-categories-components/activity-category-details-view-components/CategoryQuickStats";
-import { CategoryMetadata } from "@/components/activity-categories-components/activity-category-details-view-components/CategoryMetadata";
-import { ACTIVITY_CATEGORY_VIEW_PAGE_URL } from "@/utils/urls";
-import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
-import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
-import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
-import { CategoryOverview } from "@/components/activity-categories-components/activity-category-details-view-components/CategoryOverview";
+// Import sub-components
+// Icons
+import {
+  Tag,
+  Image,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  User,
+  Clock,
+  Activity,
+} from "lucide-react";
+
+// Constants for routing
+import { ACTIVITIES_VIEW_PAGE_URL } from "@/utils/urls";
+import { ActivityCategoryOverview } from "@/components/activity-categories-components/activity-category-details-view-components/ActivityCategoryOverview";
+import { ActivityCategoryActivitiesList } from "@/components/activity-categories-components/activity-category-details-view-components/ActivityCategoryActivitiesList";
+
+const hexToRgba = (hex: string, opacity: number): string => {
+  if (!hex) return `rgba(0,0,0,${opacity})`;
+  hex = hex.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
 const ActivityCategoryDetailsPage = () => {
   const params = useParams();
@@ -33,9 +56,8 @@ const ActivityCategoryDetailsPage = () => {
   const { theme } = useTheme();
   const categoryId = parseInt(params?.categoryId as string);
 
-  const [category, setCategory] = useState<ActivityCategoryDetails | null>(
-    null,
-  );
+  const [activityCategory, setActivityCategory] =
+    useState<ActivityCategoryDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,29 +78,30 @@ const ActivityCategoryDetailsPage = () => {
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
-    { label: "Activity Categories", href: ACTIVITY_CATEGORY_VIEW_PAGE_URL },
-    { label: "View", href: ACTIVITY_CATEGORY_VIEW_PAGE_URL },
+    { label: "Activity Categories", href: ACTIVITIES_VIEW_PAGE_URL },
+    { label: "View", href: ACTIVITIES_VIEW_PAGE_URL },
     {
-      label: category?.categoryName || "Details",
-      href: `${ACTIVITY_CATEGORY_VIEW_PAGE_URL}/${categoryId}`,
+      label: activityCategory?.categoryName || "Details",
+      href: `${ACTIVITIES_VIEW_PAGE_URL}/${categoryId}`,
     },
   ];
 
   useEffect(() => {
-    if (categoryId) fetchCategory();
+    if (categoryId) fetchActivityCategory();
     return () => resetGallery();
   }, [categoryId]);
 
-  const fetchCategory = async () => {
+  const fetchActivityCategory = async () => {
     setLoading(true);
     setError(null);
     try {
       const response =
         await ActivityCategoryService.getActivityCategoryDetails(categoryId);
-      setCategory(response.data);
+      setActivityCategory(response.data);
     } catch (err: any) {
       setError(
-        err.message || "Failed to load category details. Please try again.",
+        err.message ||
+          "Failed to load activity category details. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -87,8 +110,8 @@ const ActivityCategoryDetailsPage = () => {
 
   // Prepare images for modal
   const getModalImages = (): ImageModalImage[] => {
-    if (!category) return [];
-    return category.images.map((img: ActivityCategoryImage) => ({
+    if (!activityCategory) return [];
+    return activityCategory.images.map((img: ActivityCategoryImage) => ({
       url: img.imageUrl,
       name: img.imageName,
       description: img.imageDescription || undefined,
@@ -98,8 +121,8 @@ const ActivityCategoryDetailsPage = () => {
 
   // Prepare common gallery images
   const getGalleryImages = () => {
-    if (!category) return [];
-    return category.images.map((img: ActivityCategoryImage) => ({
+    if (!activityCategory) return [];
+    return activityCategory.images.map((img: ActivityCategoryImage) => ({
       url: img.imageUrl,
       name: img.imageName,
       description: img.imageDescription || undefined,
@@ -107,23 +130,23 @@ const ActivityCategoryDetailsPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(ACTIVITY_CATEGORY_VIEW_PAGE_URL);
+  const handleBack = () => router.push(ACTIVITIES_VIEW_PAGE_URL);
 
   const handleEdit = () =>
     router.push(
-      `${ACTIVITY_CATEGORY_VIEW_PAGE_URL}/${categoryId}?name=${category?.categoryName}`,
+      `${ACTIVITIES_VIEW_PAGE_URL}/${categoryId}?name=${activityCategory?.categoryName}`,
     );
 
   const handleDelete = () =>
     router.push(
-      `${ACTIVITY_CATEGORY_VIEW_PAGE_URL}/${categoryId}?name=${category?.categoryName}`,
+      `${ACTIVITIES_VIEW_PAGE_URL}/${categoryId}?name=${activityCategory?.categoryName}`,
     );
 
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: category?.categoryName,
-        text: category?.description,
+        title: activityCategory?.categoryName,
+        text: activityCategory?.description,
         url: window.location.href,
       });
     } else {
@@ -132,35 +155,53 @@ const ActivityCategoryDetailsPage = () => {
     }
   };
 
+  const handleViewActivity = (activityId: number) => {
+    router.push(`${ACTIVITIES_VIEW_PAGE_URL}/${activityId}`);
+  };
+
   // Status badge component
   const StatusBadge = () => {
-    if (!category) return null;
-    const statusColors = {
-      ACTIVE: { bg: "#10b981", text: "Active" },
-      INACTIVE: { bg: "#f59e0b", text: "Inactive" },
-      TERMINATED: { bg: "#ef4444", text: "Terminated" },
+    if (!activityCategory) return null;
+    const statusConfig = {
+      ACTIVE: { icon: CheckCircle, bg: "#10b981", text: "Active" },
+      INACTIVE: { icon: AlertCircle, bg: "#f59e0b", text: "Inactive" },
+      TERMINATED: { icon: XCircle, bg: "#ef4444", text: "Terminated" },
     };
-    const status =
-      statusColors[category.status as keyof typeof statusColors] ||
-      statusColors.INACTIVE;
+    const config =
+      statusConfig[activityCategory.status as keyof typeof statusConfig] ||
+      statusConfig.INACTIVE;
+    const Icon = config.icon;
+
     return (
-      <span
-        className="px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold backdrop-blur-sm text-white"
-        style={{ backgroundColor: status.bg }}
+      <div
+        className="flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full"
+        style={{
+          backgroundColor: hexToRgba(config.bg, 0.1),
+        }}
       >
-        {status.text}
-      </span>
+        <Icon
+          className="w-3 h-3 sm:w-3.5 sm:h-3.5"
+          style={{ color: config.bg }}
+        />
+        <span
+          className="text-[10px] sm:text-xs font-medium"
+          style={{ color: config.bg }}
+        >
+          {activityCategory.status}
+        </span>
+      </div>
     );
   };
 
   // Color badge component
   const ColorBadge = () => {
-    if (!category) return null;
+    if (!activityCategory) return null;
+    const displayColor = activityCategory.color || theme.primary;
     return (
       <div className="flex items-center gap-1 sm:gap-2 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full backdrop-blur-sm bg-black/50">
         <div
           className="w-2 h-2 sm:w-3 sm:h-3 rounded-full"
-          style={{ backgroundColor: category.color }}
+          style={{ backgroundColor: displayColor }}
         />
         <span className="text-white text-[10px] sm:text-xs font-medium">
           Category Color
@@ -169,38 +210,102 @@ const ActivityCategoryDetailsPage = () => {
     );
   };
 
-  // Calculate stats
-  const totalImages = category?.images?.length ?? 0;
-  const totalPrimaryActivities = category?.primaryActivities?.length ?? 0;
-  const totalOtherActivities = category?.otherActivities?.length ?? 0;
-  const totalActivities = totalPrimaryActivities + totalOtherActivities;
+  // Prepare quick stats
+  const quickStats = [
+    {
+      label: "Primary Activities",
+      value: activityCategory?.primaryActivities?.length || 0,
+      icon: Activity,
+      color: theme.warning,
+    },
+    {
+      label: "Other Activities",
+      value: activityCategory?.otherActivities?.length || 0,
+      icon: Activity,
+      color: theme.primary,
+    },
+    {
+      label: "Total Activities",
+      value:
+        (activityCategory?.primaryActivities?.length || 0) +
+        (activityCategory?.otherActivities?.length || 0),
+      icon: Activity,
+      color: theme.success,
+    },
+    {
+      label: "Total Images",
+      value: activityCategory?.images?.length || 0,
+      icon: Image,
+      color: theme.warning,
+    },
+  ];
+
+  // Prepare metadata items
+  const metadataItems = [
+    {
+      label: "Created By",
+      value:
+        activityCategory?.createdByName ||
+        `User #${activityCategory?.createdBy}`,
+      icon: User,
+      date: activityCategory?.createdAt,
+      color: theme.success,
+    },
+    {
+      label: "Last Updated",
+      value: activityCategory?.updatedByName
+        ? activityCategory.updatedByName
+        : activityCategory?.updatedBy
+          ? `User #${activityCategory.updatedBy}`
+          : "Never",
+      icon: Clock,
+      date: activityCategory?.updatedAt,
+      color: theme.primary,
+    },
+  ];
+
+  if (activityCategory?.terminatedAt) {
+    metadataItems.push({
+      label: "Terminated By",
+      value: activityCategory.terminatedBy
+        ? `User #${activityCategory.terminatedBy}`
+        : "Unknown",
+      icon: User,
+      date: activityCategory.terminatedAt,
+      color: theme.error,
+    });
+  }
 
   if (loading)
     return (
       <CommonLoading
-        message={`Loading "${category?.categoryName}" category details...`}
-        subMessage="Fetching category information"
+        message={`Loading "${activityCategory?.categoryName}" category details...`}
+        subMessage="Fetching activity category information"
         size="lg"
       />
     );
 
-  if (error || !category) {
+  if (error || !activityCategory) {
     return (
       <CommonErrorState
         error={error}
-        title="Failed to Load Category"
+        title="Failed to Load Activity Category"
         message="The activity category couldn't be loaded. Please try again."
         variant="error"
         showBackButton={true}
         showRetryButton={true}
         onBack={handleBack}
-        onRetry={fetchCategory}
-        backButtonText="Back to Categories"
+        onRetry={fetchActivityCategory}
+        backButtonText="Back to Activity Categories"
         retryButtonText="Try Again"
         fullScreen={true}
       />
     );
   }
+
+  const totalActivities =
+    (activityCategory.primaryActivities?.length || 0) +
+    (activityCategory.otherActivities?.length || 0);
 
   return (
     <div
@@ -217,8 +322,8 @@ const ActivityCategoryDetailsPage = () => {
       >
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
-            title={category.categoryName}
-            description={`Category ID: ${category.categoryId}`}
+            title={activityCategory.categoryName}
+            description={`Category ID: ${activityCategory.categoryId}`}
             breadcrumbItems={breadcrumbItems}
           />
         </div>
@@ -227,7 +332,7 @@ const ActivityCategoryDetailsPage = () => {
       {/* Main Content */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <ActionButtons
-          title={category.categoryName}
+          title={activityCategory.categoryName}
           showShare={true}
           showEdit={true}
           showDelete={true}
@@ -236,14 +341,14 @@ const ActivityCategoryDetailsPage = () => {
           onDelete={handleDelete}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5 sm:gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 sm:gap-6 items-start">
           {/* LEFT COLUMN */}
           <div className="flex flex-col gap-4 sm:gap-5">
             <CommonHeroImage
               images={getGalleryImages()}
               currentIndex={currentIndex}
-              onPrev={() => handlePrevImage(category.images.length)}
-              onNext={() => handleNextImage(category.images.length)}
+              onPrev={() => handlePrevImage(activityCategory.images.length)}
+              onNext={() => handleNextImage(activityCategory.images.length)}
               onImageChange={changeImage}
               imgTransition={imgTransition}
               statusBadge={<StatusBadge />}
@@ -251,48 +356,64 @@ const ActivityCategoryDetailsPage = () => {
               aspectRatio="video"
               showThumbnails={true}
               showCounter={true}
+              fallbackIcon={
+                <div
+                  className="w-20 h-20 rounded-full flex items-center justify-center"
+                  style={{
+                    backgroundColor: hexToRgba(
+                      activityCategory.color || theme.primary,
+                      0.1,
+                    ),
+                  }}
+                >
+                  <Tag
+                    className="w-10 h-10"
+                    style={{ color: activityCategory.color || theme.primary }}
+                  />
+                </div>
+              }
             />
 
-            <CategoryOverview
-              name={category.categoryName}
-              description={category.description}
-              color={category.color}
-              hoverColor={category.hoverColor}
+            <ActivityCategoryOverview
+              name={activityCategory.categoryName}
+              description={activityCategory.description}
+              color={activityCategory.color}
+              hoverColor={activityCategory.hoverColor}
             />
 
-            <CategoryActivitiesList
-              primaryActivities={category.primaryActivities}
-              otherActivities={category.otherActivities}
+            <ActivityCategoryActivitiesList
+              primaryActivities={activityCategory.primaryActivities || []}
+              otherActivities={activityCategory.otherActivities || []}
+              categoryColor={activityCategory.color || theme.primary}
+              onViewActivity={handleViewActivity}
             />
           </div>
 
           {/* RIGHT COLUMN */}
           <div className="flex flex-col gap-4">
-            <CategoryQuickStats
-              totalImages={totalImages}
-              totalPrimaryActivities={totalPrimaryActivities}
-              totalOtherActivities={totalOtherActivities}
-              totalActivities={totalActivities}
-              status={category.status}
-              color={category.color}
+            <CommonQuickStats
+              stats={quickStats}
+              title="Quick Stats"
+              statusBadge={<StatusBadge />}
+              columns={2}
             />
 
-            <CategoryMetadata
-              createdAt={category.createdAt}
-              createdBy={category.createdBy}
-              createdByName={category.createdByName}
-              updatedAt={category.updatedAt}
-              updatedBy={category.updatedBy}
-              updatedByName={category.updatedByName}
-              terminatedAt={category.terminatedAt}
-              terminatedBy={category.terminatedBy}
+            <CommonMetadata
+              items={metadataItems}
+              title="Metadata"
+              description="Creation and modification information"
+              createdAt={{
+                date: activityCategory.createdAt,
+                label: "Created At",
+              }}
+              showCreatedAt={true}
             />
 
             <CommonGalleryMini
               images={getGalleryImages()}
               onImageClick={handleImageClick}
               onViewAll={openExpandedGallery}
-              title="Gallery"
+              title="Category Gallery"
               showCount={true}
               maxDisplayCount={4}
             />
@@ -301,7 +422,7 @@ const ActivityCategoryDetailsPage = () => {
       </div>
 
       {/* Modals */}
-      {isModalOpen && category && (
+      {isModalOpen && activityCategory && (
         <ImageModal
           isOpen={isModalOpen}
           images={getModalImages()}
@@ -314,7 +435,7 @@ const ActivityCategoryDetailsPage = () => {
         />
       )}
 
-      {isExpandedGalleryOpen && category && (
+      {isExpandedGalleryOpen && activityCategory && (
         <CommonExpandedGallery
           images={getGalleryImages()}
           onClose={closeExpandedGallery}

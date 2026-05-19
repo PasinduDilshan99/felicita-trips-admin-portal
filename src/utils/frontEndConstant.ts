@@ -193,6 +193,14 @@ export const ADD_TOUR_CATEGORY_DATA_FE = `${API}${TOUR}/categories/add`;
 export const UPDATE_TOUR_CATEGORY_DATA_FE = `${API}${TOUR}/categories/update`;
 export const TERMINATE_TOUR_CATEGORY_DATA_FE = `${API}${TOUR}/categories/terminate`;
 
+// Tour Schedule
+export const GET_TOUR_SCHEDULE_DATA_FE = `${API}${TOUR}/schedules`;
+export const GET_TOUR_SCHEDULE_PARAMS_FOR_REQUEST_DATA_FE = `${API}${TOUR}/schedules/params`;
+export const GET_TOUR_SCHEDULE_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}/schedules/details`;
+export const ADD_TOUR_SCHEDULE_DATA_FE = `${API}${TOUR}/schedules/add`;
+export const UPDATE_TOUR_SCHEDULE_DATA_FE = `${API}${TOUR}/schedules/update`;
+export const TERMINATE_TOUR_SCHEDULE_DATA_FE = `${API}${TOUR}/schedules/terminate`;
+
 // Packages
 export const GET_ALL_PACKAGES_DETAILS_DATA_FE = `${API}${PACKAGES}`;
 export const GET_ACTIVE_PACKAGE_DETAILS_DATA_FE = `${API}${PACKAGES}/active-packages`;
@@ -217,6 +225,22 @@ export const GET_PACKAGE_SCHEDULE_STATISTICS_DATA_FE = `${API}${PACKAGES}/packag
 export const GET_PACKAGE_TYPE_STATISTICS_DATA_FE = `${API}${PACKAGES}/package-type-statistics`;
 export const GET_PACKAGE_PARAMETERS_DATA_FE = `${API}${PACKAGES}/add-package-params`;
 
+// Package Types
+export const GET_PACKAGE_TYPES_DATA_FE = `${API}${PACKAGES}/types`;
+export const GET_PACKAGE_TYPE_DETAILS_BY_ID_DATA_FE = `${API}${PACKAGES}/types/details`;
+export const GET_PACKAGE_TYPE_BASIC_DETAILS_BY_ID_DATA_FE = `${API}${PACKAGES}/types/basic-details`;
+export const ADD_PACKAGE_TYPE_DATA_FE = `${API}${PACKAGES}/types/add`;
+export const UPDATE_PACKAGE_TYPE_DATA_FE = `${API}${PACKAGES}/types/update`;
+export const TERMINATE_PACKAGE_TYPE_DATA_FE = `${API}${PACKAGES}/types/terminate`;
+
+// Package Schedule
+export const GET_PACKAGE_SCHEDULE_DATA_FE = `${API}${PACKAGES}/schedules`;
+export const GET_PACKAGE_SCHEDULE_PARAMS_FOR_REQUEST_DATA_FE = `${API}${PACKAGES}/schedules/params`;
+export const GET_PACKAGE_SCHEDULE_DETAILS_BY_ID_DATA_FE = `${API}${PACKAGES}/schedules/details`;
+export const ADD_PACKAGE_SCHEDULE_DATA_FE = `${API}${PACKAGES}/schedules/add`;
+export const UPDATE_PACKAGE_SCHEDULE_DATA_FE = `${API}${PACKAGES}/schedules/update`;
+export const TERMINATE_PACKAGE_SCHEDULE_DATA_FE = `${API}${PACKAGES}/schedules/terminate`;
+
 // Activities
 export const GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA_FE = `${API}${ACTIVITIES}`;
 export const GET_ALL_ACTIVITIES_DETAILS_DATA_FE = `${API}${ACTIVITIES}`;
@@ -240,6 +264,14 @@ export const GET_ACTIVITY_CATEGORY_DETAILS_BY_ID_DATA_FE = `${API}${ACTIVITIES}/
 export const ADD_ACTIVITY_CATEGORY_DATA_FE = `${API}${ACTIVITIES}/category/add`;
 export const UPDATE_ACTIVITY_CATEGORY_DATA_FE = `${API}${ACTIVITIES}/category/update`;
 export const TERMINATE_ACTIVITY_CATEGORY_DATA_FE = `${API}${ACTIVITIES}/category/terminate`;
+
+// Activity Schedule
+export const GET_ACTIVITY_SCHEDULE_DATA_FE = `${API}${ACTIVITIES}/schedules`;
+export const GET_ACTIVITY_SCHEDULE_PARAMS_FOR_REQUEST_DATA_FE = `${API}${ACTIVITIES}/schedules/params`;
+export const GET_ACTIVITY_SCHEDULE_DETAILS_BY_ID_DATA_FE = `${API}${ACTIVITIES}/schedules/details`;
+export const ADD_ACTIVITY_SCHEDULE_DATA_FE = `${API}${ACTIVITIES}/schedules/add`;
+export const UPDATE_ACTIVITY_SCHEDULE_DATA_FE = `${API}${ACTIVITIES}/schedules/update`;
+export const TERMINATE_ACTIVITY_SCHEDULE_DATA_FE = `${API}${ACTIVITIES}/schedules/terminate`;
 
 // Blogs
 export const GET_ALL_BLOGS_DETAILS_DATA_FE = `${API}${BLOGS}`;

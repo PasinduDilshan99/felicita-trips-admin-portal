@@ -23,7 +23,6 @@ import { Loader } from "lucide-react";
 import { FormCard } from "@/components/common-components/create-components/FormCard";
 import { DestinationSelector } from "@/components/common-components/DestinationSelector";
 import { ActivityInfoForm } from "@/components/activities-components/activity-create-components/ActivityInfoForm";
-import { SeasonSelector } from "@/components/activities-components/activity-create-components/SeasonSelector";
 import { ParticipationForm } from "@/components/activities-components/activity-create-components/ParticipationForm";
 import { RequirementsForm } from "@/components/activities-components/activity-create-components/RequirementsForm";
 import { FormActions } from "@/components/common-components/FormActions";
@@ -33,6 +32,8 @@ import { ScheduleForm } from "@/components/activities-components/activity-create
 import { CategorySelector } from "@/components/common-components/CategorySelector";
 import { adaptActivityCategories } from "@/utils/category-adapters";
 import { PricingForm } from "@/components/common-components/PricingForm";
+import { SeasonSelector } from "@/components/common-components/SeasonSelector";
+import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
 
 // Toast state interface
 interface ToastState {
@@ -93,6 +94,7 @@ const AddNewActivityPage = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [toast, setToast] = useState<ToastState>({
     show: false,
     type: "success",
@@ -182,8 +184,6 @@ const AddNewActivityPage = () => {
     }
   };
 
-  // Update the handleCategoryChange function in AddNewActivityPage
-
   // Handle category changes
   const handleCategoryChange = (categoryId: number, isPrimary: boolean) => {
     const existingIndex = formData.categories.findIndex(
@@ -193,32 +193,25 @@ const AddNewActivityPage = () => {
     let newCategories: ActivityCategory[];
 
     if (existingIndex >= 0) {
-      // Category already exists - update its primary status
       newCategories = formData.categories.map((cat, index) => {
         if (index === existingIndex) {
-          // Update the existing category's primary status
           return { ...cat, isPrimary };
         }
-        // If we're setting this category as primary, ensure others are not primary
         if (isPrimary && cat.isPrimary) {
           return { ...cat, isPrimary: false };
         }
         return cat;
       });
     } else {
-      // Category doesn't exist - add new category
-      // If adding as primary, ensure no other category is primary
       let shouldBePrimary = isPrimary;
       let updatedCategories = [...formData.categories];
 
       if (isPrimary) {
-        // Remove primary from all existing categories
         updatedCategories = updatedCategories.map((cat) => ({
           ...cat,
           isPrimary: false,
         }));
       } else if (updatedCategories.length === 0) {
-        // If this is the first category and not marked as primary, make it primary
         shouldBePrimary = true;
       }
 
@@ -266,10 +259,6 @@ const AddNewActivityPage = () => {
   const handleUploadingImagesChange = (uploading: boolean) => {
     setUploadingImages(uploading);
   };
-
-  const activityCategories = adaptActivityCategories(
-    categories?.activityCategoryList || [],
-  );
 
   // Validate form
   const validateForm = (): boolean => {
@@ -336,17 +325,8 @@ const AddNewActivityPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      const firstError = document.querySelector('[class*="border-red"]');
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      return;
-    }
-
+  // Actual submission logic
+  const submitActivity = async () => {
     setLoading(true);
 
     try {
@@ -371,21 +351,33 @@ const AddNewActivityPage = () => {
           message: `${formData.name} has been added to your activities.`,
         });
         handleReset();
+        return response;
       } else {
         throw new Error(response.message || "Failed to add activity");
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      setToast({
-        show: true,
-        type: "error",
-        title: "Submission Failed",
-        message: error.message || "Failed to add activity. Please try again.",
-        activityId: undefined,
-      });
+      throw error;
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle create button click - opens dialog
+  const handleCreateClick = () => {
+    if (validateForm()) {
+      setShowConfirmDialog(true);
+    } else {
+      const firstError = document.querySelector('[class*="border-red"]');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  };
+
+  // Handle confirm create from dialog
+  const handleConfirmCreate = async () => {
+    await submitActivity();
   };
 
   // Reset form
@@ -485,7 +477,7 @@ const AddNewActivityPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Forms */}
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form className="space-y-8">
               <FormCard>
                 <DestinationSelector
                   value={formData.destinationId}
@@ -581,9 +573,10 @@ const AddNewActivityPage = () => {
               <FormActions
                 loading={loading}
                 uploadingImages={uploadingImages}
-                onSubmit={() => {}}
+                onSubmit={handleCreateClick}
                 onReset={handleReset}
                 errors={errors}
+                submitButtonType="button"
               />
             </form>
           </div>
@@ -683,6 +676,42 @@ const AddNewActivityPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <CreateConfirmationDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleConfirmCreate}
+        details={{
+          title: "Create New Activity",
+          message: "Are you sure you want to create this activity?",
+          itemName: formData.name || "Untitled Activity",
+          type: "create",
+          estimatedTime: "~2-3 seconds",
+          tips: [
+            "Make sure all images are uploaded successfully",
+            "Double-check pricing for local and foreign participants",
+            "Verify the season and availability dates",
+            "You can edit this activity anytime after creation",
+          ],
+        }}
+        confirmText="Create Activity"
+        cancelText="Cancel"
+        onSuccess={() => {
+          console.log("Activity created successfully");
+        }}
+        onError={(error) => {
+          console.error("Failed to create activity:", error);
+          setToast({
+            show: true,
+            type: "error",
+            title: "Creation Failed",
+            message:
+              error.message || "Failed to create activity. Please try again.",
+            activityId: undefined,
+          });
+        }}
+      />
     </div>
   );
 };

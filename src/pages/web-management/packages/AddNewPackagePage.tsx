@@ -53,6 +53,7 @@ import { DayAccommodationsForm } from "@/components/packages-components/package-
 import { InclusionsExclusionsForm } from "@/components/packages-components/package-create-components/InclusionsExclusionsForm";
 import { ConditionsTipsForm } from "@/components/packages-components/package-create-components/ConditionsTipsForm";
 import { ImageUploader } from "@/components/common-components/ImageUploader";
+import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
 
 // Toast state interface
 interface ToastState {
@@ -121,6 +122,7 @@ const AddNewPackagePage = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [toast, setToast] = useState<ToastState>({
     show: false,
     type: "success",
@@ -290,7 +292,7 @@ const AddNewPackagePage = () => {
     setSelectedTour(null);
     setSelectedTourDetails(null);
     setFormData({
-      packageType: 0,
+      packageType: 1,
       tourId: 0,
       name: "",
       description: "",
@@ -375,6 +377,10 @@ const AddNewPackagePage = () => {
   };
 
   // Image handling
+  const handleImagePreviewsChange = (previews: typeof imagePreviews) => {
+    setImagePreviews(previews);
+  };
+
   const handleImagesChange = (images: PackageImageRequest[]) => {
     setFormData({ ...formData, images });
   };
@@ -435,16 +441,8 @@ const AddNewPackagePage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      const firstError = document.querySelector('[class*="border-red"]');
-      if (firstError)
-        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
-
+  // Actual submission logic
+  const submitPackage = async () => {
     setLoading(true);
     try {
       const response = await PackageService.addPackage(formData);
@@ -456,26 +454,42 @@ const AddNewPackagePage = () => {
           message: `${formData.name} has been added to your packages.`,
         });
         handleReset();
+        return response;
       } else {
         throw new Error(response.message || "Failed to add package");
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      setToast({
-        show: true,
-        type: "error",
-        title: "Submission Failed",
-        message: error.message || "Failed to add package. Please try again.",
-        packageId: undefined,
-      });
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle create button click - opens dialog
+  const handleCreateClick = () => {
+    if (validateForm()) {
+      setShowConfirmDialog(true);
+    } else {
+      const firstError = document.querySelector('[class*="border-red"]');
+      if (firstError)
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
+  // Handle confirm create from dialog
+  const handleConfirmCreate = async () => {
+    await submitPackage();
+  };
+
   const handleReset = () => {
+    imagePreviews.forEach((preview) => {
+      if (preview.url && preview.url.startsWith("blob:")) {
+        URL.revokeObjectURL(preview.url);
+      }
+    });
     setFormData({
-      packageType: 0,
+      packageType: 1,
       tourId: selectedTour?.tourId || 0,
       name: selectedTourDetails
         ? `${selectedTourDetails.tourName} Package`
@@ -779,7 +793,7 @@ const AddNewPackagePage = () => {
   const renderPackageDetails = () => (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2">
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form className="space-y-8">
           {/* Basic Information */}
           <div
             className="rounded-2xl overflow-hidden"
@@ -1104,10 +1118,11 @@ const AddNewPackagePage = () => {
           <FormActions
             loading={loading}
             uploadingImages={uploadingImages}
-            onSubmit={() => {}}
+            onSubmit={handleCreateClick}
             onReset={handleReset}
             errors={errors}
             submitText="Package"
+            submitButtonType="button"
           />
         </form>
       </div>
@@ -1115,6 +1130,8 @@ const AddNewPackagePage = () => {
       <div className="space-y-8">
         <ImageUploader<PackageImageRequest>
           images={formData.images}
+          imagePreviews={imagePreviews}
+          onImagePreviewsChange={handleImagePreviewsChange}
           onImagesChange={handleImagesChange}
           onUploadingChange={handleUploadingImagesChange}
           errors={errors}
@@ -1249,6 +1266,44 @@ const AddNewPackagePage = () => {
         {selectedTourDetails && renderSelectedTourDetails()}
         {selectedTourDetails && renderPackageDetails()}
       </div>
+
+      {/* Confirmation Dialog */}
+      <CreateConfirmationDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleConfirmCreate}
+        details={{
+          title: "Create New Package",
+          message: "Are you sure you want to create this tour package?",
+          itemName: formData.name || "Untitled Package",
+          type: "create",
+          estimatedTime: "~3-4 seconds",
+          tips: [
+            "Make sure all images are uploaded successfully",
+            "Verify that day accommodations are properly configured",
+            "Check that inclusions and exclusions are accurate",
+            "Ensure pricing and discount percentages are correct",
+            "Review date ranges and participant limits",
+            "You can edit this package anytime after creation",
+          ],
+        }}
+        confirmText="Create Package"
+        cancelText="Cancel"
+        onSuccess={() => {
+          console.log("Package created successfully");
+        }}
+        onError={(error) => {
+          console.error("Failed to create package:", error);
+          setToast({
+            show: true,
+            type: "error",
+            title: "Creation Failed",
+            message:
+              error.message || "Failed to create package. Please try again.",
+            packageId: undefined,
+          });
+        }}
+      />
     </div>
   );
 };

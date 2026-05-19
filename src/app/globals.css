@@ -85,6 +85,7 @@ body {
     transform: rotate(360deg);
   }
 }
+
 @keyframes shimmer {
   0% {
     background-position: -200% center;
@@ -149,4 +150,102 @@ body {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
+}
+
+/* Prevent scroll jump when focusing inputs in modals/portals */
+[data-base-dropdown] input:focus,
+[data-destination-dropdown] input:focus,
+[data-season-dropdown] input:focus {
+  outline: none;
+}
+
+/* Ensure dropdowns don't cause body scroll */
+body:has([data-base-dropdown]),
+body:has([data-destination-dropdown]),
+body:has([data-season-dropdown]) {
+  overflow: hidden !important;
+}
+
+/* Restore scroll when dropdown closes */
+body:not(:has([data-base-dropdown])):not(:has([data-destination-dropdown])):not(:has([data-season-dropdown])) {
+  overflow: auto !important;
+}
+
+/* Dialog animations */
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialogSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dialogSlideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+}
+
+.dialog-overlay {
+  animation: dialogFadeIn 0.2s ease-out forwards;
+}
+
+.dialog-container {
+  animation: dialogSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.dialog-container.leaving {
+  animation: dialogSlideDown 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Loading spinner animation */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 1s linear infinite;
+}
+
+/* Button ripple effect */
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.ripple-effect:active:after {
+  width: 200px;
+  height: 200px;
 }

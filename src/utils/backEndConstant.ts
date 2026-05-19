@@ -220,7 +220,13 @@ export const ADD_TOUR_CATEGORY_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/add-t
 export const UPDATE_TOUR_CATEGORY_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/update-tour-category`;
 export const TERMINATE_TOUR_CATEGORY_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/terminate-tour-category`;
 
-
+// Tour Schedule
+export const GET_TOUR_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-schedule`;
+export const GET_TOUR_SCHEDULE_PARAMS_FOR_REQUEST_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-schedule-params`;
+export const GET_TOUR_SCHEDULE_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-schedule-details-by-id`;
+export const ADD_TOUR_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/create-tour-schedule`;
+export const UPDATE_TOUR_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/update-tour-schedule`;
+export const TERMINATE_TOUR_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/terminate-tour-schedule`;
 
 // Packages
 export const GET_PACKAGE_DETAILS_BY_PACKAGE_ID_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}`;
@@ -247,6 +253,21 @@ export const GET_PACKAGE_SCHEDULE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION
 export const GET_PACKAGE_TYPE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-type-statistics`;
 export const GET_PACKAGE_PARAMETERS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/add-package-params`;
 
+// Package Types
+export const GET_PACKAGE_TYPES_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-types`;
+export const GET_PACKAGE_TYPE_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-type-details`;
+export const GET_PACKAGE_TYPE_BASIC_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-type-basic-details`;
+export const ADD_PACKAGE_TYPE_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/add-package-type`;
+export const UPDATE_PACKAGE_TYPE_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/update-package-type`;
+export const TERMINATE_PACKAGE_TYPE_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/terminate-package-type`;
+
+// Package Schedule
+export const GET_PACKAGE_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-schedule`;
+export const GET_PACKAGE_SCHEDULE_PARAMS_FOR_REQUEST_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-schedule-params`;
+export const GET_PACKAGE_SCHEDULE_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-schedule-details-by-id`;
+export const ADD_PACKAGE_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/create-package-schedule`;
+export const UPDATE_PACKAGE_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/update-package-schedule`;
+export const TERMINATE_PACKAGE_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/terminate-package-schedule`;
 
 // Activities
 export const GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}`;
@@ -271,6 +292,14 @@ export const GET_ACTIVITY_CATEGORY_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VER
 export const ADD_ACTIVITY_CATEGORY_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/add-activity-category`;
 export const UPDATE_ACTIVITY_CATEGORY_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/update-activity-category`;
 export const TERMINATE_ACTIVITY_CATEGORY_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/terminate-activity-category`;
+
+// Activity Schedule
+export const GET_ACTIVITY_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/activities-schedule`;
+export const GET_ACTIVITY_SCHEDULE_PARAMS_FOR_REQUEST_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/activities-schedule-params`;
+export const GET_ACTIVITY_SCHEDULE_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/activities-schedule-details-by-id`;
+export const ADD_ACTIVITY_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/create-activities-schedule`;
+export const UPDATE_ACTIVITY_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/update-activities-schedule`;
+export const TERMINATE_ACTIVITY_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/terminate-activities-schedule`;
 
 // Blogs
 export const GET_ALL_BLOGS_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${BLOG}/all`;

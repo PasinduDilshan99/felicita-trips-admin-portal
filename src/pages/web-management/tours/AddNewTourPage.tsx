@@ -37,9 +37,10 @@ import { TourLocationForm } from "@/components/tours-components/tour-create-comp
 import { TourDestinationsForm } from "@/components/tours-components/tour-create-components/TourDestinationsForm";
 import { InclusionsExclusionsForm } from "@/components/tours-components/tour-create-components/InclusionsExclusionsForm";
 import { ConditionsTipsForm } from "@/components/tours-components/tour-create-components/ConditionsTipsForm";
-import { SeasonSelector } from "@/components/activities-components/activity-create-components/SeasonSelector";
 import { AssignToSelector } from "@/components/tours-components/tour-create-components/AssignToSelector";
 import { TourInfoForm } from "@/components/tours-components/tour-create-components/TourInfoForm";
+import { SeasonSelector } from "@/components/common-components/SeasonSelector";
+import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
 
 // Toast state interface
 interface ToastState {
@@ -104,6 +105,7 @@ const AddNewTourPage = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [toast, setToast] = useState<ToastState>({
     show: false,
     type: "success",
@@ -318,17 +320,8 @@ const AddNewTourPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      const firstError = document.querySelector('[class*="border-red"]');
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      return;
-    }
-
+  // Actual submission logic
+  const submitTour = async () => {
     setLoading(true);
 
     try {
@@ -344,9 +337,9 @@ const AddNewTourPage = () => {
         longitude: parseFloat(formData.longitude.toFixed(6)),
       };
 
-      console.log('=================submissionData===================');
+      console.log("=================submissionData===================");
       console.log(submissionData);
-      console.log('====================================');
+      console.log("====================================");
       const response = await TourService.addTour(submissionData);
 
       if (response.code === 200) {
@@ -357,21 +350,33 @@ const AddNewTourPage = () => {
           message: `${formData.name} has been added to your tours.`,
         });
         handleReset();
+        return response;
       } else {
         throw new Error(response.message || "Failed to add tour");
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      setToast({
-        show: true,
-        type: "error",
-        title: "Submission Failed",
-        message: error.message || "Failed to add tour. Please try again.",
-        tourId: undefined,
-      });
+      throw error;
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle create button click - opens dialog
+  const handleCreateClick = () => {
+    if (validateForm()) {
+      setShowConfirmDialog(true);
+    } else {
+      const firstError = document.querySelector('[class*="border-red"]');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  };
+
+  // Handle confirm create from dialog
+  const handleConfirmCreate = async () => {
+    await submitTour();
   };
 
   // Reset form
@@ -475,7 +480,7 @@ const AddNewTourPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Forms */}
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form className="space-y-8">
               <TourInfoForm
                 formData={formData}
                 errors={errors}
@@ -568,10 +573,11 @@ const AddNewTourPage = () => {
               <FormActions
                 loading={loading}
                 uploadingImages={uploadingImages}
-                onSubmit={() => {}}
+                onSubmit={handleCreateClick}
                 onReset={handleReset}
                 errors={errors}
                 submitText="Tour"
+                submitButtonType="button"
               />
             </form>
           </div>
@@ -677,6 +683,43 @@ const AddNewTourPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <CreateConfirmationDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleConfirmCreate}
+        details={{
+          title: "Create New Tour",
+          message: "Are you sure you want to create this tour package?",
+          itemName: formData.name || "Untitled Tour",
+          type: "create",
+          estimatedTime: "~3-4 seconds",
+          tips: [
+            "Make sure all images are uploaded successfully",
+            "Double-check the itinerary and destinations",
+            "Verify inclusions and exclusions are accurate",
+            "Review pricing and duration details",
+            "You can edit this tour anytime after creation",
+          ],
+        }}
+        confirmText="Create Tour"
+        cancelText="Cancel"
+        onSuccess={() => {
+          console.log("Tour created successfully");
+        }}
+        onError={(error) => {
+          console.error("Failed to create tour:", error);
+          setToast({
+            show: true,
+            type: "error",
+            title: "Creation Failed",
+            message:
+              error.message || "Failed to create tour. Please try again.",
+            tourId: undefined,
+          });
+        }}
+      />
     </div>
   );
 };
