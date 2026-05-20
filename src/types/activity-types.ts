@@ -45,7 +45,7 @@ export interface Activity {
   requirements: Requirement[];
   images: ActivityImage[];
   destination_id: number;
-  activities_category: ActivityCategoryDetail[];
+  activities_category: ActivityCategoryFullDetail[];
   duration_hours: number;
   available_from: string;
   available_to: string;
@@ -69,7 +69,7 @@ export interface Schedule {
   special_note: string;
 }
 
-export interface ActivityCategoryDetail {
+export interface ActivityCategoryFullDetail {
   id: number;
   name: string;
   description: string;
@@ -223,12 +223,12 @@ export interface UpdateActivityRequest {
   
   // Image operations
   removeImagesIds: number[];
-  addImages: UpdateImageRequest[];
+  addImages: ActivityImageRequest[];
   updatedImages: UpdateImageRequest[];
   
   // Requirement operations
   removeRequirementsIds: number[];
-  addRequirements: UpdateRequirementRequest[];
+  addRequirements: ActivityRequirementRequest[];
   updatedRequirements: UpdateRequirementRequest[];
 }
 
@@ -317,7 +317,7 @@ export interface ActivityWishDetails {
   notWishListCount: number;
 }
 
-export interface ActivityCategoryDetail {
+export interface ActivityCategoryDetailForStatistics {
   categoryId: number;
   categoryName: string;
   count: number;
@@ -326,7 +326,7 @@ export interface ActivityCategoryDetail {
 export interface ActivityStatisticsData {
   activityDetails: ActivityDetails;
   wishDetails: ActivityWishDetails;
-  categoryDetails: ActivityCategoryDetail[];
+  categoryDetails: ActivityCategoryDetailForStatistics[];
 }
 
 export interface ActivityStatisticsApiResponse {

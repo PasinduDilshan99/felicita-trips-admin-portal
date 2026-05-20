@@ -1,0 +1,549 @@
+// components/tours-components/update-tour-components/DayToDayItineraryForm.tsx
+"use client";
+
+import React, { useState, useMemo } from "react";
+import {
+  CalendarDays,
+  Plus,
+  X,
+  ChevronDown,
+  ChevronRight,
+  MapPin,
+  Clock,
+  Trash2,
+} from "lucide-react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { DayToDayResponse, TourDestinationInput, UpdateDestinationInput } from "@/types/tour-types";
+import { DestinationCategory, ActivityCategory } from "@/types/common-types";
+import { useTheme } from "@/contexts/ThemeContext";
+
+interface DayToDayItineraryFormProps {
+  dayToDayResponses: DayToDayResponse[];
+  addedDestinations: TourDestinationInput[];
+  removedDestinations: number[];
+  removedActivities: number[];
+  updatedDestinations: UpdateDestinationInput[];
+  availableDestinations: any[];
+  availableActivities: any[];
+  availableDestinationCategories: DestinationCategory[];
+  availableActivityCategories: ActivityCategory[];
+  onAddDestination: (destinationId: number, activityId: number, dayNumber: number) => void;
+  onRemoveDestination: (tourDestinationId: number) => void;
+  onRemoveActivity: (activityId: number) => void;
+  onUpdateDestination: (tourDestinationId: number, dayNumber: number, status: "ACTIVE" | "INACTIVE") => void;
+}
+
+const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
+};
+
+const dayVariants: Variants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.3, ease: EASE_OUT } },
+};
+
+export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
+  dayToDayResponses,
+  addedDestinations,
+  removedDestinations,
+  removedActivities,
+  updatedDestinations,
+  availableDestinations,
+  availableActivities,
+  availableDestinationCategories,
+  availableActivityCategories,
+  onAddDestination,
+  onRemoveDestination,
+  onRemoveActivity,
+  onUpdateDestination,
+}) => {
+  const { theme } = useTheme();
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [expandedDays, setExpandedDays] = useState<Set<number>>(() => {
+    // Initially expand all days
+    const initialExpanded = new Set<number>();
+    dayToDayResponses.forEach(day => {
+      initialExpanded.add(day.dayNumber);
+    });
+    return initialExpanded;
+  });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedDestinationId, setSelectedDestinationId] = useState<number | null>(null);
+  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null);
+  const [selectedDay, setSelectedDay] = useState<number>(1);
+
+  const toggleDay = (dayNumber: number) => {
+    setExpandedDays(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(dayNumber)) {
+        newSet.delete(dayNumber);
+      } else {
+        newSet.add(dayNumber);
+      }
+      return newSet;
+    });
+  };
+
+  const isDestinationRemoved = (tourDestinationId: number) => removedDestinations.includes(tourDestinationId);
+  const isActivityRemoved = (activityId: number) => removedActivities.includes(activityId);
+  const getDestinationUpdate = (tourDestinationId: number) => updatedDestinations.find(u => u.tourDestinationId === tourDestinationId);
+
+  const getDestinationName = (id: number) => {
+    const dest = availableDestinations.find(d => d.destinationId === id);
+    return dest?.destinationName || `Destination ${id}`;
+  };
+
+  const getActivityName = (id: number) => {
+    const activity = availableActivities.find(a => a.activityId === id);
+    return activity?.activityName || `Activity ${id}`;
+  };
+
+  const handleAddDestinationSubmit = () => {
+    if (selectedDestinationId && selectedActivityId && selectedDay) {
+      onAddDestination(selectedDestinationId, selectedActivityId, selectedDay);
+      setSelectedDestinationId(null);
+      setSelectedActivityId(null);
+      setSelectedDay(1);
+      setShowAddForm(false);
+    }
+  };
+
+  const filteredActivities = availableActivities.filter(
+    a => a.destinationId === selectedDestinationId
+  );
+
+  // Sort days by day number
+  const sortedDays = useMemo(() => {
+    return [...dayToDayResponses].sort((a, b) => a.dayNumber - b.dayNumber);
+  }, [dayToDayResponses]);
+
+  return (
+    <motion.div
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      className="rounded-2xl overflow-hidden"
+      style={{
+        backgroundColor: theme.surface,
+        border: `1px solid ${theme.border}`,
+        boxShadow: "0 2px 16px rgba(0,0,0,0.07)",
+      }}
+    >
+      <div
+        className="flex items-center justify-between px-4 sm:px-6 py-4 cursor-pointer select-none"
+        style={{ borderBottom: `1px solid ${theme.border}` }}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center gap-3">
+          <span
+            className="flex items-center justify-center w-8 h-8 rounded-lg"
+            style={{ backgroundColor: `${theme.accent}18`, color: theme.accent }}
+          >
+            <CalendarDays className="w-4 h-4" />
+          </span>
+          <div>
+            <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+              Day-to-Day Itinerary
+            </h2>
+            <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              Plan daily destinations and activities
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowAddForm(!showAddForm);
+            }}
+            className="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-xs font-medium cursor-pointer transition-all"
+            style={{
+              backgroundColor: `${theme.accent}15`,
+              color: theme.accent,
+            }}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add Day
+          </button>
+          <ChevronDown
+            className="w-4 h-4 transition-transform"
+            style={{ transform: isExpanded ? "rotate(180deg)" : "none", color: theme.textSecondary }}
+          />
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="px-4 sm:px-6 py-5">
+          {/* Add Day/Destination Form */}
+          <AnimatePresence>
+            {showAddForm && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mb-6 p-4 rounded-xl"
+                style={{
+                  backgroundColor: `${theme.accent}08`,
+                  border: `1px solid ${theme.accent}25`,
+                }}
+              >
+                <h4 className="text-sm font-medium mb-3" style={{ color: theme.text }}>
+                  Add Destination to Itinerary
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+                      Day Number
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="30"
+                      value={selectedDay}
+                      onChange={(e) => setSelectedDay(parseInt(e.target.value))}
+                      className="w-full px-3 py-2 rounded-lg border-2 text-sm"
+                      style={{
+                        backgroundColor: theme.background,
+                        borderColor: theme.border,
+                        color: theme.text,
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+                      Destination
+                    </label>
+                    <select
+                      value={selectedDestinationId || ""}
+                      onChange={(e) => {
+                        setSelectedDestinationId(parseInt(e.target.value));
+                        setSelectedActivityId(null);
+                      }}
+                      className="w-full px-3 py-2 rounded-lg border-2 text-sm"
+                      style={{
+                        backgroundColor: theme.background,
+                        borderColor: theme.border,
+                        color: theme.text,
+                      }}
+                    >
+                      <option value="">Select destination...</option>
+                      {availableDestinations.map((dest) => (
+                        <option key={dest.destinationId} value={dest.destinationId}>
+                          {dest.destinationName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+                    Activity
+                  </label>
+                  <select
+                    value={selectedActivityId || ""}
+                    onChange={(e) => setSelectedActivityId(parseInt(e.target.value))}
+                    disabled={!selectedDestinationId}
+                    className="w-full px-3 py-2 rounded-lg border-2 text-sm disabled:opacity-50"
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    }}
+                  >
+                    <option value="">Select activity...</option>
+                    {filteredActivities.map((activity) => (
+                      <option key={activity.activityId} value={activity.activityId}>
+                        {activity.activityName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setSelectedDestinationId(null);
+                      setSelectedActivityId(null);
+                      setSelectedDay(1);
+                    }}
+                    className="flex-1 px-3 py-2 rounded-lg text-sm"
+                    style={{
+                      backgroundColor: theme.background,
+                      border: `1px solid ${theme.border}`,
+                      color: theme.textSecondary,
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddDestinationSubmit}
+                    disabled={!selectedDestinationId || !selectedActivityId}
+                    className="flex-1 px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+                    style={{
+                      backgroundColor: theme.accent,
+                      color: "#fff",
+                    }}
+                  >
+                    Add to Itinerary
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Itinerary Days */}
+          <div className="space-y-4">
+            {sortedDays.map((day) => {
+              const visibleDestinations = day.destinations.filter(
+                d => !isDestinationRemoved(d.destination.destinationId)
+              );
+              
+              if (visibleDestinations.length === 0) return null;
+
+              const isDayExpanded = expandedDays.has(day.dayNumber);
+
+              return (
+                <motion.div
+                  key={`day-${day.dayNumber}`}
+                  variants={dayVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="rounded-xl overflow-hidden"
+                  style={{
+                    border: `1px solid ${isDayExpanded ? theme.accent : theme.border}`,
+                    backgroundColor: theme.background,
+                  }}
+                >
+                  {/* Day Header */}
+                  <div
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-opacity-50 transition-colors"
+                    style={{
+                      backgroundColor: isDayExpanded ? `${theme.accent}05` : "transparent",
+                    }}
+                    onClick={() => toggleDay(day.dayNumber)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm"
+                        style={{ backgroundColor: theme.accent }}
+                      >
+                        {day.dayNumber}
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                          Day {day.dayNumber}
+                        </h3>
+                        <p className="text-xs" style={{ color: theme.textSecondary }}>
+                          {visibleDestinations.length} destination{visibleDestinations.length !== 1 ? "s" : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <motion.div
+                      animate={{ rotate: isDayExpanded ? 90 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronRight className="w-4 h-4" style={{ color: theme.textSecondary }} />
+                    </motion.div>
+                  </div>
+
+                  {/* Day Content - Using simple conditional rendering instead of AnimatePresence for better reliability */}
+                  {isDayExpanded && (
+                    <div className="px-4 pb-4 space-y-3">
+                      {visibleDestinations.map((destination) => {
+                        const update = getDestinationUpdate(destination.destination.destinationId);
+                        const isUpdated = !!update;
+                        const isActive = update ? update.status === "ACTIVE" : true;
+                        
+                        return (
+                          <div
+                            key={destination.destination.destinationId}
+                            className="rounded-lg p-3 transition-all"
+                            style={{
+                              backgroundColor: `${theme.border}10`,
+                              border: `1px solid ${isUpdated ? theme.primary : theme.border}`,
+                              opacity: isActive ? 1 : 0.6,
+                            }}
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 flex-wrap mb-2">
+                                  <MapPin className="w-3.5 h-3.5" style={{ color: theme.primary }} />
+                                  <span className="text-sm font-medium" style={{ color: theme.text }}>
+                                    {destination.destination.destinationName}
+                                  </span>
+                                  {destination.destination.category?.map((cat: any) => (
+                                    <span
+                                      key={cat.id}
+                                      className="text-xs px-1.5 py-0.5 rounded-full"
+                                      style={{
+                                        backgroundColor: `${cat.color || theme.primary}15`,
+                                        color: cat.color || theme.primary,
+                                      }}
+                                    >
+                                      {cat.name}
+                                    </span>
+                                  ))}
+                                </div>
+
+                                {/* Activities */}
+                                <div className="ml-5 space-y-2">
+                                  {destination.activities.map((activity) => {
+                                    const isActivityRemovedFlag = isActivityRemoved(activity.activityId);
+                                    if (isActivityRemovedFlag) return null;
+
+                                    return (
+                                      <div
+                                        key={activity.activityId}
+                                        className="flex items-start gap-2 p-2 rounded-lg"
+                                        style={{ backgroundColor: `${theme.border}20` }}
+                                      >
+                                        <Clock className="w-3 h-3 mt-0.5 flex-shrink-0" style={{ color: theme.accent }} />
+                                        <div className="flex-1">
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="text-sm font-medium" style={{ color: theme.text }}>
+                                              {activity.activityName}
+                                            </span>
+                                            {activity.activitiesCategory?.map((cat: any) => (
+                                              <span
+                                                key={cat.id}
+                                                className="text-[10px] px-1.5 py-0.5 rounded-full"
+                                                style={{
+                                                  backgroundColor: `${cat.color || theme.accent}15`,
+                                                  color: cat.color || theme.accent,
+                                                }}
+                                              >
+                                                {cat.name}
+                                              </span>
+                                            ))}
+                                          </div>
+                                          <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
+                                            Duration: {activity.durationHours}h | 
+                                            Available: {activity.availableFrom?.slice(0,5)} - {activity.availableTo?.slice(0,5)}
+                                          </p>
+                                        </div>
+                                        <button
+                                          onClick={() => onRemoveActivity(activity.activityId)}
+                                          className="p-1 rounded hover:bg-red-500/10 transition-all flex-shrink-0"
+                                          title="Remove activity"
+                                        >
+                                          <Trash2 className="w-3 h-3" style={{ color: theme.error }} />
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                {/* Day number update */}
+                                <select
+                                  value={update?.dayNumber || day.dayNumber}
+                                  onChange={(e) => onUpdateDestination(
+                                    destination.destination.destinationId,
+                                    parseInt(e.target.value),
+                                    isActive ? "ACTIVE" : "INACTIVE"
+                                  )}
+                                  className="text-xs px-1 py-1 rounded border"
+                                  style={{
+                                    backgroundColor: theme.background,
+                                    borderColor: theme.border,
+                                    color: theme.text,
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {Array.from({ length: 30 }, (_, i) => i + 1).map((d) => (
+                                    <option key={d} value={d}>Day {d}</option>
+                                  ))}
+                                </select>
+
+                                {/* Status Toggle */}
+                                <button
+                                  onClick={() => onUpdateDestination(
+                                    destination.destination.destinationId,
+                                    update?.dayNumber || day.dayNumber,
+                                    isActive ? "INACTIVE" : "ACTIVE"
+                                  )}
+                                  className="text-xs px-1.5 py-1 rounded transition-all whitespace-nowrap"
+                                  style={{
+                                    backgroundColor: isActive ? `${theme.error}20` : `${theme.success}20`,
+                                    color: isActive ? theme.error : theme.success,
+                                  }}
+                                >
+                                  {isActive ? "Active" : "Inactive"}
+                                </button>
+
+                                {/* Remove Button */}
+                                <button
+                                  onClick={() => onRemoveDestination(destination.destination.destinationId)}
+                                  className="p-1 rounded hover:bg-red-500/10 transition-all"
+                                  title="Remove destination"
+                                >
+                                  <X className="w-3.5 h-3.5" style={{ color: theme.error }} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* New Destinations Preview */}
+          {addedDestinations.length > 0 && (
+            <div className="mt-4 pt-4 border-t" style={{ borderColor: theme.border }}>
+              <p className="text-xs font-medium mb-2" style={{ color: theme.success }}>
+                New destinations to add:
+              </p>
+              <div className="space-y-2">
+                {addedDestinations.map((dest, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 p-2 rounded-lg"
+                    style={{ backgroundColor: `${theme.success}10`, border: `1px dashed ${theme.success}` }}
+                  >
+                    <CalendarDays className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.success }} />
+                    <span className="text-sm" style={{ color: theme.text }}>
+                      Day {dest.dayNumber}: {getDestinationName(dest.destinationId)}
+                    </span>
+                    <span className="text-xs" style={{ color: theme.textSecondary }}>→</span>
+                    <span className="text-sm" style={{ color: theme.text }}>
+                      {getActivityName(dest.activityId)}
+                    </span>
+                    <span className="ml-auto text-xs text-white px-2 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: theme.success }}>
+                      New
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {sortedDays.length === 0 && addedDestinations.length === 0 && (
+            <div className="text-center py-8">
+              <CalendarDays className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: theme.textSecondary }} />
+              <p className="text-sm" style={{ color: theme.textSecondary }}>
+                No itinerary days added yet
+              </p>
+              <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
+                Click "Add Day" to start building your tour itinerary
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+};
