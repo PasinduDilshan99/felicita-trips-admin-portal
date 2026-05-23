@@ -200,6 +200,7 @@ export const GET_TOUR_SCHEDULE_DETAILS_BY_ID_DATA_FE = `${API}${TOUR}/schedules/
 export const ADD_TOUR_SCHEDULE_DATA_FE = `${API}${TOUR}/schedules/add`;
 export const UPDATE_TOUR_SCHEDULE_DATA_FE = `${API}${TOUR}/schedules/update`;
 export const TERMINATE_TOUR_SCHEDULE_DATA_FE = `${API}${TOUR}/schedules/terminate`;
+export const GET_TOUR_SCHEDULE_ID_AND_NAMES_DATA_FE = `${API}${TOUR}/schedules/tour-schedule-id-and-names`;
 
 // Packages
 export const GET_ALL_PACKAGES_DETAILS_DATA_FE = `${API}${PACKAGES}`;
@@ -240,6 +241,7 @@ export const GET_PACKAGE_SCHEDULE_DETAILS_BY_ID_DATA_FE = `${API}${PACKAGES}/sch
 export const ADD_PACKAGE_SCHEDULE_DATA_FE = `${API}${PACKAGES}/schedules/add`;
 export const UPDATE_PACKAGE_SCHEDULE_DATA_FE = `${API}${PACKAGES}/schedules/update`;
 export const TERMINATE_PACKAGE_SCHEDULE_DATA_FE = `${API}${PACKAGES}/schedules/terminate`;
+export const GET_PACKAGE_SCHEDULE_ID_AND_NAMES_DATA_FE = `${API}${PACKAGES}/schedules/package-schedule-id-and-names`;
 
 // Activities
 export const GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA_FE = `${API}${ACTIVITIES}`;
@@ -272,6 +274,7 @@ export const GET_ACTIVITY_SCHEDULE_DETAILS_BY_ID_DATA_FE = `${API}${ACTIVITIES}/
 export const ADD_ACTIVITY_SCHEDULE_DATA_FE = `${API}${ACTIVITIES}/schedules/add`;
 export const UPDATE_ACTIVITY_SCHEDULE_DATA_FE = `${API}${ACTIVITIES}/schedules/update`;
 export const TERMINATE_ACTIVITY_SCHEDULE_DATA_FE = `${API}${ACTIVITIES}/schedules/terminate`;
+export const GET_ACTIVITIES_SCHEDULE_ID_AND_NAMES_DATA_FE = `${API}${ACTIVITIES}/schedules/activities-schedule-id-and-names`;
 
 // Blogs
 export const GET_ALL_BLOGS_DETAILS_DATA_FE = `${API}${BLOGS}`;

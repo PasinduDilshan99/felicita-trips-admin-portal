@@ -12,9 +12,11 @@ import {
   TerminateActivityScheduleApiResponse,
   GetActivityScheduleDetailsRequest,
   TerminateActivityScheduleRequest,
+  ActivityScheduleIdAndNamesApiResponse,
 } from "@/types/activity-schedule-types";
 import {
   ADD_ACTIVITY_SCHEDULE_DATA_FE,
+  GET_ACTIVITIES_SCHEDULE_ID_AND_NAMES_DATA_FE,
   GET_ACTIVITY_SCHEDULE_DATA_FE,
   GET_ACTIVITY_SCHEDULE_DETAILS_BY_ID_DATA_FE,
   GET_ACTIVITY_SCHEDULE_PARAMS_FOR_REQUEST_DATA_FE,
@@ -150,6 +152,39 @@ export class ActivityScheduleService {
       throw error;
     }
   }
+
+  // Add this method to the ActivityScheduleService class
+
+/**
+ * Get all activity schedule IDs and names for dropdown/selection
+ */
+static async getActivityScheduleIdAndNames(): Promise<ActivityScheduleIdAndNamesApiResponse> {
+  try {
+    const response = await fetch(GET_ACTIVITIES_SCHEDULE_ID_AND_NAMES_DATA_FE, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: ActivityScheduleIdAndNamesApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to fetch activity schedule IDs and names");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching activity schedule IDs and names:", error);
+    throw error;
+  }
+}
 
   /**
    * Create a new activity schedule

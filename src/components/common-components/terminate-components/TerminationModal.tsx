@@ -1,9 +1,9 @@
+// components/common-components/terminate-components/TerminationModal.tsx
 "use client";
 
 import React from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { AlertTriangle, MapPin, AlertCircle, Loader2, Trash2 } from "lucide-react";
-import { DestinationForTerminate } from "@/types/destination-types";
+import { AlertTriangle, AlertCircle, Loader2, Trash2 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 const hexToRgba = (hex: string, opacity: number): string => {
@@ -13,8 +13,6 @@ const hexToRgba = (hex: string, opacity: number): string => {
   const b = parseInt(hex.substring(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
 
 const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const EASE_IN: [number, number, number, number] = [0.42, 0, 1, 1];
@@ -98,20 +96,59 @@ const loadingIconVariants: Variants = {
   },
 };
 
-interface TerminationModalProps {
+export interface TerminationItem {
+  id: number | string;
+  name: string;
+  type?: "destination" | "activity" | "tour" | "custom" | string;
+  additionalInfo?: string;
+}
+
+export interface TerminationModalProps {
   isOpen: boolean;
-  selectedDestination: DestinationForTerminate | null;
+  item: TerminationItem | null;
   loading: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  title?: string;
+  description?: string;
+  warningMessage?: string;
+  icon?: React.ReactNode;
 }
+
+const defaultTitles = {
+  destination: "Confirm Destination Termination",
+  activity: "Confirm Activity Termination",
+  tour: "Confirm Tour Termination",
+};
+
+const defaultDescriptions = {
+  destination: "You are about to permanently terminate:",
+  activity: "You are about to permanently terminate:",
+  tour: "You are about to permanently terminate:",
+};
+
+const defaultWarningMessages = {
+  destination: "All activities and images linked to this destination will be permanently deleted.",
+  activity: "All schedules, requirements, categories, and images linked to this activity will be permanently deleted.",
+  tour: "All schedules, routes, locations, and images linked to this tour will be permanently deleted.",
+};
+
+const defaultIcons = {
+  destination: <AlertTriangle size={18} className="sm:w-5 sm:h-5" />,
+  activity: <AlertTriangle size={18} className="sm:w-5 sm:h-5" />,
+  tour: <AlertTriangle size={18} className="sm:w-5 sm:h-5" />,
+};
 
 export const TerminationModal: React.FC<TerminationModalProps> = ({
   isOpen,
-  selectedDestination,
+  item,
   loading,
   onClose,
   onConfirm,
+  title,
+  description,
+  warningMessage,
+  icon,
 }) => {
   const { theme } = useTheme();
 
@@ -121,11 +158,46 @@ export const TerminationModal: React.FC<TerminationModalProps> = ({
     }
   };
 
+  const getTitle = (): string => {
+    if (title) return title;
+    if (item?.type && defaultTitles[item.type as keyof typeof defaultTitles]) 
+      return defaultTitles[item.type as keyof typeof defaultTitles];
+    return "Confirm Termination";
+  };
+
+  const getDescription = (): string => {
+    if (description) return description;
+    if (item?.type && defaultDescriptions[item.type as keyof typeof defaultDescriptions]) 
+      return defaultDescriptions[item.type as keyof typeof defaultDescriptions];
+    return "You are about to permanently terminate:";
+  };
+
+  const getWarningMessage = (): string => {
+    if (warningMessage) return warningMessage;
+    if (item?.type && defaultWarningMessages[item.type as keyof typeof defaultWarningMessages]) 
+      return defaultWarningMessages[item.type as keyof typeof defaultWarningMessages];
+    return "All associated data linked to this item will be permanently deleted.";
+  };
+
+  const getIcon = () => {
+    if (icon) return icon;
+    if (item?.type && defaultIcons[item.type as keyof typeof defaultIcons]) 
+      return defaultIcons[item.type as keyof typeof defaultIcons];
+    return <AlertTriangle size={18} className="sm:w-5 sm:h-5" />;
+  };
+
+  const getEntityIcon = () => {
+    if (item?.type === "destination") return "📍";
+    if (item?.type === "activity") return "⚡";
+    if (item?.type === "tour") return "🚌";
+    return "📦";
+  };
+
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && item && (
         <>
-          {/* Backdrop - Only blur, no background color, with cursor pointer */}
+          {/* Backdrop */}
           <motion.div
             variants={overlayVariants}
             initial="hidden"
@@ -175,11 +247,11 @@ export const TerminationModal: React.FC<TerminationModalProps> = ({
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <AlertTriangle size={18} className="sm:w-5 sm:h-5" />
+                  {getIcon()}
                 </motion.div>
                 <motion.div variants={itemVariants}>
                   <h3 className="text-base sm:text-lg font-bold" style={{ color: theme.error }}>
-                    Confirm Termination
+                    {getTitle()}
                   </h3>
                   <p className="text-xs mt-0.5" style={{ color: hexToRgba(theme.error, 0.8) }}>
                     This action cannot be reversed
@@ -199,10 +271,10 @@ export const TerminationModal: React.FC<TerminationModalProps> = ({
                   className="text-sm"
                   style={{ color: theme.textSecondary }}
                 >
-                  You are about to permanently terminate:
+                  {getDescription()}
                 </motion.p>
 
-                {/* Destination Card - Added cursor pointer */}
+                {/* Item Card */}
                 <motion.div
                   variants={itemVariants}
                   className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl cursor-pointer"
@@ -217,27 +289,29 @@ export const TerminationModal: React.FC<TerminationModalProps> = ({
                   }}
                   onClick={() => !loading && onClose()}
                 >
-                  <motion.div
+                  <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{
                       background: hexToRgba(theme.primary, 0.1),
                       color: theme.primary,
                     }}
-                    whileHover={{ scale: 1.05, rotate: 5 }}
                   >
-                    <MapPin size={14} />
-                  </motion.div>
+                    <span className="text-base">{getEntityIcon()}</span>
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold truncate" style={{ color: theme.text }}>
-                      {selectedDestination?.destinationName}
+                      {item.name}
                     </p>
                     <p className="text-xs" style={{ color: theme.textSecondary }}>
-                      ID · {selectedDestination?.destinationId}
+                      ID · {item.id}
+                      {item.additionalInfo && (
+                        <span className="ml-2">• {item.additionalInfo}</span>
+                      )}
                     </p>
                   </div>
                 </motion.div>
 
-                {/* Warning Box - Not clickable, no cursor pointer */}
+                {/* Warning Box */}
                 <motion.div
                   variants={itemVariants}
                   className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-xl"
@@ -251,7 +325,7 @@ export const TerminationModal: React.FC<TerminationModalProps> = ({
                     style={{ color: theme.error, marginTop: 2, flexShrink: 0 }}
                   />
                   <p className="text-xs leading-relaxed" style={{ color: theme.error }}>
-                    All activities and images linked to this destination will be permanently deleted.
+                    {getWarningMessage()}
                     <br />
                     <strong>This cannot be undone.</strong>
                   </p>
@@ -317,7 +391,7 @@ export const TerminationModal: React.FC<TerminationModalProps> = ({
                 </motion.button>
               </motion.div>
 
-              {/* Footer Note - Not clickable */}
+              {/* Footer Note */}
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

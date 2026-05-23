@@ -12,11 +12,13 @@ import {
   TerminatePackageScheduleApiResponse,
   GetPackageScheduleDetailsRequest,
   TerminatePackageScheduleRequest,
+  PackageScheduleIdAndNamesApiResponse,
 } from "@/types/package-schedule-types";
 import {
   ADD_PACKAGE_SCHEDULE_DATA_FE,
   GET_PACKAGE_SCHEDULE_DATA_FE,
   GET_PACKAGE_SCHEDULE_DETAILS_BY_ID_DATA_FE,
+  GET_PACKAGE_SCHEDULE_ID_AND_NAMES_DATA_FE,
   GET_PACKAGE_SCHEDULE_PARAMS_FOR_REQUEST_DATA_FE,
   TERMINATE_PACKAGE_SCHEDULE_DATA_FE,
   UPDATE_PACKAGE_SCHEDULE_DATA_FE,
@@ -213,6 +215,39 @@ export class PackageScheduleService {
       throw error;
     }
   }
+
+  // Add this method to the PackageScheduleService class
+
+/**
+ * Get all package schedule IDs and names for dropdown/selection
+ */
+static async getPackageScheduleIdAndNames(): Promise<PackageScheduleIdAndNamesApiResponse> {
+  try {
+    const response = await fetch(GET_PACKAGE_SCHEDULE_ID_AND_NAMES_DATA_FE, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: PackageScheduleIdAndNamesApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to fetch package schedule IDs and names");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching package schedule IDs and names:", error);
+    throw error;
+  }
+}
 
   /**
    * Terminate a package schedule

@@ -221,3 +221,13 @@ export type TerminatePackageScheduleApiResponse = ApiResponse<TerminatePackageSc
 export interface GetPackageScheduleDetailsRequest {
   id: number;
 }
+
+// Add these to your existing types/package-schedule-types.ts file
+
+// Package Schedule ID and Name Response
+export interface PackageScheduleIdAndName {
+  packageScheduleId: number;
+  packageScheduleName: string;
+}
+
+export type PackageScheduleIdAndNamesApiResponse = ApiResponse<PackageScheduleIdAndName[]>;

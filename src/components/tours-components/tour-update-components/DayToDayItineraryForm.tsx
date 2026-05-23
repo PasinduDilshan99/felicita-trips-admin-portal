@@ -11,11 +11,15 @@ import {
   MapPin,
   Clock,
   Trash2,
+  Loader2,
+  Activity,
 } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { DayToDayResponse, TourDestinationInput, UpdateDestinationInput } from "@/types/tour-types";
 import { DestinationCategory, ActivityCategory } from "@/types/common-types";
+import { ActivityService } from "@/services/activityService";
 import { useTheme } from "@/contexts/ThemeContext";
+import { ActivityByDestination } from "@/types/activity-types";
 
 interface DayToDayItineraryFormProps {
   dayToDayResponses: DayToDayResponse[];
@@ -31,6 +35,7 @@ interface DayToDayItineraryFormProps {
   onRemoveDestination: (tourDestinationId: number) => void;
   onRemoveActivity: (activityId: number) => void;
   onUpdateDestination: (tourDestinationId: number, dayNumber: number, status: "ACTIVE" | "INACTIVE") => void;
+  onAddActivityToDestination?: (destinationId: number, activityId: number) => void;
 }
 
 const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -44,6 +49,17 @@ const dayVariants: Variants = {
   hidden: { opacity: 0, x: -20 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.3, ease: EASE_OUT } },
 };
+
+// Interface for newly added activities
+interface NewlyAddedActivity {
+  activityId: number;
+  activityName: string;
+  durationHours: number;
+  availableFrom: string;
+  availableTo: string;
+  activitiesCategory?: Array<{ id: number; name: string; color?: string }>;
+  destinationId: number;
+}
 
 export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
   dayToDayResponses,
@@ -59,11 +75,11 @@ export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
   onRemoveDestination,
   onRemoveActivity,
   onUpdateDestination,
+  onAddActivityToDestination,
 }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(true);
   const [expandedDays, setExpandedDays] = useState<Set<number>>(() => {
-    // Initially expand all days
     const initialExpanded = new Set<number>();
     dayToDayResponses.forEach(day => {
       initialExpanded.add(day.dayNumber);
@@ -74,6 +90,15 @@ export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
   const [selectedDestinationId, setSelectedDestinationId] = useState<number | null>(null);
   const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(1);
+
+  // State for dynamic activity fetching
+  const [destinationActivities, setDestinationActivities] = useState<Map<number, ActivityByDestination[]>>(new Map());
+  const [loadingActivities, setLoadingActivities] = useState<Set<number>>(new Set());
+  const [showAddActivityForm, setShowAddActivityForm] = useState<number | null>(null);
+  const [selectedNewActivityId, setSelectedNewActivityId] = useState<Map<number, number>>(new Map());
+  
+  // State for newly added activities to display immediately
+  const [newlyAddedActivities, setNewlyAddedActivities] = useState<NewlyAddedActivity[]>([]);
 
   const toggleDay = (dayNumber: number) => {
     setExpandedDays(prev => {
@@ -97,8 +122,70 @@ export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
   };
 
   const getActivityName = (id: number) => {
+    // First check in newly added activities
+    const newActivity = newlyAddedActivities.find(a => a.activityId === id);
+    if (newActivity) return newActivity.activityName;
+    
+    // Then check in available activities
     const activity = availableActivities.find(a => a.activityId === id);
     return activity?.activityName || `Activity ${id}`;
+  };
+
+  // Fetch activities for a specific destination
+  const fetchActivitiesForDestination = async (destinationId: number) => {
+    if (destinationActivities.has(destinationId)) return;
+    
+    setLoadingActivities(prev => new Set(prev).add(destinationId));
+    try {
+      const response = await ActivityService.getActivitiesByDestinationId(destinationId);
+      setDestinationActivities(prev => new Map(prev).set(destinationId, response.data));
+    } catch (error) {
+      console.error(`Failed to fetch activities for destination ${destinationId}:`, error);
+    } finally {
+      setLoadingActivities(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(destinationId);
+        return newSet;
+      });
+    }
+  };
+
+  // Handle adding a new activity to destination
+  const handleAddActivityToDestination = async (destinationId: number, activityId: number) => {
+    // Find the activity details from fetched activities
+    const activities = destinationActivities.get(destinationId);
+    const selectedActivity = activities?.find(a => a.activityId === activityId);
+    
+    if (selectedActivity) {
+      // Add to newly added activities state for immediate display
+      const newActivity: NewlyAddedActivity = {
+        activityId: selectedActivity.activityId,
+        activityName: selectedActivity.name,
+        durationHours: selectedActivity.durationHours,
+        availableFrom: selectedActivity.availableFrom,
+        availableTo: selectedActivity.availableTo,
+        activitiesCategory: selectedActivity.categories?.map(cat => ({
+          id: cat.categoryId,
+          name: cat.categoryName,
+        })),
+        destinationId: destinationId,
+      };
+      
+      setNewlyAddedActivities(prev => [...prev, newActivity]);
+    }
+    
+    // Call the parent handler if provided
+    if (onAddActivityToDestination) {
+      onAddActivityToDestination(destinationId, activityId);
+    }
+    
+    // Clear the selected activity for this destination
+    setSelectedNewActivityId(prev => {
+      const newMap = new Map(prev);
+      newMap.delete(destinationId);
+      return newMap;
+    });
+    setShowAddActivityForm(null);
   };
 
   const handleAddDestinationSubmit = () => {
@@ -119,6 +206,12 @@ export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
   const sortedDays = useMemo(() => {
     return [...dayToDayResponses].sort((a, b) => a.dayNumber - b.dayNumber);
   }, [dayToDayResponses]);
+
+  // Get all activities for a destination (existing + newly added)
+  const getDestinationActivities = (destinationId: number, existingActivities: any[]) => {
+    const newActivities = newlyAddedActivities.filter(a => a.destinationId === destinationId);
+    return [...existingActivities, ...newActivities];
+  };
 
   return (
     <motion.div
@@ -354,14 +447,24 @@ export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
                     </motion.div>
                   </div>
 
-                  {/* Day Content - Using simple conditional rendering instead of AnimatePresence for better reliability */}
+                  {/* Day Content */}
                   {isDayExpanded && (
                     <div className="px-4 pb-4 space-y-3">
                       {visibleDestinations.map((destination) => {
                         const update = getDestinationUpdate(destination.destination.destinationId);
                         const isUpdated = !!update;
                         const isActive = update ? update.status === "ACTIVE" : true;
+                        const isLoadingActivities = loadingActivities.has(destination.destination.destinationId);
+                        const activitiesForDestination = destinationActivities.get(destination.destination.destinationId);
+                        const showAddActivity = showAddActivityForm === destination.destination.destinationId;
+                        const selectedActivity = selectedNewActivityId.get(destination.destination.destinationId);
                         
+                        // Get all activities (existing + newly added)
+                        const allActivities = getDestinationActivities(
+                          destination.destination.destinationId,
+                          destination.activities
+                        );
+
                         return (
                           <div
                             key={destination.destination.destinationId}
@@ -372,7 +475,7 @@ export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
                               opacity: isActive ? 1 : 0.6,
                             }}
                           >
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 flex-wrap mb-2">
                                   <MapPin className="w-3.5 h-3.5" style={{ color: theme.primary }} />
@@ -393,17 +496,25 @@ export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
                                   ))}
                                 </div>
 
-                                {/* Activities */}
+                                {/* Activities (Existing + Newly Added) */}
                                 <div className="ml-5 space-y-2">
-                                  {destination.activities.map((activity) => {
+                                  {allActivities.map((activity) => {
                                     const isActivityRemovedFlag = isActivityRemoved(activity.activityId);
                                     if (isActivityRemovedFlag) return null;
+                                    
+                                    // Check if this is a newly added activity
+                                    const isNewlyAdded = newlyAddedActivities.some(
+                                      a => a.activityId === activity.activityId && a.destinationId === destination.destination.destinationId
+                                    );
 
                                     return (
                                       <div
                                         key={activity.activityId}
-                                        className="flex items-start gap-2 p-2 rounded-lg"
-                                        style={{ backgroundColor: `${theme.border}20` }}
+                                        className={`flex items-start gap-2 p-2 rounded-lg transition-all ${isNewlyAdded ? 'animate-pulse' : ''}`}
+                                        style={{ 
+                                          backgroundColor: isNewlyAdded ? `${theme.success}15` : `${theme.border}20`,
+                                          border: isNewlyAdded ? `1px solid ${theme.success}` : 'none',
+                                        }}
                                       >
                                         <Clock className="w-3 h-3 mt-0.5 flex-shrink-0" style={{ color: theme.accent }} />
                                         <div className="flex-1">
@@ -423,6 +534,17 @@ export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
                                                 {cat.name}
                                               </span>
                                             ))}
+                                            {isNewlyAdded && (
+                                              <span
+                                                className="text-[10px] px-1.5 py-0.5 rounded-full"
+                                                style={{
+                                                  backgroundColor: `${theme.success}20`,
+                                                  color: theme.success,
+                                                }}
+                                              >
+                                                Newly Added
+                                              </span>
+                                            )}
                                           </div>
                                           <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
                                             Duration: {activity.durationHours}h | 
@@ -440,6 +562,110 @@ export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
                                     );
                                   })}
                                 </div>
+
+                                {/* Add New Activity Button */}
+                                <button
+                                  onClick={() => {
+                                    setShowAddActivityForm(destination.destination.destinationId);
+                                    fetchActivitiesForDestination(destination.destination.destinationId);
+                                  }}
+                                  className="mt-3 flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-lg transition-all"
+                                  style={{
+                                    backgroundColor: `${theme.accent}15`,
+                                    color: theme.accent,
+                                  }}
+                                >
+                                  <Plus className="w-3 h-3" />
+                                  Add Activity to this Destination
+                                </button>
+
+                                {/* Add Activity Form */}
+                                <AnimatePresence>
+                                  {showAddActivity && (
+                                    <motion.div
+                                      initial={{ opacity: 0, y: -10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      exit={{ opacity: 0, y: -10 }}
+                                      className="mt-2 p-3 rounded-lg"
+                                      style={{
+                                        backgroundColor: `${theme.accent}08`,
+                                        border: `1px solid ${theme.accent}25`,
+                                      }}
+                                    >
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs font-medium" style={{ color: theme.textSecondary }}>
+                                          Select Activity to Add
+                                        </span>
+                                        <button
+                                          onClick={() => setShowAddActivityForm(null)}
+                                          className="p-0.5 rounded hover:bg-black/10"
+                                        >
+                                          <X className="w-3 h-3" style={{ color: theme.textSecondary }} />
+                                        </button>
+                                      </div>
+
+                                      {isLoadingActivities ? (
+                                        <div className="flex items-center justify-center py-4">
+                                          <Loader2 className="w-4 h-4 animate-spin" style={{ color: theme.accent }} />
+                                          <span className="text-xs ml-2" style={{ color: theme.textSecondary }}>
+                                            Loading activities...
+                                          </span>
+                                        </div>
+                                      ) : activitiesForDestination && activitiesForDestination.length > 0 ? (
+                                        <>
+                                          <select
+                                            value={selectedActivity || ""}
+                                            onChange={(e) => {
+                                              setSelectedNewActivityId(prev => 
+                                                new Map(prev).set(destination.destination.destinationId, parseInt(e.target.value))
+                                              );
+                                            }}
+                                            className="w-full px-2 py-1.5 rounded-lg border text-xs mb-2"
+                                            style={{
+                                              backgroundColor: theme.background,
+                                              borderColor: theme.border,
+                                              color: theme.text,
+                                            }}
+                                          >
+                                            <option value="">Select an activity...</option>
+                                            {activitiesForDestination.map((activity) => {
+                                              // Check if activity already exists in the destination (including newly added)
+                                              const alreadyExists = allActivities.some(
+                                                a => a.activityId === activity.activityId && !isActivityRemoved(activity.activityId)
+                                              );
+                                              if (alreadyExists) return null;
+                                              
+                                              return (
+                                                <option key={activity.activityId} value={activity.activityId}>
+                                                  {activity.name} ({activity.durationHours}h) - ${activity.priceLocal}
+                                                </option>
+                                              );
+                                            })}
+                                          </select>
+                                          <button
+                                            onClick={() => {
+                                              if (selectedActivity) {
+                                                handleAddActivityToDestination(destination.destination.destinationId, selectedActivity);
+                                              }
+                                            }}
+                                            disabled={!selectedActivity}
+                                            className="w-full px-2 py-1 rounded-lg text-xs font-medium disabled:opacity-50 transition-all"
+                                            style={{
+                                              backgroundColor: theme.accent,
+                                              color: "#fff",
+                                            }}
+                                          >
+                                            Add Activity
+                                          </button>
+                                        </>
+                                      ) : (
+                                        <p className="text-xs text-center py-2" style={{ color: theme.textSecondary }}>
+                                          No activities available for this destination
+                                        </p>
+                                      )}
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
                               </div>
 
                               <div className="flex items-center gap-1 flex-shrink-0">
@@ -523,6 +749,35 @@ export const DayToDayItineraryForm: React.FC<DayToDayItineraryFormProps> = ({
                     </span>
                     <span className="ml-auto text-xs text-white px-2 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: theme.success }}>
                       New
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Newly Added Activities Preview (for tracking) */}
+          {newlyAddedActivities.length > 0 && (
+            <div className="mt-4 pt-4 border-t" style={{ borderColor: theme.border }}>
+              <p className="text-xs font-medium mb-2" style={{ color: theme.success }}>
+                Newly added activities (will be saved with the tour):
+              </p>
+              <div className="space-y-2">
+                {newlyAddedActivities.map((activity, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 p-2 rounded-lg"
+                    style={{ backgroundColor: `${theme.success}10`, border: `1px dashed ${theme.success}` }}
+                  >
+                    <Activity className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.success }} />
+                    <span className="text-sm" style={{ color: theme.text }}>
+                      {activity.activityName}
+                    </span>
+                    <span className="text-xs" style={{ color: theme.textSecondary }}>
+                      for {getDestinationName(activity.destinationId)}
+                    </span>
+                    <span className="ml-auto text-xs text-white px-2 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: theme.success }}>
+                      Will be added
                     </span>
                   </div>
                 ))}

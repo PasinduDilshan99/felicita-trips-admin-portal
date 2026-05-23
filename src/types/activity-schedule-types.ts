@@ -250,3 +250,13 @@ export type TerminateActivityScheduleApiResponse = ApiResponse<TerminateActivity
 export interface GetActivityScheduleDetailsRequest {
   id: number;
 }
+
+// Add these to your existing types/activity-schedule-types.ts file
+
+// Activity Schedule ID and Name Response
+export interface ActivityScheduleIdAndName {
+  activityScheduleId: number;
+  activityScheduleName: string;
+}
+
+export type ActivityScheduleIdAndNamesApiResponse = ApiResponse<ActivityScheduleIdAndName[]>;

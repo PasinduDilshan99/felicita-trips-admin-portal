@@ -227,6 +227,8 @@ export const GET_TOUR_SCHEDULE_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERSION
 export const ADD_TOUR_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/create-tour-schedule`;
 export const UPDATE_TOUR_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/update-tour-schedule`;
 export const TERMINATE_TOUR_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/terminate-tour-schedule`;
+export const GET_TOUR_SCHEDULE_ID_AND_NAMES_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-schedule-id-and-names`;
+
 
 // Packages
 export const GET_PACKAGE_DETAILS_BY_PACKAGE_ID_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}`;
@@ -268,6 +270,8 @@ export const GET_PACKAGE_SCHEDULE_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VERS
 export const ADD_PACKAGE_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/create-package-schedule`;
 export const UPDATE_PACKAGE_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/update-package-schedule`;
 export const TERMINATE_PACKAGE_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/terminate-package-schedule`;
+export const GET_PACKAGE_SCHEDULE_ID_AND_NAMES_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-schedule-id-and-names`;
+
 
 // Activities
 export const GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}`;
@@ -300,6 +304,8 @@ export const GET_ACTIVITY_SCHEDULE_DETAILS_BY_ID_DATA = `${BASE_PATH}${API}${VER
 export const ADD_ACTIVITY_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/create-activities-schedule`;
 export const UPDATE_ACTIVITY_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/update-activities-schedule`;
 export const TERMINATE_ACTIVITY_SCHEDULE_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/terminate-activities-schedule`;
+export const GET_ACTIVITIES_SCHEDULE_ID_AND_NAMES_DATA = `${BASE_PATH}${API}${VERSION}${ACTIVITIES}/activities-schedule-id-and-names`;
+
 
 // Blogs
 export const GET_ALL_BLOGS_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${BLOG}/all`;

@@ -220,3 +220,13 @@ export type TerminateTourScheduleApiResponse = ApiResponse<TerminateTourSchedule
 export interface GetTourScheduleDetailsRequest {
   id: number;
 }
+
+// Add these to your existing types/tour-schedule-types.ts file
+
+// Tour Schedule ID and Name Response
+export interface TourScheduleIdAndName {
+  tourScheduleId: number;
+  tourScheduleName: string;
+}
+
+export type TourScheduleIdAndNamesApiResponse = ApiResponse<TourScheduleIdAndName[]>;

@@ -1,5 +1,6 @@
 // services/tourScheduleService.ts
 
+import { ActivityScheduleIdAndNamesApiResponse } from "@/types/activity-schedule-types";
 import {
   TourScheduleListApiResponse,
   TourScheduleFilterParams,
@@ -12,11 +13,13 @@ import {
   TerminateTourScheduleApiResponse,
   GetTourScheduleDetailsRequest,
   TerminateTourScheduleRequest,
+  TourScheduleIdAndNamesApiResponse,
 } from "@/types/tour-schedule-types";
 import {
   ADD_TOUR_SCHEDULE_DATA_FE,
   GET_TOUR_SCHEDULE_DATA_FE,
   GET_TOUR_SCHEDULE_DETAILS_BY_ID_DATA_FE,
+  GET_TOUR_SCHEDULE_ID_AND_NAMES_DATA_FE,
   GET_TOUR_SCHEDULE_PARAMS_FOR_REQUEST_DATA_FE,
   TERMINATE_TOUR_SCHEDULE_DATA_FE,
   UPDATE_TOUR_SCHEDULE_DATA_FE,
@@ -217,6 +220,39 @@ export class TourScheduleService {
   }
 
   /**
+   * Get all tour schedule IDs and names for dropdown/selection
+   */
+  static async getTourScheduleIdAndNames(): Promise<TourScheduleIdAndNamesApiResponse> {
+    try {
+      const response = await fetch(GET_TOUR_SCHEDULE_ID_AND_NAMES_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: TourScheduleIdAndNamesApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch tour schedule IDs and names",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching tour schedule IDs and names:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Terminate a tour schedule
    * @param id - The ID of the tour schedule to terminate
    */
@@ -252,6 +288,7 @@ export class TourScheduleService {
       throw error;
     }
   }
+
 
   /**
    * Helper method to get status badge color

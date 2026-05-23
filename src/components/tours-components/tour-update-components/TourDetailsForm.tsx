@@ -76,6 +76,7 @@ interface TourDetailsFormProps {
   onRemoveDestination: (tourDestinationId: number) => void;
   onRemoveActivity: (activityId: number) => void;
   onUpdateDestination: (tourDestinationId: number, dayNumber: number, status: "ACTIVE" | "INACTIVE") => void;
+  onAddActivityToDestination?: (destinationId: number, activityId: number) => void;
   onAddInclusion: (text: string, displayOrder: number) => void;
   onRemoveInclusion: (id: number) => void;
   onUpdateInclusion: (id: number, text: string, displayOrder: number, status: "ACTIVE" | "INACTIVE") => void;
@@ -140,6 +141,7 @@ const TourDetailsForm: React.FC<TourDetailsFormProps> = ({
   onRemoveDestination,
   onRemoveActivity,
   onUpdateDestination,
+  onAddActivityToDestination,
   onAddInclusion,
   onRemoveInclusion,
   onUpdateInclusion,
@@ -212,6 +214,7 @@ const TourDetailsForm: React.FC<TourDetailsFormProps> = ({
         onRemoveDestination={onRemoveDestination}
         onRemoveActivity={onRemoveActivity}
         onUpdateDestination={onUpdateDestination}
+        onAddActivityToDestination={onAddActivityToDestination}
       />
 
       <InclusionsExclusionsConditionsForm
