@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import TerminateTourPage from "@/pages/web-management/tours/TerminateTourPage";
-import TerminateActivitySchedulePage from "@/pages/web-management/activities-schedules/TerminateActivitySchedulePage";
-import TerminateTourSchedulePage from "@/pages/web-management/tours-schedules/TerminateTourSchedulePage";
+import TerminateTourCategoryPage from "@/pages/web-management/tours/tour-categories/TerminateTourCategoryPage";
 
 export default function Page() {
   return (
@@ -13,7 +12,7 @@ export default function Page() {
         </div>
       </div>
     }>
-      <TerminateTourSchedulePage />
+      <TerminateTourCategoryPage />
     </Suspense>
   );
 }
