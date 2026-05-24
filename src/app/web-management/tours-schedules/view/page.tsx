@@ -1,9 +1,12 @@
-import React from 'react'
+import ViewTourSchedulePage from "@/pages/web-management/tours-schedules/ViewTourSchedulePage";
+import React from "react";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div>
+      <ViewTourSchedulePage />
+    </div>
+  );
+};
 
-export default page
+export default page;

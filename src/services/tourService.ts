@@ -18,6 +18,7 @@ import {
   TourStatisticsApiResponse,
   TourScheduleStatisticsApiResponse,
   TourDetailsResponse,
+  TourRequestParamsApiResponse,
 } from "@/types/tour-types";
 import {
   CREATE_TOUR_DATA_FE,
@@ -26,6 +27,7 @@ import {
   GET_TOUR_DETAILS_BY_ID_DATA_FE,
   GET_TOUR_DETAILS_FOR_PACKAGE_DATA_FE,
   GET_TOUR_IDS_AND_NAMES_DATA_FE,
+  GET_TOUR_REQUEST_PARAMS_DATA_FE,
   GET_TOUR_SCHEDULE_STATISTICS_DATA_FE,
   GET_TOUR_STATISTICS_DATA_FE,
   GET_TOUR_TYPE_STATISTICS_DATA_FE,
@@ -525,4 +527,38 @@ export class TourService {
       throw error;
     }
   }
+
+  // Add this method to the TourService class
+
+/**
+ * Get tour request parameters (min/max price, durations, locations)
+ * Useful for populating filter dropdowns and range inputs
+ */
+static async getTourRequestParams(): Promise<TourRequestParamsApiResponse> {
+  try {
+    const response = await fetch(GET_TOUR_REQUEST_PARAMS_DATA_FE, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: TourRequestParamsApiResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.message || "Failed to fetch tour request parameters");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching tour request parameters:", error);
+    throw error;
+  }
+}
 }

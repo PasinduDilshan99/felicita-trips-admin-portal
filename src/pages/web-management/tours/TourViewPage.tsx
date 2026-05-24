@@ -2,309 +2,575 @@
 "use client";
 
 import { PageHeader } from "@/components/common-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_TOURS_PATH,
-} from "@/utils/constant";
-import React, { useState, useEffect, useCallback } from "react";
-import TourFilter from "@/components/tours-components/TourFilter";
-import TourCard from "@/components/tours-components/TourCard";
-import TourListCard from "@/components/tours-components/TourListCard";
-import TourPagination from "@/components/tours-components/TourPagination";
+import { WEB_MANAGEMENT_PATH, WEB_MANAGEMENT_TOURS_PATH } from "@/utils/constant";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
+import FilterPanel, { FilterField } from "@/components/common-components/FilterPanel";
+import Pagination from "@/components/common-components/Pagination";
+import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { TourService } from "@/services/tourService";
-import { TourFilterParams, Tour } from "@/types/tour-types";
-import { Loader2, Grid, List, Globe, MapPin, Calendar, Users, Clock, TrendingUp } from "lucide-react";
+import { TourFilterParams, Tour, TourRequestParams } from "@/types/tour-types";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCommon } from "@/contexts/CommonContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ResultsHeader } from "@/components/common-components/ResultsHeader";
+import { EmptyState } from "@/components/destinations-components/view-destinations-components/EmptyState";
+import CommonLoading from "@/components/common-components/CommonLoading";
+import { 
+  TOURS_PAGE_URL, 
+  TOURS_VIEW_PAGE_URL, 
+  WEB_MANAGEMENT_URL 
+} from "@/utils/urls";
+import TourCard from "@/components/tours-components/tour-view-components/TourCard";
+import TourListCard from "@/components/tours-components/tour-view-components/TourListCard";
 
-const TourViewPage = () => {
+// Sort options for tours
+const SORT_OPTIONS = [
+  { value: "tourName", label: "Tour Name" },
+  { value: "tourId", label: "Tour ID" },
+  { value: "duration", label: "Duration" },
+  { value: "tourTypeName", label: "Tour Type" },
+  { value: "tourCategoryName", label: "Category" },
+  { value: "seasonName", label: "Season" },
+];
+
+// Utility functions for URL params management
+const filtersToUrlParams = (filters: TourFilterParams): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.tourType) params.set("tourType", filters.tourType);
+  if (filters.tourCategory) params.set("tourCategory", filters.tourCategory);
+  if (filters.season) params.set("season", filters.season);
+  if (filters.location) params.set("location", filters.location);
+  if (filters.duration) params.set("duration", filters.duration.toString());
+  if (filters.minPrice) params.set("minPrice", filters.minPrice.toString());
+  if (filters.maxPrice) params.set("maxPrice", filters.maxPrice.toString());
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+
+  return params;
+};
+
+const urlParamsToFilters = (params: URLSearchParams): TourFilterParams => {
+  return {
+    name: params.get("name") || null,
+    minPrice: params.get("minPrice") ? parseFloat(params.get("minPrice")!) : null,
+    maxPrice: params.get("maxPrice") ? parseFloat(params.get("maxPrice")!) : null,
+    duration: params.get("duration") ? parseFloat(params.get("duration")!) : null,
+    tourType: params.get("tourType") || null,
+    tourCategory: params.get("tourCategory") || null,
+    season: params.get("season") || null,
+    location: params.get("location") || null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
+    pageNumber: params.get("pageNumber") ? parseInt(params.get("pageNumber")!) : 1,
+  };
+};
+
+// Main component wrapped with Suspense for useSearchParams
+const ToursViewContent = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { categories, loading: categoriesLoading } = useCommon();
+  const { theme } = useTheme();
+
+  // State for filter request params (min/max price, durations, locations)
+  const [requestParams, setRequestParams] = useState<TourRequestParams | null>(null);
+  const [requestParamsLoading, setRequestParamsLoading] = useState(true);
+
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Tours",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}`,
-    },
-    {
-      label: "View",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/view`,
-    },
+    { label: "Web Management", href: WEB_MANAGEMENT_URL },
+    { label: "Tours", href: TOURS_PAGE_URL },
+    { label: "View", href: TOURS_VIEW_PAGE_URL },
   ];
 
-  const [filters, setFilters] = useState<TourFilterParams>({
-    name: null,
-    minPrice: null,
-    maxPrice: null,
-    duration: null,
-    tourType: null,
-    tourCategory: null,
-    season: null,
-    location: null,
-    pageSize: 6,
-    pageNumber: 1,
-  });
+  const [filters, setFilters] = useState<TourFilterParams>(() =>
+    urlParamsToFilters(searchParams || new URLSearchParams()),
+  );
 
   const [tours, setTours] = useState<Tour[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [availableTourTypes, setAvailableTourTypes] = useState<string[]>([]);
-  const [availableTourCategories, setAvailableTourCategories] = useState<string[]>([]);
-  const [availableSeasons, setAvailableSeasons] = useState<string[]>([]);
   const [availableLocations, setAvailableLocations] = useState<string[]>([]);
-  
-  // New state for view mode
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [availableDurations, setAvailableDurations] = useState<number[]>([]);
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({ min: 0, max: 10000 });
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const fetchTours = useCallback(async (currentFilters: TourFilterParams) => {
-    setLoading(true);
-    try {
-      const response = await TourService.getTours(currentFilters);
-      const data = response.data;
-      
-      setTours(data.tourResponseDtoList);
-      setTotalItems(data.totalTours);
+  // Image modal state
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [modalImages, setModalImages] = useState<ImageModalImage[]>([]);
 
-      // Extract unique values for filters
-      const tourTypes = TourService.extractTourTypes(data.tourResponseDtoList);
-      const tourCategories = TourService.extractTourCategories(data.tourResponseDtoList);
-      const seasons = TourService.extractSeasons(data.tourResponseDtoList);
-      const locations = TourService.extractLocations(data.tourResponseDtoList);
-      
-      setAvailableTourTypes(tourTypes);
-      setAvailableTourCategories(tourCategories);
-      setAvailableSeasons(seasons);
-      setAvailableLocations(locations);
-    } catch (error) {
-      console.error("Error fetching tours:", error);
-    } finally {
-      setLoading(false);
-    }
+  // Fetch request parameters for filters
+  useEffect(() => {
+    const fetchRequestParams = async () => {
+      try {
+        setRequestParamsLoading(true);
+        const response = await TourService.getTourRequestParams();
+        if (response.code === 200 && response.data) {
+          setRequestParams(response.data);
+          setAvailableDurations(response.data.durations || []);
+          setAvailableLocations(response.data.locations || []);
+          setPriceRange({
+            min: response.data.minPrice || 0,
+            max: response.data.maxPrice || 10000,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching tour request params:", error);
+      } finally {
+        setRequestParamsLoading(false);
+      }
+    };
+
+    fetchRequestParams();
   }, []);
 
-  // Initial load
+  // Get tour categories from CommonContext
+  const getTourCategories = useCallback((): { value: string; label: string }[] => {
+    if (categories && categories.tourCategoryList) {
+      return categories.tourCategoryList.map((cat) => ({
+        value: cat.tourCategoryName,
+        label: cat.tourCategoryName,
+      }));
+    }
+    return [];
+  }, [categories]);
+
+  // Get tour types from CommonContext
+  const getTourTypes = useCallback((): { value: string; label: string }[] => {
+    if (categories && categories.tourTypeList) {
+      return categories.tourTypeList.map((type) => ({
+        value: type.tourTypeName,
+        label: type.tourTypeName,
+      }));
+    }
+    return [];
+  }, [categories]);
+
+  // Get seasons from CommonContext
+  const getSeasons = useCallback((): { value: string; label: string }[] => {
+    if (categories && categories.seasonsList) {
+      return categories.seasonsList.map((season) => ({
+        value: season.seasonName,
+        label: season.seasonName,
+      }));
+    }
+    return [];
+  }, [categories]);
+
+  // Get locations from API response
+  const getLocations = useCallback((): { value: string; label: string }[] => {
+    return availableLocations.map((location) => ({
+      value: location,
+      label: location,
+    }));
+  }, [availableLocations]);
+
+  // Get duration options
+  const getDurationOptions = useCallback((): { value: string; label: string }[] => {
+    return availableDurations.map((duration) => ({
+      value: duration.toString(),
+      label: `${duration} days`,
+    }));
+  }, [availableDurations]);
+
+  // Define filter fields for the FilterPanel
+  const filterFields: FilterField[] = [
+    {
+      key: "name",
+      label: "Tour Name",
+      type: "search",
+      placeholder: "Search by tour name...",
+      width: "full",
+    },
+    {
+      key: "duration",
+      label: "Duration (days)",
+      type: "select",
+      options: getDurationOptions(),
+      placeholder: "Select duration",
+      width: "quarter",
+    },
+    {
+      key: "tourType",
+      label: "Tour Type",
+      type: "select",
+      options: getTourTypes(),
+      width: "quarter",
+    },
+    {
+      key: "tourCategory",
+      label: "Category",
+      type: "select",
+      options: getTourCategories(),
+      width: "quarter",
+    },
+    {
+      key: "season",
+      label: "Season",
+      type: "select",
+      options: getSeasons(),
+      width: "quarter",
+    },
+    {
+      key: "location",
+      label: "Location",
+      type: "select",
+      options: getLocations(),
+      width: "quarter",
+    },
+    {
+      key: "minPrice",
+      label: "Min Price",
+      type: "number",
+      placeholder: "Minimum price",
+      min: priceRange.min,
+      max: priceRange.max,
+      step: 100,
+      width: "quarter",
+    },
+    {
+      key: "maxPrice",
+      label: "Max Price",
+      type: "number",
+      placeholder: "Maximum price",
+      min: priceRange.min,
+      max: priceRange.max,
+      step: 100,
+      width: "quarter",
+    },
+  ];
+
+  // Update URL with current filters
+  const updateURL = useCallback(
+    (newFilters: TourFilterParams) => {
+      const params = filtersToUrlParams(newFilters);
+      const queryString = params.toString();
+      const newURL = queryString
+        ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/view?${queryString}`
+        : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/view`;
+
+      router.replace(newURL, { scroll: false });
+    },
+    [router],
+  );
+
+  const fetchTours = useCallback(
+    async (currentFilters: TourFilterParams) => {
+      setLoading(true);
+      try {
+        const response = await TourService.getTours(currentFilters);
+        
+        if (response.code === 200 && response.data) {
+          setTours(response.data.tourResponseDtoList || []);
+          setTotalItems(response.data.totalTours || 0);
+        } else {
+          setTours([]);
+          setTotalItems(0);
+        }
+      } catch (error) {
+        console.error("Error fetching tours:", error);
+        setTours([]);
+        setTotalItems(0);
+      } finally {
+        setLoading(false);
+        setIsInitialLoad(false);
+      }
+    },
+    [],
+  );
+
+  // Initial load from URL params
   useEffect(() => {
-    fetchTours(filters);
+    const initialFilters = urlParamsToFilters(searchParams || new URLSearchParams());
+    setFilters(initialFilters);
+    fetchTours(initialFilters);
   }, []);
 
-  // Track previous filters for comparison
-  const [prevFilters, setPrevFilters] = useState(filters);
-
-  // Auto-refetch when pageSize or pageNumber changes
+  // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
-    if (filters.pageSize !== prevFilters.pageSize || filters.pageNumber !== prevFilters.pageNumber) {
-      fetchTours(filters);
-      setPrevFilters(filters);
+    if (!isInitialLoad) {
+      const urlFilters = urlParamsToFilters(searchParams || new URLSearchParams());
+      setFilters(urlFilters);
+      fetchTours(urlFilters);
     }
-  }, [filters.pageSize, filters.pageNumber, fetchTours]);
+  }, [searchParams, isInitialLoad, fetchTours]);
 
-  const handleFilterChange = (newFilters: TourFilterParams) => {
-    setFilters(newFilters);
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSearch = () => {
-    // Reset to first page when searching and fetch data
     const updatedFilters = { ...filters, pageNumber: 1 };
     setFilters(updatedFilters);
+    updateURL(updatedFilters);
+    fetchTours(updatedFilters);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    const updatedFilters = { ...filters, pageSize: newPageSize, pageNumber: 1 };
+    setFilters(updatedFilters);
+    updateURL(updatedFilters);
     fetchTours(updatedFilters);
   };
 
   const handlePageChange = (page: number) => {
-    setFilters(prev => ({ ...prev, pageNumber: page }));
+    const updatedFilters = { ...filters, pageNumber: page };
+    setFilters(updatedFilters);
+    updateURL(updatedFilters);
+    fetchTours(updatedFilters);
   };
 
-  const toggleViewMode = (mode: 'grid' | 'list') => {
+  const handleReset = () => {
+    const resetFilters: TourFilterParams = {
+      name: null,
+      minPrice: null,
+      maxPrice: null,
+      duration: null,
+      tourType: null,
+      tourCategory: null,
+      season: null,
+      location: null,
+      pageSize: 6,
+      pageNumber: 1,
+    };
+    setFilters(resetFilters);
+    updateURL(resetFilters);
+    fetchTours(resetFilters);
+  };
+
+  const handleRemoveFilter = (key: string) => {
+    const updatedFilters = { ...filters, [key]: null, pageNumber: 1 };
+    setFilters(updatedFilters);
+    updateURL(updatedFilters);
+    fetchTours(updatedFilters);
+  };
+
+  const toggleViewMode = (mode: "grid" | "list") => {
     setViewMode(mode);
   };
 
-  // Calculate statistics
-  const calculateStats = () => {
-    const activeTours = tours.filter(t => t.statusName === 'ACTIVE').length;
-    const upcomingSchedules = tours.reduce((sum, tour) => sum + TourService.getScheduleCountForNextMonths(tour, 3), 0);
-    const avgDuration = tours.length > 0 
-      ? Math.round(tours.reduce((sum, t) => sum + t.duration, 0) / tours.length)
-      : 0;
-    const totalImages = tours.reduce((sum, tour) => sum + tour.images.length, 0);
-    
-    return { activeTours, upcomingSchedules, avgDuration, totalImages };
+  // Handle image click for modal
+  const handleImageClick = (tour: Tour, imageIndex: number) => {
+    const images: ImageModalImage[] = (tour.images || []).map((img) => ({
+      url: img.imageUrl,
+      name: img.imageName,
+      description: img.imageDescription,
+      id: img.imageId,
+    }));
+    setModalImages(images);
+    setSelectedImageIndex(imageIndex);
+    setImageModalOpen(true);
   };
 
-  const stats = calculateStats();
+  // Prepare active filters for display
+  const getActiveFilters = () => {
+    const activeFilters: Array<{ key: string; label: string; value: string }> = [];
+
+    if (filters.name) {
+      activeFilters.push({ key: "name", label: "Name", value: filters.name });
+    }
+    if (filters.tourType) {
+      activeFilters.push({
+        key: "tourType",
+        label: "Tour Type",
+        value: filters.tourType,
+      });
+    }
+    if (filters.tourCategory) {
+      activeFilters.push({
+        key: "tourCategory",
+        label: "Category",
+        value: filters.tourCategory,
+      });
+    }
+    if (filters.season) {
+      activeFilters.push({
+        key: "season",
+        label: "Season",
+        value: filters.season,
+      });
+    }
+    if (filters.location) {
+      activeFilters.push({
+        key: "location",
+        label: "Location",
+        value: filters.location,
+      });
+    }
+    if (filters.duration) {
+      activeFilters.push({
+        key: "duration",
+        label: "Duration",
+        value: `${filters.duration} days`,
+      });
+    }
+    if (filters.minPrice && filters.maxPrice) {
+      activeFilters.push({
+        key: "price",
+        label: "Price Range",
+        value: `$${filters.minPrice} - $${filters.maxPrice}`,
+      });
+    } else if (filters.minPrice) {
+      activeFilters.push({
+        key: "minPrice",
+        label: "Min Price",
+        value: `$${filters.minPrice}`,
+      });
+    } else if (filters.maxPrice) {
+      activeFilters.push({
+        key: "maxPrice",
+        label: "Max Price",
+        value: `$${filters.maxPrice}`,
+      });
+    }
+
+    return activeFilters;
+  };
+
+  const currentStart =
+    tours.length > 0
+      ? (filters.pageNumber - 1) * filters.pageSize + 1
+      : 0;
+  const currentEnd = Math.min(
+    filters.pageNumber * filters.pageSize,
+    totalItems,
+  );
+
+  // Convert filters object for FilterPanel
+  const filterPanelFilters: Record<string, any> = {
+    name: filters.name,
+    duration: filters.duration,
+    tourType: filters.tourType,
+    tourCategory: filters.tourCategory,
+    season: filters.season,
+    location: filters.location,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+  };
+
+  if (categoriesLoading || requestParamsLoading) {
+    return (
+      <CommonLoading
+        message="Loading tour data..."
+        subMessage="Please wait while we fetch available tours and filters"
+        size="md"
+      />
+    );
+  }
 
   return (
-    <div className="bg-gradient-to-b from-slate-50 to-slate-100">
-      <div className="mx-auto px-2 sm:px-4 lg:px-6 py-6">
-        {/* Header with Breadcrumb */}
-        <div className="mb-8">
+    <div
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
+      {/* Header */}
+      <div
+        className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
+        style={{
+          backgroundColor: `${theme.surface}CC`,
+          borderColor: theme.border,
+        }}
+      >
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title="Tours View"
-            description="Explore and manage comprehensive travel tours and packages"
+            description="Explore and manage tour packages and experiences"
             breadcrumbItems={breadcrumbItems}
           />
         </div>
+      </div>
 
-        {/* Quick Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Tours</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{totalItems}</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg flex items-center justify-center">
-                <Globe className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Tours</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.activeTours}</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Upcoming Schedules</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.upcomingSchedules}</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-amber-100 to-orange-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-amber-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Average Duration</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.avgDuration} days</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-violet-100 rounded-lg flex items-center justify-center">
-                <Clock className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filter Section */}
         <div className="mb-8">
-          <TourFilter
-            filters={filters}
+          <FilterPanel
+            filters={filterPanelFilters}
+            fields={filterFields}
             onFilterChange={handleFilterChange}
             onSearch={handleSearch}
-            availableTourTypes={availableTourTypes}
-            availableTourCategories={availableTourCategories}
-            availableSeasons={availableSeasons}
-            availableLocations={availableLocations}
+            onReset={handleReset}
+            onPageSizeChange={handlePageSizeChange}
+            pageSize={filters.pageSize}
+            pageSizeOptions={[6, 9, 12, 24, 48]}
+            showPageSize={true}
+            showSorting={false}
+            title="Filter Tours"
+            searchButtonText="Search"
+            resetButtonText="Reset"
+            showActiveFilters={false}
+            collapsible={true}
+            isLoading={loading}
           />
         </div>
 
-        {/* Results Header with View Controls */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">
-                Tour Results
-              </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Showing <span className="font-semibold text-blue-600">{((filters.pageNumber - 1) * filters.pageSize) + 1}</span> to{' '}
-                <span className="font-semibold text-blue-600">{Math.min(filters.pageNumber * filters.pageSize, totalItems)}</span> of{' '}
-                <span className="font-semibold text-blue-600">{totalItems}</span> tours
-              </p>
-            </div>
-            
-            {/* View Mode Toggle */}
-            <div className="flex items-center space-x-4">
-              <div className="hidden sm:block text-sm text-gray-600 font-medium">
-                View as:
-              </div>
-              <div className="flex bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-1">
-                <button
-                  onClick={() => toggleViewMode('grid')}
-                  className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
-                    viewMode === 'grid'
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                      : 'text-gray-600 hover:bg-white hover:text-blue-600'
-                  }`}
-                  title="Grid View"
-                >
-                  <Grid className="w-4 h-4 mr-2" />
-                  <span className="text-sm font-medium">Grid</span>
-                </button>
-                <button
-                  onClick={() => toggleViewMode('list')}
-                  className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
-                    viewMode === 'list'
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                      : 'text-gray-600 hover:bg-white hover:text-blue-600'
-                  }`}
-                  title="List View"
-                >
-                  <List className="w-4 h-4 mr-2" />
-                  <span className="text-sm font-medium">List</span>
-                </button>
-              </div>
-            </div>
-          </div>
+        {/* Active Filters Display */}
+        <ActiveFilters
+          filters={getActiveFilters()}
+          onRemoveFilter={handleRemoveFilter}
+          onClearAll={handleReset}
+          title="Active Filters"
+          showClearAll={true}
+          variant="default"
+        />
+
+        {/* Results Header with View Toggle */}
+        <div className="mb-6">
+          <ResultsHeader
+            title="Tours"
+            currentStart={currentStart}
+            currentEnd={currentEnd}
+            totalItems={totalItems}
+            viewMode={viewMode}
+            onViewModeChange={toggleViewMode}
+          />
         </div>
 
         {/* Loading State */}
         {loading && (
-          <div className="flex flex-col justify-center items-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="relative">
-              <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full"></div>
-              </div>
-            </div>
-            <span className="mt-4 text-lg font-medium text-gray-700">Loading tours...</span>
-            <p className="mt-2 text-gray-500">Fetching amazing travel packages</p>
-          </div>
+          <CommonLoading
+            message="Loading tours..."
+            subMessage="Fetching amazing tour packages"
+            size="lg"
+          />
         )}
-
+        
         {/* Tours Grid/List */}
         {!loading && (
           <>
             {tours.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-16 text-center">
-                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-                  <Globe className="w-12 h-12 text-gray-400" />
-                </div>
-                <div className="text-2xl font-semibold text-gray-700 mb-2">No tours found</div>
-                <p className="text-gray-500 mb-6">Try adjusting your search filters or explore different categories</p>
-                <button
-                  onClick={handleSearch}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
-                >
-                  Clear Filters
-                </button>
-              </div>
+              <EmptyState onClearFilters={handleReset} />
             ) : (
               <>
                 {/* Grid View */}
-                {viewMode === 'grid' && (
+                {viewMode === "grid" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     {tours.map((tour) => (
                       <TourCard
                         key={tour.tourId}
                         tour={tour}
+                        onImageClick={(imageIndex) =>
+                          handleImageClick(tour, imageIndex)
+                        }
                       />
                     ))}
                   </div>
                 )}
 
                 {/* List View */}
-                {viewMode === 'list' && (
+                {viewMode === "list" && (
                   <div className="space-y-6 mb-8">
                     {tours.map((tour) => (
                       <TourListCard
                         key={tour.tourId}
                         tour={tour}
+                        onImageClick={(imageIndex) =>
+                          handleImageClick(tour, imageIndex)
+                        }
                       />
                     ))}
                   </div>
@@ -312,11 +578,15 @@ const TourViewPage = () => {
 
                 {/* Pagination */}
                 <div className="mt-10">
-                  <TourPagination
+                  <Pagination
                     currentPage={filters.pageNumber}
                     totalItems={totalItems}
                     pageSize={filters.pageSize}
                     onPageChange={handlePageChange}
+                    showResultsCount={true}
+                    showFirstLastButtons={true}
+                    showProgressBar={true}
+                    size="md"
                   />
                 </div>
               </>
@@ -324,8 +594,35 @@ const TourViewPage = () => {
           </>
         )}
       </div>
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModalOpen}
+        images={modalImages}
+        initialIndex={selectedImageIndex}
+        onClose={() => setImageModalOpen(false)}
+        showNavigation={true}
+        showDownload={true}
+        showZoom={true}
+        allowKeyboardNavigation={true}
+      />
     </div>
   );
 };
 
-export default TourViewPage;
+// Wrap with Suspense for useSearchParams
+const ToursViewPage = () => {
+  const { theme } = useTheme();
+
+  return (
+    <Suspense
+      fallback={
+        <CommonLoading message="Loading..." size="lg" fullScreen={false} />
+      }
+    >
+      <ToursViewContent />
+    </Suspense>
+  );
+};
+
+export default ToursViewPage;

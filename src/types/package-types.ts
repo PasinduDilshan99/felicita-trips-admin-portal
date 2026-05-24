@@ -752,3 +752,19 @@ export type PackageParametersApiResponse = ApiResponse<PackageParametersData>;
 export interface GetPackageParametersRequest {
   tourId: number;
 }
+
+// Add these to your existing types/package-types.ts file
+
+// Package Request Parameters Response
+export interface PackageRequestParams {
+  minPrice: number;
+  maxPrice: number;
+  durations: number[];
+  locations: string[];
+  minGroupSize: number;
+  maxGroupSize: number;
+  fromDate: string;
+  toDate: string;
+}
+
+export type PackageRequestParamsApiResponse = ApiResponse<PackageRequestParams>;

@@ -1,9 +1,12 @@
-import React from 'react'
+import ViewTourTypePage from "@/pages/web-management/tours/tour-types/ViewTourTypePage";
+import React from "react";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div>
+      <ViewTourTypePage />
+    </div>
+  );
+};
 
-export default page
+export default page;

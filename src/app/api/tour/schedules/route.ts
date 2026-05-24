@@ -1,9 +1,9 @@
-import { GET_TOUR_SCHEDULE_PARAMS_FOR_REQUEST_DATA } from "@/utils/backEndConstant";
+import { GET_TOUR_SCHEDULE_DATA } from "@/utils/backEndConstant";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    if (!GET_TOUR_SCHEDULE_PARAMS_FOR_REQUEST_DATA) {
+    if (!GET_TOUR_SCHEDULE_DATA) {
       throw new Error("Backend URL is not defined");
     }
 
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     const cookieHeader = request.headers.get("cookie") || "";
 
-    const response = await fetch(GET_TOUR_SCHEDULE_PARAMS_FOR_REQUEST_DATA, {
+    const response = await fetch(GET_TOUR_SCHEDULE_DATA, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

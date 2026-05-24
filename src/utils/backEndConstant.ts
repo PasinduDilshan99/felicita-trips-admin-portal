@@ -203,6 +203,8 @@ export const GET_TOUR_SCHEDULE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${
 export const GET_TOUR_CATEGORY_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-category-statistics`;
 export const GET_TOUR_TYPE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-type-statistics`;
 export const GET_TOUR_DETAILS_FOR_PACKAGE_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-details-for-add-package`;
+export const GET_TOUR_REQUEST_PARAMS_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/params-for-tour-request`;
+
 
 // Tour Types
 export const GET_TOUR_TYPES_DATA = `${BASE_PATH}${API}${VERSION}${TOUR}/tour-types`;
@@ -254,6 +256,7 @@ export const GET_PACKAGE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAG
 export const GET_PACKAGE_SCHEDULE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-schedule-statistics`;
 export const GET_PACKAGE_TYPE_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-type-statistics`;
 export const GET_PACKAGE_PARAMETERS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/add-package-params`;
+export const GET_PACKAGE_REQUEST_PARAMS_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/params-for-tour-request`;
 
 // Package Types
 export const GET_PACKAGE_TYPES_DATA = `${BASE_PATH}${API}${VERSION}${PACKAGE}/package-types`;

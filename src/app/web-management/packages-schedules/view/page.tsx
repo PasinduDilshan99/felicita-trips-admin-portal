@@ -1,9 +1,12 @@
-import React from 'react'
+import ViewPackageSchedulePage from "@/pages/web-management/packages-schedules/ViewPackageSchedulePage";
+import React from "react";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div>
+      <ViewPackageSchedulePage />
+    </div>
+  );
+};
 
-export default page
+export default page;

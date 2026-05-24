@@ -176,6 +176,7 @@ export const GET_TOUR_SCHEDULE_STATISTICS_DATA_FE = `${API}${TOUR}/tour-schedule
 export const GET_TOUR_CATEGORY_STATISTICS_DATA_FE = `${API}${TOUR}/tour-category-statistics`;
 export const GET_TOUR_TYPE_STATISTICS_DATA_FE = `${API}${TOUR}/tour-type-statistics`;
 export const GET_TOUR_DETAILS_FOR_PACKAGE_DATA_FE = `${API}${TOUR}/tour-details-for-add-package`;
+export const GET_TOUR_REQUEST_PARAMS_DATA_FE = `${API}${TOUR}/params-for-tour-request`;
 
 // Tour Types
 export const GET_TOUR_TYPES_DATA_FE = `${API}${TOUR}/tour-types`;
@@ -225,6 +226,7 @@ export const GET_PACKAGE_STATISTICS_DATA_FE = `${API}${PACKAGES}/package-statist
 export const GET_PACKAGE_SCHEDULE_STATISTICS_DATA_FE = `${API}${PACKAGES}/package-schedule-statistics`;
 export const GET_PACKAGE_TYPE_STATISTICS_DATA_FE = `${API}${PACKAGES}/package-type-statistics`;
 export const GET_PACKAGE_PARAMETERS_DATA_FE = `${API}${PACKAGES}/add-package-params`;
+export const GET_PACKAGE_REQUEST_PARAMS_DATA_FE = `${API}${PACKAGES}/params-for-tour-request`;
 
 // Package Types
 export const GET_PACKAGE_TYPES_DATA_FE = `${API}${PACKAGES}/types`;

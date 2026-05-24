@@ -707,3 +707,12 @@ export interface Activity {
   name: string;
   description: string;
 }
+
+export interface TourRequestParams {
+  minPrice: number;
+  maxPrice: number;
+  durations: number[];
+  locations: string[];
+}
+
+export type TourRequestParamsApiResponse = ApiResponse<TourRequestParams>;

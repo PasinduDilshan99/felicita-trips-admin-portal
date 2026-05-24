@@ -1,53 +1,54 @@
-// app/activities/view/page.tsx
+// app/package-schedules/view/page.tsx
 "use client";
 
 import { PageHeader } from "@/components/common-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_ACTIVITIES_PATH,
-} from "@/utils/constant";
+import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
 import FilterPanel, {
   FilterField,
 } from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
-import { ActivityService } from "@/services/activityService";
-import { ActivityFilterParams, Activity } from "@/types/activity-types";
+import { PackageScheduleService } from "@/services/packageScheduleService";
+import {
+  PackageScheduleFilterParams,
+  PackageScheduleListItem,
+  PackageScheduleParamsData,
+} from "@/types/package-schedule-types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { EmptyState } from "@/components/destinations-components/view-destinations-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import ActivityCard from "@/components/activities-components/ActivityCard";
-import ActivityListCard from "@/components/activities-components/ActivityListCard";
-import { ACTIVITIES_PAGE_URL, ACTIVITIES_VIEW_PAGE_URL, WEB_MANAGEMENT_URL } from "@/utils/urls";
+import { WEB_MANAGEMENT_URL } from "@/utils/urls";
+import PackageScheduleCard from "@/components/package-schedules-components/view-package-schedule-components/PackageScheduleCard";
+import PackageScheduleListCard from "@/components/package-schedules-components/view-package-schedule-components/PackageScheduleListCard";
 
-// Sort options for activities
-const SORT_OPTIONS = [
-  { value: "name", label: "Activity Name" },
-  { value: "activity_id", label: "Activity ID" },
-  { value: "created_at", label: "Created Date" },
-  { value: "updated_at", label: "Updated Date" },
-  { value: "price_local", label: "Price (Local)" },
-  { value: "duration_hours", label: "Duration" },
+// Default sort options
+const DEFAULT_SORT_OPTIONS = [
+  { value: "packageScheduleName", label: "Schedule Name" },
+  { value: "packageName", label: "Package Name" },
+  { value: "startDate", label: "Start Date" },
+  { value: "endDate", label: "End Date" },
+  { value: "durationStart", label: "Duration Start" },
+  { value: "durationEnd", label: "Duration End" },
+  { value: "tourScheduleName", label: "Tour Schedule Name" },
 ];
 
 // Utility functions for URL params management
 const filtersToUrlParams = (
-  filters: ActivityFilterParams,
+  filters: PackageScheduleFilterParams,
 ): URLSearchParams => {
   const params = new URLSearchParams();
 
   if (filters.name) params.set("name", filters.name);
-  if (filters.activityCategory) params.set("activityCategory", filters.activityCategory);
-  if (filters.season) params.set("season", filters.season);
+  if (filters.packageId) params.set("packageId", filters.packageId.toString());
+  if (filters.tourScheduleId)
+    params.set("tourScheduleId", filters.tourScheduleId.toString());
+  if (filters.tourId) params.set("tourId", filters.tourId.toString());
+  if (filters.startDate) params.set("startDate", filters.startDate);
+  if (filters.endDate) params.set("endDate", filters.endDate);
   if (filters.status) params.set("status", filters.status);
-  if (filters.duration) params.set("duration", filters.duration.toString());
   if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
   if (filters.pageNumber && filters.pageNumber !== 1)
     params.set("pageNumber", filters.pageNumber.toString());
@@ -59,70 +60,114 @@ const filtersToUrlParams = (
 
 const urlParamsToFilters = (
   params: URLSearchParams,
-): ActivityFilterParams => {
+): PackageScheduleFilterParams => {
   return {
     name: params.get("name") || null,
-    minPrice: null,
-    maxPrice: null,
-    duration: params.get("duration")
-      ? parseFloat(params.get("duration")!)
+    packageId: params.get("packageId")
+      ? parseInt(params.get("packageId")!)
       : null,
-    activityCategory: params.get("activityCategory") || null,
-    season: params.get("season") || null,
-    status: (params.get("status") as "ACTIVE" | "INACTIVE" | null) || null,
+    tourScheduleId: params.get("tourScheduleId")
+      ? parseInt(params.get("tourScheduleId")!)
+      : null,
+    tourId: params.get("tourId") ? parseInt(params.get("tourId")!) : null,
+    startDate: params.get("startDate") || null,
+    endDate: params.get("endDate") || null,
+    status: params.get("status") || null,
     pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
     pageNumber: params.get("pageNumber")
       ? parseInt(params.get("pageNumber")!)
       : 1,
-    sortBy: params.get("sortBy") || undefined,
+    sortBy: params.get("sortBy") || "",
     sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
   };
 };
 
 // Main component wrapped with Suspense for useSearchParams
-const ActivitiesViewContent = () => {
+const PackageSchedulesViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { categories, loading: categoriesLoading } = useCommon();
   const { theme } = useTheme();
+
+  // State for filter request params
+  const [requestParams, setRequestParams] =
+    useState<PackageScheduleParamsData | null>(null);
+  const [requestParamsLoading, setRequestParamsLoading] = useState(true);
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
     { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    { label: "Activities", href: ACTIVITIES_PAGE_URL },
-    { label: "View", href: ACTIVITIES_VIEW_PAGE_URL },
+    { label: "Package Schedules", href: WEB_MANAGEMENT_URL },
+    { label: "View", href: WEB_MANAGEMENT_URL },
   ];
 
-  const [filters, setFilters] = useState<ActivityFilterParams>(() =>
+  const [filters, setFilters] = useState<PackageScheduleFilterParams>(() =>
     urlParamsToFilters(searchParams || new URLSearchParams()),
   );
 
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [schedules, setSchedules] = useState<PackageScheduleListItem[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
-  const [availableSeasons, setAvailableSeasons] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Image modal state
-  const [imageModalOpen, setImageModalOpen] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [modalImages, setModalImages] = useState<ImageModalImage[]>([]);
+  // Fetch request parameters for filters
+  useEffect(() => {
+    const fetchRequestParams = async () => {
+      try {
+        setRequestParamsLoading(true);
+        const response =
+          await PackageScheduleService.getPackageScheduleParams();
+        if (response.code === 200 && response.data) {
+          setRequestParams(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching package schedule params:", error);
+      } finally {
+        setRequestParamsLoading(false);
+      }
+    };
 
-  // Get activity categories from CommonContext
-  const getActivityCategories = useCallback((): {
+    fetchRequestParams();
+  }, []);
+
+  // Get package options from request params
+  const getPackageOptions = useCallback((): {
     value: string;
     label: string;
   }[] => {
-    if (categories && categories.activityCategoryList) {
-      return categories.activityCategoryList.map((cat) => ({
-        value: cat.activityCategoryName,
-        label: cat.activityCategoryName,
+    if (requestParams?.packageIdAndNamesResponses) {
+      return requestParams.packageIdAndNamesResponses.map((pkg) => ({
+        value: pkg.packageId.toString(),
+        label: pkg.packageName,
       }));
     }
     return [];
-  }, [categories]);
+  }, [requestParams]);
+
+  // Get tour options from request params
+  const getTourOptions = useCallback((): { value: string; label: string }[] => {
+    if (requestParams?.tourIdAndNameResponses) {
+      return requestParams.tourIdAndNameResponses.map((tour) => ({
+        value: tour.tourId.toString(),
+        label: tour.tourName,
+      }));
+    }
+    return [];
+  }, [requestParams]);
+
+  // Get tour schedule options from request params
+  const getTourScheduleOptions = useCallback((): {
+    value: string;
+    label: string;
+  }[] => {
+    if (requestParams?.tourScheduleIdAndNameResponses) {
+      return requestParams.tourScheduleIdAndNameResponses.map((schedule) => ({
+        value: schedule.tourScheduleId.toString(),
+        label: schedule.tourScheduleName,
+      }));
+    }
+    return [];
+  }, [requestParams]);
 
   // Get status options
   const getStatusOptions = () => [
@@ -130,9 +175,24 @@ const ActivitiesViewContent = () => {
     { value: "INACTIVE", label: "Inactive" },
   ];
 
+  // Get dynamic sort options from request params
+  const getSortOptions = useCallback((): { value: string; label: string }[] => {
+    if (
+      requestParams?.sortByResponses &&
+      requestParams.sortByResponses.length > 0
+    ) {
+      return requestParams.sortByResponses.map((sort) => ({
+        value: sort.sortBy,
+        label: sort.sortByDisplayName,
+      }));
+    }
+    return DEFAULT_SORT_OPTIONS;
+  }, [requestParams]);
+
   // Get sort label
   const getSortLabel = (sortBy: string): string => {
-    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
+    const options = getSortOptions();
+    const option = options.find((opt) => opt.value === sortBy);
     return option ? option.label : sortBy;
   };
 
@@ -140,35 +200,30 @@ const ActivitiesViewContent = () => {
   const filterFields: FilterField[] = [
     {
       key: "name",
-      label: "Activity Name",
-      type: "text",
-      placeholder: "Search by name...",
+      label: "Schedule Name",
+      type: "search",
+      placeholder: "Search by schedule name...",
       width: "full",
     },
     {
-      key: "duration",
-      label: "Duration (hours)",
-      type: "number",
-      placeholder: "Duration in hours",
-      min: 0,
-      step: 1,
+      key: "packageId",
+      label: "Package",
+      type: "select",
+      options: getPackageOptions(),
       width: "third",
     },
     {
-      key: "activityCategory",
-      label: "Category",
+      key: "tourId",
+      label: "Tour",
       type: "select",
-      options: getActivityCategories(),
+      options: getTourOptions(),
       width: "third",
     },
     {
-      key: "season",
-      label: "Season",
+      key: "tourScheduleId",
+      label: "Tour Schedule",
       type: "select",
-      options: availableSeasons.map((season) => ({
-        value: season,
-        label: season,
-      })),
+      options: getTourScheduleOptions(),
       width: "third",
     },
     {
@@ -178,45 +233,54 @@ const ActivitiesViewContent = () => {
       options: getStatusOptions(),
       width: "third",
     },
+    {
+      key: "startDate",
+      label: "Start Date",
+      type: "date",
+      placeholder: "Start date",
+      width: "half",
+    },
+    {
+      key: "endDate",
+      label: "End Date",
+      type: "date",
+      placeholder: "End date",
+      width: "half",
+    },
   ];
 
   // Update URL with current filters
   const updateURL = useCallback(
-    (newFilters: ActivityFilterParams) => {
+    (newFilters: PackageScheduleFilterParams) => {
       const params = filtersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
-        ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/view?${queryString}`
-        : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/view`;
+        ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_URL}/view?${queryString}`
+        : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_URL}/view`;
 
       router.replace(newURL, { scroll: false });
     },
     [router],
   );
 
-  const fetchActivities = useCallback(
-    async (currentFilters: ActivityFilterParams) => {
+  const fetchSchedules = useCallback(
+    async (currentFilters: PackageScheduleFilterParams) => {
       setLoading(true);
       try {
-        const apiFilters = {
-          ...currentFilters,
-          minPrice: null,
-          maxPrice: null,
-        };
+        const response =
+          await PackageScheduleService.getPackageSchedules(currentFilters);
 
-        const response = await ActivityService.getActivities(apiFilters);
-        const data = response.data;
-
-        setActivities(data.activityResponseDtos);
-        setTotalItems(data.activityCount);
-
-        const categories = ActivityService.extractCategories(data.activityResponseDtos);
-        const seasons = ActivityService.extractSeasons(data.activityResponseDtos);
-        
-        setAvailableCategories(categories);
-        setAvailableSeasons(seasons);
+        if (response.code === 200 && response.data) {
+          setSchedules(response.data.packageScheduleResponses || []);
+          setTotalItems(response.data.packageScheduleCount || 0);
+        } else {
+          setSchedules([]);
+          setTotalItems(0);
+        }
       } catch (error) {
-        console.error("Error fetching activities:", error);
+        console.error("Error fetching package schedules:", error);
+        setSchedules([]);
+        setTotalItems(0);
       } finally {
         setLoading(false);
         setIsInitialLoad(false);
@@ -231,7 +295,7 @@ const ActivitiesViewContent = () => {
       searchParams || new URLSearchParams(),
     );
     setFilters(initialFilters);
-    fetchActivities(initialFilters);
+    fetchSchedules(initialFilters);
   }, []);
 
   // Watch for URL params changes and fetch data (for browser back/forward)
@@ -241,9 +305,9 @@ const ActivitiesViewContent = () => {
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
-      fetchActivities(urlFilters);
+      fetchSchedules(urlFilters);
     }
-  }, [searchParams, isInitialLoad, fetchActivities]);
+  }, [searchParams, isInitialLoad, fetchSchedules]);
 
   const handleFilterChange = (key: string, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -253,59 +317,59 @@ const ActivitiesViewContent = () => {
     const updatedFilters = { ...filters, pageNumber: 1 };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
-    fetchActivities(updatedFilters);
+    fetchSchedules(updatedFilters);
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
     const updatedFilters = { ...filters, pageSize: newPageSize, pageNumber: 1 };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
-    fetchActivities(updatedFilters);
+    fetchSchedules(updatedFilters);
   };
 
   const handlePageChange = (page: number) => {
     const updatedFilters = { ...filters, pageNumber: page };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
-    fetchActivities(updatedFilters);
+    fetchSchedules(updatedFilters);
   };
 
   const handleReset = () => {
-    const resetFilters: ActivityFilterParams = {
+    const resetFilters: PackageScheduleFilterParams = {
       name: null,
-      minPrice: null,
-      maxPrice: null,
-      duration: null,
-      activityCategory: null,
-      season: null,
+      packageId: null,
+      tourScheduleId: null,
+      tourId: null,
+      startDate: null,
+      endDate: null,
       status: null,
       pageSize: 6,
       pageNumber: 1,
-      sortBy: undefined,
+      sortBy: "",
       sortDirection: "ASC",
     };
     setFilters(resetFilters);
     updateURL(resetFilters);
-    fetchActivities(resetFilters);
+    fetchSchedules(resetFilters);
   };
 
   const handleRemoveFilter = (key: string) => {
     const updatedFilters = { ...filters, [key]: null, pageNumber: 1 };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
-    fetchActivities(updatedFilters);
+    fetchSchedules(updatedFilters);
   };
 
   const handleRemoveSort = () => {
-    const updatedFilters: ActivityFilterParams = {
+    const updatedFilters: PackageScheduleFilterParams = {
       ...filters,
-      sortBy: undefined,
+      sortBy: "",
       sortDirection: "ASC",
       pageNumber: 1,
     };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
-    fetchActivities(updatedFilters);
+    fetchSchedules(updatedFilters);
   };
 
   const handleSortChange = (
@@ -314,30 +378,17 @@ const ActivitiesViewContent = () => {
   ) => {
     const updatedFilters = {
       ...filters,
-      sortBy: newSortBy || undefined,
+      sortBy: newSortBy || "",
       sortDirection: newSortDirection,
       pageNumber: 1,
     };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
-    fetchActivities(updatedFilters);
+    fetchSchedules(updatedFilters);
   };
 
   const toggleViewMode = (mode: "grid" | "list") => {
     setViewMode(mode);
-  };
-
-  // Handle image click for modal
-  const handleImageClick = (activity: Activity, imageIndex: number) => {
-    const images: ImageModalImage[] = activity.images.map((img) => ({
-      url: img.image_url,
-      name: img.name,
-      description: img.description,
-      id: img.id,
-    }));
-    setModalImages(images);
-    setSelectedImageIndex(imageIndex);
-    setImageModalOpen(true);
   };
 
   // Prepare active filters for display
@@ -348,18 +399,37 @@ const ActivitiesViewContent = () => {
     if (filters.name) {
       activeFilters.push({ key: "name", label: "Name", value: filters.name });
     }
-    if (filters.activityCategory) {
+    if (filters.packageId && requestParams?.packageIdAndNamesResponses) {
+      const pkg = requestParams.packageIdAndNamesResponses.find(
+        (p) => p.packageId === filters.packageId,
+      );
       activeFilters.push({
-        key: "activityCategory",
-        label: "Category",
-        value: filters.activityCategory,
+        key: "packageId",
+        label: "Package",
+        value: pkg?.packageName || filters.packageId.toString(),
       });
     }
-    if (filters.season) {
+    if (filters.tourId && requestParams?.tourIdAndNameResponses) {
+      const tour = requestParams.tourIdAndNameResponses.find(
+        (t) => t.tourId === filters.tourId,
+      );
       activeFilters.push({
-        key: "season",
-        label: "Season",
-        value: filters.season,
+        key: "tourId",
+        label: "Tour",
+        value: tour?.tourName || filters.tourId.toString(),
+      });
+    }
+    if (
+      filters.tourScheduleId &&
+      requestParams?.tourScheduleIdAndNameResponses
+    ) {
+      const schedule = requestParams.tourScheduleIdAndNameResponses.find(
+        (s) => s.tourScheduleId === filters.tourScheduleId,
+      );
+      activeFilters.push({
+        key: "tourScheduleId",
+        label: "Tour Schedule",
+        value: schedule?.tourScheduleName || filters.tourScheduleId.toString(),
       });
     }
     if (filters.status) {
@@ -369,11 +439,18 @@ const ActivitiesViewContent = () => {
         value: filters.status === "ACTIVE" ? "Active" : "Inactive",
       });
     }
-    if (filters.duration) {
+    if (filters.startDate) {
       activeFilters.push({
-        key: "duration",
-        label: "Duration",
-        value: `${filters.duration} hours`,
+        key: "startDate",
+        label: "Start Date",
+        value: filters.startDate,
+      });
+    }
+    if (filters.endDate) {
+      activeFilters.push({
+        key: "endDate",
+        label: "End Date",
+        value: filters.endDate,
       });
     }
 
@@ -391,9 +468,7 @@ const ActivitiesViewContent = () => {
   };
 
   const currentStart =
-    activities.length > 0
-      ? (filters.pageNumber - 1) * filters.pageSize + 1
-      : 0;
+    schedules.length > 0 ? (filters.pageNumber - 1) * filters.pageSize + 1 : 0;
   const currentEnd = Math.min(
     filters.pageNumber * filters.pageSize,
     totalItems,
@@ -402,17 +477,19 @@ const ActivitiesViewContent = () => {
   // Convert filters object for FilterPanel
   const filterPanelFilters: Record<string, any> = {
     name: filters.name,
-    duration: filters.duration,
-    activityCategory: filters.activityCategory,
-    season: filters.season,
+    packageId: filters.packageId,
+    tourId: filters.tourId,
+    tourScheduleId: filters.tourScheduleId,
     status: filters.status,
+    startDate: filters.startDate,
+    endDate: filters.endDate,
   };
 
-  if (categoriesLoading) {
+  if (requestParamsLoading) {
     return (
       <CommonLoading
-        message="Loading categories..."
-        subMessage="Please wait while we fetch available categories"
+        message="Loading schedule data..."
+        subMessage="Please wait while we fetch available package schedules and filters"
         size="md"
       />
     );
@@ -433,8 +510,8 @@ const ActivitiesViewContent = () => {
       >
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
-            title="Activities View"
-            description="Explore and manage travel activities and experiences"
+            title="Package Schedules View"
+            description="Manage and monitor package schedules, availability, and itineraries"
             breadcrumbItems={breadcrumbItems}
           />
         </div>
@@ -455,10 +532,10 @@ const ActivitiesViewContent = () => {
             pageSizeOptions={[6, 9, 12, 24, 48]}
             showPageSize={true}
             showSorting={true}
-            sortOptions={SORT_OPTIONS}
+            sortOptions={getSortOptions()}
             sortBy={filters.sortBy || ""}
             sortDirection={filters.sortDirection || "ASC"}
-            title="Filter Activities"
+            title="Filter Package Schedules"
             searchButtonText="Search"
             resetButtonText="Reset"
             showActiveFilters={false}
@@ -482,7 +559,7 @@ const ActivitiesViewContent = () => {
         {/* Results Header with View Toggle */}
         <div className="mb-6">
           <ResultsHeader
-            title="Activities"
+            title="Package Schedules"
             currentStart={currentStart}
             currentEnd={currentEnd}
             totalItems={totalItems}
@@ -494,29 +571,26 @@ const ActivitiesViewContent = () => {
         {/* Loading State */}
         {loading && (
           <CommonLoading
-            message="Loading activities..."
-            subMessage="Fetching exciting travel experiences"
+            message="Loading schedules..."
+            subMessage="Fetching package schedules and availability"
             size="lg"
           />
         )}
-        
-        {/* Activities Grid/List */}
+
+        {/* Schedules Grid/List */}
         {!loading && (
           <>
-            {activities.length === 0 ? (
+            {schedules.length === 0 ? (
               <EmptyState onClearFilters={handleReset} />
             ) : (
               <>
                 {/* Grid View */}
                 {viewMode === "grid" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {activities.map((activity) => (
-                      <ActivityCard
-                        key={activity.id}
-                        activity={activity}
-                        onImageClick={(imageIndex) =>
-                          handleImageClick(activity, imageIndex)
-                        }
+                    {schedules.map((schedule) => (
+                      <PackageScheduleCard
+                        key={schedule.packageScheduleId}
+                        schedule={schedule}
                       />
                     ))}
                   </div>
@@ -525,13 +599,10 @@ const ActivitiesViewContent = () => {
                 {/* List View */}
                 {viewMode === "list" && (
                   <div className="space-y-6 mb-8">
-                    {activities.map((activity) => (
-                      <ActivityListCard
-                        key={activity.id}
-                        activity={activity}
-                        onImageClick={(imageIndex) =>
-                          handleImageClick(activity, imageIndex)
-                        }
+                    {schedules.map((schedule) => (
+                      <PackageScheduleListCard
+                        key={schedule.packageScheduleId}
+                        schedule={schedule}
                       />
                     ))}
                   </div>
@@ -555,24 +626,12 @@ const ActivitiesViewContent = () => {
           </>
         )}
       </div>
-
-      {/* Image Modal */}
-      <ImageModal
-        isOpen={imageModalOpen}
-        images={modalImages}
-        initialIndex={selectedImageIndex}
-        onClose={() => setImageModalOpen(false)}
-        showNavigation={true}
-        showDownload={true}
-        showZoom={true}
-        allowKeyboardNavigation={true}
-      />
     </div>
   );
 };
 
 // Wrap with Suspense for useSearchParams
-const ActivitiesViewPage = () => {
+const ViewPackageSchedulePage = () => {
   const { theme } = useTheme();
 
   return (
@@ -581,9 +640,9 @@ const ActivitiesViewPage = () => {
         <CommonLoading message="Loading..." size="lg" fullScreen={false} />
       }
     >
-      <ActivitiesViewContent />
+      <PackageSchedulesViewContent />
     </Suspense>
   );
 };
 
-export default ActivitiesViewPage;
+export default ViewPackageSchedulePage;

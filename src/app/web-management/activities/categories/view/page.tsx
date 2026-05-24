@@ -1,9 +1,12 @@
-import React from 'react'
+import ViewActivityCategoryPage from "@/pages/web-management/activities/activity-caetgories/ViewActivityCategoryPage";
+import React from "react";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div>
+      <ViewActivityCategoryPage />
+    </div>
+  );
+};
 
-export default page
+export default page;
