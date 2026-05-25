@@ -1,7 +1,7 @@
 // app/travel-management/layout.tsx
 "use client";
 
-import Sidebar from "@/components/common-components/SideBar";
+import Sidebar from "@/components/common-components/static-components/SideBar";
 import { employeeManagementSideBarData } from "@/data/side-bar-data";
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";

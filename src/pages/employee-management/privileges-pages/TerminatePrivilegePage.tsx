@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/Breadcrumb";
+import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { PrivilegeService } from "@/services/privilegeService";
 import { useTheme } from "@/contexts/ThemeContext";

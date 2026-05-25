@@ -14,22 +14,7 @@ export const COMPANY_LATITUDE = 6.934789851969375;
 export const COMPANY_THEME = "See More! Feel More! Live More!";
 export const UNIQUE_CODE_NAME = "uniqueCode";
 
-// Web Manage
-export const WEB_MANAGEMENT_PATH = "/web-management";
-export const WEB_MANAGEMENT_DESTINATION_PATH = "/destinations";
-export const WEB_MANAGEMENT_DESTINATION_CATEGORY_PATH = "/destinations/categories";
-export const WEB_MANAGEMENT_ACTIVITIES_PATH = "/activities";
-export const WEB_MANAGEMENT_ACTIVITIES_SCHEDULES_PATH = "/activities-schedules";
-export const WEB_MANAGEMENT_TOURS_PATH = "/tours";
-export const WEB_MANAGEMENT_TOURS_SCHEDULES_PATH = "/tours-schedules";
-export const WEB_MANAGEMENT_PACKAGES_PATH = "/packages";
-export const WEB_MANAGEMENT_PACKAGES_SCHEDULES_PATH = "/packages-schedules";
 
-// Booking Manage
-export const TRAVEL_MANAGEMENT_PATH = "/travel-management";
-export const TRAVEL_MANAGEMENT_BOOKINGS_PATH = "/bookings";
-
-export const WEB_MANAGEMENT_TOURS_UPDATE_PATH = "/update";
 
 export const PLACE_HOLDER_IMAGE =
   "https://res.cloudinary.com/dtzrivqye/image/upload/v1770879098/vyfco5fuhatkl95w0l65.avif";

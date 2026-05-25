@@ -1,7 +1,7 @@
 // app/user-management/privileges/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/Breadcrumb";
+import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
 import FilterPanel, {
   FilterField,

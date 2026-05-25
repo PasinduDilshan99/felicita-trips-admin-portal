@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PageHeader } from "@/components/common-components/Breadcrumb";
+import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { webPageManagementSideBarData } from "@/data/side-bar-data";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";

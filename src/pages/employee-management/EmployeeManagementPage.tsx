@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { PageHeader } from "@/components/common-components/Breadcrumb";
+import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { LoadingSkeleton } from "@/components/common-components/management-components/LoadingSkeleton";

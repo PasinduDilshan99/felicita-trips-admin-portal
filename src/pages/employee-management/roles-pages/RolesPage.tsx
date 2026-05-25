@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, JSX } from "react";
-import { PageHeader } from "@/components/common-components/Breadcrumb";
+import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import {
   AreaChart,
   Area,

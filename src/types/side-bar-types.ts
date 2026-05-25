@@ -22,3 +22,12 @@ export interface SideBarDataType {
     }[];
   }[];
 }
+
+export interface SidebarProps {
+  data: SideBarDataType[];
+  title?: string;
+  logo?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  defaultWidth?: number;
+}

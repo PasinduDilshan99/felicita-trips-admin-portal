@@ -1,6 +1,8 @@
 export const MAIN_PAGE_PAGE_TITLE = "Felicita Trips";
 
-export const HOME_PAGE_PAGE_TITLE = "Admin Portal | Felicita Trips";
+export const HOME_PAGE_TITLE = "Admin Portal | Felicita Trips";
+
+export const CONTENT_MANAGEMENT_PAGE_TITLE = "Content Management";
 
 export const DESTINATION_PAGE_TITLE = "Destinations";
 export const VIEW_DESTINATION_PAGE_TITLE = "View Destinations";

@@ -1,8 +1,8 @@
-// components/common-components/CommonLoading.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useTheme } from "@/contexts/ThemeContext";
+import Image from "next/image";
+import { COMPANY_NAME, COMPANY_THEME } from "@/utils/constant";
 
 export interface CommonLoadingProps {
   message?: string;
@@ -13,10 +13,59 @@ export interface CommonLoadingProps {
 }
 
 const MESSAGES = [
-  "Preparing your experience…",
-  "Finding the best destinations…",
-  "Crafting your journey…",
+  "Curating your perfect escape…",
+  "Discovering hidden gems…",
+  "Crafting unforgettable moments…",
+  "Mapping your dream journey…",
 ];
+
+interface Turtle {
+  id: number;
+  x: number;
+  size: number;
+  delay: number;
+  duration: number;
+  flip: boolean;
+}
+
+interface WaveDot {
+  id: number;
+  x: number;
+  delay: number;
+}
+
+/* ── Exact same SeaTurtle from NotFound ───────────────────────────── */
+const SeaTurtle = ({ size, flip }: { size: number; flip: boolean }) => (
+  <svg
+    width={size * 0.75}
+    height={size}
+    viewBox="0 0 60 80"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ transform: flip ? "scaleX(-1)" : undefined, opacity: 0.45 }}
+  >
+    <ellipse cx="30" cy="9" rx="8" ry="9" fill="#0f766e" />
+    <circle cx="27" cy="6" r="1" fill="#0d9488" />
+    <circle cx="33" cy="6" r="1" fill="#0d9488" />
+    <circle cx="23" cy="10" r="2" fill="#134e4a" />
+    <circle cx="37" cy="10" r="2" fill="#134e4a" />
+    <circle cx="23.8" cy="9.2" r="0.8" fill="#5eead4" />
+    <circle cx="37.8" cy="9.2" r="0.8" fill="#5eead4" />
+    <rect x="25" y="16" width="10" height="6" rx="3" fill="#0f766e" />
+    <ellipse cx="30" cy="45" rx="17" ry="22" fill="#0f766e" />
+    <ellipse cx="30" cy="44" rx="13" ry="18" fill="#14b8a6" />
+    <ellipse cx="30" cy="44" rx="7" ry="10" fill="#0d9488" />
+    <line x1="30" y1="26" x2="30" y2="62" stroke="#0f766e" strokeWidth="1.2" />
+    <line x1="17" y1="44" x2="43" y2="44" stroke="#0f766e" strokeWidth="1.2" />
+    <line x1="19" y1="32" x2="41" y2="56" stroke="#0f766e" strokeWidth="0.8" />
+    <line x1="41" y1="32" x2="19" y2="56" stroke="#0f766e" strokeWidth="0.8" />
+    <ellipse cx="10" cy="33" rx="7" ry="4" fill="#0d9488" transform="rotate(-40 10 33)" />
+    <ellipse cx="50" cy="33" rx="7" ry="4" fill="#0d9488" transform="rotate(40 50 33)" />
+    <ellipse cx="11" cy="57" rx="6" ry="3.5" fill="#0d9488" transform="rotate(30 11 57)" />
+    <ellipse cx="49" cy="57" rx="6" ry="3.5" fill="#0d9488" transform="rotate(-30 49 57)" />
+    <ellipse cx="30" cy="69" rx="3.5" ry="5" fill="#0f766e" />
+  </svg>
+);
 
 const CommonLoading: React.FC<CommonLoadingProps> = ({
   message,
@@ -25,256 +74,306 @@ const CommonLoading: React.FC<CommonLoadingProps> = ({
   fullScreen = false,
   className = "",
 }) => {
-  const { theme } = useTheme();
   const [msgIndex, setMsgIndex] = useState(0);
   const [msgVisible, setMsgVisible] = useState(true);
+  const [turtles, setTurtles] = useState<Turtle[]>([]);
+  const [waveDots, setWaveDots] = useState<WaveDot[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (message) return; // static message — skip cycling
+    setTurtles(
+      Array.from({ length: 8 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 88 + 2,
+        size: Math.random() * 22 + 18,
+        delay: Math.random() * 6,
+        duration: Math.random() * 10 + 14,
+        flip: Math.random() > 0.5,
+      }))
+    );
+    setWaveDots(
+      Array.from({ length: 12 }, (_, i) => ({
+        id: i,
+        x: (i / 11) * 100,
+        delay: i * 0.15,
+      }))
+    );
+    requestAnimationFrame(() => setMounted(true));
+  }, []);
+
+  useEffect(() => {
+    if (message) return;
     const interval = setInterval(() => {
       setMsgVisible(false);
       setTimeout(() => {
         setMsgIndex((i) => (i + 1) % MESSAGES.length);
         setMsgVisible(true);
-      }, 320);
-    }, 2600);
+      }, 350);
+    }, 3000);
     return () => clearInterval(interval);
   }, [message]);
 
-  const sizeConfig = {
-    sm: { 
-      globe: 48, 
-      logoText: "text-xl", 
-      tagText: "text-[9px]", 
-      dot: "w-1.5 h-1.5", 
-      msgText: "text-xs",
-      planeSize: 11,
-      planeOffset: 24,
-    },
-    md: { 
-      globe: 72, 
-      logoText: "text-[28px]", 
-      tagText: "text-[11px]", 
-      dot: "w-1.5 h-1.5", 
-      msgText: "text-[13px]",
-      planeSize: 13,
-      planeOffset: 36,
-    },
-    lg: { 
-      globe: 96, 
-      logoText: "text-4xl", 
-      tagText: "text-xs", 
-      dot: "w-2 h-2", 
-      msgText: "text-sm",
-      planeSize: 15,
-      planeOffset: 48,
-    },
-  };
-
-  const cfg = sizeConfig[size];
-
-  // Helper function to convert hex to rgba with opacity
-  const hexToRgba = (hex: string, opacity: number): string => {
-    if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-    hex = hex.replace("#", "");
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  };
-
-  // Get theme-based colors with fallbacks
-  const primaryColor = theme?.primary || "#20b296";
-  const primaryLight = hexToRgba(primaryColor, 0.12);
-  const primaryExtraLight = hexToRgba(primaryColor, 0.08);
-  const textColor = theme?.text || "#1a6b5a";
-  const textSecondaryColor = theme?.textSecondary || "#5fa898";
-  const surfaceColor = theme?.surface || "#f0f8f6";
+  const logoSizes = { sm: { ring: 88, inner: 62, core: 42 }, md: { ring: 120, inner: 84, core: 56 }, lg: { ring: 152, inner: 108, core: 72 } };
+  const textSizes = { sm: { brand: "text-xl", tag: "text-[8px]", msg: "text-[11px]" }, md: { brand: "text-[26px]", tag: "text-[9.5px]", msg: "text-[12px]" }, lg: { brand: "text-[34px]", tag: "text-[11px]", msg: "text-sm" } };
+  const lc = logoSizes[size];
+  const tc = textSizes[size];
 
   return (
     <div
-      className={`
-        relative flex flex-col items-center justify-center overflow-hidden
-        rounded-2xl
-        ${fullScreen ? "fixed inset-0 z-50" : ""}
-        ${className}
-      `}
+      className={`relative flex flex-col items-center justify-center overflow-hidden ${fullScreen ? "fixed inset-0 z-50" : ""} ${className}`}
       style={{
-        background: fullScreen 
-          ? hexToRgba(surfaceColor, 0.92)
-          : surfaceColor,
-        backdropFilter: fullScreen ? "blur(6px)" : undefined,
-        minHeight: fullScreen ? undefined : 340,
+        background: "linear-gradient(160deg,#0a2a3a 0%,#0d3d4f 30%,#0e5a5e 60%,#0f7a6e 100%)",
+        minHeight: fullScreen ? undefined : 420,
       }}
     >
-      {/* Pulse rings */}
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="absolute rounded-full border pointer-events-none"
-          style={{
-            width:  [160, 260, 360][i],
-            height: [160, 260, 360][i],
-            borderColor: hexToRgba(primaryColor, 0.12),
-            animation: `ft-expand 3s ease-out ${i * 0.6}s infinite`,
-          }}
-        />
-      ))}
-
-      {/* Globe + orbiting plane */}
-      <div
-        className="relative z-10"
-        style={{
-          width: cfg.globe,
-          height: cfg.globe,
-          animation: "ft-float 3.2s ease-in-out infinite",
-        }}
-      >
-        <svg
-          viewBox="0 0 72 72"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ width: "100%", height: "100%" }}
-        >
-          <circle 
-            cx="36" 
-            cy="36" 
-            r="28" 
-            fill={primaryExtraLight} 
-            stroke={primaryColor} 
-            strokeWidth="1.2" 
-          />
-          <ellipse 
-            cx="36" 
-            cy="36" 
-            rx="14" 
-            ry="28" 
-            fill="none" 
-            stroke={primaryColor} 
-            strokeWidth="0.9" 
-          />
-          <ellipse 
-            cx="36" 
-            cy="36" 
-            rx="28" 
-            ry="10" 
-            fill="none" 
-            stroke={primaryColor} 
-            strokeWidth="0.9" 
-          />
-          <line 
-            x1="8" 
-            y1="36" 
-            x2="64" 
-            y2="36" 
-            stroke={primaryColor} 
-            strokeWidth="0.8" 
-          />
-          <line 
-            x1="36" 
-            y1="8" 
-            x2="36" 
-            y2="64" 
-            stroke={primaryColor} 
-            strokeWidth="0.8" 
-          />
-        </svg>
-
-        {/* Plane orbit */}
-        <span
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          style={{ animation: "ft-orbit 3.2s linear infinite" }}
-        >
-          <svg
-            viewBox="0 0 72 72"
-            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-          >
-            <g transform="rotate(45, 36, 36)">
-              <text 
-                x="63" 
-                y="39" 
-                fontSize={cfg.planeSize} 
-                textAnchor="middle" 
-                dominantBaseline="middle"
-                fill={primaryColor}
-              >
-                ✈
-              </text>
-            </g>
-          </svg>
-        </span>
+      {/* ── Orbs ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full opacity-[0.18]" style={{ background: "radial-gradient(circle,#14b8a6 0%,transparent 70%)", animation: "ft-orb1 18s ease-in-out infinite" }} />
+        <div className="absolute -bottom-36 -right-36 w-[500px] h-[500px] rounded-full opacity-[0.13]" style={{ background: "radial-gradient(circle,#0891b2 0%,transparent 70%)", animation: "ft-orb2 22s ease-in-out infinite" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] rounded-full opacity-[0.09]" style={{ background: "radial-gradient(circle,#06b6d4 0%,transparent 70%)", animation: "ft-orb3 14s ease-in-out infinite" }} />
       </div>
 
-      {/* Brand name */}
-      <p
-        className={`z-10 mt-5 font-light tracking-widest ${cfg.logoText}`}
-        style={{ 
-          color: textColor,
-          fontFamily: "'Cormorant Garamond', 'Georgia', serif", 
-          letterSpacing: "0.08em" 
-        }}
-      >
-        Felicita Trips
-      </p>
+      {/* ── Swimming turtles ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {turtles.map((t) => (
+          <div
+            key={t.id}
+            style={{
+              position: "absolute",
+              left: `${t.x}%`,
+              bottom: `-${t.size * 2}px`,
+              animation: `ft-turtle-swim ${t.duration}s ${t.delay}s ease-in-out infinite`,
+            }}
+          >
+            <SeaTurtle size={t.size} flip={t.flip} />
+          </div>
+        ))}
+      </div>
 
-      {/* Tagline / subMessage */}
-      <p
-        className={`z-10 mt-1 uppercase tracking-[0.3em] ${cfg.tagText}`}
-        style={{ 
-          color: textSecondaryColor,
-          fontFamily: "'Jost', sans-serif" 
-        }}
-      >
-        {subMessage ?? "Your world. Your journey."}
-      </p>
-
-      {/* Dots */}
-      <div className="z-10 flex gap-2 mt-7">
-        {[0, 1, 2].map((i) => (
-          <span
-            key={i}
-            className={`rounded-full ${cfg.dot}`}
-            style={{ 
-              backgroundColor: primaryColor,
-              animation: `ft-pulse 1.4s ease-in-out ${i * 0.22}s infinite` 
+      {/* ── Wave dots ── */}
+      <div className="absolute bottom-[88px] left-0 right-0 flex justify-around items-end px-8 h-7 pointer-events-none">
+        {waveDots.map((d) => (
+          <div
+            key={d.id}
+            className="w-1.5 rounded-full"
+            style={{
+              background: "linear-gradient(to top,#14b8a6,#06b6d4)",
+              animation: `ft-wave-dot 2.4s ${d.delay}s ease-in-out infinite`,
+              height: "8px",
             }}
           />
         ))}
       </div>
 
-      {/* Cycling message */}
-      <p
-        className={`z-10 mt-3 ${cfg.msgText}`}
+      {/* ── Ocean floor waves ── */}
+      <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
+        <svg viewBox="0 0 2880 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full" style={{ animation: "ft-wave-slide 8s linear infinite" }}>
+          <path d="M0,60 C240,100 480,20 720,60 C960,100 1200,20 1440,60 C1680,100 1920,20 2160,60 C2400,100 2640,20 2880,60 L2880,120 L0,120 Z" fill="rgba(20,184,166,0.1)" />
+        </svg>
+        <svg viewBox="0 0 2880 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full absolute bottom-0" style={{ animation: "ft-wave-slide 12s linear infinite reverse" }}>
+          <path d="M0,80 C360,20 720,100 1080,40 C1440,0 1800,80 2160,40 C2520,0 2760,60 2880,80 L2880,120 L0,120 Z" fill="rgba(6,182,212,0.07)" />
+        </svg>
+      </div>
+
+      {/* ── Main content ── */}
+      <div
+        className="relative z-10 flex flex-col items-center text-center px-6"
         style={{
-          color: textSecondaryColor,
-          opacity: msgVisible ? 1 : 0,
-          transition: "opacity 0.3s ease",
-          minHeight: "1.25rem",
-          letterSpacing: "0.04em",
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? "translateY(0)" : "translateY(20px)",
+          transition: "opacity 0.8s ease, transform 0.8s ease",
         }}
       >
-        {message ?? MESSAGES[msgIndex]}
-      </p>
+        {/* Logo ring — same as NotFound */}
+        <div
+          className="relative flex items-center justify-center rounded-full"
+          style={{
+            width: lc.ring,
+            height: lc.ring,
+            background: "linear-gradient(135deg,rgba(20,184,166,0.2),rgba(6,182,212,0.1))",
+            border: "1px solid rgba(20,184,166,0.3)",
+            boxShadow: "0 0 40px rgba(20,184,166,0.15),inset 0 0 20px rgba(6,182,212,0.05)",
+            animation: "ft-gentle-bob 4s ease-in-out infinite",
+          }}
+        >
+          <div
+            className="flex items-center justify-center rounded-full"
+            style={{
+              width: lc.inner,
+              height: lc.inner,
+              background: "linear-gradient(135deg,rgba(20,184,166,0.3),rgba(8,145,178,0.2))",
+              border: "1px solid rgba(20,184,166,0.5)",
+            }}
+          >
+            <div
+              className="flex items-center justify-center rounded-full overflow-hidden"
+              style={{
+                width: lc.core,
+                height: lc.core,
+                background: "linear-gradient(135deg,#0e7490,#0f766e)",
+                boxShadow: "0 8px 32px rgba(14,116,144,0.5)",
+              }}
+            >
+              <Image
+                src="/logo.png"
+                alt={COMPANY_NAME}
+                className="w-full h-full object-cover"
+                width={200}
+                height={200}
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  const fb = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (fb) fb.style.display = "block";
+                }}
+              />
+              {/* Turtle fallback if logo.png fails */}
+              <div style={{ display: "none" }}>
+                <SeaTurtle size={lc.core * 0.7} flip={false} />
+              </div>
+            </div>
+          </div>
+          {/* Ping ring */}
+          <span
+            className="absolute inset-0 rounded-full"
+            style={{
+              border: "1px solid rgba(20,184,166,0.3)",
+              animation: "ft-ping-ring 3s ease-out infinite",
+            }}
+          />
+        </div>
 
-      {/* Keyframes - dynamically generated with theme values */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300&family=Jost:wght@300&display=swap');
+        {/* Brand */}
+        <p
+          className={`mt-5 font-light tracking-widest ${tc.brand}`}
+          style={{
+            fontFamily: "'Cormorant Garamond','Georgia',serif",
+            letterSpacing: "0.12em",
+            color: "#ffffff",
+            textShadow: "0 2px 18px rgba(0,0,0,0.3)",
+          }}
+        >
+          {COMPANY_NAME}
+        </p>
 
-        @keyframes ft-expand {
-          0%   { opacity: 0.6; transform: scale(0.85); }
-          100% { opacity: 0;   transform: scale(1.1); }
+        {/* Tagline */}
+        <p
+          className={`mt-1 uppercase tracking-[0.28em] ${tc.tag}`}
+          style={{
+            fontFamily: "'Jost',sans-serif",
+            fontWeight: 300,
+            color: "rgba(167,243,208,0.65)",
+          }}
+        >
+          {subMessage ?? COMPANY_THEME}
+        </p>
+
+        {/* Separator */}
+        <div style={{ width: 44, height: 1, background: "rgba(20,184,166,0.35)", borderRadius: 2, margin: "18px auto 0" }} />
+
+        {/* Progress bar */}
+        <div style={{ width: 140, height: 2, background: "rgba(255,255,255,0.1)", borderRadius: 4, overflow: "hidden", marginTop: 14 }}>
+          <div
+            style={{
+              height: "100%",
+              width: "30%",
+              background: "linear-gradient(90deg,#5eead4,#22d3ee)",
+              borderRadius: 4,
+              animation: "ft-progress 1.8s ease-in-out infinite",
+            }}
+          />
+        </div>
+
+        {/* Cycling message */}
+        <p
+          className={`mt-3 ${tc.msg}`}
+          style={{
+            fontFamily: "'Jost',sans-serif",
+            fontWeight: 300,
+            color: "rgba(167,243,208,0.65)",
+            letterSpacing: "0.05em",
+            opacity: msgVisible ? 1 : 0,
+            transform: msgVisible ? "translateY(0)" : "translateY(5px)",
+            transition: "opacity 0.35s ease, transform 0.35s ease",
+            minHeight: "1.4rem",
+          }}
+        >
+          {message ?? MESSAGES[msgIndex]}
+        </p>
+      </div>
+
+      {/* ── Footer brand line (fullScreen only) ── */}
+      {fullScreen && (
+        <div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 whitespace-nowrap"
+          style={{ opacity: mounted ? 1 : 0, transition: "opacity 1s 0.8s ease" }}
+        >
+          <span className="text-xs tracking-widest uppercase font-medium" style={{ color: "rgba(94,234,212,0.35)", letterSpacing: "0.18em" }}>
+            {COMPANY_NAME}
+          </span>
+          <span style={{ color: "rgba(94,234,212,0.2)" }}>—</span>
+          <span
+            className="text-xs font-semibold italic"
+            style={{
+              background: "linear-gradient(90deg,#5eead4,#22d3ee,#34d399)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            {COMPANY_THEME}
+          </span>
+        </div>
+      )}
+
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@300;400&display=swap');
+
+        @keyframes ft-turtle-swim {
+          0%   { transform: translateY(0)      rotate(0deg);  opacity: 0; }
+          8%   { opacity: 1; }
+          20%  { transform: translateY(-20vh)  rotate(4deg); }
+          40%  { transform: translateY(-40vh)  rotate(-4deg); }
+          60%  { transform: translateY(-60vh)  rotate(3deg); }
+          80%  { transform: translateY(-80vh)  rotate(-3deg); opacity: 0.8; }
+          95%  { opacity: 0; }
+          100% { transform: translateY(-110vh) rotate(0deg);  opacity: 0; }
         }
-        @keyframes ft-float {
-          0%, 100% { transform: translateY(0px); }
-          50%       { transform: translateY(-7px); }
+        @keyframes ft-orb1 {
+          0%, 100% { transform: translate(0,0) scale(1); }
+          50%       { transform: translate(36px,28px) scale(1.1); }
         }
-        @keyframes ft-orbit {
-          from { transform: rotate(0deg)   translateX(${cfg.planeOffset}px) rotate(0deg); }
-          to   { transform: rotate(360deg) translateX(${cfg.planeOffset}px) rotate(-360deg); }
+        @keyframes ft-orb2 {
+          0%, 100% { transform: translate(0,0) scale(1); }
+          50%       { transform: translate(-44px,-36px) scale(1.08); }
         }
-        @keyframes ft-pulse {
-          0%, 100% { opacity: 0.25; transform: scale(0.85); }
-          50%       { opacity: 1;    transform: scale(1); }
+        @keyframes ft-orb3 {
+          0%, 100% { transform: translate(-50%,-50%) scale(1); }
+          50%       { transform: translate(-50%,-50%) scale(1.14); }
+        }
+        @keyframes ft-gentle-bob {
+          0%, 100% { transform: translateY(0); }
+          50%       { transform: translateY(-10px); }
+        }
+        @keyframes ft-ping-ring {
+          0%   { transform: scale(1);   opacity: 0.6; }
+          80%  { transform: scale(1.55); opacity: 0; }
+          100% { transform: scale(1.55); opacity: 0; }
+        }
+        @keyframes ft-wave-dot {
+          0%, 100% { height: 6px;  opacity: 0.35; }
+          50%       { height: 22px; opacity: 0.9; }
+        }
+        @keyframes ft-wave-slide {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes ft-progress {
+          0%   { transform: translateX(-100%); }
+          50%  { transform: translateX(367%); }
+          100% { transform: translateX(367%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
         }
       `}</style>
     </div>

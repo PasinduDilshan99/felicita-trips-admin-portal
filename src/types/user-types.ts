@@ -47,3 +47,14 @@ export type UserNamesAndIdsApiResponse = ApiResponse<UserNameAndId[]>;
 export interface GetUserBasicDetailsRequest {
   userId: number;
 }
+
+export interface User {
+  id: number;
+  username: string;
+  roles: string[];
+  privileges: string[];
+  firstName: string;
+  lastName: string;
+  email: string;
+  mobileNumber1: string;
+}
