@@ -1,367 +1,469 @@
-// pages/web-management/activities/AddNewActivityPage.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/common-components/Breadcrumb";
 import {
+  ToastNotification,
+  ToastType,
+} from "@/components/common-components/ToastNotification";
+import {
   WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_ACTIVITIES_PATH,
+  WEB_MANAGEMENT_DESTINATION_PATH,
 } from "@/utils/constant";
-import { DestinationService } from "@/services/destinationService";
 import { ActivityService } from "@/services/activityService";
 import {
-  AddActivityFormData,
-  ActivityImageRequest,
+  AddActivityRequest,
+  ActivityCategory,
   ActivityRequirementRequest,
-  DestinationOption,
 } from "@/types/activity-types";
-import {
-  Clock,
-  DollarSign,
-  FileText,
-  Plus,
-  X,
-  Upload,
-  CheckCircle,
-  AlertCircle,
-  Camera,
-  Trash2,
-  Eye,
-  Shield,
-  Save,
-  Users,
-  MapPin,
-  ListChecks,
-  Image as ImageIcon,
-  Search,
-} from "lucide-react";
+import { useCommon } from "@/contexts/CommonContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Loader } from "lucide-react";
+import { FormCard } from "@/components/common-components/create-components/FormCard";
+import { DestinationSelector } from "@/components/common-components/DestinationSelector";
+import { ActivityInfoForm } from "@/components/activities-components/activity-create-components/ActivityInfoForm";
+import { ParticipationForm } from "@/components/activities-components/activity-create-components/ParticipationForm";
+import { RequirementsForm } from "@/components/activities-components/activity-create-components/RequirementsForm";
+import { FormActions } from "@/components/common-components/FormActions";
+import { FormSummary } from "@/components/common-components/FormSummary";
+import { ImageUploader } from "@/components/common-components/ImageUploader";
+import { ScheduleForm } from "@/components/activities-components/activity-create-components/ScheduleForm";
+import { CategorySelector } from "@/components/common-components/CategorySelector";
+import { adaptActivityCategories } from "@/utils/category-adapters";
+import { PricingForm } from "@/components/common-components/PricingForm";
+import { SeasonSelector } from "@/components/common-components/SeasonSelector";
+import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
+
+// Toast state interface
+interface ToastState {
+  show: boolean;
+  type: ToastType;
+  title: string;
+  message: string;
+  activityId?: number;
+}
 
 const AddNewActivityPage = () => {
+  const router = useRouter();
+  const { categories, loading: categoriesLoading } = useCommon();
+  const { theme } = useTheme();
+
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
     { label: "Web Management", href: WEB_MANAGEMENT_PATH },
     {
-      label: "Activities",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}`,
+      label: "Destinations",
+      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
     },
     {
-      label: "Add New",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/add`,
+      label: "Activities",
+      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activities`,
+    },
+    {
+      label: "Add New Activity",
+      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activities/add`,
     },
   ];
 
-  const router = useRouter();
-
   // Form state
-  const [formData, setFormData] = useState<AddActivityFormData>(
-    ActivityService.getDefaultFormData()
-  );
+  const [formData, setFormData] = useState<AddActivityRequest>({
+    destinationId: 0,
+    name: "",
+    description: "",
+    categories: [],
+    durationHours: 0,
+    availableFrom: "",
+    availableTo: "",
+    priceLocal: 0,
+    priceForeigners: 0,
+    minParticipate: 1,
+    maxParticipate: 20,
+    seasonId: 0,
+    status: "ACTIVE",
+    images: [],
+    requirements: [],
+  });
+
+  // Image state
+  const [imagePreviews, setImagePreviews] = useState<
+    { url: string; file?: File; uploading?: boolean; uploadError?: string }[]
+  >([]);
 
   // UI state
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [success, setSuccess] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [seasons, setSeasons] = useState<string[]>(["All year"]);
-  
-  // Destination selection state
-  const [destinations, setDestinations] = useState<DestinationOption[]>([]);
-  const [destinationSearch, setDestinationSearch] = useState("");
-  const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
-  const [selectedDestination, setSelectedDestination] = useState<DestinationOption | null>(null);
-  
-  // Image preview state
-  const [imagePreviews, setImagePreviews] = useState<
-    { url: string; file?: File }[]
-  >([]);
-  const [newImage, setNewImage] = useState<ActivityImageRequest>({
-    name: "",
-    description: "",
-    imageUrl: "",
-    status: "ACTIVE",
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [toast, setToast] = useState<ToastState>({
+    show: false,
+    type: "success",
+    title: "",
+    message: "",
+    activityId: undefined,
   });
 
-  // Requirement state
-  const [newRequirement, setNewRequirement] = useState<ActivityRequirementRequest>({
-    name: "",
-    value: "",
-    description: "",
-    color: "#3B82F6",
-    status: "ACTIVE",
-  });
+  // Get destination categories for activity categories
+  const destinationCategories = categories?.destinationCategoryList || [];
 
-  // Initialize data
-  useEffect(() => {
-    loadCategories();
-    loadSeasons();
-    loadDestinations();
-  }, []);
-
-  const loadCategories = async () => {
-    try {
-      const categoriesList = await ActivityService.getActivityCategories();
-      setCategories(categoriesList);
-    } catch (error) {
-      console.error("Error loading categories:", error);
-    }
+  // Helper functions
+  const getCategoryName = (categoryId: number): string => {
+    const category = destinationCategories.find(
+      (cat) => cat.destinationCategoryId === categoryId,
+    );
+    return category
+      ? category.destinationCategoryName
+      : `Category ${categoryId}`;
   };
 
-  const loadSeasons = async () => {
-    try {
-      const seasonsList = ActivityService.getSeasons();
-      setSeasons(["All year", ...seasonsList]);
-    } catch (error) {
-      console.error("Error loading seasons:", error);
-    }
-  };
-
-  const loadDestinations = async () => {
-    try {
-      const response = await DestinationService.getDestinationsForTerminate();
-      if (response.code === 200) {
-        setDestinations(response.data);
-      }
-    } catch (error) {
-      console.error("Error loading destinations:", error);
-    }
-  };
-
-  // Filter destinations based on search
-  const filteredDestinations = destinations.filter(dest =>
-    dest.destinationName.toLowerCase().includes(destinationSearch.toLowerCase())
-  );
-
-  // Handle destination selection
-  const handleDestinationSelect = (destination: DestinationOption) => {
-    setSelectedDestination(destination);
-    setFormData(prev => ({ ...prev, destinationId: destination.destinationId }));
-    setDestinationSearch(destination.destinationName);
-    setShowDestinationDropdown(false);
+  const getCategoryColor = (categoryId: number): string => {
+    const category = destinationCategories.find(
+      (cat) => cat.destinationCategoryId === categoryId,
+    );
+    return category?.destinationCategoryColor || theme.primary;
   };
 
   // Handle form input changes
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
 
-    // Handle number inputs
-    if (["durationHours", "priceLocal", "priceForeigners", "minParticipate", "maxParticipate"].includes(name)) {
-      setFormData({
-        ...formData,
-        [name]: value === "" ? null : parseFloat(value),
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+    let processedValue: any = value;
+    if (
+      name === "durationHours" ||
+      name === "priceLocal" ||
+      name === "priceForeigners" ||
+      name === "minParticipate" ||
+      name === "maxParticipate"
+    ) {
+      processedValue = value === "" ? 0 : parseFloat(value);
     }
 
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: "",
-      });
-    }
-  };
-
-  // Handle time input changes
-  const handleTimeChange = (field: "availableFrom" | "availableTo", value: string) => {
     setFormData({
       ...formData,
-      [field]: value,
+      [name]: processedValue,
     });
+
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
   };
 
-  // Handle image upload
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+  // Handle destination change
+  const handleDestinationChange = (destinationId: number) => {
+    setFormData({ ...formData, destinationId });
+    if (errors.destinationId) {
+      setErrors({ ...errors, destinationId: "" });
+    }
+  };
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageUrl = reader.result as string;
+  const normalizedCategories = adaptActivityCategories(
+    categories?.activityCategoryList || [],
+  );
 
-        // Add to image previews
-        setImagePreviews((prev) => [...prev, { url: imageUrl, file }]);
+  // Convert selected categories to the expected format
+  const selectedItems = formData.categories.map((cat) => ({
+    id: cat.categoryId,
+    isPrimary: cat.isPrimary,
+    status: cat.status,
+  }));
 
-        // Add to form data images
-        const newImageData: ActivityImageRequest = {
-          name: file.name.split(".")[0],
-          description: `Uploaded image: ${file.name}`,
-          imageUrl,
-          status: "ACTIVE",
-        };
+  // Handle status change
+  const handleStatusChange = (value: "ACTIVE" | "INACTIVE") => {
+    setFormData({ ...formData, status: value });
+  };
 
-        setFormData((prev) => ({
-          ...prev,
-          images: [...prev.images, newImageData],
+  // Handle season change
+  const handleSeasonChange = (seasonId: number) => {
+    setFormData({ ...formData, seasonId });
+    if (errors.seasonId) {
+      setErrors({ ...errors, seasonId: "" });
+    }
+  };
+
+  // Handle category changes
+  const handleCategoryChange = (categoryId: number, isPrimary: boolean) => {
+    const existingIndex = formData.categories.findIndex(
+      (c) => c.categoryId === categoryId,
+    );
+
+    let newCategories: ActivityCategory[];
+
+    if (existingIndex >= 0) {
+      newCategories = formData.categories.map((cat, index) => {
+        if (index === existingIndex) {
+          return { ...cat, isPrimary };
+        }
+        if (isPrimary && cat.isPrimary) {
+          return { ...cat, isPrimary: false };
+        }
+        return cat;
+      });
+    } else {
+      let shouldBePrimary = isPrimary;
+      let updatedCategories = [...formData.categories];
+
+      if (isPrimary) {
+        updatedCategories = updatedCategories.map((cat) => ({
+          ...cat,
+          isPrimary: false,
         }));
-      };
-      reader.readAsDataURL(file);
+      } else if (updatedCategories.length === 0) {
+        shouldBePrimary = true;
+      }
+
+      newCategories = [
+        ...updatedCategories,
+        {
+          categoryId,
+          isPrimary: shouldBePrimary,
+          status: "ACTIVE" as const,
+        },
+      ];
+    }
+
+    setFormData({ ...formData, categories: newCategories });
+    if (errors.categories) {
+      setErrors({ ...errors, categories: "" });
+    }
+  };
+
+  const handleRemoveCategory = (categoryId: number) => {
+    setFormData({
+      ...formData,
+      categories: formData.categories.filter(
+        (c) => c.categoryId !== categoryId,
+      ),
     });
   };
 
-  // Handle manual image URL addition
-  const handleAddImage = () => {
-    if (!newImage.name.trim() || !newImage.imageUrl.trim()) {
-      setErrors((prev) => ({
-        ...prev,
-        image: "Image name and URL are required",
-      }));
-      return;
-    }
-
-    if (!newImage.imageUrl.startsWith("http")) {
-      setErrors((prev) => ({
-        ...prev,
-        image: "Please use a valid HTTP/HTTPS URL for the image",
-      }));
-      return;
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      images: [...prev.images, { ...newImage }],
-    }));
-
-    setImagePreviews((prev) => [...prev, { url: newImage.imageUrl }]);
-
-    setNewImage({
-      name: "",
-      description: "",
-      imageUrl: "",
-      status: "ACTIVE",
-    });
-
-    if (errors.image) {
-      setErrors((prev) => ({
-        ...prev,
-        image: "",
-      }));
-    }
+  // Handle requirements change
+  const handleRequirementsChange = (
+    requirements: ActivityRequirementRequest[],
+  ) => {
+    setFormData({ ...formData, requirements });
   };
 
-  // Remove image
-  const handleRemoveImage = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
-
-    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  // Image handling
+  const handleImagePreviewsChange = (previews: typeof imagePreviews) => {
+    setImagePreviews(previews);
   };
 
-  // Add requirement
-  const handleAddRequirement = () => {
-    if (!newRequirement.name.trim() || !newRequirement.value.trim()) {
-      setErrors((prev) => ({
-        ...prev,
-        requirement: "Requirement name and value are required",
-      }));
-      return;
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      requirements: [...prev.requirements, { ...newRequirement }],
-    }));
-
-    setNewRequirement({
-      name: "",
-      value: "",
-      description: "",
-      color: "#3B82F6",
-      status: "ACTIVE",
-    });
-
-    if (errors.requirement) {
-      setErrors((prev) => ({
-        ...prev,
-        requirement: "",
-      }));
-    }
+  const handleImagesChange = (images: any[]) => {
+    setFormData({ ...formData, images });
   };
 
-  // Remove requirement
-  const handleRemoveRequirement = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      requirements: prev.requirements.filter((_, i) => i !== index),
-    }));
+  const handleUploadingImagesChange = (uploading: boolean) => {
+    setUploadingImages(uploading);
   };
 
   // Validate form
   const validateForm = (): boolean => {
-    const validationErrors = ActivityService.validateActivityForm(formData);
-    setErrors(validationErrors);
-    return Object.keys(validationErrors).length === 0;
-  };
+    const newErrors: Record<string, string> = {};
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
+    if (!formData.destinationId) {
+      newErrors.destinationId = "Please select a destination";
+    }
+    if (!formData.name.trim()) {
+      newErrors.name = "Activity name is required";
+    }
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+    if (formData.categories.length === 0) {
+      newErrors.categories = "At least one category is required";
+    }
+    if (formData.categories.filter((c) => c.isPrimary).length !== 1) {
+      newErrors.categories = "Exactly one primary category must be selected";
+    }
+    if (!formData.durationHours || formData.durationHours <= 0) {
+      newErrors.durationHours = "Valid duration is required";
+    }
+    if (!formData.availableFrom) {
+      newErrors.availableFrom = "Available from date is required";
+    }
+    if (!formData.availableTo) {
+      newErrors.availableTo = "Available to date is required";
+    }
+    if (
+      formData.availableFrom &&
+      formData.availableTo &&
+      new Date(formData.availableFrom) > new Date(formData.availableTo)
+    ) {
+      newErrors.availableTo = "Available to date must be after from date";
+    }
+    if (!formData.priceLocal || formData.priceLocal < 0) {
+      newErrors.priceLocal = "Valid local price is required";
+    }
+    if (!formData.priceForeigners || formData.priceForeigners < 0) {
+      newErrors.priceForeigners = "Valid foreigner price is required";
+    }
+    if (!formData.minParticipate || formData.minParticipate < 1) {
+      newErrors.minParticipate = "Minimum participants must be at least 1";
+    }
+    if (
+      !formData.maxParticipate ||
+      formData.maxParticipate < formData.minParticipate
+    ) {
+      newErrors.maxParticipate = "Maximum must be greater than minimum";
+    }
+    if (!formData.seasonId) {
+      newErrors.seasonId = "Please select a season";
     }
 
+    const hasUploadingImages = imagePreviews.some(
+      (preview) => preview.uploading,
+    );
+    if (hasUploadingImages) {
+      newErrors.images = "Please wait for all images to finish uploading";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Actual submission logic
+  const submitActivity = async () => {
     setLoading(true);
-    setSuccess(false);
 
     try {
-      console.log("=================formData===================");
-      console.log("Raw form data:", formData);
+      const submissionData: AddActivityRequest = {
+        ...formData,
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        durationHours: parseFloat(formData.durationHours.toFixed(1)),
+        priceLocal: parseFloat(formData.priceLocal.toFixed(2)),
+        priceForeigners: parseFloat(formData.priceForeigners.toFixed(2)),
+        minParticipate: parseInt(formData.minParticipate.toString()),
+        maxParticipate: parseInt(formData.maxParticipate.toString()),
+      };
 
-      // Prepare submission data using service method
-      const submissionData = ActivityService.prepareActivityData(formData);
+      const response = await ActivityService.addActivity(submissionData);
 
-      console.log("Processed submission data:", submissionData);
-      console.log("====================================");
-
-      // Call API to add activity using service
-      await ActivityService.addActivity(submissionData);
-
-      setSuccess(true);
-      
-      // Reset form after 2 seconds and redirect
-      setTimeout(() => {
+      if (response.code === 200) {
+        setToast({
+          show: true,
+          type: "success",
+          title: "Activity Created Successfully!",
+          message: `${formData.name} has been added to your activities.`,
+        });
         handleReset();
-        router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}`);
-      }, 2000);
-
+        return response;
+      } else {
+        throw new Error(response.message || "Failed to add activity");
+      }
     } catch (error: any) {
       console.error("Submission error:", error);
-      setErrors((prev) => ({
-        ...prev,
-        submit: error.message || "Failed to add activity. Please try again.",
-      }));
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  // Reset form
-  const handleReset = () => {
-    setFormData(ActivityService.getDefaultFormData());
-    setImagePreviews([]);
-    setDestinationSearch("");
-    setSelectedDestination(null);
-    setErrors({});
-    setSuccess(false);
+  // Handle create button click - opens dialog
+  const handleCreateClick = () => {
+    if (validateForm()) {
+      setShowConfirmDialog(true);
+    } else {
+      const firstError = document.querySelector('[class*="border-red"]');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
   };
 
+  // Handle confirm create from dialog
+  const handleConfirmCreate = async () => {
+    await submitActivity();
+  };
+
+  // Reset form
+  const handleReset = () => {
+    imagePreviews.forEach((preview) => {
+      if (preview.url && preview.url.startsWith("blob:")) {
+        URL.revokeObjectURL(preview.url);
+      }
+    });
+    setFormData({
+      destinationId: 0,
+      name: "",
+      description: "",
+      categories: [],
+      durationHours: 0,
+      availableFrom: "",
+      availableTo: "",
+      priceLocal: 0,
+      priceForeigners: 0,
+      minParticipate: 1,
+      maxParticipate: 20,
+      seasonId: 0,
+      status: "ACTIVE",
+      images: [],
+      requirements: [],
+    });
+    setImagePreviews([]);
+    setErrors({});
+  };
+
+  // Close toast
+  const handleCloseToast = () => {
+    setToast((prev) => ({ ...prev, show: false }));
+  };
+
+  // Get activity detail link
+  const getActivityLink = (): string => {
+    if (toast.activityId) {
+      return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activities/${toast.activityId}`;
+    }
+    return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activities`;
+  };
+
+  if (categoriesLoading) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: theme.background }}
+      >
+        <div className="text-center">
+          <Loader
+            className="w-12 h-12 animate-spin mx-auto mb-4"
+            style={{ color: theme.primary }}
+          />
+          <p style={{ color: theme.textSecondary }}>Loading categories...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
-      {/* Header with Breadcrumb */}
-      <div className="top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
+      {/* Toast Notification */}
+      {toast.show && (
+        <ToastNotification
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={handleCloseToast}
+          actionLink={toast.type === "success" ? getActivityLink() : undefined}
+          actionText="View Activity"
+        />
+      )}
+
+      {/* Header */}
+      <div
+        className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
+        style={{
+          backgroundColor: `${theme.surface}CC`,
+          borderColor: theme.border,
+        }}
+      >
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title="Add New Activity"
             description="Create a new activity with all details"
@@ -371,923 +473,245 @@ const AddNewActivityPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Success Message */}
-        {success && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
-            <div className="flex items-center gap-4">
-              <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-green-800">
-                  Activity Added Successfully!
-                </h3>
-                <p className="text-green-600 mt-1">
-                  Redirecting to activities list...
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {errors.submit && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-2xl">
-            <div className="flex items-center gap-4">
-              <AlertCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-red-800">
-                  Submission Failed
-                </h3>
-                <p className="text-red-600 mt-1">{errors.submit}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Form */}
+          {/* Left Column - Forms */}
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Destination Selection Card */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                  <MapPin className="w-6 h-6 text-blue-600" />
-                  Destination Selection
-                </h2>
+            <form className="space-y-8">
+              <FormCard>
+                <DestinationSelector
+                  value={formData.destinationId}
+                  onChange={handleDestinationChange}
+                  error={errors.destinationId}
+                  required
+                />
+              </FormCard>
 
-                <div className="space-y-6">
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Destination *
-                    </label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="text"
-                        value={destinationSearch}
-                        onChange={(e) => {
-                          setDestinationSearch(e.target.value);
-                          setShowDestinationDropdown(true);
-                        }}
-                        onFocus={() => setShowDestinationDropdown(true)}
-                        placeholder="Search for a destination..."
-                        className={`text-gray-600 w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                          errors.destinationId
-                            ? "border-red-300 bg-red-50"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      />
-                    </div>
-                    
-                    {showDestinationDropdown && filteredDestinations.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
-                        {filteredDestinations.map((destination) => (
-                          <div
-                            key={destination.destinationId}
-                            onClick={() => handleDestinationSelect(destination)}
-                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                          >
-                            <div className="font-medium text-gray-900">
-                              {destination.destinationName}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              ID: {destination.destinationId}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+              <ActivityInfoForm
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+                onStatusChange={handleStatusChange}
+              />
 
-                    {selectedDestination && (
-                      <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {selectedDestination.destinationName}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              Destination ID: {selectedDestination.destinationId}
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedDestination(null);
-                              setDestinationSearch("");
-                              setFormData(prev => ({ ...prev, destinationId: null }));
-                            }}
-                            className="p-1 text-gray-400 hover:text-red-500"
-                          >
-                            <X className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
+              <CategorySelector
+                categories={normalizedCategories}
+                selectedItems={selectedItems}
+                onCategoryAdd={(categoryId) => {
+                  const hasPrimary = formData.categories.some(
+                    (c) => c.isPrimary,
+                  );
+                  const newCategory = {
+                    categoryId,
+                    isPrimary: !hasPrimary,
+                    status: "ACTIVE" as const,
+                  };
+                  setFormData({
+                    ...formData,
+                    categories: [...formData.categories, newCategory],
+                  });
+                }}
+                onCategoryRemove={(categoryId) => {
+                  setFormData({
+                    ...formData,
+                    categories: formData.categories.filter(
+                      (c) => c.categoryId !== categoryId,
+                    ),
+                  });
+                }}
+                onSetPrimary={(categoryId) => {
+                  setFormData({
+                    ...formData,
+                    categories: formData.categories.map((cat) => ({
+                      ...cat,
+                      isPrimary: cat.categoryId === categoryId,
+                    })),
+                  });
+                }}
+                mode="primary-secondary"
+                title="Activity Categories"
+                description="Select activity categories and set one as primary"
+                error={errors.categories}
+                showDescriptions
+              />
 
-                    {errors.destinationId && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.destinationId}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <ScheduleForm
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+              />
 
-              {/* Activity Information Card */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                  <FileText className="w-6 h-6 text-green-600" />
-                  Activity Information
-                </h2>
+              <PricingForm
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+                mode="activity"
+                title="Activity Pricing"
+                description="Set pricing for local and foreign participants"
+              />
 
-                <div className="space-y-6">
-                  {/* Name */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Activity Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className={`text-gray-600 w-full px-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                        errors.name
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      placeholder="Enter activity name"
-                    />
-                    {errors.name && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.name}
-                      </p>
-                    )}
-                  </div>
+              <ParticipationForm
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+              />
 
-                  {/* Description */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description *
-                    </label>
-                    <textarea
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      rows={4}
-                      className={`text-gray-600 w-full px-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                        errors.description
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      placeholder="Enter activity description"
-                    />
-                    {errors.description && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.description}
-                      </p>
-                    )}
-                  </div>
+              <FormCard>
+                <SeasonSelector
+                  value={formData.seasonId}
+                  onChange={handleSeasonChange}
+                  error={errors.seasonId}
+                  required
+                />
+              </FormCard>
 
-                  {/* Category & Season */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Category *
-                      </label>
-                      <select
-                        name="activitiesCategory"
-                        value={formData.activitiesCategory}
-                        onChange={handleInputChange}
-                        className={`text-gray-600 w-full px-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                          errors.activitiesCategory
-                            ? "border-red-300 bg-red-50"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        <option value="">Select a category</option>
-                        {categories.map((category) => (
-                          <option key={category} value={category}>
-                            {category}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.activitiesCategory && (
-                        <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                          <AlertCircle className="w-4 h-4" />
-                          {errors.activitiesCategory}
-                        </p>
-                      )}
-                    </div>
+              <RequirementsForm
+                requirements={formData.requirements}
+                onRequirementsChange={handleRequirementsChange}
+              />
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Season
-                      </label>
-                      <select
-                        name="season"
-                        value={formData.season}
-                        onChange={handleInputChange}
-                        className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                      >
-                        {seasons.map((season) => (
-                          <option key={season} value={season}>
-                            {season}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Status */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Status
-                    </label>
-                    <select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                      className="text-gray-600 w-full px-4 py-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    >
-                      <option value="ACTIVE">Active</option>
-                      <option value="INACTIVE">Inactive</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Schedule & Duration Card */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                  <Clock className="w-6 h-6 text-purple-600" />
-                  Schedule & Duration
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Duration */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Duration (Hours) *
-                    </label>
-                    <input
-                      type="number"
-                      name="durationHours"
-                      value={formData.durationHours || ""}
-                      onChange={handleInputChange}
-                      step="0.5"
-                      min="0.5"
-                      max="24"
-                      className={`text-gray-600 w-full px-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                        errors.durationHours
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      placeholder="e.g., 4.5"
-                    />
-                    {errors.durationHours && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.durationHours}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Available From */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Available From *
-                    </label>
-                    <input
-                      type="time"
-                      value={formData.availableFrom}
-                      onChange={(e) => handleTimeChange("availableFrom", e.target.value)}
-                      className={`text-gray-600 w-full px-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                        errors.availableFrom
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    />
-                    {errors.availableFrom && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.availableFrom}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Available To */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Available To *
-                    </label>
-                    <input
-                      type="time"
-                      value={formData.availableTo}
-                      onChange={(e) => handleTimeChange("availableTo", e.target.value)}
-                      className={`text-gray-600 w-full px-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                        errors.availableTo
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    />
-                    {errors.availableTo && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.availableTo}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Time Info */}
-                <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl">
-                  <p className="text-sm text-purple-700">
-                    ⏰ Activity will be available from {formData.availableFrom} to {formData.availableTo} 
-                    {formData.durationHours && ` (${formData.durationHours} hours)`}
-                  </p>
-                </div>
-              </div>
-
-              {/* Pricing Card */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                  <DollarSign className="w-6 h-6 text-amber-600" />
-                  Pricing
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Local Price */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Local Price (LKR) *
-                    </label>
-                    <input
-                      type="number"
-                      name="priceLocal"
-                      value={formData.priceLocal || ""}
-                      onChange={handleInputChange}
-                      min="0"
-                      step="100"
-                      className={`text-gray-600 w-full px-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                        errors.priceLocal
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      placeholder="e.g., 3000"
-                    />
-                    {errors.priceLocal && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.priceLocal}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Foreigner Price */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Foreigner Price (LKR) *
-                    </label>
-                    <input
-                      type="number"
-                      name="priceForeigners"
-                      value={formData.priceForeigners || ""}
-                      onChange={handleInputChange}
-                      min="0"
-                      step="100"
-                      className={`text-gray-600 w-full px-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                        errors.priceForeigners
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      placeholder="e.g., 8000"
-                    />
-                    {errors.priceForeigners && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.priceForeigners}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Participants Card */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                  <Users className="w-6 h-6 text-rose-600" />
-                  Participants
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Minimum Participants */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Minimum Participants *
-                    </label>
-                    <input
-                      type="number"
-                      name="minParticipate"
-                      value={formData.minParticipate || ""}
-                      onChange={handleInputChange}
-                      min="1"
-                      className={`text-gray-600 w-full px-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                        errors.minParticipate
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      placeholder="e.g., 1"
-                    />
-                    {errors.minParticipate && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.minParticipate}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Maximum Participants */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Maximum Participants *
-                    </label>
-                    <input
-                      type="number"
-                      name="maxParticipate"
-                      value={formData.maxParticipate || ""}
-                      onChange={handleInputChange}
-                      min="1"
-                      className={`text-gray-600 w-full px-4 py-3 rounded-xl border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
-                        errors.maxParticipate
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      placeholder="e.g., 10"
-                    />
-                    {errors.maxParticipate && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.maxParticipate}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Requirements Card */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                  <ListChecks className="w-6 h-6 text-emerald-600" />
-                  Requirements
-                </h2>
-
-                <div className="space-y-6">
-                  {/* Add Requirement Form */}
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-xl border border-emerald-100">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Requirement Name *
-                        </label>
-                        <input
-                          type="text"
-                          value={newRequirement.name}
-                          onChange={(e) => setNewRequirement({ ...newRequirement, name: e.target.value })}
-                          className="text-gray-600 w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="e.g., Footwear"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Value *
-                        </label>
-                        <input
-                          type="text"
-                          value={newRequirement.value}
-                          onChange={(e) => setNewRequirement({ ...newRequirement, value: e.target.value })}
-                          className="text-gray-600 w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="e.g., Hiking shoes"
-                        />
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Description
-                        </label>
-                        <input
-                          type="text"
-                          value={newRequirement.description}
-                          onChange={(e) => setNewRequirement({ ...newRequirement, description: e.target.value })}
-                          className="text-gray-600 w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="e.g., Proper hiking shoes required"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Color
-                        </label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={newRequirement.color}
-                            onChange={(e) => setNewRequirement({ ...newRequirement, color: e.target.value })}
-                            className="w-10 h-10 rounded-lg cursor-pointer"
-                          />
-                          <input
-                            type="text"
-                            value={newRequirement.color}
-                            onChange={(e) => setNewRequirement({ ...newRequirement, color: e.target.value })}
-                            className="text-gray-600 flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Status
-                        </label>
-                        <select
-                          value={newRequirement.status}
-                          onChange={(e) => setNewRequirement({ ...newRequirement, status: e.target.value as "ACTIVE" | "INACTIVE" })}
-                          className="text-gray-600 w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="ACTIVE">Active</option>
-                          <option value="INACTIVE">Inactive</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleAddRequirement}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-colors duration-200 font-medium flex items-center justify-center gap-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add Requirement
-                    </button>
-
-                    {errors.requirement && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.requirement}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Requirements List */}
-                  {formData.requirements.length > 0 ? (
-                    <div className="space-y-3">
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Added Requirements ({formData.requirements.length})
-                      </h3>
-                      {formData.requirements.map((req, index) => (
-                        <div
-                          key={index}
-                          className="p-4 bg-white border border-gray-200 rounded-xl flex items-center justify-between group hover:border-gray-300 transition-colors duration-200"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div
-                              className="w-4 h-4 rounded-full"
-                              style={{ backgroundColor: req.color }}
-                            />
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium text-gray-900">
-                                  {req.name}
-                                </span>
-                                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                                  {req.value}
-                                </span>
-                                <span className={`px-2 py-1 text-xs rounded ${
-                                  req.status === "ACTIVE"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-gray-100 text-gray-800"
-                                }`}>
-                                  {req.status}
-                                </span>
-                              </div>
-                              {req.description && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                  {req.description}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveRequirement(index)}
-                            className="p-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                            title="Remove requirement"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <ListChecks className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                      <p className="text-gray-500">No requirements added yet</p>
-                      <p className="text-gray-400 text-sm mt-1">
-                        Add requirements like age limits, equipment needed, etc.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Submit Buttons */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="flex-1 px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:from-gray-100 hover:to-gray-200 transition-all duration-200 font-medium"
-                  >
-                    Reset Form
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl border-2 border-blue-500 hover:from-blue-700 hover:to-indigo-700 hover:border-blue-600 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Adding Activity...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-5 h-5" />
-                        Add Activity
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
+              <FormActions
+                loading={loading}
+                uploadingImages={uploadingImages}
+                onSubmit={handleCreateClick}
+                onReset={handleReset}
+                errors={errors}
+                submitButtonType="button"
+              />
             </form>
           </div>
 
-          {/* Right Column - Image Upload & Preview */}
+          {/* Right Column - Sidebar */}
           <div className="space-y-8">
-            {/* Image Upload Card */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-rose-600" />
-                Upload Images
-              </h3>
+            <ImageUploader
+              images={formData.images}
+              imagePreviews={imagePreviews}
+              onImagePreviewsChange={handleImagePreviewsChange}
+              onImagesChange={handleImagesChange}
+              onUploadingChange={handleUploadingImagesChange}
+              errors={errors}
+            />
 
-              {/* File Upload */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Upload Image Files
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 transition-colors duration-200">
-                  <input
-                    type="file"
-                    id="image-upload"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 font-medium mb-1">
-                      Click to upload images
-                    </p>
-                    <p className="text-gray-500 text-sm">
-                      PNG, JPG, GIF up to 5MB each
-                    </p>
-                  </label>
-                </div>
-              </div>
-
-              {/* Manual Image URL */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Or Add by URL
-                  </label>
-                  <input
-                    type="text"
-                    value={newImage.imageUrl}
-                    onChange={(e) =>
-                      setNewImage({ ...newImage, imageUrl: e.target.value })
-                    }
-                    className="text-gray-600 w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Image Name
-                  </label>
-                  <input
-                    type="text"
-                    value={newImage.name}
-                    onChange={(e) =>
-                      setNewImage({ ...newImage, name: e.target.value })
-                    }
-                    className="text-gray-600 w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Main View, Action Shot, etc."
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleAddImage}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 rounded-lg border border-emerald-100 hover:border-emerald-300 transition-colors duration-200 font-medium flex items-center justify-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Image
-                </button>
-              </div>
-
-              {errors.images && (
-                <p className="mt-4 text-sm text-red-600 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.images}
-                </p>
-              )}
-            </div>
-
-            {/* Image Gallery Preview */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                  <Camera className="w-5 h-5 text-purple-600" />
-                  Image Preview ({imagePreviews.length})
-                </h3>
-                {imagePreviews.length > 0 && (
-                  <span className="px-3 py-1 bg-gradient-to-r from-purple-50 to-violet-50 text-purple-700 rounded-full text-sm font-medium">
-                    {imagePreviews.length} images
-                  </span>
-                )}
-              </div>
-
-              {imagePreviews.length === 0 ? (
-                <div className="text-center py-8">
-                  <Camera className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500">No images added yet</p>
-                  <p className="text-gray-400 text-sm mt-1">
-                    Upload or add images to preview
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {imagePreviews.map((preview, index) => (
-                    <div
-                      key={index}
-                      className="group relative rounded-xl overflow-hidden border border-gray-200"
-                    >
-                      <img
-                        src={preview.url}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-48 object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <p className="text-white text-sm font-medium truncate">
-                            {formData.images[index]?.name ||
-                              `Image ${index + 1}`}
-                          </p>
-                          <p className="text-white/80 text-xs truncate">
-                            {formData.images[index]?.description ||
-                              "No description"}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleRemoveImage(index)}
-                        className="absolute top-3 right-3 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
-                        title="Remove image"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {errors.images && imagePreviews.length === 0 && (
-                <div className="mt-4 p-4 bg-gradient-to-r from-red-50 to-rose-50 rounded-lg border border-red-100">
-                  <p className="text-red-600 text-sm">{errors.images}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Form Preview Card */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
-                <Eye className="w-5 h-5 text-amber-600" />
-                Form Summary
-              </h3>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
-                  <span className="text-gray-600">Activity</span>
-                  <span className="font-semibold text-gray-900 truncate ml-2">
-                    {formData.name || "Not set"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg">
-                  <span className="text-gray-600">Destination</span>
-                  <span className="font-semibold text-gray-900 truncate ml-2">
-                    {selectedDestination?.destinationName || "Not set"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg">
-                  <span className="text-gray-600">Category</span>
-                  <span className="font-semibold text-gray-900">
-                    {formData.activitiesCategory || "Not set"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg">
-                  <span className="text-gray-600">Duration</span>
-                  <span className="font-semibold text-gray-900">
-                    {formData.durationHours ? `${formData.durationHours} hours` : "Not set"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg">
-                  <span className="text-gray-600">Price Range</span>
-                  <span className="font-semibold text-gray-900">
-                    {formData.priceLocal && formData.priceForeigners 
-                      ? `LKR ${formData.priceLocal} - ${formData.priceForeigners}`
-                      : "Not set"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-cyan-50 to-sky-50 rounded-lg">
-                  <span className="text-gray-600">Participants</span>
-                  <span className="font-semibold text-gray-900">
-                    {formData.minParticipate && formData.maxParticipate 
-                      ? `${formData.minParticipate}-${formData.maxParticipate}`
-                      : "Not set"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Help & Tips */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-green-600" />
-                Tips & Guidelines
-              </h3>
-
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <p className="text-gray-600 text-sm">
-                    Select the correct destination first
-                  </p>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <p className="text-gray-600 text-sm">
-                    Provide clear pricing for both local and foreign visitors
-                  </p>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <p className="text-gray-600 text-sm">
-                    Set realistic participant limits
-                  </p>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <p className="text-gray-600 text-sm">
-                    Add requirements like equipment, age limits, or skill levels
-                  </p>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <p className="text-gray-600 text-sm">
-                    Use high-quality images that showcase the activity
-                  </p>
-                </div>
-              </div>
-            </div>
+            <FormSummary
+              title="Activity Summary"
+              sections={[
+                {
+                  label: "Activity",
+                  value: formData.name || "Not set",
+                  icon: "activity",
+                  color: theme.primary,
+                },
+                {
+                  label: "Destination",
+                  value: formData.destinationId
+                    ? `ID: ${formData.destinationId}`
+                    : "Not set",
+                  icon: "map",
+                  color: theme.accent,
+                },
+                {
+                  label: "Categories",
+                  value:
+                    formData.categories.length > 0
+                      ? formData.categories
+                          .map((c) => getCategoryName(c.categoryId))
+                          .join(", ")
+                      : "Not set",
+                  icon: "tag",
+                  color: theme.success,
+                },
+                {
+                  label: "Duration",
+                  value: formData.durationHours
+                    ? `${formData.durationHours} hours`
+                    : "Not set",
+                  icon: "clock",
+                  color: theme.warning,
+                },
+                {
+                  label: "Pricing",
+                  value:
+                    formData.priceLocal && formData.priceForeigners
+                      ? `Local: $${formData.priceLocal} | Foreign: $${formData.priceForeigners}`
+                      : "Not set",
+                  icon: "dollar",
+                  color: theme.success,
+                },
+                {
+                  label: "Participants",
+                  value:
+                    formData.minParticipate && formData.maxParticipate
+                      ? `${formData.minParticipate} - ${formData.maxParticipate}`
+                      : "Not set",
+                  icon: "users",
+                  color: theme.error,
+                },
+                {
+                  label: "Images",
+                  value:
+                    formData.images.length > 0
+                      ? `${formData.images.length} image(s)`
+                      : "No images (optional)",
+                  icon: "image",
+                  color: theme.error,
+                },
+                {
+                  label: "Requirements",
+                  value:
+                    formData.requirements.length > 0
+                      ? `${formData.requirements.length} requirement(s)`
+                      : "No requirements",
+                  icon: "clipboard",
+                  color: theme.warning,
+                },
+              ]}
+              tips={[
+                "Set accurate pricing for local and foreign participants",
+                "Define clear participation limits for better planning",
+                "Select the appropriate season for availability",
+                "Add images to showcase the activity",
+                "Include any special requirements participants should know",
+              ]}
+            />
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <CreateConfirmationDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleConfirmCreate}
+        details={{
+          title: "Create New Activity",
+          message: "Are you sure you want to create this activity?",
+          itemName: formData.name || "Untitled Activity",
+          type: "create",
+          estimatedTime: "~2-3 seconds",
+          tips: [
+            "Make sure all images are uploaded successfully",
+            "Double-check pricing for local and foreign participants",
+            "Verify the season and availability dates",
+            "You can edit this activity anytime after creation",
+          ],
+        }}
+        confirmText="Create Activity"
+        cancelText="Cancel"
+        onSuccess={() => {
+          console.log("Activity created successfully");
+        }}
+        onError={(error) => {
+          console.error("Failed to create activity:", error);
+          setToast({
+            show: true,
+            type: "error",
+            title: "Creation Failed",
+            message:
+              error.message || "Failed to create activity. Please try again.",
+            activityId: undefined,
+          });
+        }}
+      />
     </div>
   );
 };

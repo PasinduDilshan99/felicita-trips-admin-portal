@@ -1,155 +1,112 @@
-// app/tours/terminate/page.tsx
+// app/web-management/tours/terminate/page.tsx
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/common-components/Breadcrumb";
 import {
   WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_TOURS_PATH,
 } from "@/utils/constant";
 import { TourService } from "@/services/tourService";
-import {
-  TourForTerminate,
-  Tour,
-} from "@/types/tour-types";
-import {
-  Search,
-  MapPin,
-  Tag,
-  Clock,
-  Users,
-  Image as ImageIcon,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Trash2,
-  Shield,
-  ChevronDown,
-  ChevronUp,
-  Loader2,
-  AlertCircle,
-  Globe,
-  Calendar,
-  DollarSign,
-  Compass,
-  Route,
-  CalendarDays,
-  Thermometer,
-  Briefcase,
-  Award,
-  Navigation,
-  FileWarning,
-  AlertOctagon,
-} from "lucide-react";
+import { Tour, TourNameId } from "@/types/tour-types";
+import { AlertTriangle, Search, MapPin, Calendar, Clock } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
+import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import CommonSearch from "@/components/common-components/CommonSearch";
+import SelectedItemBar from "@/components/common-components/SelectedItemBar";
+import CommonLoading from "@/components/common-components/CommonLoading";
+import CommonErrorState from "@/components/common-components/CommonErrorState";
+import { TourStats } from "@/components/tours-components/terminate-tour-components/TourStats";
+import { BasicInfoPanel } from "@/components/tours-components/terminate-tour-components/BasicInfoPanel";
+import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
+import { SchedulesList } from "@/components/tours-components/terminate-tour-components/SchedulesList";
+import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
+import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
+
+
+const hexToRgba = (hex: string, opacity: number): string => {
+  hex = hex.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
+// Type for search items
+interface TourSearchItem {
+  id: number;
+  name: string;
+}
 
 const TerminateTourPage = () => {
+  const { theme } = useTheme();
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   const initialTourName = searchParams?.get("tour-name") || "";
   const initialTourId = searchParams?.get("tour-id") || "";
 
-  // State for tours list
-  const [tours, setTours] = useState<TourForTerminate[]>([]);
-  const [filteredTours, setFilteredTours] = useState<TourForTerminate[]>([]);
-  
-  // State for search
-  const [searchTerm, setSearchTerm] = useState(initialTourName);
-  const [showDropdown, setShowDropdown] = useState(false);
-  
-  // State for selected tour
-  const [selectedTour, setSelectedTour] = useState<TourForTerminate | null>(
+  const [tours, setTours] = useState<TourNameId[]>([]);
+  const [selectedTour, setSelectedTour] = useState<TourNameId | null>(
     initialTourId && initialTourName
       ? {
           tourId: parseInt(initialTourId),
           tourName: initialTourName,
         }
-      : null
+      : null,
   );
-  
-  // State for tour details
   const [tourDetails, setTourDetails] = useState<Tour | null>(null);
-  
-  // UI state
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingTerminate, setLoadingTerminate] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [expandedSchedules, setExpandedSchedules] = useState<number[]>([]);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    title: string;
+    message: string;
+    actionLink?: string;
+  } | null>(null);
+
+  // Image modal state
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
     { label: "Web Management", href: WEB_MANAGEMENT_PATH },
     {
       label: "Tours",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}`,
+      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PATH}`,
     },
     {
       label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/terminate`,
+      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PATH}/terminate`,
     },
   ];
-
-  // Fetch tours list on initial load
-  useEffect(() => {
-    if (!selectedTour) {
-      fetchTours();
-    }
-  }, []);
-
-  // If initialTourId is provided, fetch details
-  useEffect(() => {
-    if (initialTourId && !tourDetails) {
-      handleSelectTour(parseInt(initialTourId), initialTourName);
-    }
-  }, [initialTourId, initialTourName]);
 
   const fetchTours = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await TourService.getToursForTerminate();
+      const response = await TourService.getAllTourNames();
       setTours(response.data);
-      setFilteredTours(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load tours");
+      setToast({
+        type: "error",
+        title: "Error",
+        message: err.message || "Failed to load tours",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter tours based on search term
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredTours(tours);
-      return;
-    }
-
-    const filtered = tours.filter((tour) =>
-      tour.tourName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredTours(filtered);
-    setShowDropdown(true);
-  }, [searchTerm, tours]);
-
-  // Handle search input
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setShowDropdown(true);
-  };
-
-  // Handle tour selection
-  const handleSelectTour = async (id: number, name: string) => {
-    setSelectedTour({ tourId: id, tourName: name });
-    setSearchTerm(name);
-    setShowDropdown(false);
-    await fetchTourDetails(id);
-  };
-
-  // Fetch tour details
   const fetchTourDetails = async (id: number) => {
     setLoadingDetails(true);
     setError(null);
@@ -159,18 +116,45 @@ const TerminateTourPage = () => {
       setTourDetails(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load tour details");
+      setToast({
+        type: "error",
+        title: "Load Failed",
+        message: err.message || "Failed to load tour details",
+      });
     } finally {
       setLoadingDetails(false);
     }
   };
 
-  // Handle terminate confirmation
+  const handleSelectTour = async (id: number, name: string) => {
+    setSelectedTour({ tourId: id, tourName: name });
+    await fetchTourDetails(id);
+
+    // Update URL
+    const url = new URL(window.location.href);
+    url.searchParams.set("tour-id", id.toString());
+    url.searchParams.set("tour-name", name);
+    router.replace(url.toString(), { scroll: false });
+  };
+
+  const handleClearTourSelection = () => {
+    setSelectedTour(null);
+    setTourDetails(null);
+    setError(null);
+    setSuccess(null);
+
+    // Update URL to remove query params
+    const url = new URL(window.location.href);
+    url.searchParams.delete("tour-id");
+    url.searchParams.delete("tour-name");
+    router.replace(url.toString(), { scroll: false });
+  };
+
   const handleTerminateClick = () => {
     if (!selectedTour) return;
     setShowConfirmModal(true);
   };
 
-  // Handle confirm termination
   const handleConfirmTerminate = async () => {
     if (!selectedTour) return;
 
@@ -180,644 +164,422 @@ const TerminateTourPage = () => {
 
     try {
       await TourService.terminateTour(selectedTour.tourId);
-      
+
       setSuccess("Tour terminated successfully!");
+      setToast({
+        type: "success",
+        title: "Termination Successful!",
+        message: `"${selectedTour.tourName}" has been permanently removed from the system.`,
+      });
+
       setShowConfirmModal(false);
-      
-      // Redirect to tours list after delay
+
       setTimeout(() => {
-        router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_TOURS_PATH}/view`);
+        handleClearTourSelection();
+        fetchTours();
       }, 2000);
-      
     } catch (err: any) {
       setError(err.message || "Failed to terminate tour");
+      setToast({
+        type: "error",
+        title: "Termination Failed",
+        message: err.message || "Failed to terminate tour. Please try again.",
+      });
     } finally {
       setLoadingTerminate(false);
     }
   };
 
-  // Toggle schedule expansion
-  const toggleSchedule = (scheduleId: number) => {
-    setExpandedSchedules((prev) =>
-      prev.includes(scheduleId)
-        ? prev.filter((id) => id !== scheduleId)
-        : [...prev, scheduleId]
-    );
+  // Prepare images for modal
+  const getModalImages = (): ImageModalImage[] => {
+    if (!tourDetails?.images) return [];
+    return tourDetails.images.map((img) => ({
+      url: img.imageUrl,
+      name: img.imageName,
+      description: img.imageDescription,
+      id: img.imageId,
+    }));
   };
 
-  // Calculate stats
-  const stats = tourDetails
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setImageModalOpen(true);
+  };
+
+  // Convert tours to search items format
+  const searchItems: TourSearchItem[] = tours.map((tour) => ({
+    id: tour.tourId,
+    name: tour.tourName,
+  }));
+
+  const selectedSearchItem: TourSearchItem | null = selectedTour
     ? {
-        totalSchedules: tourDetails.schedules.length,
-        totalImages: tourDetails.images.length,
-        upcomingSchedules: TourService.getScheduleCountForNextMonths(tourDetails, 3),
-        scheduleDurationRange: {
-          min: Math.min(...tourDetails.schedules.map(s => s.durationStart)),
-          max: Math.max(...tourDetails.schedules.map(s => s.durationEnd))
-        }
+        id: selectedTour.tourId,
+        name: selectedTour.tourName,
       }
     : null;
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  // Prepare termination item for modal
+  const terminationItem: TerminationItem | null = selectedTour
+    ? {
+        id: selectedTour.tourId,
+        name: selectedTour.tourName,
+        type: "custom",
+        additionalInfo: tourDetails?.tourTypeName,
+      }
+    : null;
 
-  // Get tour type icon
-  const getTourTypeIcon = (tourType: string) => {
-    const lowerType = tourType.toLowerCase();
-    if (lowerType.includes('adventure')) return <Compass className="w-4 h-4" />;
-    if (lowerType.includes('cultural')) return <Globe className="w-4 h-4" />;
-    if (lowerType.includes('wildlife')) return <Tag className="w-4 h-4" />;
-    if (lowerType.includes('beach')) return <ImageIcon className="w-4 h-4" />;
-    return <Briefcase className="w-4 h-4" />;
-  };
+  useEffect(() => {
+    if (!selectedTour) {
+      fetchTours();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (initialTourId && !tourDetails) {
+      handleSelectTour(parseInt(initialTourId), initialTourName);
+    }
+  }, [initialTourId, initialTourName]);
+
+  if (loading && !selectedTour) {
+    return (
+      <CommonLoading
+        message="Loading tours..."
+        subMessage="Please wait while we fetch available tours"
+        size="lg"
+        fullScreen={true}
+      />
+    );
+  }
 
   return (
-    <div className="bg-gradient-to-b from-slate-50 to-slate-100">
-      {/* Header with Breadcrumb */}
-      <div className="top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
+      {/* Toast Notifications */}
+      {toast && (
+        <ToastNotification
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={() => setToast(null)}
+          actionLink={toast.actionLink}
+          actionText="View Details"
+        />
+      )}
+
+      {/* Header */}
+      <div
+        className="sticky top-0 z-10 backdrop-blur-sm border-b transition-all duration-300"
+        style={{
+          backgroundColor: `${theme.surface}CC`,
+          borderColor: theme.border,
+        }}
+      >
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title="Terminate Tour"
-            description="Permanently remove a tour package from the system"
+            description="Permanently remove a tour from the system"
             breadcrumbItems={breadcrumbItems}
           />
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <Search className="w-6 h-6 text-blue-600" />
-            Select Tour to Terminate
-          </h2>
-
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-4">
-              <Search className="w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                onFocus={() => setShowDropdown(true)}
-                placeholder="Search tour by name..."
-                className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              />
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section - Only show when no tour is selected */}
+        {!selectedTour && (
+          <div
+            className="rounded-2xl shadow-lg mb-8 transition-all duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            <div
+              className="px-5 sm:px-6 py-4 flex items-center gap-3 border-b"
+              style={{ borderColor: theme.border }}
+            >
+              <span
+                className="w-9 h-9 flex items-center justify-center rounded-xl"
+                style={{
+                  background: hexToRgba(theme.error, 0.1),
+                  color: theme.error,
+                }}
+              >
+                <Search className="w-4 h-4" />
+              </span>
+              <div>
+                <h2
+                  className="text-sm sm:text-base font-semibold"
+                  style={{ color: theme.text }}
+                >
+                  Select Tour to Terminate
+                </h2>
+                <p
+                  className="text-xs mt-0.5"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Search and select a tour to review its data before termination
+                </p>
+              </div>
             </div>
 
-            {/* Dropdown */}
-            {showDropdown && (
-              <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-lg border border-gray-200 max-h-96 overflow-y-auto">
-                {loading ? (
-                  <div className="p-8 text-center">
-                    <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto mb-3" />
-                    <p className="text-gray-600">Loading tours...</p>
-                  </div>
-                ) : filteredTours.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-600">No tours found</p>
-                    <p className="text-gray-500 text-sm mt-1">
-                      Try a different search term
-                    </p>
-                  </div>
-                ) : (
-                  filteredTours.map((tour) => (
-                    <button
-                      key={tour.tourId}
-                      onClick={() =>
-                        handleSelectTour(tour.tourId, tour.tourName)
-                      }
-                      className="w-full px-6 py-4 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium text-gray-900">
-                            {tour.tourName}
-                          </h3>
-                          <p className="text-sm text-gray-500 mt-1">
-                            ID: {tour.tourId}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className="px-3 py-1 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 rounded-full text-xs font-medium">
-                            Select
-                          </span>
-                        </div>
-                      </div>
-                    </button>
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* Click outside to close dropdown */}
-            {showDropdown && (
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setShowDropdown(false)}
+            <div className="px-5 sm:px-6 py-5">
+              <CommonSearch<TourSearchItem>
+                items={searchItems}
+                loading={loading}
+                selectedItem={selectedSearchItem}
+                onSelectItem={(item) => handleSelectTour(item.id, item.name)}
+                onClearSelection={handleClearTourSelection}
+                initialSearchTerm={initialTourName}
+                placeholder="Search tours..."
+                title="Tours"
+                variant="error"
+                size="md"
+                getBadgeText={(item) => `ID: ${item.id}`}
               />
-            )}
-          </div>
-        </div>
-
-        {/* Success Message */}
-        {success && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
-            <div className="flex items-center gap-4">
-              <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-green-800">
-                  Operation Successful!
-                </h3>
-                <p className="text-green-600 mt-1">{success}</p>
-              </div>
             </div>
           </div>
         )}
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-2xl">
-            <div className="flex items-center gap-4">
-              <XCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-red-800">Error</h3>
-                <p className="text-red-600 mt-1">{error}</p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Selected Tour Info Bar */}
+        <SelectedItemBar
+          item={
+            selectedTour
+              ? {
+                  id: selectedTour.tourId,
+                  name: selectedTour.tourName,
+                }
+              : null
+          }
+          onClear={handleClearTourSelection}
+          variant="error"
+          title="Selected for Termination"
+          showId={true}
+          clearButtonText="Change Selection"
+          size="md"
+        />
 
         {/* Tour Details Section */}
         {selectedTour && (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            {/* Header with Warning */}
-            <div className="bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-200 p-6">
-              <div className="flex items-center gap-4">
-                <AlertOctagon className="w-8 h-8 text-red-600 flex-shrink-0" />
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-red-800">
-                    Tour Termination Review
-                  </h2>
-                  <p className="text-red-600 mt-1">
-                    Review the tour details below before proceeding with termination.
-                    This action is permanent and cannot be undone.
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-gray-600">Tour ID</div>
-                  <div className="text-xl font-bold text-gray-900">
-                    #{selectedTour.tourId}
-                  </div>
-                </div>
+          <div
+            className="rounded-2xl overflow-hidden transition-all duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1.5px solid ${hexToRgba(theme.error, 0.5)}`,
+              boxShadow: `0 4px 32px ${hexToRgba(theme.error, 0.07)}`,
+            }}
+          >
+            {/* Warning Header */}
+            <div
+              className="px-5 sm:px-6 py-4 flex flex-wrap items-center gap-4"
+              style={{
+                background: `linear-gradient(90deg, ${hexToRgba(theme.error, 0.08)}, ${hexToRgba(theme.error, 0.03)})`,
+                borderBottom: `1.5px solid ${hexToRgba(theme.error, 0.3)}`,
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.error}, ${theme.error})`,
+                  color: "#fff",
+                }}
+              >
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-base font-bold" style={{ color: theme.error }}>
+                  Tour Termination Review
+                </h2>
+                <p className="text-xs mt-0.5" style={{ color: theme.error }}>
+                  Review all data carefully. This action is permanent and cannot be undone.
+                </p>
+              </div>
+              <div
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl flex-shrink-0"
+                style={{
+                  background: hexToRgba(theme.error, 0.08),
+                  border: `1px solid ${hexToRgba(theme.error, 0.2)}`,
+                }}
+              >
+                <span className="text-xs" style={{ color: theme.error }}>
+                  ID
+                </span>
+                <span className="text-sm font-bold" style={{ color: theme.error }}>
+                  #{selectedTour.tourId}
+                </span>
               </div>
             </div>
 
-            {/* Loading State for Details */}
-            {loadingDetails ? (
-              <div className="p-12 text-center">
-                <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-                <p className="text-gray-600">Loading tour details...</p>
-              </div>
-            ) : tourDetails ? (
-              <div className="p-8">
-                {/* Quick Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Duration</div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {tourDetails.duration} days
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Schedules</div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {stats?.totalSchedules || 0}
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Upcoming</div>
-                    <div className="text-lg font-bold text-gray-900">
-                      {stats?.upcomingSchedules || 0} in 3 months
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Images</div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {stats?.totalImages || 0}
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Status</div>
-                    <div className={`text-lg font-bold ${
-                      tourDetails.statusName === 'ACTIVE' 
-                        ? 'text-green-600' 
-                        : 'text-red-600'
-                    }`}>
-                      {tourDetails.statusName}
-                    </div>
-                  </div>
-                </div>
+            {/* Loading Details */}
+            {loadingDetails && (
+              <CommonLoading
+                message="Loading tour details..."
+                subMessage="Please wait while we fetch the tour information"
+                size="lg"
+              />
+            )}
 
-                {/* Tour Information */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                  {/* Left Column - Basic Info */}
-                  <div className="space-y-6">
-                    <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-xl">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <Globe className="w-5 h-5 text-blue-600" />
-                        Basic Information
-                      </h3>
-                      <div className="space-y-3">
-                        <div>
-                          <div className="text-sm text-gray-500">Tour Name</div>
-                          <div className="text-lg font-medium text-gray-900">
-                            {tourDetails.tourName}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">Description</div>
-                          <div className="text-gray-700 mt-1">
-                            {tourDetails.tourDescription}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="text-sm text-gray-500">Tour Type</div>
-                            <div className="text-gray-700 mt-1 flex items-center gap-2">
-                              {getTourTypeIcon(tourDetails.tourTypeName)}
-                              {tourDetails.tourTypeName}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-500">Tour Category</div>
-                            <div className="text-gray-700 mt-1 flex items-center gap-2">
-                              <Briefcase className="w-4 h-4" />
-                              {tourDetails.tourCategoryName}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="text-sm text-gray-500">Season</div>
-                            <div className="text-gray-700 mt-1 flex items-center gap-2">
-                              <Thermometer className="w-4 h-4" />
-                              {tourDetails.seasonName}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-500">Duration</div>
-                            <div className="text-gray-700 mt-1 flex items-center gap-2">
-                              <Clock className="w-4 h-4" />
-                              {tourDetails.duration} days
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+            {/* Tour Details Content */}
+            {!loadingDetails && tourDetails && (
+              <div className="p-5 sm:p-6 space-y-6">
+                <TourStats tourDetails={tourDetails} />
 
-                    {/* Route Information */}
-                    <div className="bg-gradient-to-r from-gray-50 to-green-50 p-6 rounded-xl">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <Route className="w-5 h-5 text-green-600" />
-                        Route Information
-                      </h3>
-                      <div className="space-y-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <Navigation className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="text-sm text-gray-500">Start Location</div>
-                            <div className="text-gray-900 font-medium">
-                              {tourDetails.startLocation}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <MapPin className="w-4 h-4 text-emerald-600" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="text-sm text-gray-500">End Location</div>
-                            <div className="text-gray-900 font-medium">
-                              {tourDetails.endLocation}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 bg-gradient-to-r from-amber-100 to-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <Award className="w-4 h-4 text-amber-600" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="text-sm text-gray-500">Coordinates</div>
-                            <div className="text-gray-900 text-sm">
-                              {tourDetails.latitude.toFixed(6)}, {tourDetails.longitude.toFixed(6)}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Tour Categories */}
-                    <div className="bg-gradient-to-r from-gray-50 to-purple-50 p-6 rounded-xl">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <Tag className="w-5 h-5 text-purple-600" />
-                        Category Details
-                      </h3>
-                      <div className="space-y-4">
-                        <div>
-                          <div className="text-sm text-gray-500">Tour Type Description</div>
-                          <div className="text-gray-700 mt-1">
-                            {tourDetails.tourTypeDescription}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">Tour Category Description</div>
-                          <div className="text-gray-700 mt-1">
-                            {tourDetails.tourCategoryDescription}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">Season Description</div>
-                          <div className="text-gray-700 mt-1">
-                            {tourDetails.seasonDescription}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                <div
+                  className="grid gap-6"
+                  style={{
+                    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                  }}
+                >
+                  {/* Left Column */}
+                  <div className="space-y-5">
+                    <BasicInfoPanel tourDetails={tourDetails} />
+                    <ImagesPanel
+                      images={tourDetails.images.map((img) => ({
+                        id: img.imageId,
+                        url: img.imageUrl,
+                        name: img.imageName,
+                        description: img.imageDescription,
+                      }))}
+                      onImageClick={handleImageClick}
+                      title="Tour Images"
+                      showDeletionBadge={true}
+                      deletionBadgeText="Will be deleted"
+                    />
                   </div>
 
-                  {/* Right Column - Schedules & Images */}
-                  <div className="space-y-6">
-                    {/* Schedules */}
-                    <div className="bg-gradient-to-r from-gray-50 to-amber-50 p-6 rounded-xl">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                          <CalendarDays className="w-5 h-5 text-amber-600" />
-                          Schedules ({tourDetails.schedules.length})
-                        </h3>
-                        <span className="px-3 py-1 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 rounded-full text-xs font-medium">
-                          All will be terminated
-                        </span>
-                      </div>
+                  {/* Right Column */}
+                  <div className="space-y-5">
+                    <SchedulesList schedules={tourDetails.schedules} />
 
-                      <div className="space-y-4">
-                        {tourDetails.schedules.map((schedule) => (
-                          <div
-                            key={schedule.scheduleId}
-                            className="border border-gray-200 rounded-lg overflow-hidden"
-                          >
-                            <button
-                              onClick={() => toggleSchedule(schedule.scheduleId)}
-                              className="w-full px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 flex items-center justify-between transition-all duration-200"
-                            >
-                              <div className="flex items-center gap-3">
-                                <Calendar className="w-4 h-4 text-amber-600" />
-                                <div className="text-left">
-                                  <span className="font-medium text-gray-900 block">
-                                    {schedule.scheduleName}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    {formatDate(schedule.assumeStartDate)} - {formatDate(schedule.assumeEndDate)}
-                                  </span>
-                                </div>
-                              </div>
-                              {expandedSchedules.includes(schedule.scheduleId) ? (
-                                <ChevronUp className="w-4 h-4 text-gray-500" />
-                              ) : (
-                                <ChevronDown className="w-4 h-4 text-gray-500" />
-                              )}
-                            </button>
-
-                            {expandedSchedules.includes(schedule.scheduleId) && (
-                              <div className="p-4 border-t border-gray-200 bg-white">
-                                <p className="text-sm text-gray-600 mb-3">
-                                  {schedule.scheduleDescription}
-                                </p>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <div className="text-xs text-gray-500">Duration Range</div>
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {schedule.durationStart} - {schedule.durationEnd} days
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <div className="text-xs text-gray-500">Date Range</div>
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {formatDate(schedule.assumeStartDate)} to {formatDate(schedule.assumeEndDate)}
-                                    </div>
-                                  </div>
-                                </div>
-                                {schedule.specialNote && (
-                                  <div className="mt-3 p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded">
-                                    <div className="text-xs text-gray-500">Special Note</div>
-                                    <div className="text-sm text-gray-700">
-                                      {schedule.specialNote}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Images Preview */}
-                    {tourDetails.images.length > 0 && (
-                      <div className="bg-gradient-to-r from-gray-50 to-rose-50 p-6 rounded-xl">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                          <ImageIcon className="w-5 h-5 text-rose-600" />
-                          Images ({tourDetails.images.length})
-                        </h3>
-                        <div className="grid grid-cols-3 gap-3">
-                          {tourDetails.images.slice(0, 6).map((image) => (
-                            <div key={image.imageId} className="aspect-square">
-                              <img
-                                src={image.imageUrl}
-                                alt={image.imageName}
-                                className="w-full h-full object-cover rounded-lg border border-gray-200"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
-                                }}
-                              />
-                            </div>
-                          ))}
-                          {tourDetails.images.length > 6 && (
-                            <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                              <span className="text-gray-600 font-medium">
-                                +{tourDetails.images.length - 6} more
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Impact Warning */}
-                    <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-xl border border-red-200">
-                      <h3 className="text-lg font-semibold text-red-800 mb-4 flex items-center gap-2">
-                        <FileWarning className="w-5 h-5 text-red-600" />
-                        Termination Impact
-                      </h3>
-                      <ul className="space-y-3">
-                        <li className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-red-700">
-                            All schedules will be permanently deleted
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-red-700">
-                            All booking records for this tour will be affected
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-red-700">
-                            This action cannot be undone. Recovery is not possible
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-red-700">
-                            System will log this termination for audit purposes
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-red-700">
-                            Associated promotional materials will be removed
-                          </span>
-                        </li>
-                      </ul>
-                    </div>
+                    {/* Custom Impact Warning for Tours */}
+                    <ImpactWarning
+                      title="Tour Termination Impact"
+                      customItems={[
+                        {
+                          icon: <Calendar size={11} />,
+                          text: "All schedules associated with this tour will be permanently deleted",
+                        },
+                        {
+                          icon: <MapPin size={11} />,
+                          text: "All tour routes and locations will be permanently removed",
+                        },
+                        {
+                          icon: <Clock size={11} />,
+                          text: "All tour duration settings will be permanently deleted",
+                        },
+                        {
+                          icon: <AlertTriangle size={11} />,
+                          text: "This action cannot be undone — recovery is not possible",
+                        },
+                        {
+                          icon: <AlertTriangle size={11} />,
+                          text: "This termination will be logged for audit trail purposes",
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
 
                 {/* Termination Button */}
-                <div className="flex justify-center mt-8">
+                <div
+                  className="flex justify-center pt-4"
+                  style={{
+                    borderTop: `1.5px solid ${hexToRgba(theme.error, 0.2)}`,
+                  }}
+                >
                   <button
                     onClick={handleTerminateClick}
                     disabled={loadingTerminate}
-                    className="px-8 py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+                    className="cursor-pointer flex items-center gap-3 px-8 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-xl active:scale-95 disabled:hover:scale-100"
+                    style={{
+                      background: loadingTerminate
+                        ? `linear-gradient(135deg, ${theme.error}, ${theme.error}dd)`
+                        : `linear-gradient(135deg, ${theme.error}, ${hexToRgba(theme.error, 0.8)})`,
+                      color: "#fff",
+                      opacity: loadingTerminate ? 0.6 : 1,
+                      boxShadow: `0 4px 16px ${hexToRgba(theme.error, 0.3)}`,
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
                   >
                     {loadingTerminate ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Processing...
+                        <div className="relative w-4 h-4">
+                          <div className="absolute inset-0 border-2 border-white/30 rounded-full" />
+                          <div className="absolute inset-0 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        </div>
+                        <span className="animate-pulse">Processing…</span>
                       </>
                     ) : (
                       <>
-                        <Trash2 className="w-5 h-5" />
+                        <svg
+                          className="w-4 h-4 transition-transform duration-200 group-hover:rotate-12"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
                         Terminate Tour Permanently
                       </>
                     )}
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="p-12 text-center">
-                <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Tour details could not be loaded</p>
-                <p className="text-gray-500 text-sm mt-2">
-                  Please try selecting the tour again
-                </p>
-              </div>
+            )}
+
+            {/* Error State */}
+            {!loadingDetails && !tourDetails && error && (
+              <CommonErrorState
+                error={error}
+                title="Failed to Load Tour"
+                message="The tour couldn't be loaded. Please try again."
+                variant="error"
+                showBackButton={true}
+                showRetryButton={true}
+                onBack={handleClearTourSelection}
+                onRetry={() =>
+                  selectedTour && fetchTourDetails(selectedTour.tourId)
+                }
+                backButtonText="Change Selection"
+                retryButtonText="Try Again"
+                fullScreen={false}
+              />
             )}
           </div>
         )}
-
-        {/* Confirmation Modal */}
-        {showConfirmModal && (
-          <>
-            {/* Backdrop */}
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-
-            {/* Modal */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-                <div className="p-8">
-                  {/* Icon */}
-                  <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <AlertTriangle className="w-8 h-8 text-white" />
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-2xl font-bold text-gray-900 text-center mb-3">
-                    Confirm Tour Termination
-                  </h3>
-
-                  {/* Message */}
-                  <p className="text-gray-600 text-center mb-2">
-                    Are you sure you want to permanently terminate
-                  </p>
-                  <p className="text-lg font-semibold text-red-600 text-center mb-6">
-                    {selectedTour?.tourName}?
-                  </p>
-
-                  {/* Warning Details */}
-                  <div className="bg-gradient-to-r from-red-50 to-rose-50 p-4 rounded-lg mb-6">
-                    <div className="text-sm text-red-700 space-y-2">
-                      <p className="flex items-center gap-2">
-                        <span className="text-lg">⚠️</span>
-                        <span>This will delete:</span>
-                      </p>
-                      <ul className="list-disc list-inside ml-6 space-y-1">
-                        <li>{tourDetails?.schedules.length || 0} schedule(s)</li>
-                        <li>{tourDetails?.images.length || 0} image(s)</li>
-                        <li>All booking records</li>
-                        <li>Tour package details</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => setShowConfirmModal(false)}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 font-medium"
-                      disabled={loadingTerminate}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleConfirmTerminate}
-                      disabled={loadingTerminate}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-lg hover:from-red-700 hover:to-rose-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      {loadingTerminate ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Terminating...
-                        </>
-                      ) : (
-                        "Confirm Termination"
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Disclaimer */}
-                  <p className="text-xs text-gray-500 text-center mt-6">
-                    By confirming, you acknowledge that all tour data, schedules, and booking records will be permanently deleted.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
       </div>
+
+      {/* Confirmation Modal */}
+      <TerminationModal
+        isOpen={showConfirmModal}
+        item={terminationItem}
+        loading={loadingTerminate}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmTerminate}
+        title="Confirm Tour Termination"
+        description="You are about to permanently terminate:"
+        warningMessage="All schedules, routes, locations, and images linked to this tour will be permanently deleted."
+      />
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModalOpen}
+        images={getModalImages()}
+        initialIndex={selectedImageIndex}
+        onClose={() => setImageModalOpen(false)}
+        showNavigation={true}
+        showDownload={true}
+        showZoom={true}
+        allowKeyboardNavigation={true}
+      />
     </div>
   );
 };

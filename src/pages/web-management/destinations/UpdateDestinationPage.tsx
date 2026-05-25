@@ -50,15 +50,7 @@ import {
   DESTINATION_PAGE_URL,
   WEB_MANAGEMENT_URL,
 } from "@/utils/urls";
-
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { hexToRgba } from "@/utils/functions";
 
 const UpdateDestinationPage = () => {
   const searchParams = useSearchParams();

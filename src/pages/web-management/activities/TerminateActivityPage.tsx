@@ -1,154 +1,113 @@
-// app/activities/terminate/page.tsx
+// app/web-management/activities/terminate/page.tsx
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/common-components/Breadcrumb";
 import {
   WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_ACTIVITIES_PATH,
 } from "@/utils/constant";
 import { ActivityService } from "@/services/activityService";
-import {
-  ActivityForTerminate,
-  Activity,
-} from "@/types/activity-types";
-import {
-  Search,
-  MapPin,
-  Tag,
-  Clock,
-  Users,
-  Image as ImageIcon,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Trash2,
-  Shield,
-  ChevronDown,
-  ChevronUp,
-  Loader2,
-  AlertCircle,
-  Globe,
-  Calendar,
-  DollarSign,
-  Activity as ActivityIcon,
-  Target,
-  AlertOctagon,
-  FileWarning,
-  CalendarDays,
-  Thermometer,
-  BarChart3,
-  Award,
-} from "lucide-react";
+import { Activity, ActivityIdName } from "@/types/activity-types";
+import { AlertTriangle, Search } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
+import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import CommonSearch from "@/components/common-components/CommonSearch";
+import SelectedItemBar from "@/components/common-components/SelectedItemBar";
+import CommonLoading from "@/components/common-components/CommonLoading";
+import CommonErrorState from "@/components/common-components/CommonErrorState";
+import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
+import { ActivityStats } from "@/components/activities-components/terminate-activity-components/ActivityStats";
+import { BasicInfoPanel } from "@/components/activities-components/terminate-activity-components/BasicInfoPanel";
+import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
+import { CategoriesList } from "@/components/activities-components/terminate-activity-components/CategoriesList";
+import { SchedulesList } from "@/components/activities-components/terminate-activity-components/SchedulesList";
+import { RequirementsList } from "@/components/activities-components/terminate-activity-components/RequirementsList";
+import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
+
+const hexToRgba = (hex: string, opacity: number): string => {
+  hex = hex.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
+// Type for search items
+interface ActivitySearchItem {
+  id: number;
+  name: string;
+}
 
 const TerminateActivityPage = () => {
+  const { theme } = useTheme();
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   const initialActivityName = searchParams?.get("activity-name") || "";
   const initialActivityId = searchParams?.get("activity-id") || "";
 
-  // State for activities list
-  const [activities, setActivities] = useState<ActivityForTerminate[]>([]);
-  const [filteredActivities, setFilteredActivities] = useState<ActivityForTerminate[]>([]);
-  
-  // State for search
-  const [searchTerm, setSearchTerm] = useState(initialActivityName);
-  const [showDropdown, setShowDropdown] = useState(false);
-  
-  // State for selected activity
-  const [selectedActivity, setSelectedActivity] = useState<ActivityForTerminate | null>(
+  const [activities, setActivities] = useState<ActivityIdName[]>([]);
+  const [selectedActivity, setSelectedActivity] = useState<ActivityIdName | null>(
     initialActivityId && initialActivityName
       ? {
           activityId: parseInt(initialActivityId),
           activityName: initialActivityName,
         }
-      : null
+      : null,
   );
-  
-  // State for activity details
   const [activityDetails, setActivityDetails] = useState<Activity | null>(null);
-  
-  // UI state
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingTerminate, setLoadingTerminate] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [expandedSchedules, setExpandedSchedules] = useState<number[]>([]);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    title: string;
+    message: string;
+    actionLink?: string;
+  } | null>(null);
+
+  // Image modal state
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/" },
     { label: "Web Management", href: WEB_MANAGEMENT_PATH },
     {
       label: "Activities",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}`,
+      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PATH}`,
     },
     {
       label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/terminate`,
+      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PATH}/terminate`,
     },
   ];
-
-  // Fetch activities list on initial load
-  useEffect(() => {
-    if (!selectedActivity) {
-      fetchActivities();
-    }
-  }, []);
-
-  // If initialActivityId is provided, fetch details
-  useEffect(() => {
-    if (initialActivityId && !activityDetails) {
-      handleSelectActivity(parseInt(initialActivityId), initialActivityName);
-    }
-  }, [initialActivityId, initialActivityName]);
 
   const fetchActivities = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await ActivityService.getActivitiesForTerminate();
+      const response = await ActivityService.getActivityIdsAndNames();
       setActivities(response.data);
-      setFilteredActivities(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load activities");
+      setToast({
+        type: "error",
+        title: "Error",
+        message: err.message || "Failed to load activities",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter activities based on search term
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredActivities(activities);
-      return;
-    }
-
-    const filtered = activities.filter((act) =>
-      act.activityName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredActivities(filtered);
-    setShowDropdown(true);
-  }, [searchTerm, activities]);
-
-  // Handle search input
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setShowDropdown(true);
-  };
-
-  // Handle activity selection
-  const handleSelectActivity = async (id: number, name: string) => {
-    setSelectedActivity({ activityId: id, activityName: name });
-    setSearchTerm(name);
-    setShowDropdown(false);
-    await fetchActivityDetails(id);
-  };
-
-  // Fetch activity details
   const fetchActivityDetails = async (id: number) => {
     setLoadingDetails(true);
     setError(null);
@@ -158,18 +117,45 @@ const TerminateActivityPage = () => {
       setActivityDetails(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load activity details");
+      setToast({
+        type: "error",
+        title: "Load Failed",
+        message: err.message || "Failed to load activity details",
+      });
     } finally {
       setLoadingDetails(false);
     }
   };
 
-  // Handle terminate confirmation
+  const handleSelectActivity = async (id: number, name: string) => {
+    setSelectedActivity({ activityId: id, activityName: name });
+    await fetchActivityDetails(id);
+
+    // Update URL
+    const url = new URL(window.location.href);
+    url.searchParams.set("activity-id", id.toString());
+    url.searchParams.set("activity-name", name);
+    router.replace(url.toString(), { scroll: false });
+  };
+
+  const handleClearActivitySelection = () => {
+    setSelectedActivity(null);
+    setActivityDetails(null);
+    setError(null);
+    setSuccess(null);
+
+    // Update URL to remove query params
+    const url = new URL(window.location.href);
+    url.searchParams.delete("activity-id");
+    url.searchParams.delete("activity-name");
+    router.replace(url.toString(), { scroll: false });
+  };
+
   const handleTerminateClick = () => {
     if (!selectedActivity) return;
     setShowConfirmModal(true);
   };
 
-  // Handle confirm termination
   const handleConfirmTerminate = async () => {
     if (!selectedActivity) return;
 
@@ -179,65 +165,120 @@ const TerminateActivityPage = () => {
 
     try {
       await ActivityService.terminateActivity(selectedActivity.activityId);
-      
+
       setSuccess("Activity terminated successfully!");
+      setToast({
+        type: "success",
+        title: "Termination Successful!",
+        message: `"${selectedActivity.activityName}" has been permanently removed from the system.`,
+      });
+
       setShowConfirmModal(false);
-      
-      // Redirect to activities list after delay
+
       setTimeout(() => {
-        router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/view`);
+        handleClearActivitySelection();
+        fetchActivities();
       }, 2000);
-      
     } catch (err: any) {
       setError(err.message || "Failed to terminate activity");
+      setToast({
+        type: "error",
+        title: "Termination Failed",
+        message: err.message || "Failed to terminate activity. Please try again.",
+      });
     } finally {
       setLoadingTerminate(false);
     }
   };
 
-  // Toggle schedule expansion
-  const toggleSchedule = (scheduleId: number) => {
-    setExpandedSchedules((prev) =>
-      prev.includes(scheduleId)
-        ? prev.filter((id) => id !== scheduleId)
-        : [...prev, scheduleId]
-    );
+  // Prepare images for modal
+  const getModalImages = (): ImageModalImage[] => {
+    if (!activityDetails?.images) return [];
+    return activityDetails.images.map((img) => ({
+      url: img.image_url,
+      name: img.name,
+      description: img.description,
+      id: img.id,
+    }));
   };
 
-  // Calculate stats
-  const stats = activityDetails
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setImageModalOpen(true);
+  };
+
+  // Convert activities to search items format
+  const searchItems: ActivitySearchItem[] = activities.map((act) => ({
+    id: act.activityId,
+    name: act.activityName,
+  }));
+
+  const selectedSearchItem: ActivitySearchItem | null = selectedActivity
     ? {
-        totalSchedules: activityDetails.schedules.length,
-        totalRequirements: activityDetails.requirements.length,
-        totalImages: activityDetails.images.length,
-        seasons: activityDetails.season.split(',').map(s => s.trim()),
+        id: selectedActivity.activityId,
+        name: selectedActivity.activityName,
       }
     : null;
 
-  // Format time
-  const formatTime = (timeString: string) => {
-    const [hours, minutes] = timeString.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const formattedHour = hour % 12 || 12;
-    return `${formattedHour}:${minutes} ${ampm}`;
-  };
+  // Prepare termination item for modal
+  const terminationItem: TerminationItem | null = selectedActivity
+    ? {
+        id: selectedActivity.activityId,
+        name: selectedActivity.activityName,
+        type: "activity",
+        additionalInfo: activityDetails?.destinationName,
+      }
+    : null;
 
-  // Get category icon
-  const getCategoryIcon = (category: string) => {
-    const lowerCategory = category.toLowerCase();
-    if (lowerCategory.includes('adventure')) return <Target className="w-4 h-4" />;
-    if (lowerCategory.includes('water')) return <ActivityIcon className="w-4 h-4" />;
-    if (lowerCategory.includes('cultural')) return <Globe className="w-4 h-4" />;
-    if (lowerCategory.includes('wildlife')) return <ActivityIcon className="w-4 h-4" />;
-    return <ActivityIcon className="w-4 h-4" />;
-  };
+  useEffect(() => {
+    if (!selectedActivity) {
+      fetchActivities();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (initialActivityId && !activityDetails) {
+      handleSelectActivity(parseInt(initialActivityId), initialActivityName);
+    }
+  }, [initialActivityId, initialActivityName]);
+
+  if (loading && !selectedActivity) {
+    return (
+      <CommonLoading
+        message="Loading activities..."
+        subMessage="Please wait while we fetch available activities"
+        size="lg"
+        fullScreen={true}
+      />
+    );
+  }
 
   return (
-    <div className="bg-gradient-to-b from-slate-50 to-slate-100">
-      {/* Header with Breadcrumb */}
-      <div className="top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
+      {/* Toast Notifications */}
+      {toast && (
+        <ToastNotification
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={() => setToast(null)}
+          actionLink={toast.actionLink}
+          actionText="View Details"
+        />
+      )}
+
+      {/* Header */}
+      <div
+        className="sticky top-0 z-10 backdrop-blur-sm border-b transition-all duration-300"
+        style={{
+          backgroundColor: `${theme.surface}CC`,
+          borderColor: theme.border,
+        }}
+      >
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
             title="Terminate Activity"
             description="Permanently remove an activity from the system"
@@ -247,552 +288,286 @@ const TerminateActivityPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <Search className="w-6 h-6 text-blue-600" />
-            Select Activity to Terminate
-          </h2>
-
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-4">
-              <Search className="w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                onFocus={() => setShowDropdown(true)}
-                placeholder="Search activity by name..."
-                className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              />
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section - Only show when no activity is selected */}
+        {!selectedActivity && (
+          <div
+            className="rounded-2xl shadow-lg mb-8 transition-all duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            <div
+              className="px-5 sm:px-6 py-4 flex items-center gap-3 border-b"
+              style={{ borderColor: theme.border }}
+            >
+              <span
+                className="w-9 h-9 flex items-center justify-center rounded-xl"
+                style={{
+                  background: hexToRgba(theme.error, 0.1),
+                  color: theme.error,
+                }}
+              >
+                <Search className="w-4 h-4" />
+              </span>
+              <div>
+                <h2
+                  className="text-sm sm:text-base font-semibold"
+                  style={{ color: theme.text }}
+                >
+                  Select Activity to Terminate
+                </h2>
+                <p
+                  className="text-xs mt-0.5"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Search and select an activity to review its data before
+                  termination
+                </p>
+              </div>
             </div>
 
-            {/* Dropdown */}
-            {showDropdown && (
-              <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-lg border border-gray-200 max-h-96 overflow-y-auto">
-                {loading ? (
-                  <div className="p-8 text-center">
-                    <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto mb-3" />
-                    <p className="text-gray-600">Loading activities...</p>
-                  </div>
-                ) : filteredActivities.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-600">No activities found</p>
-                    <p className="text-gray-500 text-sm mt-1">
-                      Try a different search term
-                    </p>
-                  </div>
-                ) : (
-                  filteredActivities.map((act) => (
-                    <button
-                      key={act.activityId}
-                      onClick={() =>
-                        handleSelectActivity(act.activityId, act.activityName)
-                      }
-                      className="w-full px-6 py-4 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium text-gray-900">
-                            {act.activityName}
-                          </h3>
-                          <p className="text-sm text-gray-500 mt-1">
-                            ID: {act.activityId}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className="px-3 py-1 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 rounded-full text-xs font-medium">
-                            Select
-                          </span>
-                        </div>
-                      </div>
-                    </button>
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* Click outside to close dropdown */}
-            {showDropdown && (
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setShowDropdown(false)}
+            <div className="px-5 sm:px-6 py-5">
+              <CommonSearch<ActivitySearchItem>
+                items={searchItems}
+                loading={loading}
+                selectedItem={selectedSearchItem}
+                onSelectItem={(item) =>
+                  handleSelectActivity(item.id, item.name)
+                }
+                onClearSelection={handleClearActivitySelection}
+                initialSearchTerm={initialActivityName}
+                placeholder="Search activities..."
+                title="Activities"
+                variant="error"
+                size="md"
+                getBadgeText={(item) => `ID: ${item.id}`}
               />
-            )}
-          </div>
-        </div>
-
-        {/* Success Message */}
-        {success && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
-            <div className="flex items-center gap-4">
-              <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-green-800">
-                  Operation Successful!
-                </h3>
-                <p className="text-green-600 mt-1">{success}</p>
-              </div>
             </div>
           </div>
         )}
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-2xl">
-            <div className="flex items-center gap-4">
-              <XCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-red-800">Error</h3>
-                <p className="text-red-600 mt-1">{error}</p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Selected Activity Info Bar */}
+        <SelectedItemBar
+          item={
+            selectedActivity
+              ? {
+                  id: selectedActivity.activityId,
+                  name: selectedActivity.activityName,
+                }
+              : null
+          }
+          onClear={handleClearActivitySelection}
+          variant="error"
+          title="Selected for Termination"
+          showId={true}
+          clearButtonText="Change Selection"
+          size="md"
+        />
 
         {/* Activity Details Section */}
         {selectedActivity && (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            {/* Header with Warning */}
-            <div className="bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-200 p-6">
-              <div className="flex items-center gap-4">
-                <AlertOctagon className="w-8 h-8 text-red-600 flex-shrink-0" />
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-red-800">
-                    Activity Termination Review
-                  </h2>
-                  <p className="text-red-600 mt-1">
-                    Review the activity details below before proceeding with termination.
-                    This action is permanent and cannot be undone.
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-gray-600">Activity ID</div>
-                  <div className="text-xl font-bold text-gray-900">
-                    #{selectedActivity.activityId}
-                  </div>
-                </div>
+          <div
+            className="rounded-2xl overflow-hidden transition-all duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1.5px solid ${hexToRgba(theme.error, 0.5)}`,
+              boxShadow: `0 4px 32px ${hexToRgba(theme.error, 0.07)}`,
+            }}
+          >
+            {/* Warning Header */}
+            <div
+              className="px-5 sm:px-6 py-4 flex flex-wrap items-center gap-4"
+              style={{
+                background: `linear-gradient(90deg, ${hexToRgba(theme.error, 0.08)}, ${hexToRgba(theme.error, 0.03)})`,
+                borderBottom: `1.5px solid ${hexToRgba(theme.error, 0.3)}`,
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.error}, ${theme.error})`,
+                  color: "#fff",
+                }}
+              >
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2
+                  className="text-base font-bold"
+                  style={{ color: theme.error }}
+                >
+                  Activity Termination Review
+                </h2>
+                <p className="text-xs mt-0.5" style={{ color: theme.error }}>
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
+                </p>
+              </div>
+              <div
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl flex-shrink-0"
+                style={{
+                  background: hexToRgba(theme.error, 0.08),
+                  border: `1px solid ${hexToRgba(theme.error, 0.2)}`,
+                }}
+              >
+                <span className="text-xs" style={{ color: theme.error }}>
+                  ID
+                </span>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: theme.error }}
+                >
+                  #{selectedActivity.activityId}
+                </span>
               </div>
             </div>
 
-            {/* Loading State for Details */}
-            {loadingDetails ? (
-              <div className="p-12 text-center">
-                <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-                <p className="text-gray-600">Loading activity details...</p>
-              </div>
-            ) : activityDetails ? (
-              <div className="p-8">
-                {/* Quick Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Duration</div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {activityDetails.duration_hours}h
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Schedules</div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {stats?.totalSchedules || 0}
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Local Price</div>
-                    <div className="text-lg font-bold text-gray-900">
-                      LKR {activityDetails.price_local.toLocaleString()}
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Foreign Price</div>
-                    <div className="text-lg font-bold text-gray-900">
-                      LKR {activityDetails.price_foreigners.toLocaleString()}
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl">
-                    <div className="text-xs text-gray-500 mb-1">Status</div>
-                    <div className={`text-lg font-bold ${
-                      activityDetails.status === 'ACTIVE' 
-                        ? 'text-green-600' 
-                        : 'text-red-600'
-                    }`}>
-                      {activityDetails.status}
-                    </div>
-                  </div>
-                </div>
+            {/* Loading Details */}
+            {loadingDetails && (
+              <CommonLoading
+                message="Loading activity details..."
+                subMessage="Please wait while we fetch the activity information"
+                size="lg"
+              />
+            )}
 
-                {/* Activity Information */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                  {/* Left Column - Basic Info */}
-                  <div className="space-y-6">
-                    <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-xl">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <Globe className="w-5 h-5 text-blue-600" />
-                        Basic Information
-                      </h3>
-                      <div className="space-y-3">
-                        <div>
-                          <div className="text-sm text-gray-500">Activity Name</div>
-                          <div className="text-lg font-medium text-gray-900">
-                            {activityDetails.name}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">Description</div>
-                          <div className="text-gray-700 mt-1">
-                            {activityDetails.description}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="text-sm text-gray-500">Destination ID</div>
-                            <div className="text-gray-700 mt-1 flex items-center gap-2">
-                              <MapPin className="w-4 h-4" />
-                              {activityDetails.destination_id}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-500">Category</div>
-                            <div className="text-gray-700 mt-1 flex items-center gap-2">
-                              {getCategoryIcon(activityDetails.activities_category)}
-                              {activityDetails.activities_category}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="text-sm text-gray-500">Available Time</div>
-                            <div className="text-gray-700 mt-1 flex items-center gap-2">
-                              <Clock className="w-4 h-4" />
-                              {formatTime(activityDetails.available_from)} - {formatTime(activityDetails.available_to)}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-500">Group Size</div>
-                            <div className="text-gray-700 mt-1 flex items-center gap-2">
-                              <Users className="w-4 h-4" />
-                              {activityDetails.min_participate} - {activityDetails.max_participate}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+            {/* Activity Details Content */}
+            {!loadingDetails && activityDetails && (
+              <div className="p-5 sm:p-6 space-y-6">
+                <ActivityStats activityDetails={activityDetails} />
 
-                    {/* Seasons */}
-                    <div className="bg-gradient-to-r from-gray-50 to-amber-50 p-6 rounded-xl">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <Thermometer className="w-5 h-5 text-amber-600" />
-                        Best Seasons
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {stats?.seasons?.map((season, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1.5 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 rounded-lg text-sm font-medium"
-                          >
-                            {season}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Requirements */}
-                    {activityDetails.requirements.length > 0 && (
-                      <div className="bg-gradient-to-r from-gray-50 to-rose-50 p-6 rounded-xl">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                          <Shield className="w-5 h-5 text-rose-600" />
-                          Requirements ({activityDetails.requirements.length})
-                        </h3>
-                        <div className="space-y-3">
-                          {activityDetails.requirements.map((req) => (
-                            <div
-                              key={req.id}
-                              className="p-3 bg-white rounded-lg border border-gray-200"
-                              style={{ borderLeftColor: req.color, borderLeftWidth: '3px' }}
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="font-medium text-gray-900">
-                                  {req.name}
-                                </span>
-                                <span 
-                                  className="px-2 py-1 rounded text-xs font-medium"
-                                  style={{ 
-                                    backgroundColor: `${req.color}20`,
-                                    color: req.color
-                                  }}
-                                >
-                                  {req.value}
-                                </span>
-                              </div>
-                              <p className="text-sm text-gray-600 mt-1">
-                                {req.description}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                <div
+                  className="grid gap-6"
+                  style={{
+                    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                  }}
+                >
+                  {/* Left Column */}
+                  <div className="space-y-5">
+                    <BasicInfoPanel activityDetails={activityDetails} />
+                    <ImagesPanel
+                      images={activityDetails.images.map((img) => ({
+                        id: img.id,
+                        url: img.image_url,
+                        name: img.name,
+                        description: img.description,
+                      }))}
+                      onImageClick={handleImageClick}
+                      title="Activity Images"
+                      showDeletionBadge={true}
+                      deletionBadgeText="Will be deleted"
+                    />
                   </div>
 
-                  {/* Right Column - Schedules & Images */}
-                  <div className="space-y-6">
-                    {/* Schedules */}
-                    <div className="bg-gradient-to-r from-gray-50 to-purple-50 p-6 rounded-xl">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                          <CalendarDays className="w-5 h-5 text-purple-600" />
-                          Schedules ({activityDetails.schedules.length})
-                        </h3>
-                        <span className="px-3 py-1 bg-gradient-to-r from-purple-100 to-violet-100 text-purple-700 rounded-full text-xs font-medium">
-                          All will be terminated
-                        </span>
-                      </div>
+                  {/* Right Column */}
+                  <div className="space-y-5">
+                    <CategoriesList categories={activityDetails.activities_category} />
+                    
+                    <SchedulesList schedules={activityDetails.schedules} />
+                    
+                    <RequirementsList requirements={activityDetails.requirements} />
 
-                      <div className="space-y-4">
-                        {activityDetails.schedules.map((schedule) => (
-                          <div
-                            key={schedule.id}
-                            className="border border-gray-200 rounded-lg overflow-hidden"
-                          >
-                            <button
-                              onClick={() => toggleSchedule(schedule.id)}
-                              className="w-full px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 flex items-center justify-between transition-all duration-200"
-                            >
-                              <div className="flex items-center gap-3">
-                                <Calendar className="w-4 h-4 text-purple-600" />
-                                <span className="font-medium text-gray-900 text-left">
-                                  {schedule.name}
-                                </span>
-                              </div>
-                              {expandedSchedules.includes(schedule.id) ? (
-                                <ChevronUp className="w-4 h-4 text-gray-500" />
-                              ) : (
-                                <ChevronDown className="w-4 h-4 text-gray-500" />
-                              )}
-                            </button>
-
-                            {expandedSchedules.includes(schedule.id) && (
-                              <div className="p-4 border-t border-gray-200 bg-white">
-                                <p className="text-sm text-gray-600 mb-3">
-                                  {schedule.description}
-                                </p>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <div className="text-xs text-gray-500">Date Range</div>
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {schedule.assume_start_date} to {schedule.assume_end_date}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <div className="text-xs text-gray-500">Duration Range</div>
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {schedule.duration_hours_start} - {schedule.duration_hours_end} hours
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <div className="text-xs text-gray-500">Status</div>
-                                    <div className={`text-sm font-medium ${
-                                      schedule.status === 1 ? 'text-green-600' : 'text-red-600'
-                                    }`}>
-                                      {schedule.status === 1 ? 'Active' : 'Inactive'}
-                                    </div>
-                                  </div>
-                                </div>
-                                {schedule.special_note && (
-                                  <div className="mt-3 p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded">
-                                    <div className="text-xs text-gray-500">Special Note</div>
-                                    <div className="text-sm text-gray-700">
-                                      {schedule.special_note}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Images Preview */}
-                    {activityDetails.images.length > 0 && (
-                      <div className="bg-gradient-to-r from-gray-50 to-rose-50 p-6 rounded-xl">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                          <ImageIcon className="w-5 h-5 text-rose-600" />
-                          Images ({activityDetails.images.length})
-                        </h3>
-                        <div className="grid grid-cols-3 gap-3">
-                          {activityDetails.images.slice(0, 6).map((image) => (
-                            <div key={image.id} className="aspect-square">
-                              <img
-                                src={image.image_url}
-                                alt={image.name}
-                                className="w-full h-full object-cover rounded-lg border border-gray-200"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
-                                }}
-                              />
-                            </div>
-                          ))}
-                          {activityDetails.images.length > 6 && (
-                            <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                              <span className="text-gray-600 font-medium">
-                                +{activityDetails.images.length - 6} more
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Impact Warning */}
-                    <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-xl border border-red-200">
-                      <h3 className="text-lg font-semibold text-red-800 mb-4 flex items-center gap-2">
-                        <FileWarning className="w-5 h-5 text-red-600" />
-                        Termination Impact
-                      </h3>
-                      <ul className="space-y-3">
-                        <li className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-red-700">
-                            All associated schedules will be permanently deleted
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-red-700">
-                            All booking records for this activity will be affected
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-red-700">
-                            This action cannot be undone. Recovery is not possible
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                          <span className="text-red-700">
-                            System will log this termination for audit purposes
-                          </span>
-                        </li>
-                      </ul>
-                    </div>
+                    <ImpactWarning entityType="activity" />
                   </div>
                 </div>
 
                 {/* Termination Button */}
-                <div className="flex justify-center mt-8">
+                <div
+                  className="flex justify-center pt-4"
+                  style={{
+                    borderTop: `1.5px solid ${hexToRgba(theme.error, 0.2)}`,
+                  }}
+                >
                   <button
                     onClick={handleTerminateClick}
                     disabled={loadingTerminate}
-                    className="px-8 py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+                    className="cursor-pointer flex items-center gap-3 px-8 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-xl active:scale-95 disabled:hover:scale-100"
+                    style={{
+                      background: loadingTerminate
+                        ? `linear-gradient(135deg, ${theme.error}, ${theme.error}dd)`
+                        : `linear-gradient(135deg, ${theme.error}, ${hexToRgba(theme.error, 0.8)})`,
+                      color: "#fff",
+                      opacity: loadingTerminate ? 0.6 : 1,
+                      boxShadow: `0 4px 16px ${hexToRgba(theme.error, 0.3)}`,
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
                   >
                     {loadingTerminate ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Processing...
+                        <div className="relative w-4 h-4">
+                          <div className="absolute inset-0 border-2 border-white/30 rounded-full" />
+                          <div className="absolute inset-0 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        </div>
+                        <span className="animate-pulse">Processing…</span>
                       </>
                     ) : (
                       <>
-                        <Trash2 className="w-5 h-5" />
+                        <svg
+                          className="w-4 h-4 transition-transform duration-200 group-hover:rotate-12"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
                         Terminate Activity Permanently
                       </>
                     )}
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="p-12 text-center">
-                <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Activity details could not be loaded</p>
-                <p className="text-gray-500 text-sm mt-2">
-                  Please try selecting the activity again
-                </p>
-              </div>
+            )}
+
+            {/* Error State */}
+            {!loadingDetails && !activityDetails && error && (
+              <CommonErrorState
+                error={error}
+                title="Failed to Load Activity"
+                message="The activity couldn't be loaded. Please try again."
+                variant="error"
+                showBackButton={true}
+                showRetryButton={true}
+                onBack={handleClearActivitySelection}
+                onRetry={() =>
+                  selectedActivity &&
+                  fetchActivityDetails(selectedActivity.activityId)
+                }
+                backButtonText="Change Selection"
+                retryButtonText="Try Again"
+                fullScreen={false}
+              />
             )}
           </div>
         )}
-
-        {/* Confirmation Modal */}
-        {showConfirmModal && (
-          <>
-            {/* Backdrop */}
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-
-            {/* Modal */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-                <div className="p-8">
-                  {/* Icon */}
-                  <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <AlertTriangle className="w-8 h-8 text-white" />
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-2xl font-bold text-gray-900 text-center mb-3">
-                    Confirm Termination
-                  </h3>
-
-                  {/* Message */}
-                  <p className="text-gray-600 text-center mb-2">
-                    Are you sure you want to permanently terminate
-                  </p>
-                  <p className="text-lg font-semibold text-red-600 text-center mb-6">
-                    {selectedActivity?.activityName}?
-                  </p>
-
-                  {/* Warning Details */}
-                  <div className="bg-gradient-to-r from-red-50 to-rose-50 p-4 rounded-lg mb-6">
-                    <div className="text-sm text-red-700 space-y-2">
-                      <p className="flex items-center gap-2">
-                        <span className="text-lg">⚠️</span>
-                        <span>This will delete:</span>
-                      </p>
-                      <ul className="list-disc list-inside ml-6 space-y-1">
-                        <li>{activityDetails?.schedules.length || 0} schedule(s)</li>
-                        <li>{activityDetails?.requirements.length || 0} requirement(s)</li>
-                        <li>{activityDetails?.images.length || 0} image(s)</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => setShowConfirmModal(false)}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 font-medium"
-                      disabled={loadingTerminate}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleConfirmTerminate}
-                      disabled={loadingTerminate}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-lg hover:from-red-700 hover:to-rose-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      {loadingTerminate ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Terminating...
-                        </>
-                      ) : (
-                        "Confirm Termination"
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Disclaimer */}
-                  <p className="text-xs text-gray-500 text-center mt-6">
-                    By confirming, you acknowledge that all associated data will be permanently deleted.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
       </div>
+
+      {/* Confirmation Modal */}
+      <TerminationModal
+        isOpen={showConfirmModal}
+        item={terminationItem}
+        loading={loadingTerminate}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmTerminate}
+      />
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModalOpen}
+        images={getModalImages()}
+        initialIndex={selectedImageIndex}
+        onClose={() => setImageModalOpen(false)}
+        showNavigation={true}
+        showDownload={true}
+        showZoom={true}
+        allowKeyboardNavigation={true}
+      />
     </div>
   );
 };

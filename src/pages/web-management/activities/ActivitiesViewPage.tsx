@@ -17,7 +17,6 @@ import ImageModal, {
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { ActivityService } from "@/services/activityService";
 import { ActivityFilterParams, Activity } from "@/types/activity-types";
-import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";

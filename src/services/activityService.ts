@@ -1,9 +1,7 @@
 // services/activityService.ts
 import {
   ActivityFilterParams,
-  ApiResponse,
   SingleActivityApiResponse,
-  ActivitiesForTerminateResponse,
   TerminateActivityApiResponse,
   AddActivityRequest,
   AddActivityApiResponse,
@@ -11,11 +9,19 @@ import {
   UpdateActivityRequest,
   UpdateActivityApiResponse,
   ActivityStatisticsApiResponse,
+  ActivityFilterApiResponse,
+  ActivityScheduleStatisticsApiResponse,
+  ActivityCategoriesStatisticsApiResponse,
+  ActivitiesByDestinationResponse,
+  GetActivitiesByDestinationRequest,
 } from "@/types/activity-types";
 import {
   ADD_ACTIVITY_DATA_FE,
+  GET_ACTIVITIES_BY_DESTINATION_ID_DATA_FE,
+  GET_ACTIVITIES_CATEGORIES_STATISTICS_DATA_FE,
   GET_ACTIVITIES_DETAILS_BY_REQUEST_DATA_FE,
   GET_ACTIVITIES_NAMES_AND_IDS_DATA_FE,
+  GET_ACTIVITIES_SCHEDULE_STATISTICS_DATA_FE,
   GET_ACTIVITIES_STATISTICS_DATA_FE,
   GET_ACTIVITY_DETAILS_BY_ACTIVITY_ID_DATA_FE,
   TERMINATE_ACTIVITY_DATA_FE,
@@ -36,7 +42,7 @@ export class ActivityService {
   // Fetch activities with filters
   static async getActivities(
     params: ActivityFilterParams,
-  ): Promise<ApiResponse> {
+  ): Promise<ActivityFilterApiResponse> {
     try {
       const response = await fetch(GET_ACTIVITIES_DETAILS_BY_REQUEST_DATA_FE, {
         method: "POST",
@@ -52,7 +58,7 @@ export class ActivityService {
           pageSize: params.pageSize,
           pageNumber: params.pageNumber,
           sortBy: params.sortBy || null,
-          sortDirection: params.sortDirection || null
+          sortDirection: params.sortDirection || null,
         }),
       });
 
@@ -60,7 +66,7 @@ export class ActivityService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: ApiResponse = await response.json();
+      const data: ActivityFilterApiResponse = await response.json();
       return data;
     } catch (error) {
       console.error("Error fetching activities:", error);
@@ -182,6 +188,41 @@ export class ActivityService {
     }
   }
 
+  static async getActivitiesByDestinationId(
+    destinationId: number,
+  ): Promise<ActivitiesByDestinationResponse> {
+    try {
+      const requestBody: GetActivitiesByDestinationRequest = { destinationId };
+
+      const response = await fetch(GET_ACTIVITIES_BY_DESTINATION_ID_DATA_FE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ActivitiesByDestinationResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch activities by destination",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching activities by destination:", error);
+      throw error;
+    }
+  }
+
   // Get activity IDs and names for search dropdown
   static async getActivityIdsAndNames(): Promise<ActivityIdNameResponse> {
     try {
@@ -234,8 +275,7 @@ export class ActivityService {
     }
   }
 
-  // Add this method to the ActivityService class
-
+  // Get activities statistics
   static async getActivitiesStatistics(): Promise<ActivityStatisticsApiResponse> {
     try {
       const response = await fetch(GET_ACTIVITIES_STATISTICS_DATA_FE, {
@@ -266,7 +306,73 @@ export class ActivityService {
     }
   }
 
-  // Validate activity form data
+  // Get activity schedule statistics
+  static async getActivityScheduleStatistics(): Promise<ActivityScheduleStatisticsApiResponse> {
+    try {
+      const response = await fetch(GET_ACTIVITIES_SCHEDULE_STATISTICS_DATA_FE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ActivityScheduleStatisticsApiResponse = await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch activity schedule statistics",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching activity schedule statistics:", error);
+      throw error;
+    }
+  }
+
+  // Get activity categories statistics
+  static async getActivityCategoriesStatistics(): Promise<ActivityCategoriesStatisticsApiResponse> {
+    try {
+      const response = await fetch(
+        GET_ACTIVITIES_CATEGORIES_STATISTICS_DATA_FE,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ActivityCategoriesStatisticsApiResponse =
+        await response.json();
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "Failed to fetch activity categories statistics",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching activity categories statistics:", error);
+      throw error;
+    }
+  }
+
+  // Validate activity form data (updated for new structure)
   static validateActivityForm(formData: any): Record<string, string> {
     const errors: Record<string, string> = {};
 
@@ -276,8 +382,8 @@ export class ActivityService {
     if (!formData.name?.trim()) errors.name = "Activity name is required";
     if (!formData.description?.trim())
       errors.description = "Description is required";
-    if (!formData.activitiesCategory)
-      errors.activitiesCategory = "Category is required";
+    if (!formData.categories || formData.categories.length === 0)
+      errors.categories = "At least one category is required";
     if (formData.durationHours === null || formData.durationHours <= 0)
       errors.durationHours = "Valid duration is required";
     if (!formData.availableFrom)
@@ -291,6 +397,7 @@ export class ActivityService {
       errors.minParticipate = "Minimum participants must be at least 1";
     if (formData.maxParticipate === null || formData.maxParticipate < 1)
       errors.maxParticipate = "Maximum participants must be at least 1";
+    if (!formData.seasonId) errors.seasonId = "Season is required";
 
     // Validate min/max participants
     if (
@@ -311,6 +418,18 @@ export class ActivityService {
       errors.availableTo = "End time must be after start time";
     }
 
+    // Validate primary category (exactly one primary)
+    if (formData.categories) {
+      const primaryCount = formData.categories.filter(
+        (cat: any) => cat.isPrimary === true,
+      ).length;
+      if (primaryCount === 0) {
+        errors.categories = "One category must be marked as primary";
+      } else if (primaryCount > 1) {
+        errors.categories = "Only one category can be marked as primary";
+      }
+    }
+
     // Images validation
     if (!formData.images || formData.images.length === 0) {
       errors.images = "At least one image is required";
@@ -319,13 +438,17 @@ export class ActivityService {
     return errors;
   }
 
-  // Helper to prepare activity data for submission
+  // Helper to prepare activity data for submission (create)
   static prepareActivityData(formData: any): AddActivityRequest {
     return {
       destinationId: formData.destinationId!,
       name: formData.name.trim(),
       description: formData.description.trim(),
-      activitiesCategory: formData.activitiesCategory,
+      categories: formData.categories.map((cat: any) => ({
+        categoryId: cat.categoryId,
+        isPrimary: cat.isPrimary,
+        status: cat.status as "ACTIVE" | "INACTIVE",
+      })),
       durationHours: parseFloat(formData.durationHours!.toFixed(1)),
       availableFrom: formData.availableFrom,
       availableTo: formData.availableTo,
@@ -333,31 +456,93 @@ export class ActivityService {
       priceForeigners: formData.priceForeigners!,
       minParticipate: formData.minParticipate!,
       maxParticipate: formData.maxParticipate!,
-      season: formData.season,
-      status: formData.status,
+      seasonId: formData.seasonId!,
+      status: formData.status as "ACTIVE" | "INACTIVE",
       images: formData.images.map((image: any) => ({
-        ...image,
         name: image.name.trim(),
         description: image.description.trim(),
+        imageUrl: image.imageUrl,
         status: image.status as "ACTIVE" | "INACTIVE",
       })),
       requirements: formData.requirements.map((req: any) => ({
-        ...req,
         name: req.name.trim(),
         value: req.value.trim(),
         description: req.description.trim(),
+        color: req.color,
         status: req.status as "ACTIVE" | "INACTIVE",
       })),
     };
   }
 
-  // Get default form data
+  // Helper to prepare activity data for submission (update)
+  static prepareUpdateActivityData(formData: any): UpdateActivityRequest {
+    return {
+      activityId: formData.activityId!,
+      destinationId: formData.destinationId!,
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      durationHours: parseFloat(formData.durationHours!.toFixed(1)),
+      availableFrom: formData.availableFrom,
+      availableTo: formData.availableTo,
+      priceLocal: formData.priceLocal!,
+      priceForeigners: formData.priceForeigners!,
+      minParticipate: formData.minParticipate!,
+      maxParticipate: formData.maxParticipate!,
+      seasonId: formData.seasonId!,
+      status: formData.status as "ACTIVE" | "INACTIVE",
+      removeCategoryIds: formData.removeCategoryIds || [],
+      removeImagesIds: formData.removeImagesIds || [],
+      addCategories: (formData.addCategories || []).map((cat: any) => ({
+        categoryId: cat.categoryId,
+        isPrimary: cat.isPrimary,
+        status: cat.status as "ACTIVE" | "INACTIVE",
+      })),
+      updatedCategories: (formData.updatedCategories || []).map((cat: any) => ({
+        categoryId: cat.categoryId,
+        isPrimary: cat.isPrimary,
+        status: cat.status as "ACTIVE" | "INACTIVE",
+      })),
+      addImages: (formData.addImages || []).map((image: any) => ({
+        name: image.name.trim(),
+        description: image.description.trim(),
+        imageUrl: image.imageUrl,
+        status: image.status as "ACTIVE" | "INACTIVE",
+      })),
+      updatedImages: (formData.updatedImages || []).map((image: any) => ({
+        imageId: image.imageId,
+        name: image.name.trim(),
+        description: image.description.trim(),
+        imageUrl: image.imageUrl,
+        status: image.status as "ACTIVE" | "INACTIVE",
+      })),
+      removeRequirementsIds: formData.removeRequirementsIds || [],
+      addRequirements: (formData.addRequirements || []).map((req: any) => ({
+        name: req.name.trim(),
+        value: req.value.trim(),
+        description: req.description.trim(),
+        color: req.color,
+        status: req.status as "ACTIVE" | "INACTIVE",
+      })),
+      updatedRequirements: (formData.updatedRequirements || []).map(
+        (req: any) => ({
+          requirementId: req.requirementId,
+          name: req.name.trim(),
+          value: req.value.trim(),
+          description: req.description.trim(),
+          color: req.color,
+          status: req.status as "ACTIVE" | "INACTIVE",
+        }),
+      ),
+    };
+  }
+
+  // Get default form data (updated for new structure)
   static getDefaultFormData(): any {
     return {
       destinationId: null,
       name: "",
       description: "",
-      activitiesCategory: "",
+      categories: [],
       durationHours: null,
       availableFrom: "08:00",
       availableTo: "17:00",
@@ -365,10 +550,21 @@ export class ActivityService {
       priceForeigners: null,
       minParticipate: null,
       maxParticipate: null,
-      season: "All year",
+      seasonId: null,
       status: "ACTIVE" as "ACTIVE" | "INACTIVE",
       images: [],
       requirements: [],
+      // Update-specific fields
+      activityId: null,
+      removeCategoryIds: [],
+      removeImagesIds: [],
+      addCategories: [],
+      updatedCategories: [],
+      addImages: [],
+      updatedImages: [],
+      removeRequirementsIds: [],
+      addRequirements: [],
+      updatedRequirements: [],
     };
   }
 }

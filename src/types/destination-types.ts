@@ -523,3 +523,58 @@ export interface TerminateTrendingDestinationApiResponse {
   data: TerminateTrendingDestinationResponse;
   timestamp: string;
 }
+
+export interface DestinationActivity {
+  activityId: number;
+  activityName: string;
+  activityDescription: string;
+  activitiesCategory: string;
+  durationHours: number;
+  availableFrom: string;
+  availableTo: string;
+  priceLocal: number;
+  priceForeigners: number;
+  minParticipate: number;
+  maxParticipate: number;
+  season: string;
+}
+
+export interface DestinationDetailsForTour {
+  destinationId: number;
+  destinationName: string;
+  destinationDescription: string;
+  location: string;
+  latitude: number;
+  longitude: number;
+  categoryName: string;
+  categoryDescription: string;
+  statusName: string;
+  activities: DestinationActivity[];
+  images: {
+    imageId: number;
+    imageName: string;
+    imageDescription: string;
+    imageUrl: string;
+  }[];
+}
+
+export interface DestinationDetailsResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: DestinationDetailsForTour;
+  timestamp: string;
+}
+
+export interface DestinationForTour {
+  destinationId: number;
+  destinationName: string;
+}
+
+export interface DestinationsForTourResponse {
+  code: number;
+  status: string;
+  message: string;
+  data: DestinationForTour[];
+  timestamp: string;
+}

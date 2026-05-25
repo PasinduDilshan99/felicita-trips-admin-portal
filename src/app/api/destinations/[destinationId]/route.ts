@@ -7,10 +7,10 @@ interface DestinationParams {
 
 export async function GET(
   request: NextRequest,
-  context: { params: DestinationParams | Promise<DestinationParams> }
+  context: { params: Promise<DestinationParams> }
 ) {
   try {
-  const { destinationId } = await context.params;
+    const { destinationId } = await context.params;
 
     console.log("Destination History API - destinationId:", destinationId);
 

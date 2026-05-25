@@ -1,43 +1,30 @@
 import { GET_ACTIVITIES_NAMES_AND_IDS_DATA } from "@/utils/backEndConstant";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function GET() {
   try {
-    if (!GET_ACTIVITIES_NAMES_AND_IDS_DATA) {
-      throw new Error("Backend URL is not defined");
-    }
-
-    const body = await request.json();
-
-    // Get cookies from the incoming request
-    const cookieHeader = request.headers.get("cookie") || "";
-
     const response = await fetch(GET_ACTIVITIES_NAMES_AND_IDS_DATA, {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
-        // Forward cookies
-        Cookie: cookieHeader,
       },
-      body: JSON.stringify(body),
-      // credentials is ignored in server-side fetch, headers already include cookies
     });
 
     if (!response.ok) {
       const text = await response.text();
       console.error("Backend returned error:", text);
       return NextResponse.json(
-        { error: "Failed to fetch activities" },
+        { error: "Failed to fetch data from backend" },
         { status: response.status },
       );
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: response.status });
   } catch (error) {
-    console.error("Error fetching activities:", error);
+    console.error("Error fetching backend data:", error);
     return NextResponse.json(
-      { error: "Something went wrong while fetching activities" },
+      { error: "Something went wrong" },
       { status: 500 },
     );
   }

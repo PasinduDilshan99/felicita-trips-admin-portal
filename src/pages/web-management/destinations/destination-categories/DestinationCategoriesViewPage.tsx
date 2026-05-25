@@ -471,6 +471,7 @@ const DestinationCategoriesViewContent = () => {
 
         {/* Results Header */}
         <ResultsHeader
+          title="Destination Categories"
           currentStart={currentStart}
           currentEnd={currentEnd}
           totalItems={totalItems}

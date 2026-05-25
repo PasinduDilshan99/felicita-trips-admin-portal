@@ -1,775 +1,1012 @@
 // app/activities/update/page.tsx
 "use client";
 
-import { useSearchParams, useRouter } from 'next/navigation';
-import React, { useState, useEffect, useCallback } from 'react';
-import { ActivityService } from '@/services/activityService';
-import { Activity, ActivityIdName, UpdateImageRequest, UpdateRequirementRequest } from '@/types/activity-types';
-import { toast, ToastContainer } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { PageHeader } from "@/components/common-components/Breadcrumb";
+import {
+  UpdateActivityRequest,
+  AddCategoryRequest,
+  UpdateCategoryRequest,
+  ActivityImageRequest,
+  UpdateImageRequest,
+  ActivityRequirementRequest,
+  UpdateRequirementRequest,
+  ActivityCategoryFullDetail,
+} from "@/types/activity-types";
+import { OtherService } from "@/services/otherService";
+import {
+  Activity,
+  ActivityIdName,
+  ActivityCategoryDetail,
+  ActivityImage,
+  Requirement,
+  Schedule,
+} from "@/types/activity-types";
+import { ActivityCategory, SeasonType } from "@/types/common-types";
+import { Search, Edit, Save, RefreshCw, Loader2 } from "lucide-react";
+import { useCommon } from "@/contexts/CommonContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
+import CommonLoading from "@/components/common-components/CommonLoading";
+import CommonErrorState from "@/components/common-components/CommonErrorState";
+import CommonSearch, {
+  SearchItem,
+} from "@/components/common-components/CommonSearch";
+import SelectedItemBar from "@/components/common-components/SelectedItemBar";
+import { hexToRgba } from "@/utils/functions";
+import { ACTIVITY_DETAILS_VIEW_PAGE_URL } from "@/utils/urls";
+import { ActivityService } from "@/services/activityService";
+import ActivityDetailsForm from "@/components/activities-components/activity-update-components/ActivityDetailsForm";
+import { UpdateConfirmationModal } from "@/components/common-components/UpdateConfirmationModal";
 
 const ActivityUpdatePage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const initialActivityId = searchParams?.get("activity-id");
-  const initialActivityName = searchParams?.get("activity-name");
+  const { theme } = useTheme();
 
-  // State management
-  const [activityData, setActivityData] = useState<Activity | null>(null);
-  const [activityList, setActivityList] = useState<ActivityIdName[]>([]);
-  const [filteredActivities, setFilteredActivities] = useState<ActivityIdName[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(
-    initialActivityId ? parseInt(initialActivityId) : null
+  const {
+    categories,
+    loading: commonLoading,
+    error: commonError,
+  } = useCommon();
+
+  const initialActivityName = searchParams?.get("activity-name") || "";
+  const initialActivityId = searchParams?.get("activity-id") || "";
+
+  // State for activities list
+  const [activities, setActivities] = useState<ActivityIdName[]>([]);
+
+  // State for selected activity
+  const [selectedActivity, setSelectedActivity] =
+    useState<ActivityIdName | null>(
+      initialActivityId && initialActivityName
+        ? {
+            activityId: parseInt(initialActivityId),
+            activityName: initialActivityName,
+          }
+        : null,
+    );
+
+  // State for original activity details
+  const [originalActivity, setOriginalActivity] = useState<Activity | null>(
+    null,
   );
+
+  // State for edited activity
+  const [editedActivity, setEditedActivity] = useState<Activity | null>(null);
+
+  // State for removed items
+  const [removedImages, setRemovedImages] = useState<number[]>([]);
+  const [removedCategories, setRemovedCategories] = useState<number[]>([]);
+  const [removedRequirements, setRemovedRequirements] = useState<number[]>([]);
+
+  // State for new/updated items
+  const [newImages, setNewImages] = useState<ActivityImageRequest[]>([]);
+  const [updatedImages, setUpdatedImages] = useState<UpdateImageRequest[]>([]);
+  const [newCategories, setNewCategories] = useState<AddCategoryRequest[]>([]);
+  const [updatedCategories, setUpdatedCategories] = useState<
+    UpdateCategoryRequest[]
+  >([]);
+  const [newRequirements, setNewRequirements] = useState<
+    ActivityRequirementRequest[]
+  >([]);
+  const [updatedRequirements, setUpdatedRequirements] = useState<
+    UpdateRequirementRequest[]
+  >([]);
+
+  // UI state
   const [loading, setLoading] = useState(false);
-  const [updating, setUpdating] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    activitiesCategory: '',
-    durationHours: 0,
-    availableFrom: '',
-    availableTo: '',
-    priceLocal: 0,
-    priceForeigners: 0,
-    minParticipate: 0,
-    maxParticipate: 0,
-    season: '',
-    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE',
-    destination_id: 0,
-  });
+  // Toast notification state
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    title: string;
+    message: string;
+    actionLink?: string;
+  } | null>(null);
 
-  // Images and Requirements state
-  const [images, setImages] = useState<UpdateImageRequest[]>([]);
-  const [requirements, setRequirements] = useState<UpdateRequirementRequest[]>([]);
-  const [imagesToRemove, setImagesToRemove] = useState<number[]>([]);
-  const [requirementsToRemove, setRequirementsToRemove] = useState<number[]>([]);
+  // Available data
+  const [availableCategories, setAvailableCategories] = useState<
+    ActivityCategory[]
+  >([]);
+  const [availableSeasons, setAvailableSeasons] = useState<SeasonType[]>([]);
 
-  // Load activity IDs and names
-  const loadActivityList = useCallback(async () => {
+  const breadcrumbItems = [
+    { label: "Dashboard", href: "/" },
+    { label: "Activities", href: ACTIVITY_DETAILS_VIEW_PAGE_URL },
+    {
+      label: "Update",
+      href: ACTIVITY_DETAILS_VIEW_PAGE_URL,
+    },
+  ];
+
+  // Extract data from context
+  useEffect(() => {
+    if (categories?.activityCategoryList) {
+      setAvailableCategories(categories?.activityCategoryList);
+    }
+  }, [categories?.activityCategoryList]);
+
+  // Fetch activities list on initial load
+  useEffect(() => {
+    if (!selectedActivity) {
+      fetchActivities();
+    }
+  }, []);
+
+  // If initialActivityId is provided, fetch details
+  useEffect(() => {
+    if (initialActivityId && !originalActivity) {
+      handleSelectActivity(parseInt(initialActivityId), initialActivityName);
+    }
+  }, [initialActivityId, initialActivityName]);
+
+  const fetchActivities = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
       const response = await ActivityService.getActivityIdsAndNames();
-      if (response.code === 200) {
-        setActivityList(response.data);
-        setFilteredActivities(response.data);
-      }
-    } catch (error) {
-      toast.error('Failed to load activity list');
-      console.error(error);
+      setActivities(response.data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load activities");
+      setToast({
+        type: "error",
+        title: "Error",
+        message: err.message || "Failed to load activities",
+      });
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  // Load activity details
-  const loadActivityDetails = useCallback(async (id: number) => {
+  const handleSelectActivity = async (id: number, name: string) => {
+    setSelectedActivity({ activityId: id, activityName: name });
+    await fetchActivityDetails(id);
+  };
+
+  // Upload image to Cloudinary
+  const uploadImageToCloudinary = async (file: File): Promise<string> => {
     try {
-      setLoading(true);
-      const response = await ActivityService.getActivityById(id);
-      if (response.code === 200) {
-        const activity = response.data;
-        setActivityData(activity);
-        
-        // Set form data
-        setFormData({
-          name: activity.name,
-          description: activity.description,
-          activitiesCategory: activity.activities_category,
-          durationHours: activity.duration_hours,
-          availableFrom: activity.available_from.split(':').slice(0, 2).join(':'),
-          availableTo: activity.available_to.split(':').slice(0, 2).join(':'),
-          priceLocal: activity.price_local,
-          priceForeigners: activity.price_foreigners,
-          minParticipate: activity.min_participate,
-          maxParticipate: activity.max_participate,
-          season: activity.season,
-          status: activity.status as 'ACTIVE' | 'INACTIVE',
-          destination_id: activity.destination_id,
+      const response = await OtherService.uploadImage(file);
+      return response.data.secure_url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw new Error("Failed to upload image to Cloudinary");
+    }
+  };
+
+  const handleAddNewImage = async (
+    imageFile: File,
+    imageName: string,
+    imageDescription: string,
+  ) => {
+    setUploadingImages(true);
+    try {
+      const cloudinaryUrl = await uploadImageToCloudinary(imageFile);
+
+      const newImage: ActivityImageRequest = {
+        name: imageName,
+        description: imageDescription,
+        imageUrl: cloudinaryUrl,
+        status: "ACTIVE",
+      };
+
+      setNewImages((prev) => [...prev, newImage]);
+
+      if (editedActivity) {
+        const tempImage: ActivityImage = {
+          id: Date.now(),
+          name: imageName,
+          description: imageDescription,
+          image_url: cloudinaryUrl,
+          status: 1,
+        };
+        setEditedActivity({
+          ...editedActivity,
+          images: [...editedActivity.images, tempImage],
         });
-
-        // Set images with IDs
-        const imagesWithIds: UpdateImageRequest[] = activity.images.map(img => ({
-          imageId: img.id,
-          name: img.name,
-          description: img.description,
-          imageUrl: img.image_url,
-          status: img.status === 1 ? 'ACTIVE' : 'INACTIVE'
-        }));
-        setImages(imagesWithIds);
-
-        // Set requirements with IDs
-        const requirementsWithIds: UpdateRequirementRequest[] = activity.requirements.map(req => ({
-          requirementId: req.id,
-          name: req.name,
-          value: req.value,
-          description: req.description,
-          color: req.color,
-          status: req.status === 1 ? 'ACTIVE' : 'INACTIVE'
-        }));
-        setRequirements(requirementsWithIds);
-
-        // Reset removal arrays
-        setImagesToRemove([]);
-        setRequirementsToRemove([]);
-      }
-    } catch (error) {
-      toast.error('Failed to load activity details');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Initial load
-  useEffect(() => {
-    loadActivityList();
-    
-    if (selectedActivityId) {
-      loadActivityDetails(selectedActivityId);
-    }
-  }, [selectedActivityId, loadActivityList, loadActivityDetails]);
-
-  // Filter activities based on search term
-  useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredActivities(activityList);
-    } else {
-      const filtered = activityList.filter(activity =>
-        activity.activityName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredActivities(filtered);
-    }
-  }, [searchTerm, activityList]);
-
-  // Handle activity selection from dropdown
-  const handleActivitySelect = (activity: ActivityIdName) => {
-    setSelectedActivityId(activity.activityId);
-    setSearchTerm(activity.activityName);
-    setShowDropdown(false);
-    // Update URL with selected activity
-    router.push(`/web-management/activities/update?activity-id=${activity.activityId}&activity-name=${encodeURIComponent(activity.activityName)}`);
-  };
-
-  // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name.includes('price') || name.includes('Participate') || name.includes('Hours') 
-        ? parseFloat(value) || 0 
-        : value
-    }));
-  };
-
-  // Handle image updates
-  const handleImageUpdate = (index: number, field: keyof UpdateImageRequest, value: string) => {
-    setImages(prev => prev.map((img, i) => 
-      i === index ? { ...img, [field]: value } : img
-    ));
-  };
-
-  const handleRemoveImage = (index: number, imageId?: number) => {
-    if (imageId) {
-      setImagesToRemove(prev => [...prev, imageId]);
-    }
-    setImages(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleAddImage = () => {
-    setImages(prev => [...prev, {
-      name: '',
-      description: '',
-      imageUrl: '',
-      status: 'ACTIVE'
-    }]);
-  };
-
-  // Handle requirement updates
-  const handleRequirementUpdate = (index: number, field: keyof UpdateRequirementRequest, value: string) => {
-    setRequirements(prev => prev.map((req, i) => 
-      i === index ? { ...req, [field]: value } : req
-    ));
-  };
-
-  const handleRemoveRequirement = (index: number, requirementId?: number) => {
-    if (requirementId) {
-      setRequirementsToRemove(prev => [...prev, requirementId]);
-    }
-    setRequirements(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleAddRequirement = () => {
-    setRequirements(prev => [...prev, {
-      name: '',
-      value: '',
-      description: '',
-      color: '#3B82F6',
-      status: 'ACTIVE'
-    }]);
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedActivityId) {
-      toast.error('Please select an activity to update');
-      return;
-    }
-
-    // Prepare images data
-    const updatedImages = images.filter(img => img.imageId).map(img => ({
-      ...img,
-      imageId: img.imageId!
-    }));
-
-    const addImages = images.filter(img => !img.imageId);
-
-    const updatedRequirements = requirements.filter(req => req.requirementId).map(req => ({
-      ...req,
-      requirementId: req.requirementId!
-    }));
-
-    const addRequirements = requirements.filter(req => !req.requirementId);
-
-    // Prepare update request
-    const updateData = {
-      activityId: selectedActivityId,
-      destinationId: formData.destination_id,
-      name: formData.name,
-      description: formData.description,
-      activitiesCategory: formData.activitiesCategory,
-      durationHours: formData.durationHours,
-      availableFrom: formData.availableFrom,
-      availableTo: formData.availableTo,
-      priceLocal: formData.priceLocal,
-      priceForeigners: formData.priceForeigners,
-      minParticipate: formData.minParticipate,
-      maxParticipate: formData.maxParticipate,
-      season: formData.season,
-      status: formData.status,
-      
-      removeImagesIds: imagesToRemove,
-      addImages,
-      updatedImages,
-      
-      removeRequirementsIds: requirementsToRemove,
-      addRequirements,
-      updatedRequirements,
-    };
-
-    try {
-      setUpdating(true);
-      const response = await ActivityService.updateActivity(updateData);
-      
-      if (response.code === 200) {
-        toast.success('Activity updated successfully!');
-        // Reload activity details
-        loadActivityDetails(selectedActivityId);
-      } else {
-        toast.error(response.message || 'Failed to update activity');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update activity');
-      console.error(error);
+      setError(error.message || "Failed to upload image");
+      setToast({
+        type: "error",
+        title: "Upload Failed",
+        message: error.message || "Failed to upload image",
+      });
     } finally {
-      setUpdating(false);
+      setUploadingImages(false);
     }
   };
 
-  // Render activity selection section
-  const renderActivitySelection = () => (
-    <div className="mb-8 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4  text-gray-800">Select Activity to Update</h2>
-      <div className="relative">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setShowDropdown(true);
-          }}
-          onFocus={() => setShowDropdown(true)}
-          placeholder="Search activity by name..."
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500  text-gray-800"
-        />
-        
-        {showDropdown && filteredActivities.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto ">
-            {filteredActivities.map((activity) => (
-              <div
-                key={activity.activityId}
-                onClick={() => handleActivitySelect(activity)}
-                className="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0 "
-              >
-                <div className="font-medium  text-gray-800">{activity.activityName}</div>
-                <div className="text-sm text-gray-500 ">ID: {activity.activityId}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      
-      {selectedActivityId && (
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg  text-gray-800">
-          <p className="font-medium">Selected Activity:</p>
-          <p>ID: {selectedActivityId} | Name: {searchTerm}</p>
-        </div>
-      )}
-    </div>
-  );
+  const fetchActivityDetails = async (id: number) => {
+    setLoadingDetails(true);
+    setError(null);
+    setOriginalActivity(null);
+    setEditedActivity(null);
+    setRemovedImages([]);
+    setRemovedCategories([]);
+    setRemovedRequirements([]);
+    setNewImages([]);
+    setUpdatedImages([]);
+    setNewCategories([]);
+    setUpdatedCategories([]);
+    setNewRequirements([]);
+    setUpdatedRequirements([]);
 
-  // Render loading state
-  if (loading && !activityData) {
+    try {
+      const response = await ActivityService.getActivityById(id);
+      const activityData = response.data;
+      setOriginalActivity(activityData);
+      setEditedActivity(activityData);
+    } catch (err: any) {
+      setError(err.message || "Failed to load activity details");
+      setToast({
+        type: "error",
+        title: "Load Failed",
+        message: err.message || "Failed to load activity details",
+      });
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  // Handle field changes
+  const handleFieldChange = (field: string, value: any) => {
+    if (!editedActivity) return;
+
+    setEditedActivity({
+      ...editedActivity,
+      [field]: value,
+    });
+  };
+
+  // Handle category changes
+  const handleCategoryPrimaryChange = (
+    categoryId: number,
+    isPrimary: boolean,
+  ) => {
+    if (!editedActivity) return;
+
+    const updatedCategories = editedActivity.activities_category.map((cat) =>
+      cat.id === categoryId ? { ...cat, is_primary: isPrimary } : cat,
+    );
+
+    // Track category update if it exists in original
+    const originalCat = originalActivity?.activities_category.find(
+      (c) => c.id === categoryId,
+    );
+    if (originalCat && originalCat.is_primary !== isPrimary) {
+      const existingUpdate = updatedCategories.find((u) => u.id === categoryId);
+      if (!existingUpdate) {
+        setUpdatedCategories((prev) => [
+          ...prev,
+          {
+            categoryId: categoryId,
+            isPrimary: isPrimary,
+            status: "ACTIVE",
+          },
+        ]);
+      } else {
+        setUpdatedCategories((prev) =>
+          prev.map((u) =>
+            u.categoryId === categoryId ? { ...u, isPrimary } : u,
+          ),
+        );
+      }
+    }
+
+    setEditedActivity({
+      ...editedActivity,
+      activities_category: updatedCategories,
+    });
+  };
+
+  // Handle category removal
+  const handleRemoveCategory = (categoryId: number) => {
+    if (!editedActivity) return;
+
+    setRemovedCategories((prev) => [...prev, categoryId]);
+
+    setEditedActivity({
+      ...editedActivity,
+      activities_category: editedActivity.activities_category.filter(
+        (cat) => cat.id !== categoryId,
+      ),
+    });
+  };
+
+  // Handle new category addition
+  const handleAddNewCategory = (categoryId: number, isPrimary: boolean) => {
+    const category = availableCategories.find(
+      (c) => c.activityCategoryId === categoryId,
+    );
+    if (!category) return;
+
+    const newCategory: AddCategoryRequest = {
+      categoryId: categoryId,
+      isPrimary: isPrimary,
+      status: "ACTIVE",
+    };
+
+    setNewCategories((prev) => [...prev, newCategory]);
+
+    if (editedActivity) {
+      const tempCategory: ActivityCategoryFullDetail = {
+        id: Date.now(),
+        name: category.activityCategoryName,
+        description: category.activityCategoryDescription || "",
+        is_primary: isPrimary,
+      };
+      setEditedActivity({
+        ...editedActivity,
+        activities_category: [
+          ...editedActivity.activities_category,
+          tempCategory,
+        ],
+      });
+    }
+  };
+
+  // Handle image removal
+  const handleRemoveImage = (imageId: number) => {
+    if (!editedActivity) return;
+
+    setRemovedImages((prev) => [...prev, imageId]);
+
+    setEditedActivity({
+      ...editedActivity,
+      images: editedActivity.images.filter((img) => img.id !== imageId),
+    });
+  };
+
+  // Handle requirement removal
+  const handleRemoveRequirement = (requirementId: number) => {
+    if (!editedActivity) return;
+
+    setRemovedRequirements((prev) => [...prev, requirementId]);
+
+    setEditedActivity({
+      ...editedActivity,
+      requirements: editedActivity.requirements.filter(
+        (req) => req.id !== requirementId,
+      ),
+    });
+  };
+
+  // Handle new requirement addition
+  const handleAddNewRequirement = (requirement: ActivityRequirementRequest) => {
+    setNewRequirements((prev) => [...prev, requirement]);
+
+    if (editedActivity) {
+      const tempRequirement: Requirement = {
+        id: Date.now(),
+        name: requirement.name,
+        value: requirement.value,
+        description: requirement.description,
+        color: requirement.color,
+        status: 1,
+      };
+      setEditedActivity({
+        ...editedActivity,
+        requirements: [...editedActivity.requirements, tempRequirement],
+      });
+    }
+  };
+
+  // Handle update existing requirement
+  const handleUpdateRequirement = (
+    updatedRequirement: UpdateRequirementRequest,
+  ) => {
+    if (!editedActivity) return;
+
+    const existingUpdate = updatedRequirements.find(
+      (r) => r.requirementId === updatedRequirement.requirementId,
+    );
+
+    if (existingUpdate) {
+      setUpdatedRequirements((prev) =>
+        prev.map((r) =>
+          r.requirementId === updatedRequirement.requirementId
+            ? updatedRequirement
+            : r,
+        ),
+      );
+    } else {
+      setUpdatedRequirements((prev) => [...prev, updatedRequirement]);
+    }
+
+    setEditedActivity({
+      ...editedActivity,
+      requirements: editedActivity.requirements.map((req) =>
+        req.id === updatedRequirement.requirementId
+          ? {
+              ...req,
+              name: updatedRequirement.name,
+              value: updatedRequirement.value,
+              description: updatedRequirement.description,
+              color: updatedRequirement.color,
+            }
+          : req,
+      ),
+    });
+  };
+
+  // Handle update existing image
+  const handleUpdateImage = (updatedImage: UpdateImageRequest) => {
+    if (!editedActivity) return;
+
+    const existingUpdate = updatedImages.find(
+      (img) => img.imageId === updatedImage.imageId,
+    );
+
+    if (existingUpdate) {
+      setUpdatedImages((prev) =>
+        prev.map((img) =>
+          img.imageId === updatedImage.imageId ? updatedImage : img,
+        ),
+      );
+    } else {
+      setUpdatedImages((prev) => [...prev, updatedImage]);
+    }
+
+    setEditedActivity({
+      ...editedActivity,
+      images: editedActivity.images.map((img) =>
+        img.id === updatedImage.imageId
+          ? {
+              ...img,
+              name: updatedImage.name,
+              description: updatedImage.description,
+            }
+          : img,
+      ),
+    });
+  };
+
+  // Check if there are any changes
+  const hasChanges = useCallback(() => {
+    if (!originalActivity || !editedActivity) return false;
+
+    const basicFieldsChanged =
+      originalActivity.name !== editedActivity.name ||
+      originalActivity.description !== editedActivity.description ||
+      originalActivity.duration_hours !== editedActivity.duration_hours ||
+      originalActivity.available_from !== editedActivity.available_from ||
+      originalActivity.available_to !== editedActivity.available_to ||
+      originalActivity.price_local !== editedActivity.price_local ||
+      originalActivity.price_foreigners !== editedActivity.price_foreigners ||
+      originalActivity.min_participate !== editedActivity.min_participate ||
+      originalActivity.max_participate !== editedActivity.max_participate ||
+      originalActivity.seasonId !== editedActivity.seasonId ||
+      originalActivity.status !== editedActivity.status;
+
+    const itemsChanged =
+      removedImages.length > 0 ||
+      removedCategories.length > 0 ||
+      removedRequirements.length > 0 ||
+      newImages.length > 0 ||
+      newCategories.length > 0 ||
+      newRequirements.length > 0 ||
+      updatedImages.length > 0 ||
+      updatedCategories.length > 0 ||
+      updatedRequirements.length > 0;
+
+    return basicFieldsChanged || itemsChanged;
+  }, [
+    originalActivity,
+    editedActivity,
+    removedImages,
+    removedCategories,
+    removedRequirements,
+    newImages,
+    newCategories,
+    newRequirements,
+    updatedImages,
+    updatedCategories,
+    updatedRequirements,
+  ]);
+
+  // Prepare update data
+  const prepareUpdateData = (): UpdateActivityRequest | null => {
+    if (!editedActivity || !selectedActivity) return null;
+
+    return {
+      activityId: selectedActivity.activityId,
+      destinationId: editedActivity.destination_id,
+      name: editedActivity.name,
+      description: editedActivity.description,
+      durationHours: editedActivity.duration_hours,
+      availableFrom: editedActivity.available_from,
+      availableTo: editedActivity.available_to,
+      priceLocal: editedActivity.price_local,
+      priceForeigners: editedActivity.price_foreigners,
+      minParticipate: editedActivity.min_participate,
+      maxParticipate: editedActivity.max_participate,
+      seasonId: editedActivity.seasonId,
+      status: editedActivity.status as "ACTIVE" | "INACTIVE",
+      removeCategoryIds: removedCategories,
+      addCategories: newCategories,
+      updatedCategories: updatedCategories,
+      removeImagesIds: removedImages,
+      addImages: newImages,
+      updatedImages: updatedImages,
+      removeRequirementsIds: removedRequirements,
+      addRequirements: newRequirements,
+      updatedRequirements: updatedRequirements,
+    };
+  };
+
+  // Handle update submission
+  const handleUpdateSubmit = async () => {
+    const updateData = prepareUpdateData();
+    if (!updateData) return;
+
+    setLoadingUpdate(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await ActivityService.updateActivity(updateData);
+
+      setSuccess(`Activity "${editedActivity?.name}" updated successfully!`);
+
+      setToast({
+        type: "success",
+        title: "Update Successful!",
+        message: `${editedActivity?.name} has been updated successfully.`,
+        actionLink: `${ACTIVITY_DETAILS_VIEW_PAGE_URL}/view?id=${selectedActivity?.activityId}`,
+      });
+
+      setShowConfirmModal(false);
+
+      setTimeout(() => {
+        if (selectedActivity) {
+          fetchActivityDetails(selectedActivity.activityId);
+        }
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message || "Failed to update activity");
+      setToast({
+        type: "error",
+        title: "Update Failed",
+        message: err.message || "Failed to update activity. Please try again.",
+      });
+    } finally {
+      setLoadingUpdate(false);
+    }
+  };
+
+  // Reset all changes
+  const handleResetChanges = () => {
+    if (originalActivity) {
+      setEditedActivity(originalActivity);
+      setRemovedImages([]);
+      setRemovedCategories([]);
+      setRemovedRequirements([]);
+      setNewImages([]);
+      setUpdatedImages([]);
+      setNewCategories([]);
+      setUpdatedCategories([]);
+      setNewRequirements([]);
+      setUpdatedRequirements([]);
+      setError(null);
+      setSuccess(null);
+
+      setToast({
+        type: "success",
+        title: "Changes Reset",
+        message: "All unsaved changes have been discarded.",
+      });
+    }
+  };
+
+  const handleClearActivitySelection = () => {
+    setSelectedActivity(null);
+    setOriginalActivity(null);
+    setEditedActivity(null);
+    setRemovedImages([]);
+    setRemovedCategories([]);
+    setRemovedRequirements([]);
+    setNewImages([]);
+    setUpdatedImages([]);
+    setNewCategories([]);
+    setUpdatedCategories([]);
+    setNewRequirements([]);
+    setUpdatedRequirements([]);
+    setToast(null);
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("activity-id");
+    url.searchParams.delete("activity-name");
+    router.replace(url.toString(), { scroll: false });
+  };
+
+  // Get changed fields for confirmation modal
+  const getChangedFields = () => {
+    if (!originalActivity || !editedActivity) return [];
+
+    const changes: Array<{
+      field: string;
+      oldValue: any;
+      newValue: any;
+    }> = [];
+
+    const fields = [
+      { key: "name", label: "Activity Name" },
+      { key: "description", label: "Description" },
+      { key: "duration_hours", label: "Duration (hours)" },
+      { key: "available_from", label: "Available From" },
+      { key: "available_to", label: "Available To" },
+      { key: "price_local", label: "Local Price" },
+      { key: "price_foreigners", label: "Foreigners Price" },
+      { key: "min_participate", label: "Min Participants" },
+      { key: "max_participate", label: "Max Participants" },
+      { key: "status", label: "Status" },
+    ];
+
+    fields.forEach(({ key, label }) => {
+      const oldValue = originalActivity[key as keyof Activity];
+      const newValue = editedActivity[key as keyof Activity];
+
+      if (oldValue !== newValue) {
+        changes.push({
+          field: label,
+          oldValue,
+          newValue,
+        });
+      }
+    });
+
+    if (removedCategories.length > 0) {
+      changes.push({
+        field: "Categories to Remove",
+        oldValue: originalActivity.activities_category.length,
+        newValue:
+          originalActivity.activities_category.length -
+          removedCategories.length,
+      });
+    }
+
+    if (newCategories.length > 0) {
+      changes.push({
+        field: "New Categories",
+        oldValue: originalActivity.activities_category.length,
+        newValue:
+          originalActivity.activities_category.length + newCategories.length,
+      });
+    }
+
+    if (removedImages.length > 0) {
+      changes.push({
+        field: "Images to Remove",
+        oldValue: originalActivity.images.length,
+        newValue: originalActivity.images.length - removedImages.length,
+      });
+    }
+
+    if (newImages.length > 0) {
+      changes.push({
+        field: "New Images",
+        oldValue: originalActivity.images.length,
+        newValue: originalActivity.images.length + newImages.length,
+      });
+    }
+
+    if (removedRequirements.length > 0) {
+      changes.push({
+        field: "Requirements to Remove",
+        oldValue: originalActivity.requirements.length,
+        newValue:
+          originalActivity.requirements.length - removedRequirements.length,
+      });
+    }
+
+    if (newRequirements.length > 0) {
+      changes.push({
+        field: "New Requirements",
+        oldValue: originalActivity.requirements.length,
+        newValue: originalActivity.requirements.length + newRequirements.length,
+      });
+    }
+
+    return changes;
+  };
+
+  // Convert activities to search items format
+  const searchItems: SearchItem[] = activities.map((act) => ({
+    id: act.activityId,
+    name: act.activityName,
+  }));
+
+  const selectedSearchItem = selectedActivity
+    ? {
+        id: selectedActivity.activityId,
+        name: selectedActivity.activityName,
+      }
+    : null;
+
+  // Show loading state if common data is loading
+  if (commonLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-6xl mx-auto">
-          {renderActivitySelection()}
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
-          </div>
-        </div>
-      </div>
+      <CommonLoading
+        message="Loading categories..."
+        subMessage="Please wait while we fetch available categories"
+        size="lg"
+      />
+    );
+  }
+
+  // Show error state if common data failed to load
+  if (commonError) {
+    return (
+      <CommonErrorState
+        error={commonError}
+        title="Failed to Load Categories"
+        message="Unable to load activity categories. Please try again."
+        variant="error"
+        showBackButton={false}
+        showRetryButton={true}
+        onRetry={() => window.location.reload()}
+        retryButtonText="Retry"
+        fullScreen={true}
+      />
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <ToastContainer position="top-right" autoClose={3000} />
-      
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2 text-gray-800">Update Activity</h1>
-        <p className="text-gray-600 mb-8">Modify activity details, images, and requirements</p>
-        
-        {renderActivitySelection()}
-        
-        {activityData && (
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-            {/* Basic Information */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4 pb-2 border-b  text-gray-800">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Activity Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className=" text-gray-600 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
-                  </label>
-                  <select
-                    name="activitiesCategory"
-                    value={formData.activitiesCategory}
-                    onChange={handleInputChange}
-                    required
-                    className=" text-gray-600 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="Adventure">Adventure</option>
-                    <option value="Cultural">Cultural</option>
-                    <option value="Wildlife">Wildlife</option>
-                    <option value="Water Sports">Water Sports</option>
-                    <option value="Wellness">Wellness</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Duration (hours) *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="0.5"
-                    name="durationHours"
-                    value={formData.durationHours}
-                    onChange={handleInputChange}
-                    required
-                    className="text-gray-600 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Season
-                  </label>
-                  <input
-                    type="text"
-                    name="season"
-                    value={formData.season}
-                    onChange={handleInputChange}
-                    className="text-gray-600 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="e.g., December to April"
-                  />
-                </div>
-              </div>
-              
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  required
-                  rows={4}
-                  className="text-gray-600 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-            
-            {/* Pricing and Participants */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4 pb-2 border-b text-gray-800">Pricing & Participants</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 ">
-                    Local Price (LKR) *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    name="priceLocal"
-                    value={formData.priceLocal}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Foreigner Price (LKR) *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    name="priceForeigners"
-                    value={formData.priceForeigners}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Min Participants *
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    name="minParticipate"
-                    value={formData.minParticipate}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Max Participants *
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    name="maxParticipate"
-                    value={formData.maxParticipate}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Available From *
-                  </label>
-                  <input
-                    type="time"
-                    name="availableFrom"
-                    value={formData.availableFrom}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Available To *
-                  </label>
-                  <input
-                    type="time"
-                    name="availableTo"
-                    value={formData.availableTo}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-600"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            {/* Images Section */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4 pb-2 border-b text-gray-800">
-                <h3 className="text-lg font-semibold">Images</h3>
-                <button
-                  type="button"
-                  onClick={handleAddImage}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                >
-                  Add Image
-                </button>
-              </div>
-              
-              {images.map((image, index) => (
-                <div key={index} className="mb-6 p-4 border border-gray-200 rounded-lg text-gray-600">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium">Image {index + 1}</h4>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(index, image.imageId)}
-                      className="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Image URL *
-                      </label>
-                      <input
-                        type="url"
-                        value={image.imageUrl}
-                        onChange={(e) => handleImageUpdate(index, 'imageUrl', e.target.value)}
-                        required
-                        className="w-full p-2 border border-gray-300 rounded"
-                      />
-                      {image.imageUrl && (
-                        <div className="mt-2">
-                          <img
-                            src={image.imageUrl}
-                            alt="Preview"
-                            className="h-20 object-cover rounded"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Name *
-                        </label>
-                        <input
-                          type="text"
-                          value={image.name}
-                          onChange={(e) => handleImageUpdate(index, 'name', e.target.value)}
-                          required
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Description *
-                        </label>
-                        <textarea
-                          value={image.description}
-                          onChange={(e) => handleImageUpdate(index, 'description', e.target.value)}
-                          required
-                          rows={2}
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Status
-                        </label>
-                        <select
-                          value={image.status}
-                          onChange={(e) => handleImageUpdate(index, 'status', e.target.value)}
-                          className="w-full p-2 border border-gray-300 rounded"
-                        >
-                          <option value="ACTIVE">Active</option>
-                          <option value="INACTIVE">Inactive</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Requirements Section */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4 pb-2 border-b text-gray-800">
-                <h3 className="text-lg font-semibold">Requirements</h3>
-                <button
-                  type="button"
-                  onClick={handleAddRequirement}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                >
-                  Add Requirement
-                </button>
-              </div>
-              
-              {requirements.map((requirement, index) => (
-                <div key={index} className="mb-6 p-4 border border-gray-200 rounded-lg text-gray-600">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium">Requirement {index + 1}</h4>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveRequirement(index, requirement.requirementId)}
-                      className="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Name *
-                        </label>
-                        <input
-                          type="text"
-                          value={requirement.name}
-                          onChange={(e) => handleRequirementUpdate(index, 'name', e.target.value)}
-                          required
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Value *
-                        </label>
-                        <input
-                          type="text"
-                          value={requirement.value}
-                          onChange={(e) => handleRequirementUpdate(index, 'value', e.target.value)}
-                          required
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Description *
-                        </label>
-                        <textarea
-                          value={requirement.description}
-                          onChange={(e) => handleRequirementUpdate(index, 'description', e.target.value)}
-                          required
-                          rows={2}
-                          className="w-full p-2 border border-gray-300 rounded"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Color
-                        </label>
-                        <input
-                          type="color"
-                          value={requirement.color}
-                          onChange={(e) => handleRequirementUpdate(index, 'color', e.target.value)}
-                          className="w-full h-10 p-1 border border-gray-300 rounded"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Status
-                        </label>
-                        <select
-                          value={requirement.status}
-                          onChange={(e) => handleRequirementUpdate(index, 'status', e.target.value)}
-                          className="w-full p-2 border border-gray-300 rounded"
-                        >
-                          <option value="ACTIVE">Active</option>
-                          <option value="INACTIVE">Inactive</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Status and Submit */}
-            <div className="mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status *
-                  </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="ACTIVE">Active</option>
-                    <option value="INACTIVE">Inactive</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            
-            {/* Submit Button */}
-            <div className="flex justify-end space-x-4 pt-6 border-t">
+    <div
+      className="min-h-screen transition-colors duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
+      {/* Toast Notifications */}
+      {toast && (
+        <ToastNotification
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={() => setToast(null)}
+          actionLink={toast.actionLink}
+          actionText="View Activity"
+        />
+      )}
+
+      {/* Header with Breadcrumb */}
+      <div
+        className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
+        style={{
+          backgroundColor: `${theme.surface}CC`,
+          borderColor: theme.border,
+        }}
+      >
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <PageHeader
+            title="Update Activity"
+            description="Edit and update existing activity information"
+            breadcrumbItems={breadcrumbItems}
+          />
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section - Only show when no activity is selected */}
+        {!selectedActivity && (
+          <div
+            className="rounded-2xl shadow-lg p-8 mb-8 transition-all duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            <h2
+              className="text-2xl font-bold mb-6 flex items-center gap-3"
+              style={{ color: theme.text }}
+            >
+              <Search className="w-6 h-6" style={{ color: theme.primary }} />
+              Select Activity to Update
+            </h2>
+
+            <CommonSearch
+              items={searchItems}
+              loading={loading}
+              selectedItem={selectedSearchItem}
+              onSelectItem={(item) =>
+                handleSelectActivity(item.id as number, item.name)
+              }
+              onClearSelection={handleClearActivitySelection}
+              initialSearchTerm={initialActivityName}
+              placeholder="Search activities..."
+              title="Activities"
+              variant="primary"
+              size="md"
+              getBadgeText={(item) => `ID: ${item.id}`}
+            />
+          </div>
+        )}
+
+        {/* Selected Activity Info Bar */}
+        {selectedActivity && (
+          <SelectedItemBar
+            item={{
+              id: selectedActivity.activityId,
+              name: selectedActivity.activityName,
+            }}
+            onClear={handleClearActivitySelection}
+            variant="primary"
+            title="Currently Editing"
+            showId={true}
+            clearButtonText="Change Activity"
+            size="md"
+          />
+        )}
+
+        {/* Loading Details */}
+        {loadingDetails && (
+          <CommonLoading
+            message="Loading activity details..."
+            subMessage="Please wait while we fetch the activity information"
+            size="lg"
+            fullScreen={false}
+            className="rounded-2xl shadow-lg border"
+          />
+        )}
+
+        {/* Activity Details Form */}
+        {editedActivity && selectedActivity && (
+          <ActivityDetailsForm
+            activity={editedActivity}
+            originalActivity={originalActivity}
+            removedImages={removedImages}
+            removedCategories={removedCategories}
+            removedRequirements={removedRequirements}
+            newImages={newImages}
+            newCategories={newCategories}
+            newRequirements={newRequirements}
+            availableCategories={availableCategories}
+            availableSeasons={availableSeasons}
+            onFieldChange={handleFieldChange}
+            onCategoryPrimaryChange={handleCategoryPrimaryChange}
+            onRemoveCategory={handleRemoveCategory}
+            onAddNewCategory={handleAddNewCategory}
+            onRemoveImage={handleRemoveImage}
+            onAddNewImage={handleAddNewImage}
+            onUpdateImage={handleUpdateImage}
+            onRemoveRequirement={handleRemoveRequirement}
+            onAddNewRequirement={handleAddNewRequirement}
+            onUpdateRequirement={handleUpdateRequirement}
+            uploadingImages={uploadingImages}
+          />
+        )}
+
+        {/* Action Buttons */}
+        {editedActivity && originalActivity && (
+          <div
+            className="rounded-2xl shadow-lg p-8 mt-8 transition-colors duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            <div className="flex flex-col sm:flex-row gap-4">
               <button
-                type="button"
-                onClick={() => router.back()}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                onClick={handleResetChanges}
+                disabled={!hasChanges() || loadingUpdate || uploadingImages}
+                className="cursor-pointer flex-1 px-6 py-4 rounded-xl border-2 transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: theme.background,
+                  borderColor: theme.border,
+                  color: theme.textSecondary,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = theme.primary;
+                  e.currentTarget.style.backgroundColor = hexToRgba(
+                    theme.primary,
+                    0.05,
+                  );
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = theme.border;
+                  e.currentTarget.style.backgroundColor = theme.background;
+                }}
               >
-                Cancel
+                <RefreshCw className="w-5 h-5" />
+                Reset Changes
               </button>
+
               <button
-                type="submit"
-                disabled={updating || !selectedActivityId}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                onClick={() => setShowConfirmModal(true)}
+                disabled={!hasChanges() || loadingUpdate || uploadingImages}
+                className="cursor-pointer flex-1 px-6 py-4 rounded-xl text-white font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`,
+                }}
               >
-                {updating ? 'Updating...' : 'Update Activity'}
+                <Save className="w-5 h-5" />
+                {loadingUpdate ? "Updating..." : "Update Activity"}
               </button>
             </div>
-          </form>
+
+            {/* Uploading Indicator */}
+            {uploadingImages && (
+              <div
+                className="mt-6 p-4 rounded-xl transition-colors duration-300"
+                style={{
+                  backgroundColor: hexToRgba(theme.primary, 0.1),
+                  border: `1px solid ${hexToRgba(theme.primary, 0.2)}`,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <Loader2
+                    className="w-5 h-5 animate-spin"
+                    style={{ color: theme.primary }}
+                  />
+                  <div>
+                    <p className="font-medium" style={{ color: theme.primary }}>
+                      Uploading images to Cloudinary...
+                    </p>
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Please wait for all images to finish uploading before
+                      updating
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Change Indicator */}
+            {hasChanges() && !uploadingImages && (
+              <div
+                className="mt-6 p-4 rounded-xl transition-colors duration-300"
+                style={{
+                  backgroundColor: hexToRgba(theme.primary, 0.1),
+                  border: `1px solid ${hexToRgba(theme.primary, 0.2)}`,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <Edit className="w-5 h-5" style={{ color: theme.primary }} />
+                  <div>
+                    <p className="font-medium" style={{ color: theme.primary }}>
+                      You have unsaved changes
+                    </p>
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Click "Update Activity" to save your changes
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Confirmation Modal */}
+        {showConfirmModal && originalActivity && editedActivity && (
+          <UpdateConfirmationModal
+            isOpen={showConfirmModal}
+            onClose={() => setShowConfirmModal(false)}
+            onConfirm={handleUpdateSubmit}
+            isLoading={loadingUpdate}
+            type="update"
+            itemName={editedActivity.name}
+            changedFields={getChangedFields()}
+            confirmText="Update Activity"
+            cancelText="Cancel"
+            title="Confirm Activity Update"
+            message={`You are about to update "${editedActivity.name}". Please review the changes below before confirming.`}
+            showFieldComparisons={true}
+          />
         )}
       </div>
     </div>

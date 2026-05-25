@@ -1,4 +1,4 @@
-// app/web-management/destinations/terminate/page.tsx (Updated with CommonSearch)
+// app/web-management/destinations/terminate/page.tsx (Updated with Common Components)
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -27,9 +27,9 @@ import CommonErrorState from "@/components/common-components/CommonErrorState";
 import { DestinationStats } from "@/components/destinations-components/terminate-destination-components/DestinationStats";
 import { BasicInfoPanel } from "@/components/destinations-components/terminate-destination-components/BasicInfoPanel";
 import { ActivitiesList } from "@/components/destinations-components/terminate-destination-components/ActivitiesList";
-import { ImpactWarning } from "@/components/destinations-components/terminate-destination-components/ImpactWarning";
-import { TerminationModal } from "@/components/destinations-components/terminate-destination-components/TerminationModal";
-import { ImagesPanel } from "@/components/destinations-components/terminate-destination-components/ImagesPanel";
+import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
+import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
+import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
 
 const hexToRgba = (hex: string, opacity: number): string => {
   hex = hex.replace("#", "");
@@ -229,6 +229,15 @@ const TerminateDestinationPage = () => {
     ? {
         id: selectedDestination.destinationId,
         name: selectedDestination.destinationName,
+      }
+    : null;
+
+  // Prepare termination item for modal
+  const terminationItem: TerminationItem | null = selectedDestination
+    ? {
+        id: selectedDestination.destinationId,
+        name: selectedDestination.destinationName,
+        type: "destination",
       }
     : null;
 
@@ -453,8 +462,16 @@ const TerminateDestinationPage = () => {
                   <div className="space-y-5">
                     <BasicInfoPanel destinationDetails={destinationDetails} />
                     <ImagesPanel
-                      images={destinationDetails.images}
+                      images={destinationDetails.images.map((img) => ({
+                        id: img.imageId,
+                        url: img.imageUrl,
+                        name: img.imageName,
+                        description: img.imageDescription,
+                      }))}
                       onImageClick={handleImageClick}
+                      title="Destination Images"
+                      showDeletionBadge={true}
+                      deletionBadgeText="Will be deleted"
                     />
                   </div>
 
@@ -503,7 +520,7 @@ const TerminateDestinationPage = () => {
                       </div>
                     </div>
 
-                    <ImpactWarning />
+                    <ImpactWarning entityType="destination" />
                   </div>
                 </div>
 
@@ -582,10 +599,10 @@ const TerminateDestinationPage = () => {
         )}
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal - Using common component */}
       <TerminationModal
         isOpen={showConfirmModal}
-        selectedDestination={selectedDestination}
+        item={terminationItem}
         loading={loadingTerminate}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleConfirmTerminate}
