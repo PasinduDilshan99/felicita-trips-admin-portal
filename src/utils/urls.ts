@@ -90,7 +90,7 @@ export const PACKAGE_TYPE_TERMINATE_URL = `${PACKAGE_TYPES_PAGE_URL}/terminate`;
 
 // ==================== SCHEDULES ====================
 // Activity Schedule
-export const ACTIVITY_SCHEDULE_PAGE_URL = `${CONTENT_MANAGEMENT_URL}/activity-schedule`;
+export const ACTIVITY_SCHEDULE_PAGE_URL = `${CONTENT_MANAGEMENT_URL}/activity-schedules`;
 export const ACTIVITY_SCHEDULE_VIEW_PAGE_URL = `${ACTIVITY_SCHEDULE_PAGE_URL}/view`;
 export const ACTIVITY_SCHEDULE_DETAILS_VIEW_URL = `${ACTIVITY_SCHEDULE_VIEW_PAGE_URL}/details`;
 export const ACTIVITY_SCHEDULE_ADD_URL = `${ACTIVITY_SCHEDULE_PAGE_URL}/add`;
@@ -98,7 +98,7 @@ export const ACTIVITY_SCHEDULE_UPDATE_URL = `${ACTIVITY_SCHEDULE_PAGE_URL}/updat
 export const ACTIVITY_SCHEDULE_TERMINATE_URL = `${ACTIVITY_SCHEDULE_PAGE_URL}/terminate`;
 
 // Tour Schedule
-export const TOUR_SCHEDULE_PAGE_URL = `${CONTENT_MANAGEMENT_URL}/tour-schedule`;
+export const TOUR_SCHEDULE_PAGE_URL = `${CONTENT_MANAGEMENT_URL}/tour-schedules`;
 export const TOUR_SCHEDULE_VIEW_PAGE_URL = `${TOUR_SCHEDULE_PAGE_URL}/view`;
 export const TOUR_SCHEDULE_DETAILS_VIEW_URL = `${TOUR_SCHEDULE_VIEW_PAGE_URL}/details`;
 export const TOUR_SCHEDULE_ADD_URL = `${TOUR_SCHEDULE_PAGE_URL}/add`;
@@ -106,7 +106,7 @@ export const TOUR_SCHEDULE_UPDATE_URL = `${TOUR_SCHEDULE_PAGE_URL}/update`;
 export const TOUR_SCHEDULE_TERMINATE_URL = `${TOUR_SCHEDULE_PAGE_URL}/terminate`;
 
 // Package Schedule
-export const PACKAGE_SCHEDULE_PAGE_URL = `${CONTENT_MANAGEMENT_URL}/package-schedule`;
+export const PACKAGE_SCHEDULE_PAGE_URL = `${CONTENT_MANAGEMENT_URL}/package-schedules`;
 export const PACKAGE_SCHEDULE_VIEW_PAGE_URL = `${PACKAGE_SCHEDULE_PAGE_URL}/view`;
 export const PACKAGE_SCHEDULE_DETAILS_VIEW_URL = `${PACKAGE_SCHEDULE_VIEW_PAGE_URL}/details`;
 export const PACKAGE_SCHEDULE_ADD_URL = `${PACKAGE_SCHEDULE_PAGE_URL}/add`;

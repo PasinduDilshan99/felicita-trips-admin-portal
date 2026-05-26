@@ -56,7 +56,7 @@ export const PieChartCard = ({
           />
           {item.name}
           <span className={`${prefix}-pie-legend-count`}>
-            {item.value.toLocaleString()}
+            {item.value?.toLocaleString()}
           </span>
         </div>
       ))}

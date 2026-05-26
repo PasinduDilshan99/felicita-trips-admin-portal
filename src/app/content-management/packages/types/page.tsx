@@ -1,4 +1,4 @@
-import PackageTypesPage from "@/pages/content-management/packages/PackageTypesPage";
+import PackageTypesPage from "@/pages/content-management/packages/package-types/PackageTypesPage";
 import React from "react";
 
 const page = () => {

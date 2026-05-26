@@ -1,5 +1,5 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
-import ActivitiesCategoriesPage from "@/pages/content-management/activities/ActivitiesCategoriesPage";
+import ActivitiesCategoriesPage from "@/pages/content-management/activities/activity-caetgories/ActivitiesCategoriesPage";
 import UpdateActivityCategoryPage from "@/pages/content-management/activities/activity-caetgories/UpdateActivityCategoryPage";
 import UpdatePackageTypesPage from "@/pages/content-management/packages/package-types/UpdatePackageTypesPage";
 import UpdateTourCategoryPage from "@/pages/content-management/tours/tour-categories/UpdateTourCategoryPage";

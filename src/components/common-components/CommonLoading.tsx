@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import { COMPANY_NAME, COMPANY_THEME } from "@/utils/constant";
 
 export interface CommonLoadingProps {
@@ -34,7 +35,6 @@ interface WaveDot {
   delay: number;
 }
 
-/* ── Exact same SeaTurtle from NotFound ───────────────────────────── */
 const SeaTurtle = ({ size, flip }: { size: number; flip: boolean }) => (
   <svg
     width={size * 0.75}
@@ -67,18 +67,19 @@ const SeaTurtle = ({ size, flip }: { size: number; flip: boolean }) => (
   </svg>
 );
 
-const CommonLoading: React.FC<CommonLoadingProps> = ({
+const LoadingInner: React.FC<CommonLoadingProps & { mounted: boolean }> = ({
   message,
   subMessage,
   size = "md",
   fullScreen = false,
   className = "",
+  mounted,
 }) => {
   const [msgIndex, setMsgIndex] = useState(0);
   const [msgVisible, setMsgVisible] = useState(true);
   const [turtles, setTurtles] = useState<Turtle[]>([]);
   const [waveDots, setWaveDots] = useState<WaveDot[]>([]);
-  const [mounted, setMounted] = useState(false);
+  const [innerMounted, setInnerMounted] = useState(false);
 
   useEffect(() => {
     setTurtles(
@@ -98,7 +99,7 @@ const CommonLoading: React.FC<CommonLoadingProps> = ({
         delay: i * 0.15,
       }))
     );
-    requestAnimationFrame(() => setMounted(true));
+    requestAnimationFrame(() => setInnerMounted(true));
   }, []);
 
   useEffect(() => {
@@ -113,24 +114,65 @@ const CommonLoading: React.FC<CommonLoadingProps> = ({
     return () => clearInterval(interval);
   }, [message]);
 
-  const logoSizes = { sm: { ring: 88, inner: 62, core: 42 }, md: { ring: 120, inner: 84, core: 56 }, lg: { ring: 152, inner: 108, core: 72 } };
-  const textSizes = { sm: { brand: "text-xl", tag: "text-[8px]", msg: "text-[11px]" }, md: { brand: "text-[26px]", tag: "text-[9.5px]", msg: "text-[12px]" }, lg: { brand: "text-[34px]", tag: "text-[11px]", msg: "text-sm" } };
+  const logoSizes = {
+    sm: { ring: 88, inner: 62, core: 42 },
+    md: { ring: 120, inner: 84, core: 56 },
+    lg: { ring: 152, inner: 108, core: 72 },
+  };
+  const textSizes = {
+    sm: { brand: "text-xl", tag: "text-[8px]", msg: "text-[11px]" },
+    md: { brand: "text-[26px]", tag: "text-[9.5px]", msg: "text-[12px]" },
+    lg: { brand: "text-[34px]", tag: "text-[11px]", msg: "text-sm" },
+  };
   const lc = logoSizes[size];
   const tc = textSizes[size];
 
+  const containerStyle: React.CSSProperties = fullScreen
+    ? {
+        position: "fixed",
+        inset: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: 9999,
+        background:
+          "linear-gradient(160deg,#0a2a3a 0%,#0d3d4f 30%,#0e5a5e 60%,#0f7a6e 100%)",
+      }
+    : {
+        background:
+          "linear-gradient(160deg,#0a2a3a 0%,#0d3d4f 30%,#0e5a5e 60%,#0f7a6e 100%)",
+        minHeight: 420,
+      };
+
   return (
     <div
-      className={`relative flex flex-col items-center justify-center overflow-hidden ${fullScreen ? "fixed inset-0 z-50" : ""} ${className}`}
-      style={{
-        background: "linear-gradient(160deg,#0a2a3a 0%,#0d3d4f 30%,#0e5a5e 60%,#0f7a6e 100%)",
-        minHeight: fullScreen ? undefined : 420,
-      }}
+      className={`relative flex flex-col items-center justify-center overflow-hidden ${
+        fullScreen ? "" : className
+      }`}
+      style={containerStyle}
     >
       {/* ── Orbs ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full opacity-[0.18]" style={{ background: "radial-gradient(circle,#14b8a6 0%,transparent 70%)", animation: "ft-orb1 18s ease-in-out infinite" }} />
-        <div className="absolute -bottom-36 -right-36 w-[500px] h-[500px] rounded-full opacity-[0.13]" style={{ background: "radial-gradient(circle,#0891b2 0%,transparent 70%)", animation: "ft-orb2 22s ease-in-out infinite" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] rounded-full opacity-[0.09]" style={{ background: "radial-gradient(circle,#06b6d4 0%,transparent 70%)", animation: "ft-orb3 14s ease-in-out infinite" }} />
+        <div
+          className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full opacity-[0.18]"
+          style={{
+            background: "radial-gradient(circle,#14b8a6 0%,transparent 70%)",
+            animation: "ft-orb1 18s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute -bottom-36 -right-36 w-[500px] h-[500px] rounded-full opacity-[0.13]"
+          style={{
+            background: "radial-gradient(circle,#0891b2 0%,transparent 70%)",
+            animation: "ft-orb2 22s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] rounded-full opacity-[0.09]"
+          style={{
+            background: "radial-gradient(circle,#06b6d4 0%,transparent 70%)",
+            animation: "ft-orb3 14s ease-in-out infinite",
+          }}
+        />
       </div>
 
       {/* ── Swimming turtles ── */}
@@ -167,11 +209,29 @@ const CommonLoading: React.FC<CommonLoadingProps> = ({
 
       {/* ── Ocean floor waves ── */}
       <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
-        <svg viewBox="0 0 2880 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full" style={{ animation: "ft-wave-slide 8s linear infinite" }}>
-          <path d="M0,60 C240,100 480,20 720,60 C960,100 1200,20 1440,60 C1680,100 1920,20 2160,60 C2400,100 2640,20 2880,60 L2880,120 L0,120 Z" fill="rgba(20,184,166,0.1)" />
+        <svg
+          viewBox="0 0 2880 120"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full"
+          style={{ animation: "ft-wave-slide 8s linear infinite" }}
+        >
+          <path
+            d="M0,60 C240,100 480,20 720,60 C960,100 1200,20 1440,60 C1680,100 1920,20 2160,60 C2400,100 2640,20 2880,60 L2880,120 L0,120 Z"
+            fill="rgba(20,184,166,0.1)"
+          />
         </svg>
-        <svg viewBox="0 0 2880 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full absolute bottom-0" style={{ animation: "ft-wave-slide 12s linear infinite reverse" }}>
-          <path d="M0,80 C360,20 720,100 1080,40 C1440,0 1800,80 2160,40 C2520,0 2760,60 2880,80 L2880,120 L0,120 Z" fill="rgba(6,182,212,0.07)" />
+        <svg
+          viewBox="0 0 2880 120"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full absolute bottom-0"
+          style={{ animation: "ft-wave-slide 12s linear infinite reverse" }}
+        >
+          <path
+            d="M0,80 C360,20 720,100 1080,40 C1440,0 1800,80 2160,40 C2520,0 2760,60 2880,80 L2880,120 L0,120 Z"
+            fill="rgba(6,182,212,0.07)"
+          />
         </svg>
       </div>
 
@@ -179,20 +239,22 @@ const CommonLoading: React.FC<CommonLoadingProps> = ({
       <div
         className="relative z-10 flex flex-col items-center text-center px-6"
         style={{
-          opacity: mounted ? 1 : 0,
-          transform: mounted ? "translateY(0)" : "translateY(20px)",
+          opacity: innerMounted ? 1 : 0,
+          transform: innerMounted ? "translateY(0)" : "translateY(20px)",
           transition: "opacity 0.8s ease, transform 0.8s ease",
         }}
       >
-        {/* Logo ring — same as NotFound */}
+        {/* Logo ring */}
         <div
           className="relative flex items-center justify-center rounded-full"
           style={{
             width: lc.ring,
             height: lc.ring,
-            background: "linear-gradient(135deg,rgba(20,184,166,0.2),rgba(6,182,212,0.1))",
+            background:
+              "linear-gradient(135deg,rgba(20,184,166,0.2),rgba(6,182,212,0.1))",
             border: "1px solid rgba(20,184,166,0.3)",
-            boxShadow: "0 0 40px rgba(20,184,166,0.15),inset 0 0 20px rgba(6,182,212,0.05)",
+            boxShadow:
+              "0 0 40px rgba(20,184,166,0.15),inset 0 0 20px rgba(6,182,212,0.05)",
             animation: "ft-gentle-bob 4s ease-in-out infinite",
           }}
         >
@@ -201,7 +263,8 @@ const CommonLoading: React.FC<CommonLoadingProps> = ({
             style={{
               width: lc.inner,
               height: lc.inner,
-              background: "linear-gradient(135deg,rgba(20,184,166,0.3),rgba(8,145,178,0.2))",
+              background:
+                "linear-gradient(135deg,rgba(20,184,166,0.3),rgba(8,145,178,0.2))",
               border: "1px solid rgba(20,184,166,0.5)",
             }}
           >
@@ -222,11 +285,11 @@ const CommonLoading: React.FC<CommonLoadingProps> = ({
                 height={200}
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
-                  const fb = e.currentTarget.nextElementSibling as HTMLElement;
+                  const fb = e.currentTarget
+                    .nextElementSibling as HTMLElement;
                   if (fb) fb.style.display = "block";
                 }}
               />
-              {/* Turtle fallback if logo.png fails */}
               <div style={{ display: "none" }}>
                 <SeaTurtle size={lc.core * 0.7} flip={false} />
               </div>
@@ -268,10 +331,27 @@ const CommonLoading: React.FC<CommonLoadingProps> = ({
         </p>
 
         {/* Separator */}
-        <div style={{ width: 44, height: 1, background: "rgba(20,184,166,0.35)", borderRadius: 2, margin: "18px auto 0" }} />
+        <div
+          style={{
+            width: 44,
+            height: 1,
+            background: "rgba(20,184,166,0.35)",
+            borderRadius: 2,
+            margin: "18px auto 0",
+          }}
+        />
 
         {/* Progress bar */}
-        <div style={{ width: 140, height: 2, background: "rgba(255,255,255,0.1)", borderRadius: 4, overflow: "hidden", marginTop: 14 }}>
+        <div
+          style={{
+            width: 140,
+            height: 2,
+            background: "rgba(255,255,255,0.1)",
+            borderRadius: 4,
+            overflow: "hidden",
+            marginTop: 14,
+          }}
+        >
           <div
             style={{
               height: "100%",
@@ -305,9 +385,18 @@ const CommonLoading: React.FC<CommonLoadingProps> = ({
       {fullScreen && (
         <div
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 whitespace-nowrap"
-          style={{ opacity: mounted ? 1 : 0, transition: "opacity 1s 0.8s ease" }}
+          style={{
+            opacity: innerMounted ? 1 : 0,
+            transition: "opacity 1s 0.8s ease",
+          }}
         >
-          <span className="text-xs tracking-widest uppercase font-medium" style={{ color: "rgba(94,234,212,0.35)", letterSpacing: "0.18em" }}>
+          <span
+            className="text-xs tracking-widest uppercase font-medium"
+            style={{
+              color: "rgba(94,234,212,0.35)",
+              letterSpacing: "0.18em",
+            }}
+          >
             {COMPANY_NAME}
           </span>
           <span style={{ color: "rgba(94,234,212,0.2)" }}>—</span>
@@ -378,6 +467,26 @@ const CommonLoading: React.FC<CommonLoadingProps> = ({
       `}</style>
     </div>
   );
+};
+
+const CommonLoading: React.FC<CommonLoadingProps> = (props) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // For fullScreen, render via portal into document.body to escape
+  // any parent stacking context or overflow:hidden
+  if (props.fullScreen) {
+    if (!mounted) return null; // avoid SSR mismatch
+    return createPortal(
+      <LoadingInner {...props} mounted={mounted} />,
+      document.body
+    );
+  }
+
+  return <LoadingInner {...props} mounted={mounted} />;
 };
 
 export default CommonLoading;

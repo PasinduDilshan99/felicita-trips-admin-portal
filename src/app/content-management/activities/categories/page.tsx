@@ -1,5 +1,5 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
-import ActivitiesCategoriesPage from "@/pages/content-management/activities/ActivitiesCategoriesPage";
+import ActivitiesCategoriesPage from "@/pages/content-management/activities/activity-caetgories/ActivitiesCategoriesPage";
 import { ACTIVITY_CATEGORY_PAGE_TITLE } from "@/utils/pagesHeaderTitles";
 import { ACTIVITY_CATEGORY_PRIVILEGE } from "@/utils/privileges";
 import { Metadata } from "next";

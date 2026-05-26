@@ -1,12 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef, JSX } from "react";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_ACTIVITIES_PATH,
-} from "@/utils/constant";
-import { webManagementSideBarData } from "@/data/side-bar-data";
 import {
   PieChart,
   Pie,
@@ -33,6 +27,9 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
 import { ActionCardSkeleton } from "@/components/common-components/management-components/ActionCardSkeleton";
 import { ActionCard } from "@/components/common-components/management-components/ActionCard";
+import { contentManagementSideBarData } from "@/data/side-bar-data";
+import { ACTIVITY_CATEGORY_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
 
 /* ─────────────────────────────────────────────
    Animated Counter — eases out, starts from 0
@@ -360,19 +357,10 @@ const ActivitiesCategoriesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const activitiesData = webManagementSideBarData.find(
+  const activitiesData = contentManagementSideBarData.find(
     (item) => item.name === "Activities",
   );
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Activities",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}`,
-    },
-    { label: "Categories", href: "#" },
-  ];
 
   useEffect(() => {
     fetchStatistics();
@@ -1025,7 +1013,7 @@ const ActivitiesCategoriesPage = () => {
                 <PageHeader
                   title="Activity Categories"
                   description="Manage and analyze category performance and statistics"
-                  breadcrumbItems={breadcrumbItems}
+                  breadcrumbItems={ACTIVITY_CATEGORY_PAGE_BREADCRUMB_DATA}
                 />
               </div>
             </div>

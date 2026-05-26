@@ -1,4 +1,4 @@
-import TourCategoriesPage from "@/pages/content-management/tours/TourCategoriesPage";
+import TourCategoriesPage from "@/pages/content-management/tours/tour-categories/TourCategoriesPage";
 import React from "react";
 
 const page = () => {
