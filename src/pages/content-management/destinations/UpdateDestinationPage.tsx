@@ -5,70 +5,59 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { DestinationService } from "@/services/destinationService";
 import { OtherService } from "@/services/otherService";
 import {
-  DestinationForTerminate,
+  DestinationForTour,
   SingleDestinationResponse,
-  Activity,
-  Image,
-  NewActivityRequest,
-  NewImageRequest,
   UpdateDestinationRequest,
-  DestinationCategoryDetailsDtos,
+  NewImageRequest,
+  NewActivityRequest,
+  UpdateImageRequest,
 } from "@/types/destination-types";
-import { Search, Edit, Save, Loader2, RefreshCw } from "lucide-react";
-import DestinationDetailsForm from "@/components/destinations-components/update-destinations-components/DestinationDetailsForm";
-import { UpdateConfirmationModal } from "@/components/common-components/UpdateConfirmationModal";
-import {
-  ActivityCategory,
-  DestinationCategory,
-  SeasonType,
-} from "@/types/common-types";
+import { Search, Edit, Save, RefreshCw, Loader2 } from "lucide-react";
 import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
-import CommonSearch from "@/components/common-components/CommonSearch";
+import CommonSearch, { SearchItem } from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
-import { DESTINATION_DETAILS_VIEW_PAGE_URL } from "@/utils/urls";
+import { UpdateConfirmationModal, ChangedField } from "@/components/common-components/UpdateConfirmationModal";
 import { hexToRgba } from "@/utils/functions";
-import { DESTINATION_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { DESTINATION_PAGE_URL } from "@/utils/urls";
 import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { DestinationBasicInfoForm } from "@/components/destinations-components/update-destinations-components/DestinationBasicInfoForm";
+import { DestinationCategoriesForm } from "@/components/destinations-components/update-destinations-components/DestinationCategoriesForm";
+import { DestinationImagesForm } from "@/components/destinations-components/update-destinations-components/DestinationImagesForm";
+import { DestinationActivitiesForm } from "@/components/destinations-components/update-destinations-components/DestinationActivitiesForm";
+import { DESTINATION_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
+import { DESTINATION_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const UpdateDestinationPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
-
-  const {
-    categories,
-    loading: commonLoading,
-    error: commonError,
-  } = useCommon();
+  const { categories, loading: commonLoading, error: commonError } = useCommon();
 
   const initialDestinationName = searchParams?.get("destination-name") || "";
   const initialDestinationId = searchParams?.get("destination-id") || "";
-  const [destinations, setDestinations] = useState<DestinationForTerminate[]>(
-    [],
+
+  const [destinations, setDestinations] = useState<DestinationForTour[]>([]);
+  const [selectedDestination, setSelectedDestination] = useState<DestinationForTour | null>(
+    initialDestinationId && initialDestinationName
+      ? {
+          destinationId: parseInt(initialDestinationId),
+          destinationName: initialDestinationName,
+        }
+      : null,
   );
-  const [selectedDestination, setSelectedDestination] =
-    useState<DestinationForTerminate | null>(
-      initialDestinationId && initialDestinationName
-        ? {
-            destinationId: parseInt(initialDestinationId),
-            destinationName: initialDestinationName,
-          }
-        : null,
-    );
-  const [originalDestination, setOriginalDestination] =
-    useState<SingleDestinationResponse | null>(null);
-  const [editedDestination, setEditedDestination] =
-    useState<SingleDestinationResponse | null>(null);
+  const [originalDestination, setOriginalDestination] = useState<SingleDestinationResponse | null>(null);
+  const [editedDestination, setEditedDestination] = useState<SingleDestinationResponse | null>(null);
   const [originalCategoryIds, setOriginalCategoryIds] = useState<number[]>([]);
   const [currentCategoryIds, setCurrentCategoryIds] = useState<number[]>([]);
   const [removedImages, setRemovedImages] = useState<number[]>([]);
   const [removedActivities, setRemovedActivities] = useState<number[]>([]);
   const [newImages, setNewImages] = useState<NewImageRequest[]>([]);
   const [newActivities, setNewActivities] = useState<NewActivityRequest[]>([]);
+  const [updatedImages, setUpdatedImages] = useState<UpdateImageRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -76,6 +65,7 @@ const UpdateDestinationPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["basic", "categories", "images", "activities"]));
 
   const [toast, setToast] = useState<{
     type: "success" | "error";
@@ -84,20 +74,30 @@ const UpdateDestinationPage = () => {
     actionLink?: string;
   } | null>(null);
 
-  const [availableCategories, setAvailableCategories] = useState<
-    DestinationCategory[]
-  >([]);
-  const [availableActivityCategories, setAvailableActivityCategories] =
-    useState<ActivityCategory[]>([]);
-  const [availableSeasons, setAvailableSeasons] = useState<SeasonType[]>([]);
+  const availableCategories = categories?.destinationCategoryList || [];
+  const availableActivityCategories = categories?.activityCategoryList || [];
+  const availableSeasons = categories?.seasonsList || [];
 
-  useEffect(() => {
-    if (categories) {
-      setAvailableCategories(categories.destinationCategoryList);
-      setAvailableActivityCategories(categories.activityCategoryList);
-      setAvailableSeasons(categories.seasonsList);
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(section)) newSet.delete(section);
+      else newSet.add(section);
+      return newSet;
+    });
+  };
+
+  const updateUrlWithSelectedDestination = useCallback((destination: DestinationForTour | null) => {
+    const url = new URL(window.location.href);
+    if (destination) {
+      url.searchParams.set("destination-id", destination.destinationId.toString());
+      url.searchParams.set("destination-name", destination.destinationName);
+    } else {
+      url.searchParams.delete("destination-id");
+      url.searchParams.delete("destination-name");
     }
-  }, [categories]);
+    router.replace(url.toString(), { scroll: false });
+  }, [router]);
 
   useEffect(() => {
     if (!selectedDestination) {
@@ -106,11 +106,8 @@ const UpdateDestinationPage = () => {
   }, []);
 
   useEffect(() => {
-    if (initialDestinationId && !originalDestination) {
-      handleSelectDestination(
-        parseInt(initialDestinationId),
-        initialDestinationName,
-      );
+    if (initialDestinationId && !originalDestination && !loadingDetails) {
+      handleSelectDestination(parseInt(initialDestinationId), initialDestinationName);
     }
   }, [initialDestinationId, initialDestinationName]);
 
@@ -118,7 +115,7 @@ const UpdateDestinationPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await DestinationService.getDestinationsForTerminate();
+      const response = await DestinationService.getDestinationNames();
       setDestinations(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load destinations");
@@ -133,8 +130,46 @@ const UpdateDestinationPage = () => {
   };
 
   const handleSelectDestination = async (id: number, name: string) => {
-    setSelectedDestination({ destinationId: id, destinationName: name });
+    const newSelectedDestination = { destinationId: id, destinationName: name };
+    setSelectedDestination(newSelectedDestination);
+    updateUrlWithSelectedDestination(newSelectedDestination);
     await fetchDestinationDetails(id);
+  };
+
+  const fetchDestinationDetails = async (id: number) => {
+    setLoadingDetails(true);
+    setError(null);
+    setOriginalDestination(null);
+    setEditedDestination(null);
+    setRemovedImages([]);
+    setRemovedActivities([]);
+    setNewImages([]);
+    setNewActivities([]);
+    setUpdatedImages([]);
+    setOriginalCategoryIds([]);
+    setCurrentCategoryIds([]);
+
+    try {
+      const response = await DestinationService.getDestinationById(id);
+      const destinationData = response.data;
+      setOriginalDestination(destinationData);
+      setEditedDestination(destinationData);
+
+      const categoryIds = destinationData.destinationCategoryDetailsDtos?.map(
+        (cat) => cat.id
+      ) || [];
+      setOriginalCategoryIds(categoryIds);
+      setCurrentCategoryIds(categoryIds);
+    } catch (err: any) {
+      setError(err.message || "Failed to load destination details");
+      setToast({
+        type: "error",
+        title: "Load Failed",
+        message: err.message || "Failed to load destination details",
+      });
+    } finally {
+      setLoadingDetails(false);
+    }
   };
 
   const uploadImageToCloudinary = async (file: File): Promise<string> => {
@@ -147,11 +182,7 @@ const UpdateDestinationPage = () => {
     }
   };
 
-  const handleAddNewImage = async (
-    imageFile: File,
-    imageName: string,
-    imageDescription: string,
-  ) => {
+  const handleAddNewImage = async (imageFile: File, imageName: string, imageDescription: string) => {
     setUploadingImages(true);
     try {
       const cloudinaryUrl = await uploadImageToCloudinary(imageFile);
@@ -166,7 +197,7 @@ const UpdateDestinationPage = () => {
       setNewImages((prev) => [...prev, newImage]);
 
       if (editedDestination) {
-        const tempImage: Image = {
+        const tempImage = {
           imageId: Date.now(),
           imageName: imageName,
           imageDescription: imageDescription,
@@ -189,45 +220,65 @@ const UpdateDestinationPage = () => {
     }
   };
 
-  const fetchDestinationDetails = async (id: number) => {
-    setLoadingDetails(true);
-    setError(null);
-    setOriginalDestination(null);
-    setEditedDestination(null);
-    setRemovedImages([]);
-    setRemovedActivities([]);
-    setNewImages([]);
-    setNewActivities([]);
-    setOriginalCategoryIds([]);
-    setCurrentCategoryIds([]);
+  const handleUpdateImage = (imageId: number, name: string, description: string) => {
+    const existingUpdate = updatedImages.find((u) => u.id === imageId);
+    if (existingUpdate) {
+      setUpdatedImages((prev) =>
+        prev.map((u) =>
+          u.id === imageId ? { ...u, name, description } : u
+        )
+      );
+    } else {
+      const originalImage = originalDestination?.images.find((img) => img.imageId === imageId);
+      setUpdatedImages((prev) => [
+        ...prev,
+        {
+          id: imageId,
+          name,
+          description,
+          imageUrl: originalImage?.imageUrl || "",
+          status: "ACTIVE",
+        },
+      ]);
+    }
+    setEditedDestination((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        images: prev.images.map((img) =>
+          img.imageId === imageId ? { ...img, imageName: name, imageDescription: description } : img
+        ),
+      };
+    });
+  };
 
-    try {
-      const response = await DestinationService.getDestinationById(id);
-      const destinationData = response.data;
-      setOriginalDestination(destinationData);
-      setEditedDestination(destinationData);
-
-      const categoryIds =
-        destinationData.destinationCategoryDetailsDtos?.map(
-          (cat: DestinationCategoryDetailsDtos) => cat.id,
-        ) || [];
-      setOriginalCategoryIds(categoryIds);
-      setCurrentCategoryIds(categoryIds);
-    } catch (err: any) {
-      setError(err.message || "Failed to load destination details");
-      setToast({
-        type: "error",
-        title: "Load Failed",
-        message: err.message || "Failed to load destination details",
+  const handleAddNewActivity = (activity: NewActivityRequest) => {
+    setNewActivities((prev) => [...prev, activity]);
+    
+    if (editedDestination) {
+      const tempActivity = {
+        activityId: Date.now(),
+        activityName: activity.name,
+        activityDescription: activity.description,
+        activityCategories: [],
+        durationHours: activity.durationHover,
+        availableFrom: activity.availableFrom,
+        availableTo: activity.availableTo,
+        priceLocal: activity.priceLocal,
+        priceForeigners: activity.priceForeigners,
+        minParticipate: activity.minParticipate,
+        maxParticipate: activity.maxParticipate,
+        season: "",
+      };
+      setEditedDestination({
+        ...editedDestination,
+        activities: [...editedDestination.activities, tempActivity],
       });
-    } finally {
-      setLoadingDetails(false);
     }
   };
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleBasicFieldChange = (field: string, value: any) => {
     if (!editedDestination) return;
-
     setEditedDestination({
       ...editedDestination,
       [field]: value,
@@ -235,65 +286,40 @@ const UpdateDestinationPage = () => {
   };
 
   const handleCategoryChange = (categoryId: number) => {
-    setCurrentCategoryIds((prev) => {
+    setCurrentCategoryIds(prev => {
+      let newIds: number[];
       if (prev.includes(categoryId)) {
-        return prev.filter((id) => id !== categoryId);
+        newIds = prev.filter((id) => id !== categoryId);
       } else {
-        return [...prev, categoryId];
+        newIds = [...prev, categoryId];
       }
+      return newIds;
     });
   };
 
   const handleRemoveImage = (imageId: number) => {
-    if (!editedDestination) return;
-
     setRemovedImages((prev) => [...prev, imageId]);
-
-    setEditedDestination({
-      ...editedDestination,
-      images: editedDestination.images.filter((img) => img.imageId !== imageId),
+    setEditedDestination((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        images: prev.images.filter((img) => img.imageId !== imageId),
+      };
     });
   };
 
   const handleRemoveActivity = (activityId: number) => {
-    if (!editedDestination) return;
-
     setRemovedActivities((prev) => [...prev, activityId]);
-
-    setEditedDestination({
-      ...editedDestination,
-      activities: editedDestination.activities.filter(
-        (act) => act.activityId !== activityId,
-      ),
+    setEditedDestination((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        activities: prev.activities.filter((act) => act.activityId !== activityId),
+      };
     });
   };
 
-  const handleAddNewActivity = (activity: NewActivityRequest) => {
-    setNewActivities((prev) => [...prev, activity]);
-  };
-
-  const handleUpdateActivity = (updatedActivity: Activity) => {
-    if (!editedDestination) return;
-
-    setEditedDestination({
-      ...editedDestination,
-      activities: editedDestination.activities.map((act) =>
-        act.activityId === updatedActivity.activityId ? updatedActivity : act,
-      ),
-    });
-  };
-
-  const handleUpdateImage = (updatedImage: Image) => {
-    if (!editedDestination) return;
-
-    setEditedDestination({
-      ...editedDestination,
-      images: editedDestination.images.map((img) =>
-        img.imageId === updatedImage.imageId ? updatedImage : img,
-      ),
-    });
-  };
-
+  // Calculate category changes
   const getCategoryChanges = useCallback(() => {
     const removedCategoryIds = originalCategoryIds.filter(
       (id) => !currentCategoryIds.includes(id),
@@ -304,28 +330,29 @@ const UpdateDestinationPage = () => {
     return { removedCategoryIds, addedCategoryIds };
   }, [originalCategoryIds, currentCategoryIds]);
 
+  // Check if there are any changes
   const hasChanges = useCallback(() => {
     if (!originalDestination || !editedDestination) return false;
 
     const basicFieldsChanged =
-      originalDestination.destinationName !==
-        editedDestination.destinationName ||
-      originalDestination.destinationDescription !==
-        editedDestination.destinationDescription ||
+      originalDestination.destinationName !== editedDestination.destinationName ||
+      originalDestination.destinationDescription !== editedDestination.destinationDescription ||
       originalDestination.location !== editedDestination.location ||
       originalDestination.latitude !== editedDestination.latitude ||
       originalDestination.longitude !== editedDestination.longitude ||
-      originalDestination.statusName !== editedDestination.statusName;
+      originalDestination.statusName !== editedDestination.statusName ||
+      originalDestination.extraPrice !== editedDestination.extraPrice ||
+      originalDestination.extraPriceNote !== editedDestination.extraPriceNote;
 
     const { removedCategoryIds, addedCategoryIds } = getCategoryChanges();
-    const categoriesChanged =
-      removedCategoryIds.length > 0 || addedCategoryIds.length > 0;
+    const categoriesChanged = removedCategoryIds.length > 0 || addedCategoryIds.length > 0;
 
     const itemsChanged =
       removedImages.length > 0 ||
       removedActivities.length > 0 ||
       newImages.length > 0 ||
-      newActivities.length > 0;
+      newActivities.length > 0 ||
+      updatedImages.length > 0;
 
     return basicFieldsChanged || categoriesChanged || itemsChanged;
   }, [
@@ -335,9 +362,11 @@ const UpdateDestinationPage = () => {
     removedActivities,
     newImages,
     newActivities,
+    updatedImages,
     getCategoryChanges,
   ]);
 
+  // Prepare update data
   const prepareUpdateData = (): UpdateDestinationRequest | null => {
     if (!editedDestination || !selectedDestination) return null;
 
@@ -356,12 +385,14 @@ const UpdateDestinationPage = () => {
       extraPrice: editedDestination.extraPrice || undefined,
       extraPriceNote: editedDestination.extraPriceNote || "",
       removeImages: removedImages,
+      updateImages: updatedImages,
       newImages: newImages,
       removeActivities: removedActivities,
       newActivities: newActivities,
     };
   };
 
+  // Handle update submission
   const handleUpdateSubmit = async () => {
     const updateData = prepareUpdateData();
     if (!updateData) return;
@@ -373,14 +404,13 @@ const UpdateDestinationPage = () => {
     try {
       const response = await DestinationService.updateDestination(updateData);
 
-      const successMsg = `Destination "${editedDestination?.destinationName}" updated successfully!`;
-      setSuccess(successMsg);
+      setSuccess(`Destination "${editedDestination?.destinationName}" updated successfully!`);
 
       setToast({
         type: "success",
         title: "Update Successful!",
         message: `${editedDestination?.destinationName} has been updated successfully.`,
-        actionLink: `${DESTINATION_DETAILS_VIEW_PAGE_URL}/${selectedDestination?.destinationId}`,
+        actionLink: `${DESTINATION_PAGE_URL}/view?id=${selectedDestination?.destinationId}`,
       });
 
       setShowConfirmModal(false);
@@ -395,14 +425,14 @@ const UpdateDestinationPage = () => {
       setToast({
         type: "error",
         title: "Update Failed",
-        message:
-          err.message || "Failed to update destination. Please try again.",
+        message: err.message || "Failed to update destination. Please try again.",
       });
     } finally {
       setLoadingUpdate(false);
     }
   };
 
+  // Reset all changes
   const handleResetChanges = () => {
     if (originalDestination) {
       setEditedDestination(originalDestination);
@@ -410,6 +440,7 @@ const UpdateDestinationPage = () => {
       setRemovedActivities([]);
       setNewImages([]);
       setNewActivities([]);
+      setUpdatedImages([]);
       setCurrentCategoryIds(originalCategoryIds);
       setError(null);
       setSuccess(null);
@@ -430,25 +461,18 @@ const UpdateDestinationPage = () => {
     setRemovedActivities([]);
     setNewImages([]);
     setNewActivities([]);
+    setUpdatedImages([]);
     setOriginalCategoryIds([]);
     setCurrentCategoryIds([]);
     setToast(null);
-
-    const url = new URL(window.location.href);
-    url.searchParams.delete("destination-id");
-    url.searchParams.delete("destination-name");
-    router.replace(url.toString(), { scroll: false });
+    updateUrlWithSelectedDestination(null);
   };
 
-  // Prepare changed fields for confirmation modal
-  const getChangedFields = () => {
+  // Get changed fields for confirmation modal
+  const getChangedFields = (): ChangedField[] => {
     if (!originalDestination || !editedDestination) return [];
 
-    const changes: Array<{
-      field: string;
-      oldValue: any;
-      newValue: any;
-    }> = [];
+    const changes: ChangedField[] = [];
 
     const fields = [
       { key: "destinationName", label: "Destination Name" },
@@ -460,75 +484,50 @@ const UpdateDestinationPage = () => {
     ];
 
     fields.forEach(({ key, label }) => {
-      const oldValue =
-        originalDestination[key as keyof SingleDestinationResponse];
-      const newValue =
-        editedDestination[key as keyof SingleDestinationResponse];
-
+      const oldValue = originalDestination[key as keyof SingleDestinationResponse];
+      const newValue = editedDestination[key as keyof SingleDestinationResponse];
       if (oldValue !== newValue) {
-        changes.push({
-          field: label,
-          oldValue,
-          newValue,
-        });
+        changes.push({ field: label, oldValue, newValue });
       }
     });
 
+    if (originalDestination.extraPrice !== editedDestination.extraPrice) {
+      changes.push({ field: "Extra Price", oldValue: originalDestination.extraPrice || 0, newValue: editedDestination.extraPrice || 0 });
+    }
+    if (originalDestination.extraPriceNote !== editedDestination.extraPriceNote) {
+      changes.push({ field: "Extra Price Note", oldValue: originalDestination.extraPriceNote || "", newValue: editedDestination.extraPriceNote || "" });
+    }
+
     const { removedCategoryIds, addedCategoryIds } = getCategoryChanges();
-    
-    if (removedCategoryIds.length > 0) {
+    if (removedCategoryIds.length > 0 || addedCategoryIds.length > 0) {
       changes.push({
-        field: "Categories Removed",
+        field: "Categories",
         oldValue: originalCategoryIds.length,
-        newValue: originalCategoryIds.length - removedCategoryIds.length,
-      });
-    }
-    
-    if (addedCategoryIds.length > 0) {
-      changes.push({
-        field: "Categories Added",
-        oldValue: originalCategoryIds.length,
-        newValue: originalCategoryIds.length + addedCategoryIds.length,
+        newValue: currentCategoryIds.length,
       });
     }
 
-    if (removedImages.length > 0) {
+    if (removedImages.length > 0 || newImages.length > 0 || updatedImages.length > 0) {
       changes.push({
-        field: "Images Removed",
+        field: "Images",
         oldValue: originalDestination.images.length,
-        newValue: originalDestination.images.length - removedImages.length,
+        newValue: editedDestination.images.length,
       });
     }
 
-    if (newImages.length > 0) {
+    if (removedActivities.length > 0 || newActivities.length > 0) {
       changes.push({
-        field: "Images Added",
-        oldValue: originalDestination.images.length,
-        newValue: originalDestination.images.length + newImages.length,
-      });
-    }
-
-    if (removedActivities.length > 0) {
-      changes.push({
-        field: "Activities Removed",
+        field: "Activities",
         oldValue: originalDestination.activities.length,
-        newValue:
-          originalDestination.activities.length - removedActivities.length,
-      });
-    }
-
-    if (newActivities.length > 0) {
-      changes.push({
-        field: "Activities Added",
-        oldValue: originalDestination.activities.length,
-        newValue: originalDestination.activities.length + newActivities.length,
+        newValue: editedDestination.activities.length,
       });
     }
 
     return changes;
   };
 
-  const searchItems = destinations.map((dest) => ({
+  // Convert destinations to search items format
+  const searchItems: SearchItem[] = destinations.map((dest) => ({
     id: dest.destinationId,
     name: dest.destinationName,
   }));
@@ -540,22 +539,24 @@ const UpdateDestinationPage = () => {
       }
     : null;
 
+  // Show loading state from common context
   if (commonLoading) {
     return (
       <CommonLoading
-        message="Loading Destination..."
-        subMessage="Please wait while we fetch available categories"
+        message="Loading destination data..."
+        subMessage="Please wait while we fetch available destinations and categories"
         size="lg"
       />
     );
   }
 
+  // Show error state
   if (commonError) {
     return (
       <CommonErrorState
         error={commonError}
-        title="Failed to Load Categories"
-        message="Unable to load destination categories. Please try again."
+        title="Failed to Load Data"
+        message="Unable to load destination data. Please try again."
         variant="error"
         showBackButton={false}
         showRetryButton={true}
@@ -571,6 +572,7 @@ const UpdateDestinationPage = () => {
       className="min-h-screen transition-colors duration-300"
       style={{ backgroundColor: theme.background }}
     >
+      {/* Toast Notifications */}
       {toast && (
         <ToastNotification
           type={toast.type}
@@ -582,6 +584,7 @@ const UpdateDestinationPage = () => {
         />
       )}
 
+      {/* Header with Breadcrumb */}
       <div
         className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
         style={{
@@ -598,7 +601,9 @@ const UpdateDestinationPage = () => {
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section */}
         {!selectedDestination && (
           <div
             className="rounded-2xl shadow-lg p-8 mb-8 transition-all duration-300"
@@ -619,9 +624,7 @@ const UpdateDestinationPage = () => {
               items={searchItems}
               loading={loading}
               selectedItem={selectedSearchItem}
-              onSelectItem={(item) =>
-                handleSelectDestination(item.id as number, item.name)
-              }
+              onSelectItem={(item) => handleSelectDestination(item.id as number, item.name)}
               onClearSelection={handleClearDestinationSelection}
               initialSearchTerm={initialDestinationName}
               placeholder="Search destinations..."
@@ -632,24 +635,24 @@ const UpdateDestinationPage = () => {
             />
           </div>
         )}
-        
-        <SelectedItemBar
-          item={
-            selectedDestination
-              ? {
-                  id: selectedDestination.destinationId,
-                  name: selectedDestination.destinationName,
-                }
-              : null
-          }
-          onClear={handleClearDestinationSelection}
-          variant="primary"
-          title="Currently Editing"
-          showId={true}
-          clearButtonText="Change Destination"
-          size="md"
-        />
-        
+
+        {/* Selected Destination Info Bar */}
+        {selectedDestination && (
+          <SelectedItemBar
+            item={{
+              id: selectedDestination.destinationId,
+              name: selectedDestination.destinationName,
+            }}
+            onClear={handleClearDestinationSelection}
+            variant="primary"
+            title="Currently Editing"
+            showId={true}
+            clearButtonText="Change Destination"
+            size="md"
+          />
+        )}
+
+        {/* Loading Details */}
         {loadingDetails && (
           <CommonLoading
             message="Loading destination details..."
@@ -659,33 +662,64 @@ const UpdateDestinationPage = () => {
             className="rounded-2xl shadow-lg border"
           />
         )}
-        
-        {/* Destination Details Form - This already includes the CategorySelector */}
+
+        {/* Destination Details Form */}
         {editedDestination && selectedDestination && (
-          <DestinationDetailsForm
-            destination={editedDestination}
-            originalDestination={originalDestination}
-            removedImages={removedImages}
-            removedActivities={removedActivities}
-            newImages={newImages}
-            newActivities={newActivities}
-            currentCategoryIds={currentCategoryIds}
-            originalCategoryIds={originalCategoryIds}
-            availableCategories={availableCategories}
-            availableActivityCategories={availableActivityCategories}
-            availableSeasons={availableSeasons}
-            onFieldChange={handleFieldChange}
-            onCategoryChange={handleCategoryChange}
-            onRemoveImage={handleRemoveImage}
-            onRemoveActivity={handleRemoveActivity}
-            onAddNewImage={handleAddNewImage}
-            onAddNewActivity={handleAddNewActivity}
-            onUpdateActivity={handleUpdateActivity}
-            onUpdateImage={handleUpdateImage}
-            uploadingImages={uploadingImages}
-          />
+          <div className="space-y-6">
+            {/* Basic Information Section */}
+            <DestinationBasicInfoForm
+              destination={editedDestination}
+              originalDestination={originalDestination}
+              onFieldChange={handleBasicFieldChange}
+              statusOptions={DESTINATION_UPDATE_STATUS_OPTIONS}
+              expandedSections={expandedSections}
+              onToggleSection={toggleSection}
+              theme={theme}
+            />
+
+            {/* Categories Section */}
+            <DestinationCategoriesForm
+              currentCategoryIds={currentCategoryIds}
+              originalCategoryIds={originalCategoryIds}
+              availableCategories={availableCategories}
+              onCategoryChange={handleCategoryChange}
+              expandedSections={expandedSections}
+              onToggleSection={toggleSection}
+              theme={theme}
+            />
+
+            {/* Images Section */}
+            <DestinationImagesForm
+              images={editedDestination.images}
+              removedImages={removedImages}
+              newImages={newImages}
+              updatedImages={updatedImages}
+              uploadingImages={uploadingImages}
+              onRemoveImage={handleRemoveImage}
+              onAddNewImage={handleAddNewImage}
+              onUpdateImage={handleUpdateImage}
+              expandedSections={expandedSections}
+              onToggleSection={toggleSection}
+              theme={theme}
+            />
+
+            {/* Activities Section */}
+            <DestinationActivitiesForm
+              activities={editedDestination.activities}
+              removedActivities={removedActivities}
+              newActivities={newActivities}
+              availableActivityCategories={availableActivityCategories}
+              availableSeasons={availableSeasons}
+              onRemoveActivity={handleRemoveActivity}
+              onAddNewActivity={handleAddNewActivity}
+              expandedSections={expandedSections}
+              onToggleSection={toggleSection}
+              theme={theme}
+            />
+          </div>
         )}
-        
+
+        {/* Action Buttons */}
         {editedDestination && originalDestination && (
           <div
             className="rounded-2xl shadow-lg p-8 mt-8 transition-colors duration-300"
@@ -706,10 +740,7 @@ const UpdateDestinationPage = () => {
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = theme.primary;
-                  e.currentTarget.style.backgroundColor = hexToRgba(
-                    theme.primary,
-                    0.05,
-                  );
+                  e.currentTarget.style.backgroundColor = hexToRgba(theme.primary, 0.05);
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = theme.border;
@@ -733,6 +764,7 @@ const UpdateDestinationPage = () => {
               </button>
             </div>
 
+            {/* Uploading Indicator */}
             {uploadingImages && (
               <div
                 className="mt-6 p-4 rounded-xl transition-colors duration-300"
@@ -742,26 +774,20 @@ const UpdateDestinationPage = () => {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <Loader2
-                    className="w-5 h-5 animate-spin"
-                    style={{ color: theme.primary }}
-                  />
+                  <Loader2 className="w-5 h-5 animate-spin" style={{ color: theme.primary }} />
                   <div>
                     <p className="font-medium" style={{ color: theme.primary }}>
                       Uploading images to Cloudinary...
                     </p>
-                    <p
-                      className="text-sm mt-1"
-                      style={{ color: theme.textSecondary }}
-                    >
-                      Please wait for all images to finish uploading before
-                      updating
+                    <p className="text-sm mt-1" style={{ color: theme.textSecondary }}>
+                      Please wait for all images to finish uploading before updating
                     </p>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* Change Indicator */}
             {hasChanges() && !uploadingImages && (
               <div
                 className="mt-6 p-4 rounded-xl transition-colors duration-300"
@@ -776,10 +802,7 @@ const UpdateDestinationPage = () => {
                     <p className="font-medium" style={{ color: theme.primary }}>
                       You have unsaved changes
                     </p>
-                    <p
-                      className="text-sm mt-1"
-                      style={{ color: theme.textSecondary }}
-                    >
+                    <p className="text-sm mt-1" style={{ color: theme.textSecondary }}>
                       Click "Update Destination" to save your changes
                     </p>
                   </div>
@@ -788,21 +811,21 @@ const UpdateDestinationPage = () => {
             )}
           </div>
         )}
-        
+
         {/* Confirmation Modal */}
         {showConfirmModal && originalDestination && editedDestination && (
           <UpdateConfirmationModal
             isOpen={showConfirmModal}
             onClose={() => setShowConfirmModal(false)}
             onConfirm={handleUpdateSubmit}
-            title="Confirm Destination Update"
-            message={`Are you sure you want to update "${editedDestination.destinationName}"?`}
-            changedFields={getChangedFields()}
-            confirmText="Confirm Update"
-            cancelText="Cancel"
-            type="update"
             isLoading={loadingUpdate}
+            type="update"
             itemName={editedDestination.destinationName}
+            changedFields={getChangedFields()}
+            confirmText="Update Destination"
+            cancelText="Cancel"
+            title="Confirm Destination Update"
+            message={`You are about to update "${editedDestination.destinationName}". Please review the changes below before confirming.`}
             showFieldComparisons={true}
           />
         )}

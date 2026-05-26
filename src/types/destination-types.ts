@@ -194,9 +194,18 @@ export interface UpdateDestinationRequest {
   extraPrice?: number;
   extraPriceNote?: string;
   removeImages: number[];
+  updateImages: UpdateImageRequest[];
   newImages: NewImageRequest[];
   removeActivities: number[];
   newActivities: NewActivityRequest[];
+}
+
+export interface UpdateImageRequest {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface UpdateDestinationResponse {
@@ -618,3 +627,7 @@ export interface LocationFormProps {
   onGetCurrentLocation: () => void;
 }
 
+export interface DestinationSearchItem {
+  id: number;
+  name: string;
+}

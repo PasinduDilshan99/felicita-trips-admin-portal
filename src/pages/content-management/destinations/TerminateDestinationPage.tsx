@@ -1,49 +1,34 @@
-// app/web-management/destinations/terminate/page.tsx (Updated with Common Components)
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
 import { DestinationService } from "@/services/destinationService";
 import {
   DestinationForTerminate,
+  DestinationSearchItem,
   SingleDestinationResponse,
 } from "@/types/destination-types";
 import { AlertTriangle, Activity, Search } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
-
 import { DestinationStats } from "@/components/destinations-components/terminate-destination-components/DestinationStats";
 import { BasicInfoPanel } from "@/components/destinations-components/terminate-destination-components/BasicInfoPanel";
 import { ActivitiesList } from "@/components/destinations-components/terminate-destination-components/ActivitiesList";
-import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
+import {
+  TerminationItem,
+  TerminationModal,
+} from "@/components/common-components/terminate-components/TerminationModal";
 import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
 import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface DestinationSearchItem {
-  id: number;
-  name: string;
-}
+import { hexToRgba } from "@/utils/functions";
+import { DESTINATION_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ImageModalImage } from "@/types/common-components-types";
 
 const TerminateDestinationPage = () => {
   const { theme } = useTheme();
@@ -74,7 +59,6 @@ const TerminateDestinationPage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
@@ -82,22 +66,8 @@ const TerminateDestinationPage = () => {
     actionLink?: string;
   } | null>(null);
 
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/terminate`,
-    },
-  ];
 
   const fetchDestinations = async () => {
     setLoading(true);
@@ -140,7 +110,6 @@ const TerminateDestinationPage = () => {
     setSelectedDestination({ destinationId: id, destinationName: name });
     await fetchDestinationDetails(id);
 
-    // Update URL
     const url = new URL(window.location.href);
     url.searchParams.set("destination-id", id.toString());
     url.searchParams.set("destination-name", name);
@@ -153,7 +122,6 @@ const TerminateDestinationPage = () => {
     setError(null);
     setSuccess(null);
 
-    // Update URL to remove query params
     const url = new URL(window.location.href);
     url.searchParams.delete("destination-id");
     url.searchParams.delete("destination-name");
@@ -203,7 +171,6 @@ const TerminateDestinationPage = () => {
     }
   };
 
-  // Prepare images for modal
   const getModalImages = (): ImageModalImage[] => {
     if (!destinationDetails?.images) return [];
     return destinationDetails.images.map((img) => ({
@@ -284,7 +251,6 @@ const TerminateDestinationPage = () => {
         />
       )}
 
-      {/* Header */}
       <div
         className="sticky top-0 z-10 backdrop-blur-sm border-b transition-all duration-300"
         style={{
@@ -296,14 +262,12 @@ const TerminateDestinationPage = () => {
           <PageHeader
             title="Terminate Destination"
             description="Permanently remove a destination from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={DESTINATION_TERMINATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Section - Only show when no destination is selected */}
         {!selectedDestination && (
           <div
             className="rounded-2xl shadow-lg mb-8 transition-all duration-300"
@@ -362,7 +326,6 @@ const TerminateDestinationPage = () => {
           </div>
         )}
 
-        {/* Selected Destination Info Bar */}
         <SelectedItemBar
           item={
             selectedDestination
@@ -380,7 +343,6 @@ const TerminateDestinationPage = () => {
           size="md"
         />
 
-        {/* Destination Details Section */}
         {selectedDestination && (
           <div
             className="rounded-2xl overflow-hidden transition-all duration-300"
@@ -390,7 +352,6 @@ const TerminateDestinationPage = () => {
               boxShadow: `0 4px 32px ${hexToRgba(theme.error, 0.07)}`,
             }}
           >
-            {/* Warning Header */}
             <div
               className="px-5 sm:px-6 py-4 flex flex-wrap items-center gap-4"
               style={{
@@ -438,7 +399,6 @@ const TerminateDestinationPage = () => {
               </div>
             </div>
 
-            {/* Loading Details */}
             {loadingDetails && (
               <CommonLoading
                 message="Loading destination details..."
@@ -447,7 +407,6 @@ const TerminateDestinationPage = () => {
               />
             )}
 
-            {/* Destination Details Content */}
             {!loadingDetails && destinationDetails && (
               <div className="p-5 sm:p-6 space-y-6">
                 <DestinationStats destinationDetails={destinationDetails} />
@@ -458,7 +417,6 @@ const TerminateDestinationPage = () => {
                     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
                   }}
                 >
-                  {/* Left Column */}
                   <div className="space-y-5">
                     <BasicInfoPanel destinationDetails={destinationDetails} />
                     <ImagesPanel
@@ -475,7 +433,6 @@ const TerminateDestinationPage = () => {
                     />
                   </div>
 
-                  {/* Right Column */}
                   <div className="space-y-5">
                     <div
                       className="rounded-xl overflow-hidden transition-all duration-200"
@@ -524,7 +481,6 @@ const TerminateDestinationPage = () => {
                   </div>
                 </div>
 
-                {/* Termination Button */}
                 <div
                   className="flex justify-center pt-4"
                   style={{
@@ -599,7 +555,6 @@ const TerminateDestinationPage = () => {
         )}
       </div>
 
-      {/* Confirmation Modal - Using common component */}
       <TerminationModal
         isOpen={showConfirmModal}
         item={terminationItem}
@@ -608,7 +563,6 @@ const TerminateDestinationPage = () => {
         onConfirm={handleConfirmTerminate}
       />
 
-      {/* Image Modal */}
       <ImageModal
         isOpen={imageModalOpen}
         images={getModalImages()}

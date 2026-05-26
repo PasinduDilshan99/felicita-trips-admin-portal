@@ -38,6 +38,12 @@ export const DESTINATION_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Update", href: URLS.DESTINATION_UPDATE_PAGE_URL },
 ];
 
+export const DESTINATION_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
+  { label: "Terminate", href: URLS.DESTINATION_TERMINATE_PAGE_URL },
+];
+
 export const DESTINATION_CATEGORY_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
   { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },

@@ -1,74 +1,17 @@
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { Activity, ImageIcon, Clock, DollarSign, Shield, MapPin, Tag, Globe } from "lucide-react";
+import { motion } from "framer-motion";
+import { Activity, ImageIcon, Clock, DollarSign, Shield } from "lucide-react";
 import { SingleDestinationResponse } from "@/types/destination-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const statCardVariants: Variants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.38,
-      ease: EASE_OUT,
-    },
-  },
-  hover: {
-    y: -4,
-    scale: 1.02,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut",
-    },
-  },
-  tap: {
-    scale: 0.98,
-    transition: {
-      duration: 0.1,
-    },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.3,
-      ease: EASE_OUT,
-      delay: 0.1,
-    },
-  },
-};
+import {
+  containerVariants,
+  statCardVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
 interface DestinationStatsProps {
   destinationDetails: SingleDestinationResponse;
@@ -82,25 +25,30 @@ interface StatItem {
   formatter?: (value: number | string) => string | number;
 }
 
-export const DestinationStats: React.FC<DestinationStatsProps> = ({ destinationDetails }) => {
+export const DestinationStats: React.FC<DestinationStatsProps> = ({
+  destinationDetails,
+}) => {
   const { theme } = useTheme();
   const { formatPrice, currentCurrency } = useCurrency();
 
   const stats = {
     totalActivities: destinationDetails.activities.length,
     totalImages: destinationDetails.images.length,
-    avgDuration: destinationDetails.activities.length > 0
-      ? Math.round(
-          destinationDetails.activities.reduce((sum, a) => sum + a.durationHours, 0) /
-          destinationDetails.activities.length
-        )
-      : 0,
-    minPrice: destinationDetails.activities.length > 0
-      ? Math.min(...destinationDetails.activities.map((a) => a.priceLocal))
-      : 0,
+    avgDuration:
+      destinationDetails.activities.length > 0
+        ? Math.round(
+            destinationDetails.activities.reduce(
+              (sum, a) => sum + a.durationHours,
+              0,
+            ) / destinationDetails.activities.length,
+          )
+        : 0,
+    minPrice:
+      destinationDetails.activities.length > 0
+        ? Math.min(...destinationDetails.activities.map((a) => a.priceLocal))
+        : 0,
   };
 
-  // Format status display
   const getStatusColor = (status: string): string => {
     switch (status?.toUpperCase()) {
       case "ACTIVE":
@@ -114,7 +62,6 @@ export const DestinationStats: React.FC<DestinationStatsProps> = ({ destinationD
     }
   };
 
-  // Helper function to format display value
   const getDisplayValue = (item: StatItem): string | number => {
     if (item.formatter) {
       return item.formatter(item.value);
@@ -123,41 +70,41 @@ export const DestinationStats: React.FC<DestinationStatsProps> = ({ destinationD
   };
 
   const statItems: StatItem[] = [
-    { 
-      label: "Activities", 
-      value: stats.totalActivities, 
-      icon: <Activity size={14} />, 
+    {
+      label: "Activities",
+      value: stats.totalActivities,
+      icon: <Activity size={14} />,
       color: theme.success,
       formatter: (val) => val,
     },
-    { 
-      label: "Images", 
-      value: stats.totalImages, 
-      icon: <ImageIcon size={14} />, 
+    {
+      label: "Images",
+      value: stats.totalImages,
+      icon: <ImageIcon size={14} />,
       color: theme.accent,
       formatter: (val) => val,
     },
-    { 
-      label: "Avg Duration", 
-      value: `${stats.avgDuration}h`, 
-      icon: <Clock size={14} />, 
+    {
+      label: "Avg Duration",
+      value: `${stats.avgDuration}h`,
+      icon: <Clock size={14} />,
       color: theme.warning || "#f59e0b",
       formatter: (val) => val,
     },
-    { 
-      label: "Min Price", 
-      value: stats.minPrice, 
-      icon: <DollarSign size={14} />, 
+    {
+      label: "Min Price",
+      value: stats.minPrice,
+      icon: <DollarSign size={14} />,
       color: theme.success,
       formatter: (val) => {
-        const numVal = typeof val === 'number' ? val : 0;
+        const numVal = typeof val === "number" ? val : 0;
         return numVal > 0 ? formatPrice(numVal) : "—";
       },
     },
-    { 
-      label: "Status", 
-      value: destinationDetails.statusName || "Unknown", 
-      icon: <Shield size={14} />, 
+    {
+      label: "Status",
+      value: destinationDetails.statusName || "Unknown",
+      icon: <Shield size={14} />,
       color: getStatusColor(destinationDetails.statusName),
       formatter: (val) => val,
     },
@@ -180,9 +127,9 @@ export const DestinationStats: React.FC<DestinationStatsProps> = ({ destinationD
         }
       `}</style>
 
-      <div 
+      <div
         className="grid gap-3"
-        style={{ 
+        style={{
           gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
         }}
       >
@@ -201,16 +148,25 @@ export const DestinationStats: React.FC<DestinationStatsProps> = ({ destinationD
               backdropFilter: "blur(0px)",
             }}
           >
-            <div className="flex items-center gap-1.5" style={{ color: item.color, opacity: 0.85 }}>
+            <div
+              className="flex items-center gap-1.5"
+              style={{ color: item.color, opacity: 0.85 }}
+            >
               <span className="flex-shrink-0">{item.icon}</span>
-              <span className="text-xs font-medium tracking-wide">{item.label}</span>
+              <span className="text-xs font-medium tracking-wide">
+                {item.label}
+              </span>
             </div>
-            
+
             <motion.p
               variants={valueVariants}
               className="text-base sm:text-lg font-bold mt-1.5 truncate"
               style={{ color: theme.text }}
-              key={typeof item.value === 'number' ? item.value : item.value.toString()}
+              key={
+                typeof item.value === "number"
+                  ? item.value
+                  : item.value.toString()
+              }
               initial="hidden"
               animate="visible"
             >
@@ -225,7 +181,7 @@ export const DestinationStats: React.FC<DestinationStatsProps> = ({ destinationD
                 transition={{ delay: 0.2 }}
                 className="flex items-center gap-1 mt-1"
               >
-                <span 
+                <span
                   className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
                   style={{
                     backgroundColor: `${item.color}15`,
@@ -245,9 +201,9 @@ export const DestinationStats: React.FC<DestinationStatsProps> = ({ destinationD
                 transition={{ delay: 0.15, type: "spring", stiffness: 300 }}
                 className="absolute top-2 right-2"
               >
-                <span 
+                <span
                   className="inline-block w-2 h-2 rounded-full"
-                  style={{ 
+                  style={{
                     backgroundColor: item.color,
                     boxShadow: `0 0 0 2px ${hexToRgba(item.color, 0.2)}`,
                   }}

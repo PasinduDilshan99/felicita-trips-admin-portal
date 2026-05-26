@@ -433,3 +433,119 @@ export const confirmVariants: Variants = {
     transition: { duration: 0.16, ease: "easeIn" },
   },
 };
+
+export const sectionVariants: Variants = {
+  hidden: { opacity: 0, height: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const },
+  },
+};
+
+export const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+export const contentVariants: Variants = {
+  hidden: { opacity: 0, height: 0, marginTop: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    marginTop: 8,
+    transition: {
+      duration: 0.28,
+      ease: EASE_OUT,
+      staggerChildren: 0.03,
+      delayChildren: 0.1,
+    },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    marginTop: 0,
+    transition: {
+      duration: 0.22,
+      ease: "easeIn",
+    },
+  },
+};
+
+export const infoRowVariants: Variants = {
+  hidden: { opacity: 0, x: -5 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+};
+
+export const categoryVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.18, ease: EASE_OUT },
+  },
+  hover: {
+    scale: 1.05,
+    transition: { duration: 0.15 },
+  },
+};
+
+export const emptyVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: EASE_OUT },
+  },
+};
+
+export const buttonVariants: Variants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.05, transition: { duration: 0.15 } },
+  tap: { scale: 0.95, transition: { duration: 0.1 } },
+};
+
+export const valueVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.25, ease: EASE_OUT },
+  },
+};
+
+export const statCardVariants: Variants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.38,
+      ease: EASE_OUT,
+    },
+  },
+  hover: {
+    y: -4,
+    scale: 1.02,
+    transition: {
+      duration: 0.2,
+      ease: "easeOut",
+    },
+  },
+  tap: {
+    scale: 0.98,
+    transition: {
+      duration: 0.1,
+    },
+  },
+};

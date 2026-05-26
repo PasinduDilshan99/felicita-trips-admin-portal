@@ -34,18 +34,15 @@ import {
   DestCategoryLineTooltip,
 } from "@/components/statistics-components";
 
-/* ─────────────────────────────────────────────
-   Main Page
-───────────────────────────────────────────── */
 const DestinationCategoriesPage = () => {
   const { theme, isDarkMode } = useTheme();
-  const [statistics, setStatistics] = useState<DestinationCategoriesStatisticsData | null>(null);
+  const [statistics, setStatistics] =
+    useState<DestinationCategoriesStatisticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
   const [hoveredLinePoint, setHoveredLinePoint] = useState<string | null>(null);
 
-  // Find Destinations -> Destination Categories subData
   const destinationsData = contentManagementSideBarData.find(
     (item) => item.name === "Destinations",
   );
@@ -62,7 +59,8 @@ const DestinationCategoriesPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await DestinationService.getDestinationCategoriesStatistics();
+      const response =
+        await DestinationService.getDestinationCategoriesStatistics();
       if (response.data) setStatistics(response.data);
     } catch {
       setError("We couldn't load the category statistics. Please try again.");
@@ -71,7 +69,6 @@ const DestinationCategoriesPage = () => {
     }
   };
 
-  /* ── Chart data ── */
   const categoryUsageData = statistics?.categoryUsedDetails
     ? [...statistics.categoryUsedDetails].sort((a, b) => b.count - a.count)
     : [];
@@ -108,7 +105,6 @@ const DestinationCategoriesPage = () => {
     isDarkMode,
   );
 
-  // Helper function to get bar color (with hover effect)
   const getBarColor = (
     categoryName: string,
     defaultColor: string,
@@ -122,7 +118,6 @@ const DestinationCategoriesPage = () => {
       : hexToRgba(p, 0.85);
   };
 
-  // Helper function to get line color (with hover effect)
   const getLineColor = (
     categoryName: string,
     defaultColor: string,
@@ -140,7 +135,6 @@ const DestinationCategoriesPage = () => {
       : successColor;
   };
 
-  // Helper function to get dot fill color
   const getDotFill = (
     categoryName: string,
     defaultColor: string,
@@ -158,7 +152,6 @@ const DestinationCategoriesPage = () => {
       : successColor;
   };
 
-  // Show CommonLoading while loading
   if (loading) {
     return (
       <CommonLoading
@@ -214,7 +207,6 @@ const DestinationCategoriesPage = () => {
 
       <div className="dc-root">
         <div>
-          {/* ── Breadcrumb / Header ── */}
           <div
             className="sticky top-0 z-10 backdrop-blur-md border-b shadow-sm transition-colors duration-300"
             style={{
@@ -232,7 +224,6 @@ const DestinationCategoriesPage = () => {
           </div>
 
           <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* ── Quick Actions ── */}
             <section className="dc-fade-up dc-delay-1">
               <SectionHeader
                 title="Quick Actions"
@@ -264,7 +255,6 @@ const DestinationCategoriesPage = () => {
               </div>
             </section>
 
-            {/* ── Error ── */}
             {error && (
               <div className="dc-mt-6 dc-fade-up">
                 <ErrorBanner
@@ -275,7 +265,6 @@ const DestinationCategoriesPage = () => {
               </div>
             )}
 
-            {/* ── Statistics ── */}
             {!error && (
               <section className="dc-mt-8 dc-fade-up dc-delay-2">
                 <SectionHeader
@@ -309,7 +298,6 @@ const DestinationCategoriesPage = () => {
               </section>
             )}
 
-            {/* ── Charts ── */}
             {!error && statistics && (
               <section className="dc-mt-8 dc-fade-up dc-delay-3">
                 <SectionHeader
@@ -318,7 +306,6 @@ const DestinationCategoriesPage = () => {
                   prefix="dc"
                 />
                 <div className="dc-charts-row">
-                  {/* Bar chart — Destinations by Category */}
                   <div className="dc-chart-card">
                     <div className="dc-chart-header">
                       <div className="dc-chart-title">
@@ -326,10 +313,18 @@ const DestinationCategoriesPage = () => {
                         Destinations by Category
                       </div>
                       <span className="dc-chart-sub">
-                        {statistics.destinationCategoriesDetails.totalDestinationCategoriesCount} categories
+                        {
+                          statistics.destinationCategoriesDetails
+                            .totalDestinationCategoriesCount
+                        }{" "}
+                        categories
                       </span>
                     </div>
-                    <div style={{ height: Math.max(340, categoryUsageData.length * 35) }}>
+                    <div
+                      style={{
+                        height: Math.max(340, categoryUsageData.length * 35),
+                      }}
+                    >
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                           data={categoryUsageData}
@@ -343,7 +338,11 @@ const DestinationCategoriesPage = () => {
                           />
                           <XAxis
                             type="number"
-                            tick={{ fontSize: 11, fill: textSecondary, fontWeight: 500 }}
+                            tick={{
+                              fontSize: 11,
+                              fill: textSecondary,
+                              fontWeight: 500,
+                            }}
                             axisLine={false}
                             tickLine={false}
                           />
@@ -366,7 +365,9 @@ const DestinationCategoriesPage = () => {
                             barSize={categoryUsageData.length > 15 ? 18 : 24}
                             onMouseEnter={(data, index) => {
                               if (data && categoryUsageData[index]) {
-                                setHoveredBar(categoryUsageData[index].categoryName);
+                                setHoveredBar(
+                                  categoryUsageData[index].categoryName,
+                                );
                               }
                             }}
                             onMouseLeave={() => setHoveredBar(null)}
@@ -388,14 +389,15 @@ const DestinationCategoriesPage = () => {
                     </div>
                   </div>
 
-                  {/* Line chart — Images per Category */}
                   <div className="dc-chart-card">
                     <div className="dc-chart-header">
                       <div className="dc-chart-title">
                         <span className="dc-chart-dot dc-chart-dot--ok" />
                         Images per Category
                       </div>
-                      <span className="dc-chart-sub">{imagesCountData.length} categories</span>
+                      <span className="dc-chart-sub">
+                        {imagesCountData.length} categories
+                      </span>
                     </div>
                     <div style={{ height: 340 }}>
                       <ResponsiveContainer width="100%" height="100%">
@@ -422,7 +424,11 @@ const DestinationCategoriesPage = () => {
                             }
                           />
                           <YAxis
-                            tick={{ fontSize: 11, fill: textSecondary, fontWeight: 500 }}
+                            tick={{
+                              fontSize: 11,
+                              fill: textSecondary,
+                              fontWeight: 500,
+                            }}
                             axisLine={false}
                             tickLine={false}
                             width={36}
@@ -434,7 +440,8 @@ const DestinationCategoriesPage = () => {
                             strokeWidth={2.5}
                             dot={(props: any) => {
                               const { cx, cy, payload, index } = props;
-                              const isHovered = hoveredLinePoint === payload.categoryName;
+                              const isHovered =
+                                hoveredLinePoint === payload.categoryName;
                               const fillColor = getDotFill(
                                 payload.categoryName,
                                 payload.color,
@@ -452,9 +459,7 @@ const DestinationCategoriesPage = () => {
                                   onMouseEnter={() =>
                                     setHoveredLinePoint(payload.categoryName)
                                   }
-                                  onMouseLeave={() =>
-                                    setHoveredLinePoint(null)
-                                  }
+                                  onMouseLeave={() => setHoveredLinePoint(null)}
                                   style={{
                                     transition: "r 0.2s ease, fill 0.2s ease",
                                     cursor: "pointer",
@@ -485,7 +490,6 @@ const DestinationCategoriesPage = () => {
               </section>
             )}
 
-            {/* ── Info banner ── */}
             <section className="dc-mt-7 dc-fade-up dc-delay-4">
               <InfoBanner
                 title="Category Management"

@@ -1,12 +1,12 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
 import TerminateDestinationPage from "@/pages/content-management/destinations/TerminateDestinationPage";
-import { REMOVE_DESTINATION_PAGE_TITLE } from "@/utils/pagesHeaderTitles";
+import { DESTINATION_TERMINATE_PAGE_TITLE } from "@/utils/pagesHeaderTitles";
 import { DESTINATION_TERMINATE_PRIVILEGE } from "@/utils/privileges";
 import { Metadata } from "next";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: REMOVE_DESTINATION_PAGE_TITLE,
+  title: DESTINATION_TERMINATE_PAGE_TITLE,
 };
 
 const page = () => {
