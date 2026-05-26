@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   Globe,
   Plus,
   ChevronDown,
-  ChevronUp,
   Trash2,
   X,
   AlertCircle,
@@ -17,10 +16,8 @@ import {
   Banknote,
   Calendar,
   Tag,
-  Layers,
   Sparkles,
   Eye,
-  ExternalLink,
 } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Activity, NewActivityRequest } from "@/types/destination-types";
@@ -29,6 +26,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import Link from "next/link";
 import { ACTIVITY_DETAILS_VIEW_PAGE_URL } from "@/utils/urls";
+import { activityBodyVariants, activityCardVariants, bodyVariants, cardVariants, chevronVariants, confirmVariants, errorVariants, formVariants, headerVariants, pillVariants, tagVariants } from "@/app/animations/variants";
+import { DESTINATION_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
 
 interface ActivitiesManagementProps {
   activities: Activity[];
@@ -41,160 +40,6 @@ interface ActivitiesManagementProps {
   onUpdateActivity: (activity: Activity) => void;
   error?: string;
 }
-
-/* ─── Constants ──────────────────────────────────────────────────────────── */
-
-const STATUS_OPTIONS = [
-  {
-    value: "ACTIVE",
-    label: "Active",
-    description: "Available for booking",
-    color: "#059669",
-    bg: "#ECFDF5",
-  },
-  {
-    value: "INACTIVE",
-    label: "Inactive",
-    description: "Temporarily unavailable",
-    color: "#6b7280",
-    bg: "#F9FAFB",
-  },
-];
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const bodyVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    transition: { duration: 0.32, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    height: 0,
-    transition: { duration: 0.22, ease: "easeIn" },
-  },
-};
-
-const formVariants: Variants = {
-  hidden: { opacity: 0, y: -20, scale: 0.98 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.32, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    y: -20,
-    scale: 0.98,
-    transition: { duration: 0.24, ease: "easeIn" },
-  },
-};
-
-const activityCardVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.28, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    x: -10,
-    transition: { duration: 0.2, ease: "easeIn" },
-  },
-};
-
-const activityBodyVariants: Variants = {
-  hidden: { opacity: 0, height: 0, marginTop: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    marginTop: 12,
-    transition: { duration: 0.28, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    height: 0,
-    marginTop: 0,
-    transition: { duration: 0.22, ease: "easeIn" },
-  },
-};
-
-const tagVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.8,
-    transition: { duration: 0.15, ease: "easeIn" },
-  },
-};
-
-const chevronVariants: Variants = {
-  open: { rotate: 180, transition: { duration: 0.28, ease: EASE_OUT } },
-  closed: { rotate: 0, transition: { duration: 0.28, ease: EASE_OUT } },
-};
-
-const errorVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    transition: { duration: 0.22, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    height: 0,
-    transition: { duration: 0.16, ease: "easeIn" },
-  },
-};
-
-const pillVariants: Variants = {
-  rest: { scale: 1 },
-  hover: { y: -2, transition: { duration: 0.15, ease: "easeOut" } },
-  tap: { scale: 0.97, transition: { duration: 0.1 } },
-};
-
-const confirmVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.92, x: 10 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    x: 0,
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.92,
-    x: 10,
-    transition: { duration: 0.16, ease: "easeIn" },
-  },
-};
-
-/* ─── Helpers ─────────────────────────────────────────────────────────────── */
 
 /** Strips microseconds / seconds from a backend time string like "08:00:00.000000" → "08:00" */
 const formatTimeDisplay = (raw: string | null | undefined): string => {
@@ -888,7 +733,7 @@ export const ActivitiesManagement: React.FC<ActivitiesManagementProps> = ({
                             Status
                           </label>
                           <div className="flex gap-2">
-                            {STATUS_OPTIONS.map((opt) => {
+                            {DESTINATION_UPDATE_STATUS_OPTIONS.map((opt) => {
                               const active = newActivityData.status === opt.value;
                               return (
                                 <motion.button

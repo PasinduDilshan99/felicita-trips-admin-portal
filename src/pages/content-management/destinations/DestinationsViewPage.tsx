@@ -1,127 +1,42 @@
-// app/destinations/view/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_DESTINATION_PATH,
-  WEB_MANAGEMENT_PATH,
-} from "@/utils/constant";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
-import DestinationCard from "@/components/destinations-components/DestinationCard";
-import DestinationListCard from "@/components/destinations-components/DestinationListCard";
+import DestinationCard from "@/components/destinations-components/view-destinations-components/DestinationCard";
+import DestinationListCard from "@/components/destinations-components/view-destinations-components/DestinationListCard";
 import Pagination from "@/components/common-components/Pagination";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { DestinationService } from "@/services/destinationService";
 import {
   DestinationFilterParams,
   Destination,
 } from "@/types/destination-types";
-import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
-import { EmptyState } from "@/components/destinations-components/view-destinations-components/EmptyState";
+import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
+import { DESTINATION_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { DESTINATION_VIEW_PAGE_URL } from "@/utils/urls";
 import {
-  DESTINATION_PAGE_URL,
-  DESTINATIONS_VIEW_PAGE_URL,
-  WEB_MANAGEMENT_URL,
-} from "@/utils/urls";
+  destinationViewFiltersToUrlParams,
+  destinationViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { DESTINATION_VIEW_SORTING_OPTIONS } from "@/data/sorting-options";
+import { FilterField } from "@/types/filter-types";
+import FilterPanel from "@/components/common-components/FilterPanel";
+import { ImageModalImage } from "@/types/common-components-types";
+import ImageModal from "@/components/common-components/ImageModal";
 
-// Sort options
-const SORT_OPTIONS = [
-  { value: "name", label: "Destination Name" },
-  { value: "destination_id", label: "Destination ID" },
-  { value: "created_at", label: "Created Date" },
-  { value: "updated_at", label: "Updated Date" },
-  { value: "location", label: "Location" },
-];
-
-// Utility functions for URL params management
-const filtersToUrlParams = (
-  filters: DestinationFilterParams,
-): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.destinationCategory)
-    params.set("destinationCategory", filters.destinationCategory);
-  if (filters.season) params.set("season", filters.season);
-  if (filters.status) params.set("status", filters.status);
-  if (filters.duration) params.set("duration", filters.duration.toString());
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
-
-  return params;
-};
-
-const urlParamsToFilters = (
-  params: URLSearchParams,
-): DestinationFilterParams => {
-  return {
-    name: params.get("name") || null,
-    minPrice: null,
-    maxPrice: null,
-    duration: params.get("duration")
-      ? parseFloat(params.get("duration")!)
-      : null,
-    destinationCategory: params.get("destinationCategory") || null,
-    season: params.get("season") || null,
-    status: (params.get("status") as "ACTIVE" | "INACTIVE" | null) || null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-    sortBy: params.get("sortBy") || undefined,
-    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
-  };
-};
-
-// Loading component
-const LoadingComponent = ({ theme }: { theme: any }) => (
-  <div
-    className="flex flex-col justify-center items-center py-16 rounded-xl shadow-sm border"
-    style={{
-      backgroundColor: theme.surface,
-      borderColor: theme.border,
-    }}
-  >
-    <Loader2
-      className="w-12 h-12 animate-spin"
-      style={{ color: theme.primary }}
-    />
-    <span className="mt-4 text-lg font-medium" style={{ color: theme.text }}>
-      Loading destinations...
-    </span>
-  </div>
-);
-
-// Main component wrapped with Suspense for useSearchParams
 const DestinationsViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { categories, loading: categoriesLoading } = useCommon();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    { label: "Destinations", href: `${DESTINATION_PAGE_URL}` },
-    { label: "View", href: `${DESTINATIONS_VIEW_PAGE_URL}` },
-  ];
-
   const [filters, setFilters] = useState<DestinationFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    destinationViewUrlParamsToFilters(searchParams || new URLSearchParams()),
   );
 
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -150,19 +65,19 @@ const DestinationsViewContent = () => {
     return [];
   }, [categories]);
 
-  // Get status options
+  // Get sort label
+  const getSortLabel = (sortBy: string): string => {
+    const option = DESTINATION_VIEW_SORTING_OPTIONS.find(
+      (opt) => opt.value === sortBy,
+    );
+    return option ? option.label : sortBy;
+  };
+
   const getStatusOptions = () => [
     { value: "ACTIVE", label: "Active" },
     { value: "INACTIVE", label: "Inactive" },
   ];
 
-  // Get sort label
-  const getSortLabel = (sortBy: string): string => {
-    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
-    return option ? option.label : sortBy;
-  };
-
-  // Define filter fields for the FilterPanel
   const filterFields: FilterField[] = [
     {
       key: "name",
@@ -209,11 +124,11 @@ const DestinationsViewContent = () => {
   // Update URL with current filters
   const updateURL = useCallback(
     (newFilters: DestinationFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = destinationViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
-        ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view?${queryString}`
-        : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view`;
+        ? `${DESTINATION_VIEW_PAGE_URL}?${queryString}`
+        : DESTINATION_VIEW_PAGE_URL;
 
       router.replace(newURL, { scroll: false });
     },
@@ -252,7 +167,7 @@ const DestinationsViewContent = () => {
 
   // Initial load from URL params
   useEffect(() => {
-    const initialFilters = urlParamsToFilters(
+    const initialFilters = destinationViewUrlParamsToFilters(
       searchParams || new URLSearchParams(),
     );
     setFilters(initialFilters);
@@ -262,7 +177,7 @@ const DestinationsViewContent = () => {
   // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = destinationViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -325,7 +240,7 @@ const DestinationsViewContent = () => {
     const updatedFilters: DestinationFilterParams = {
       ...filters,
       sortBy: undefined,
-      sortDirection: "ASC" as const, // Add 'as const' to fix the type
+      sortDirection: "ASC" as const,
       pageNumber: 1,
     };
     setFilters(updatedFilters);
@@ -460,7 +375,7 @@ const DestinationsViewContent = () => {
           <PageHeader
             title="Destinations View"
             description="Explore and manage travel destinations with rich visual experience"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={DESTINATION_VIEW_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -480,7 +395,7 @@ const DestinationsViewContent = () => {
             pageSizeOptions={[6, 9, 12, 24, 48]}
             showPageSize={true}
             showSorting={true}
-            sortOptions={SORT_OPTIONS}
+            sortOptions={DESTINATION_VIEW_SORTING_OPTIONS}
             sortBy={filters.sortBy || ""}
             sortDirection={filters.sortDirection || "ASC"}
             title="Filter Destinations"
@@ -528,7 +443,13 @@ const DestinationsViewContent = () => {
         {!loading && (
           <>
             {destinations.length === 0 ? (
-              <EmptyState onClearFilters={handleReset} />
+              <EmptyState
+                entityType="destination"
+                title="No destinations available"
+                description="Check back later for new listings"
+                actionLabel="Reset Search"
+                onClearFilters={handleReset}
+              />
             ) : (
               <>
                 {/* Grid View */}
@@ -595,10 +516,7 @@ const DestinationsViewContent = () => {
   );
 };
 
-// Wrap with Suspense for useSearchParams
 const DestinationsViewPage = () => {
-  const { theme } = useTheme();
-
   return (
     <Suspense
       fallback={

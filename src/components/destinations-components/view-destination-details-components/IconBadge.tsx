@@ -2,11 +2,7 @@
 
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface IconBadgeProps {
-  icon: React.ElementType;
-  color?: string;
-}
+import { IconBadgeProps } from "@/types/destination-types";
 
 export const IconBadge: React.FC<IconBadgeProps> = ({ icon: Icon, color }) => {
   const { theme } = useTheme();

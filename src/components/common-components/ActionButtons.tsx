@@ -13,10 +13,11 @@ import {
   Download,
   Settings,
   MoreVertical,
-  Save,        // Add this import
-  X,           // Add this import
+  Save,
+  X,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 export type ActionButtonVariant =
   | "primary"
@@ -34,6 +35,9 @@ export interface ActionButton {
   onClick: () => void;
   disabled?: boolean;
   show?: boolean;
+  requiredPrivileges?: string[];
+  requiredRoles?: string[];
+  requireAll?: boolean; // If true, requires all privileges/roles; if false, requires at least one
 }
 
 interface ActionButtonsProps {
@@ -68,6 +72,19 @@ interface ActionButtonsProps {
   titleClassName?: string;
   buttonsClassName?: string;
   containerClassName?: string;
+  // Privilege props for default buttons
+  sharePrivileges?: string[];
+  editPrivileges?: string[];
+  deletePrivileges?: string[];
+  addPrivileges?: string[];
+  viewPrivileges?: string[];
+  archivePrivileges?: string[];
+  copyPrivileges?: string[];
+  downloadPrivileges?: string[];
+  settingsPrivileges?: string[];
+  savePrivileges?: string[];
+  cancelPrivileges?: string[];
+  requireAllPrivileges?: boolean; // Global setting for all buttons
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({
@@ -98,14 +115,62 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   titleClassName = "",
   buttonsClassName = "",
   containerClassName = "",
-  saveButtonText = "Save",        // Changed from empty string
-  cancelButtonText = "Cancel",    // Changed from empty string
-  saveButtonVariant = "primary",  // Changed from empty string
-  cancelButtonVariant = "default", // Changed from empty string
+  saveButtonText = "Save",
+  cancelButtonText = "Cancel",
+  saveButtonVariant = "primary",
+  cancelButtonVariant = "default",
+  // Privilege props
+  sharePrivileges = [],
+  editPrivileges = [],
+  deletePrivileges = [],
+  addPrivileges = [],
+  viewPrivileges = [],
+  archivePrivileges = [],
+  copyPrivileges = [],
+  downloadPrivileges = [],
+  settingsPrivileges = [],
+  savePrivileges = [],
+  cancelPrivileges = [],
+  requireAllPrivileges = false,
 }) => {
   const { theme } = useTheme();
+  const { hasPrivilege, hasRole, user } = useAuth();
 
-  // Helper function to convert hex to rgba (add if not already available)
+  // Helper function to check if user has access based on privileges and roles
+  const hasAccess = (
+    requiredPrivileges: string[] = [],
+    requiredRoles: string[] = [],
+    requireAll: boolean = false
+  ): boolean => {
+    // If no user is logged in, only allow if no privileges/roles are required
+    if (!user) {
+      return requiredPrivileges.length === 0 && requiredRoles.length === 0;
+    }
+
+    // Check privileges
+    let hasRequiredPrivileges = true;
+    if (requiredPrivileges.length > 0) {
+      if (requireAll) {
+        hasRequiredPrivileges = requiredPrivileges.every(priv => hasPrivilege(priv));
+      } else {
+        hasRequiredPrivileges = requiredPrivileges.some(priv => hasPrivilege(priv));
+      }
+    }
+
+    // Check roles
+    let hasRequiredRoles = true;
+    if (requiredRoles.length > 0) {
+      if (requireAll) {
+        hasRequiredRoles = requiredRoles.every(role => hasRole(role));
+      } else {
+        hasRequiredRoles = requiredRoles.some(role => hasRole(role));
+      }
+    }
+
+    return hasRequiredPrivileges && hasRequiredRoles;
+  };
+
+  // Helper function to convert hex to rgba
   const hexToRgba = (hex: string, opacity: number): string => {
     if (!hex) return `rgba(0, 0, 0, ${opacity})`;
     hex = hex.replace("#", "");
@@ -169,117 +234,128 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
     }
   };
 
-  // Build default buttons from props
+  // Build default buttons from props with privilege checks
   const getDefaultButtons = (): ActionButton[] => {
     const defaultButtons: ActionButton[] = [];
 
-    if (showAdd && onAdd) {
+    if (showAdd && onAdd && hasAccess(addPrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "add",
         label: "Add",
         icon: Plus,
         variant: "success",
         onClick: onAdd,
+        requiredPrivileges: addPrivileges,
       });
     }
 
-    if (showView && onView) {
+    if (showView && onView && hasAccess(viewPrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "view",
         label: "View",
         icon: Eye,
         variant: "primary",
         onClick: onView,
+        requiredPrivileges: viewPrivileges,
       });
     }
 
-    if (showEdit && onEdit) {
+    if (showEdit && onEdit && hasAccess(editPrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "edit",
         label: "Edit",
         icon: Edit,
         variant: "primary",
         onClick: onEdit,
+        requiredPrivileges: editPrivileges,
       });
     }
 
-    if (showShare && onShare) {
+    if (showShare && onShare && hasAccess(sharePrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "share",
         label: "Share",
         icon: Share2,
         variant: "success",
         onClick: onShare,
+        requiredPrivileges: sharePrivileges,
       });
     }
 
-    if (showSave && onSave) {
+    if (showSave && onSave && hasAccess(savePrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "save",
         label: saveButtonText,
         icon: Save,
         variant: saveButtonVariant,
         onClick: onSave,
+        requiredPrivileges: savePrivileges,
       });
     }
 
-    if (showCancel && onCancel) {
+    if (showCancel && onCancel && hasAccess(cancelPrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "cancel",
         label: cancelButtonText,
         icon: X,
         variant: cancelButtonVariant,
         onClick: onCancel,
+        requiredPrivileges: cancelPrivileges,
       });
     }
 
-    if (showCopy && onCopy) {
+    if (showCopy && onCopy && hasAccess(copyPrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "copy",
         label: "Copy",
         icon: Copy,
         variant: "info",
         onClick: onCopy,
+        requiredPrivileges: copyPrivileges,
       });
     }
 
-    if (showDownload && onDownload) {
+    if (showDownload && onDownload && hasAccess(downloadPrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "download",
         label: "Download",
         icon: Download,
         variant: "info",
         onClick: onDownload,
+        requiredPrivileges: downloadPrivileges,
       });
     }
 
-    if (showArchive && onArchive) {
+    if (showArchive && onArchive && hasAccess(archivePrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "archive",
         label: "Archive",
         icon: Archive,
         variant: "warning",
         onClick: onArchive,
+        requiredPrivileges: archivePrivileges,
       });
     }
 
-    if (showSettings && onSettings) {
+    if (showSettings && onSettings && hasAccess(settingsPrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "settings",
         label: "Settings",
         icon: Settings,
         variant: "default",
         onClick: onSettings,
+        requiredPrivileges: settingsPrivileges,
       });
     }
 
-    if (showDelete && onDelete) {
+    if (showDelete && onDelete && hasAccess(deletePrivileges, [], requireAllPrivileges)) {
       defaultButtons.push({
         id: "delete",
         label: "Delete",
         icon: Trash2,
         variant: "error",
         onClick: onDelete,
+        requiredPrivileges: deletePrivileges,
       });
     }
 
@@ -287,7 +363,20 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   };
 
   const allButtons = buttons.length > 0 ? buttons : getDefaultButtons();
-  const visibleButtons = allButtons.filter((btn) => btn.show !== false);
+  
+  // Filter buttons based on privilege checks
+  const visibleButtons = allButtons.filter((btn) => {
+    // Check if button should be shown based on explicit show flag
+    if (btn.show === false) return false;
+    
+    // Check privileges and roles for custom buttons
+    if (btn.requiredPrivileges?.length || btn.requiredRoles?.length) {
+      return hasAccess(btn.requiredPrivileges, btn.requiredRoles, btn.requireAll);
+    }
+    
+    // If no privileges/roles defined, always show
+    return true;
+  });
 
   if (visibleButtons.length === 0 && !title) {
     return null;

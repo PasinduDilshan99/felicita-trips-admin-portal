@@ -476,10 +476,8 @@ const CommonLoading: React.FC<CommonLoadingProps> = (props) => {
     setMounted(true);
   }, []);
 
-  // For fullScreen, render via portal into document.body to escape
-  // any parent stacking context or overflow:hidden
   if (props.fullScreen) {
-    if (!mounted) return null; // avoid SSR mismatch
+    if (!mounted) return null;
     return createPortal(
       <LoadingInner {...props} mounted={mounted} />,
       document.body

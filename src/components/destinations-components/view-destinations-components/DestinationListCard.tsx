@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Destination } from "@/types/destination-types";
+import { DestinationListCardProps } from "@/types/destination-types";
 import {
   MapPin,
   Tag,
   Clock,
-  Users,
   Image as ImageIcon,
   Activity,
   Star,
@@ -19,53 +18,19 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-  PLACE_HOLDER_IMAGE,
-} from "@/utils/constant";
+import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   ACTIVITY_DETAILS_VIEW_PAGE_URL,
-  DESTINATION_CATEGORY_VIEW_DETAILS_URL,
+  DESTINATION_CATEGORY_VIEW_PAGE_URL,
   DESTINATION_DETAILS_VIEW_PAGE_URL,
 } from "@/utils/urls";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
-
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Helper function to truncate description
-const truncateDescription = (
-  description: string,
-  maxLength: number = 260,
-): string => {
-  if (!description) return "";
-  if (description.length <= maxLength) return description;
-
-  let truncated = description.substring(0, maxLength);
-  const lastSpaceIndex = truncated.lastIndexOf(" ");
-
-  if (lastSpaceIndex > 0 && lastSpaceIndex > maxLength - 20) {
-    truncated = truncated.substring(0, lastSpaceIndex);
-  }
-
-  return truncated + "...";
-};
-
-interface DestinationListCardProps {
-  destination: Destination;
-  onImageClick?: (imageIndex: number) => void;
-}
+import ImageModal from "@/components/common-components/ImageModal";
+import { hexToRgba, truncateDescription } from "@/utils/functions";
+import { ImageModalImage } from "@/types/common-components-types";
+import { DESTINATION_DETAILS_VIEW_PRIVILEGE } from "@/utils/privileges";
+import PrivilegedButton from "@/components/common-components/PrivilegedButton";
 
 const DestinationListCard: React.FC<DestinationListCardProps> = ({
   destination,
@@ -74,15 +39,12 @@ const DestinationListCard: React.FC<DestinationListCardProps> = ({
   const router = useRouter();
   const { theme } = useTheme();
 
-  // State for current image index and selected primary image
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllActivities, setShowAllActivities] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-
-  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
 
@@ -100,7 +62,6 @@ const DestinationListCard: React.FC<DestinationListCardProps> = ({
         )
       : 0;
 
-  // Get primary category and all categories
   const primaryCategory = destination.destinationCategoryDetailsDtos.find(
     (cat) => cat.isPrimary === true,
   );
@@ -155,7 +116,6 @@ const DestinationListCard: React.FC<DestinationListCardProps> = ({
     setIsAutoRotating(false);
   };
 
-  // Auto-rotate images every 5 seconds
   useEffect(() => {
     if (!isAutoRotating || images.length <= 1) return;
 
@@ -187,14 +147,12 @@ const DestinationListCard: React.FC<DestinationListCardProps> = ({
     setIsAutoRotating(false);
   };
 
-  // Handle view details button click
   const handleViewDetails = () => {
     router.push(
       `${DESTINATION_DETAILS_VIEW_PAGE_URL}/${destination.destinationId}?name=${destination.destinationName}`,
     );
   };
 
-  // Toggle categories view
   const toggleCategories = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowAllCategories(!showAllCategories);
@@ -724,7 +682,7 @@ const DestinationListCard: React.FC<DestinationListCardProps> = ({
                       key={category.id}
                       onClick={() => {
                         router.push(
-                          `${DESTINATION_CATEGORY_VIEW_DETAILS_URL}/${category.id}?name=${category.name}`,
+                          `${DESTINATION_CATEGORY_VIEW_PAGE_URL}/${category.id}?name=${category.name}`,
                         );
                       }}
                       className={`category-item inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all duration-200 hover:scale-105 ${
@@ -828,58 +786,27 @@ const DestinationListCard: React.FC<DestinationListCardProps> = ({
               </div>
             </div>
 
-            {/* View Details Button */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <button
+              <PrivilegedButton
+                requiredPrivileges={[DESTINATION_DETAILS_VIEW_PRIVILEGE]}
+                variant="primary"
+                size="md"
+                fullWidth={true}
+                showShineEffect={true}
+                showTopBorder={true}
+                elevation="md"
                 onClick={handleViewDetails}
-                className="cursor-pointer group/btn relative w-full font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 ease-out"
-                style={{
-                  background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.accent} 100%)`,
-                  color: "#fff",
-                  boxShadow: `0 4px 15px -3px ${theme.primary}55, 0 2px 6px -2px ${theme.accent}33`,
-                }}
-                onMouseEnter={(e) => {
-                  const btn = e.currentTarget as HTMLButtonElement;
-                  btn.style.boxShadow = `0 8px 25px -4px ${theme.primary}70, 0 4px 10px -3px ${theme.accent}50`;
-                  btn.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  const btn = e.currentTarget as HTMLButtonElement;
-                  btn.style.boxShadow = `0 4px 15px -3px ${theme.primary}55, 0 2px 6px -2px ${theme.accent}33`;
-                  btn.style.transform = "translateY(0)";
-                }}
-                onMouseDown={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.transform =
-                    "translateY(0) scale(0.97)";
-                }}
-                onMouseUp={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.transform =
-                    "translateY(-2px) scale(1)";
-                }}
+                icon={<Eye className="w-4 h-4" />}
+                iconPosition="left"
               >
-                <span
-                  className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out"
-                  style={{
-                    background:
-                      "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
-                  }}
-                />
-                <span
-                  className="absolute inset-x-0 top-0 h-px"
-                  style={{ background: "rgba(255,255,255,0.35)" }}
-                />
-                <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:scale-110" />
-                <span className="relative tracking-wide text-sm">
-                  View Complete Details
-                </span>
-                <ArrowRight className="relative w-4 h-4 ml-1 transition-transform duration-300 group-hover/btn:translate-x-1.5" />
-              </button>
+                View Details
+                <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover/btn:translate-x-1" />
+              </PrivilegedButton>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Image Modal */}
       <ImageModal
         isOpen={isModalOpen}
         images={getModalImages()}

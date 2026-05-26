@@ -3,14 +3,7 @@
 import React, { useId, useRef, useState } from "react";
 import { MapPin, Navigation, AlertCircle, ExternalLink, ChevronDown } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface LocationFormProps {
-  formData: any;
-  errors: Record<string, string>;
-  loading: boolean;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onGetCurrentLocation: () => void;
-}
+import { LocationFormProps } from "@/types/destination-types";
 
 export const LocationForm: React.FC<LocationFormProps> = ({
   formData,

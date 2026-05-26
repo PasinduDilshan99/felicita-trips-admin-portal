@@ -6,65 +6,13 @@ import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DESCRIPTION_MAX_CHARACTERS, NAME_MAX_CHARACTERS } from "@/data/destination-constant-data";
 import { DESTINATION_STATUS_OPTIONS } from "@/data/status-options-data";
+import { cardVariants, fieldGroupVariants, fieldVariants, modifiedBadgeVariants, pillVariants } from "@/app/animations/variants";
 
 interface BasicInfoFormProps {
   destination: any;
   hasChanged: (field: string) => boolean;
   onFieldChange: (field: string, value: any) => void;
 }
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-};
-
-const fieldGroupVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.07, delayChildren: 0.1 },
-  },
-};
-
-const fieldVariants: Variants = {
-  hidden: { opacity: 0, y: 14 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.38, ease: EASE_OUT },
-  },
-};
-
-const modifiedBadgeVariants: Variants = {
-  hidden: { opacity: 0, height: 0, marginTop: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    marginTop: 6,
-    transition: { duration: 0.22, ease: "easeOut" },
-  },
-  exit: {
-    opacity: 0,
-    height: 0,
-    marginTop: 0,
-    transition: { duration: 0.18, ease: "easeIn" },
-  },
-};
-
-const pillVariants: Variants = {
-  rest: { scale: 1, y: 0 },
-  hover: { y: -2, transition: { duration: 0.15, ease: "easeOut" } },
-  tap: { scale: 0.97, transition: { duration: 0.1 } },
-};
-
-/* ─── Component ──────────────────────────────────────────────────────────── */
 
 export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   destination,
@@ -118,7 +66,6 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     transition: "border-color 0.18s ease, box-shadow 0.18s ease",
   };
 
-  /* ── Field helper for consistent label + modified badge ── */
   const ModifiedBadge = ({ field }: { field: string }) => (
     <AnimatePresence>
       {hasChanged(field) && (

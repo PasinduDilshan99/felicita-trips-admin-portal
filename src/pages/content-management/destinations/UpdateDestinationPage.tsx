@@ -1,13 +1,7 @@
-// app/destinations/update/page.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
 import { DestinationService } from "@/services/destinationService";
 import { OtherService } from "@/services/otherService";
 import {
@@ -20,19 +14,9 @@ import {
   UpdateDestinationRequest,
   DestinationCategoryDetailsDtos,
 } from "@/types/destination-types";
-import {
-  Search,
-  Edit,
-  Save,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Loader2,
-  RefreshCw,
-  X,
-} from "lucide-react";
+import { Search, Edit, Save, Loader2, RefreshCw } from "lucide-react";
 import DestinationDetailsForm from "@/components/destinations-components/update-destinations-components/DestinationDetailsForm";
-import UpdateConfirmationModal from "@/components/destinations-components/update-destinations-components/UpdateConfirmationModal";
+import { UpdateConfirmationModal } from "@/components/common-components/UpdateConfirmationModal";
 import {
   ActivityCategory,
   DestinationCategory,
@@ -45,19 +29,16 @@ import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
-import {
-  DESTINATION_CATEGORY_UPDATE_URL,
-  DESTINATION_PAGE_URL,
-  WEB_MANAGEMENT_URL,
-} from "@/utils/urls";
+import { DESTINATION_DETAILS_VIEW_PAGE_URL } from "@/utils/urls";
 import { hexToRgba } from "@/utils/functions";
+import { DESTINATION_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
 
 const UpdateDestinationPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
 
-  // Use the common context
   const {
     categories,
     loading: commonLoading,
@@ -66,13 +47,9 @@ const UpdateDestinationPage = () => {
 
   const initialDestinationName = searchParams?.get("destination-name") || "";
   const initialDestinationId = searchParams?.get("destination-id") || "";
-
-  // State for destinations list
   const [destinations, setDestinations] = useState<DestinationForTerminate[]>(
     [],
   );
-
-  // State for selected destination
   const [selectedDestination, setSelectedDestination] =
     useState<DestinationForTerminate | null>(
       initialDestinationId && initialDestinationName
@@ -82,28 +59,16 @@ const UpdateDestinationPage = () => {
           }
         : null,
     );
-
-  // State for original destination details
   const [originalDestination, setOriginalDestination] =
     useState<SingleDestinationResponse | null>(null);
-
-  // State for edited destination
   const [editedDestination, setEditedDestination] =
     useState<SingleDestinationResponse | null>(null);
-
-  // State for category changes
   const [originalCategoryIds, setOriginalCategoryIds] = useState<number[]>([]);
   const [currentCategoryIds, setCurrentCategoryIds] = useState<number[]>([]);
-
-  // State for removed items
   const [removedImages, setRemovedImages] = useState<number[]>([]);
   const [removedActivities, setRemovedActivities] = useState<number[]>([]);
-
-  // State for new items
   const [newImages, setNewImages] = useState<NewImageRequest[]>([]);
   const [newActivities, setNewActivities] = useState<NewActivityRequest[]>([]);
-
-  // UI state
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -112,7 +77,6 @@ const UpdateDestinationPage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
@@ -120,7 +84,6 @@ const UpdateDestinationPage = () => {
     actionLink?: string;
   } | null>(null);
 
-  // Derive available categories from context
   const [availableCategories, setAvailableCategories] = useState<
     DestinationCategory[]
   >([]);
@@ -128,20 +91,6 @@ const UpdateDestinationPage = () => {
     useState<ActivityCategory[]>([]);
   const [availableSeasons, setAvailableSeasons] = useState<SeasonType[]>([]);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    {
-      label: "Destinations",
-      href: DESTINATION_PAGE_URL,
-    },
-    {
-      label: "Update",
-      href: DESTINATION_CATEGORY_UPDATE_URL,
-    },
-  ];
-
-  // Extract categories from context data
   useEffect(() => {
     if (categories) {
       setAvailableCategories(categories.destinationCategoryList);
@@ -150,14 +99,12 @@ const UpdateDestinationPage = () => {
     }
   }, [categories]);
 
-  // Fetch destinations list on initial load
   useEffect(() => {
     if (!selectedDestination) {
       fetchDestinations();
     }
   }, []);
 
-  // If initialDestinationId is provided, fetch details
   useEffect(() => {
     if (initialDestinationId && !originalDestination) {
       handleSelectDestination(
@@ -185,13 +132,11 @@ const UpdateDestinationPage = () => {
     }
   };
 
-  // Handle destination selection
   const handleSelectDestination = async (id: number, name: string) => {
     setSelectedDestination({ destinationId: id, destinationName: name });
     await fetchDestinationDetails(id);
   };
 
-  // Upload image to Cloudinary
   const uploadImageToCloudinary = async (file: File): Promise<string> => {
     try {
       const response = await OtherService.uploadImage(file);
@@ -202,7 +147,6 @@ const UpdateDestinationPage = () => {
     }
   };
 
-  // Handle new image addition with Cloudinary upload
   const handleAddNewImage = async (
     imageFile: File,
     imageName: string,
@@ -245,7 +189,6 @@ const UpdateDestinationPage = () => {
     }
   };
 
-  // Fetch destination details
   const fetchDestinationDetails = async (id: number) => {
     setLoadingDetails(true);
     setError(null);
@@ -282,7 +225,6 @@ const UpdateDestinationPage = () => {
     }
   };
 
-  // Handle field changes
   const handleFieldChange = (field: string, value: any) => {
     if (!editedDestination) return;
 
@@ -292,20 +234,16 @@ const UpdateDestinationPage = () => {
     });
   };
 
-  // Handle category changes
   const handleCategoryChange = (categoryId: number) => {
     setCurrentCategoryIds((prev) => {
-      let newIds: number[];
       if (prev.includes(categoryId)) {
-        newIds = prev.filter((id) => id !== categoryId);
+        return prev.filter((id) => id !== categoryId);
       } else {
-        newIds = [...prev, categoryId];
+        return [...prev, categoryId];
       }
-      return newIds;
     });
   };
 
-  // Handle image removal
   const handleRemoveImage = (imageId: number) => {
     if (!editedDestination) return;
 
@@ -317,7 +255,6 @@ const UpdateDestinationPage = () => {
     });
   };
 
-  // Handle activity removal
   const handleRemoveActivity = (activityId: number) => {
     if (!editedDestination) return;
 
@@ -331,12 +268,10 @@ const UpdateDestinationPage = () => {
     });
   };
 
-  // Handle new activity addition
   const handleAddNewActivity = (activity: NewActivityRequest) => {
     setNewActivities((prev) => [...prev, activity]);
   };
 
-  // Handle update existing activity
   const handleUpdateActivity = (updatedActivity: Activity) => {
     if (!editedDestination) return;
 
@@ -348,7 +283,6 @@ const UpdateDestinationPage = () => {
     });
   };
 
-  // Handle update existing image
   const handleUpdateImage = (updatedImage: Image) => {
     if (!editedDestination) return;
 
@@ -360,7 +294,6 @@ const UpdateDestinationPage = () => {
     });
   };
 
-  // Calculate category changes
   const getCategoryChanges = useCallback(() => {
     const removedCategoryIds = originalCategoryIds.filter(
       (id) => !currentCategoryIds.includes(id),
@@ -371,7 +304,6 @@ const UpdateDestinationPage = () => {
     return { removedCategoryIds, addedCategoryIds };
   }, [originalCategoryIds, currentCategoryIds]);
 
-  // Check if there are any changes
   const hasChanges = useCallback(() => {
     if (!originalDestination || !editedDestination) return false;
 
@@ -406,7 +338,6 @@ const UpdateDestinationPage = () => {
     getCategoryChanges,
   ]);
 
-  // Prepare update data
   const prepareUpdateData = (): UpdateDestinationRequest | null => {
     if (!editedDestination || !selectedDestination) return null;
 
@@ -431,7 +362,6 @@ const UpdateDestinationPage = () => {
     };
   };
 
-  // Handle update submission
   const handleUpdateSubmit = async () => {
     const updateData = prepareUpdateData();
     if (!updateData) return;
@@ -446,12 +376,11 @@ const UpdateDestinationPage = () => {
       const successMsg = `Destination "${editedDestination?.destinationName}" updated successfully!`;
       setSuccess(successMsg);
 
-      // Show success toast with navigation link
       setToast({
         type: "success",
         title: "Update Successful!",
         message: `${editedDestination?.destinationName} has been updated successfully.`,
-        actionLink: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/view?id=${selectedDestination?.destinationId}`,
+        actionLink: `${DESTINATION_DETAILS_VIEW_PAGE_URL}/${selectedDestination?.destinationId}`,
       });
 
       setShowConfirmModal(false);
@@ -474,7 +403,6 @@ const UpdateDestinationPage = () => {
     }
   };
 
-  // Reset all changes
   const handleResetChanges = () => {
     if (originalDestination) {
       setEditedDestination(originalDestination);
@@ -506,14 +434,13 @@ const UpdateDestinationPage = () => {
     setCurrentCategoryIds([]);
     setToast(null);
 
-    // Update URL to remove query params
     const url = new URL(window.location.href);
     url.searchParams.delete("destination-id");
     url.searchParams.delete("destination-name");
     router.replace(url.toString(), { scroll: false });
   };
 
-  // Get changed fields for confirmation modal
+  // Prepare changed fields for confirmation modal
   const getChangedFields = () => {
     if (!originalDestination || !editedDestination) return [];
 
@@ -548,16 +475,18 @@ const UpdateDestinationPage = () => {
     });
 
     const { removedCategoryIds, addedCategoryIds } = getCategoryChanges();
+    
     if (removedCategoryIds.length > 0) {
       changes.push({
-        field: "Categories to Remove",
+        field: "Categories Removed",
         oldValue: originalCategoryIds.length,
         newValue: originalCategoryIds.length - removedCategoryIds.length,
       });
     }
+    
     if (addedCategoryIds.length > 0) {
       changes.push({
-        field: "Categories to Add",
+        field: "Categories Added",
         oldValue: originalCategoryIds.length,
         newValue: originalCategoryIds.length + addedCategoryIds.length,
       });
@@ -565,7 +494,7 @@ const UpdateDestinationPage = () => {
 
     if (removedImages.length > 0) {
       changes.push({
-        field: "Images to Remove",
+        field: "Images Removed",
         oldValue: originalDestination.images.length,
         newValue: originalDestination.images.length - removedImages.length,
       });
@@ -573,7 +502,7 @@ const UpdateDestinationPage = () => {
 
     if (newImages.length > 0) {
       changes.push({
-        field: "New Images",
+        field: "Images Added",
         oldValue: originalDestination.images.length,
         newValue: originalDestination.images.length + newImages.length,
       });
@@ -581,7 +510,7 @@ const UpdateDestinationPage = () => {
 
     if (removedActivities.length > 0) {
       changes.push({
-        field: "Activities to Remove",
+        field: "Activities Removed",
         oldValue: originalDestination.activities.length,
         newValue:
           originalDestination.activities.length - removedActivities.length,
@@ -590,7 +519,7 @@ const UpdateDestinationPage = () => {
 
     if (newActivities.length > 0) {
       changes.push({
-        field: "New Activities",
+        field: "Activities Added",
         oldValue: originalDestination.activities.length,
         newValue: originalDestination.activities.length + newActivities.length,
       });
@@ -599,7 +528,6 @@ const UpdateDestinationPage = () => {
     return changes;
   };
 
-  // Convert destinations to search items format
   const searchItems = destinations.map((dest) => ({
     id: dest.destinationId,
     name: dest.destinationName,
@@ -612,18 +540,16 @@ const UpdateDestinationPage = () => {
       }
     : null;
 
-  // Show loading state if common data is loading
   if (commonLoading) {
     return (
       <CommonLoading
-        message="Loading categories..."
+        message="Loading Destination..."
         subMessage="Please wait while we fetch available categories"
         size="lg"
       />
     );
   }
 
-  // Show error state if common data failed to load
   if (commonError) {
     return (
       <CommonErrorState
@@ -645,7 +571,6 @@ const UpdateDestinationPage = () => {
       className="min-h-screen transition-colors duration-300"
       style={{ backgroundColor: theme.background }}
     >
-      {/* Toast Notifications */}
       {toast && (
         <ToastNotification
           type={toast.type}
@@ -657,7 +582,6 @@ const UpdateDestinationPage = () => {
         />
       )}
 
-      {/* Header with Breadcrumb */}
       <div
         className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
         style={{
@@ -669,14 +593,12 @@ const UpdateDestinationPage = () => {
           <PageHeader
             title="Update Destination"
             description="Edit and update existing destination information"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={DESTINATION_UPDATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Section - Only show when no destination is selected */}
         {!selectedDestination && (
           <div
             className="rounded-2xl shadow-lg p-8 mb-8 transition-all duration-300"
@@ -710,7 +632,7 @@ const UpdateDestinationPage = () => {
             />
           </div>
         )}
-        {/* Selected Destination Info Bar */}
+        
         <SelectedItemBar
           item={
             selectedDestination
@@ -727,6 +649,7 @@ const UpdateDestinationPage = () => {
           clearButtonText="Change Destination"
           size="md"
         />
+        
         {loadingDetails && (
           <CommonLoading
             message="Loading destination details..."
@@ -736,7 +659,8 @@ const UpdateDestinationPage = () => {
             className="rounded-2xl shadow-lg border"
           />
         )}
-        {/* Destination Details Form */}
+        
+        {/* Destination Details Form - This already includes the CategorySelector */}
         {editedDestination && selectedDestination && (
           <DestinationDetailsForm
             destination={editedDestination}
@@ -761,7 +685,7 @@ const UpdateDestinationPage = () => {
             uploadingImages={uploadingImages}
           />
         )}
-        {/* Action Buttons */}
+        
         {editedDestination && originalDestination && (
           <div
             className="rounded-2xl shadow-lg p-8 mt-8 transition-colors duration-300"
@@ -809,7 +733,6 @@ const UpdateDestinationPage = () => {
               </button>
             </div>
 
-            {/* Uploading Indicator */}
             {uploadingImages && (
               <div
                 className="mt-6 p-4 rounded-xl transition-colors duration-300"
@@ -839,7 +762,6 @@ const UpdateDestinationPage = () => {
               </div>
             )}
 
-            {/* Change Indicator */}
             {hasChanges() && !uploadingImages && (
               <div
                 className="mt-6 p-4 rounded-xl transition-colors duration-300"
@@ -866,23 +788,22 @@ const UpdateDestinationPage = () => {
             )}
           </div>
         )}
+        
         {/* Confirmation Modal */}
         {showConfirmModal && originalDestination && editedDestination && (
           <UpdateConfirmationModal
             isOpen={showConfirmModal}
             onClose={() => setShowConfirmModal(false)}
             onConfirm={handleUpdateSubmit}
-            loading={loadingUpdate}
+            title="Confirm Destination Update"
+            message={`Are you sure you want to update "${editedDestination.destinationName}"?`}
             changedFields={getChangedFields()}
-            originalDestination={originalDestination}
-            editedDestination={editedDestination}
-            removedImages={removedImages}
-            newImages={newImages}
-            removedActivities={removedActivities}
-            newActivities={newActivities}
-            removedCategoryIds={getCategoryChanges().removedCategoryIds}
-            addedCategoryIds={getCategoryChanges().addedCategoryIds}
-            availableCategories={availableCategories}
+            confirmText="Confirm Update"
+            cancelText="Cancel"
+            type="update"
+            isLoading={loadingUpdate}
+            itemName={editedDestination.destinationName}
+            showFieldComparisons={true}
           />
         )}
       </div>

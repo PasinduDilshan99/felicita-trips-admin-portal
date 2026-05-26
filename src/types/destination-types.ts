@@ -578,3 +578,43 @@ export interface DestinationsForTourResponse {
   data: DestinationForTour[];
   timestamp: string;
 }
+
+export interface DestinationCardProps {
+  destination: Destination;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface DestinationListCardProps {
+  destination: Destination;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface IconBadgeProps {
+  icon: React.ElementType;
+  color?: string;
+}
+
+export interface LocationMapProps {
+  location: string;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export interface DestinationInfoFormProps {
+  formData: any;
+  errors: Record<string, string>;
+  onInputChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => void;
+}
+
+export interface LocationFormProps {
+  formData: any;
+  errors: Record<string, string>;
+  loading: boolean;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onGetCurrentLocation: () => void;
+}
+

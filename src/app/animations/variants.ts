@@ -246,7 +246,6 @@ export const separatorVariants: Variants = {
   },
 };
 
-
 export const titleVariants: Variants = {
   hidden: { opacity: 0, x: -20 },
   visible: {
@@ -273,3 +272,164 @@ export const actionVariants: Variants = {
   },
 };
 
+export const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: EASE_OUT },
+  },
+};
+
+export const fieldGroupVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.07, delayChildren: 0.1 },
+  },
+};
+
+export const fieldVariants: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.38, ease: EASE_OUT },
+  },
+};
+
+export const modifiedBadgeVariants: Variants = {
+  hidden: { opacity: 0, height: 0, marginTop: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    marginTop: 6,
+    transition: { duration: 0.22, ease: "easeOut" },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    marginTop: 0,
+    transition: { duration: 0.18, ease: "easeIn" },
+  },
+};
+
+export const pillVariants: Variants = {
+  rest: { scale: 1, y: 0 },
+  hover: { y: -2, transition: { duration: 0.15, ease: "easeOut" } },
+  tap: { scale: 0.97, transition: { duration: 0.1 } },
+};
+
+export const bodyVariants: Variants = {
+  hidden: { opacity: 0, height: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    transition: { duration: 0.32, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    transition: { duration: 0.22, ease: "easeIn" },
+  },
+};
+
+export const tagVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.82 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.22, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.82,
+    transition: { duration: 0.16, ease: "easeIn" },
+  },
+};
+
+export const rowVariants: Variants = {
+  rest: { x: 0 },
+  hover: { x: 3, transition: { duration: 0.15, ease: "easeOut" } },
+};
+
+export const errorVariants: Variants = {
+  hidden: { opacity: 0, height: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    transition: { duration: 0.22, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    transition: { duration: 0.16, ease: "easeIn" },
+  },
+};
+
+export const modifiedVariants: Variants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.22, ease: EASE_OUT } },
+  exit: { opacity: 0, y: 6, transition: { duration: 0.16 } },
+};
+
+export const formVariants: Variants = {
+  hidden: { opacity: 0, y: -20, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.32, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    y: -20,
+    scale: 0.98,
+    transition: { duration: 0.24, ease: "easeIn" },
+  },
+};
+
+export const activityCardVariants: Variants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.28, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    x: -10,
+    transition: { duration: 0.2, ease: "easeIn" },
+  },
+};
+
+export const activityBodyVariants: Variants = {
+  hidden: { opacity: 0, height: 0, marginTop: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    marginTop: 12,
+    transition: { duration: 0.28, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    marginTop: 0,
+    transition: { duration: 0.22, ease: "easeIn" },
+  },
+};
+
+export const confirmVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.92, x: 10 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    x: 0,
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.92,
+    x: 10,
+    transition: { duration: 0.16, ease: "easeIn" },
+  },
+};

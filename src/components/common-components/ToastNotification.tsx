@@ -1,21 +1,9 @@
-// components/common-components/ToastNotification.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { CheckCircle, AlertCircle, X, ExternalLink } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-export type ToastType = "success" | "error";
-
-interface ToastNotificationProps {
-  type: ToastType;
-  title: string;
-  message: string;
-  duration?: number;
-  onClose: () => void;
-  actionLink?: string;
-  actionText?: string;
-}
+import { ToastNotificationProps } from "@/types/common-components-types";
 
 export const ToastNotification: React.FC<ToastNotificationProps> = ({
   type,
@@ -128,7 +116,6 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
             boxShadow: `0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px ${currentColor.border}`,
           }}
         >
-          {/* Progress bar */}
           <div
             className="absolute top-0 left-0 h-1"
             style={{
@@ -139,19 +126,23 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
 
           <div className="p-4">
             <div className="flex items-start gap-3">
-              {/* Icon */}
               <div
                 className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{ backgroundColor: currentColor.light }}
               >
                 {type === "success" ? (
-                  <CheckCircle className="w-5 h-5" style={{ color: currentColor.icon }} />
+                  <CheckCircle
+                    className="w-5 h-5"
+                    style={{ color: currentColor.icon }}
+                  />
                 ) : (
-                  <AlertCircle className="w-5 h-5" style={{ color: currentColor.icon }} />
+                  <AlertCircle
+                    className="w-5 h-5"
+                    style={{ color: currentColor.icon }}
+                  />
                 )}
               </div>
 
-              {/* Content */}
               <div className="flex-1 min-w-0">
                 <h3
                   className="text-sm font-semibold mb-1"
@@ -159,10 +150,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
                 >
                   {title}
                 </h3>
-                <p
-                  className="text-sm"
-                  style={{ color: theme.textSecondary }}
-                >
+                <p className="text-sm" style={{ color: theme.textSecondary }}>
                   {message}
                 </p>
 
@@ -179,7 +167,6 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
                 )}
               </div>
 
-              {/* Close button */}
               <button
                 onClick={handleClose}
                 className="flex-shrink-0 p-1.5 rounded-lg transition-all hover:scale-110"

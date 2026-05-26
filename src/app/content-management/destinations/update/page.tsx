@@ -1,12 +1,12 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
 import UpdateDestinationPage from "@/pages/content-management/destinations/UpdateDestinationPage";
-import { UPDATE_DESTINATION_PAGE_TITLE } from "@/utils/pagesHeaderTitles";
+import { DESTINATION_UPDATE_PAGE_TITLE } from "@/utils/pagesHeaderTitles";
 import { DESTINATION_UPDATE_PRIVILEGE } from "@/utils/privileges";
 import { Metadata } from "next";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: UPDATE_DESTINATION_PAGE_TITLE,
+  title: DESTINATION_UPDATE_PAGE_TITLE,
 };
 
 const page = () => {

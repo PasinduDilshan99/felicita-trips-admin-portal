@@ -21,7 +21,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
-import { EmptyState } from "@/components/destinations-components/view-destinations-components/EmptyState";
+import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import ActivityCard from "@/components/activities-components/ActivityCard";
 import ActivityListCard from "@/components/activities-components/ActivityListCard";

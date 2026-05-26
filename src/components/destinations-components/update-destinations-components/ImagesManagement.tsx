@@ -10,13 +10,15 @@ import {
   Trash2,
   ChevronDown,
   AlertCircle,
+  Eye,
+  Edit,
+  Check,
 } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Image as ImageType, NewImageRequest } from "@/types/destination-types";
 import { useTheme } from "@/contexts/ThemeContext";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import { ImageModalImage } from "@/types/common-components-types";
+import ImageModal from "@/components/common-components/ImageModal";
 
 interface ImagesManagementProps {
   images: ImageType[];
@@ -24,6 +26,8 @@ interface ImagesManagementProps {
   newImages: NewImageRequest[];
   uploadingImages: boolean;
   onRemoveImage: (imageId: number) => void;
+  onRestoreImage?: (imageId: number) => void;
+  onUpdateImage: (image: ImageType) => void;
   onAddNewImage: (
     file: File,
     name: string,
@@ -145,6 +149,28 @@ const pillVariants: Variants = {
   tap: { scale: 0.95, transition: { duration: 0.1 } },
 };
 
+const modalOverlayVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.2 } },
+  exit: { opacity: 0, transition: { duration: 0.15 } },
+};
+
+const editModalVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", damping: 25, stiffness: 300 },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    y: 20,
+    transition: { duration: 0.2 },
+  },
+};
+
 /* ─── Component ──────────────────────────────────────────────────────────── */
 
 export const ImagesManagement: React.FC<ImagesManagementProps> = ({
@@ -153,6 +179,8 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
   newImages,
   uploadingImages,
   onRemoveImage,
+  onRestoreImage,
+  onUpdateImage,
   onAddNewImage,
   error,
 }) => {
@@ -162,6 +190,12 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
   const [uploadingLocalImage, setUploadingLocalImage] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingImage, setEditingImage] = useState<ImageType | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    description: "",
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -173,6 +207,37 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
 
   const isImageRemoved = (imageId: number): boolean => {
     return removedImages.includes(imageId);
+  };
+
+  const handleRestoreImage = (imageId: number) => {
+    if (onRestoreImage) {
+      onRestoreImage(imageId);
+    } else {
+      // If no restore handler provided, we need to implement it
+      console.warn("onRestoreImage handler not provided");
+    }
+  };
+
+  const handleEditImage = (image: ImageType) => {
+    setEditingImage(image);
+    setEditFormData({
+      name: image.imageName,
+      description: image.imageDescription || "",
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingImage && editFormData.name.trim()) {
+      const updatedImage = {
+        ...editingImage,
+        imageName: editFormData.name,
+        imageDescription: editFormData.description,
+      };
+      onUpdateImage(updatedImage);
+      setEditModalOpen(false);
+      setEditingImage(null);
+    }
   };
 
   const getAllImagesForModal = (): ImageModalImage[] => {
@@ -294,6 +359,16 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(0,0,0,0.3);
+        }
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
       `}</style>
 
@@ -638,6 +713,91 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                 )}
               </AnimatePresence>
 
+              {/* Removed Images Section */}
+              {removedImages.length > 0 && (
+                <div className="px-4 sm:px-6 pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="text-xs font-medium uppercase tracking-wide"
+                        style={{ color: theme.error }}
+                      >
+                        Removed Images
+                      </span>
+                      <motion.span
+                        key="removed-count"
+                        initial={{ opacity: 0, scale: 0.7 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-xs px-1.5 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor: `${theme.error}20`,
+                          color: theme.error,
+                        }}
+                      >
+                        {removedImages.length}
+                      </motion.span>
+                    </div>
+                  </div>
+
+                  <motion.div
+                    variants={imageGridVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
+                  >
+                    <AnimatePresence mode="popLayout">
+                      {images
+                        .filter((img) => removedImages.includes(img.imageId))
+                        .map((image) => (
+                          <motion.div
+                            key={image.imageId}
+                            layout
+                            variants={imageCardVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            whileHover="hover"
+                            className="relative rounded-xl overflow-hidden opacity-60"
+                            style={{
+                              border: `2px solid ${theme.error}`,
+                              backgroundColor: theme.background,
+                            }}
+                          >
+                            <img
+                              src={image.imageUrl}
+                              alt={image.imageName}
+                              className="w-full h-40 object-cover grayscale"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-red-900/50 via-red-900/20 to-transparent">
+                              <div className="absolute bottom-0 left-0 right-0 p-3">
+                                <p className="text-white text-sm font-medium truncate">
+                                  {image.imageName}
+                                </p>
+                                <p className="text-red-200 text-xs mt-0.5">
+                                  Will be removed
+                                </p>
+                              </div>
+                            </div>
+                            <motion.button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRestoreImage(image.imageId);
+                              }}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              whileHover={{ opacity: 1, scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className="absolute top-2 right-2 p-1.5 rounded-full bg-green-500 text-white shadow-lg"
+                              title="Restore image"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </motion.button>
+                          </motion.div>
+                        ))}
+                    </AnimatePresence>
+                  </motion.div>
+                </div>
+              )}
+
               {/* Existing Images Section */}
               <div className="px-4 sm:px-6 pt-6">
                 <div className="flex items-center justify-between mb-4">
@@ -703,17 +863,10 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                               animate="visible"
                               exit="exit"
                               whileHover="hover"
-                              className="relative group rounded-xl overflow-hidden cursor-pointer"
+                              className="relative group rounded-xl overflow-hidden"
                               style={{
                                 border: `1px solid ${theme.border}`,
                                 backgroundColor: theme.background,
-                              }}
-                              onClick={() => {
-                                const allImages = getAllImagesForModal();
-                                const index = allImages.findIndex(
-                                  (img) => img.id === image.imageId,
-                                );
-                                openImageModal(index);
                               }}
                             >
                               <img
@@ -721,36 +874,64 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                                 alt={image.imageName}
                                 className="w-full h-40 object-cover"
                               />
+                              
+                              {/* Overlay with actions on hover */}
                               <motion.div
-                                className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"
+                                className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2"
                                 initial={{ opacity: 0 }}
                                 whileHover={{ opacity: 1 }}
                                 transition={{ duration: 0.2 }}
                               >
-                                <div className="absolute bottom-0 left-0 right-0 p-3">
-                                  <p className="text-white text-sm font-medium truncate">
-                                    {image.imageName}
-                                  </p>
-                                  {image.imageDescription && (
-                                    <p className="text-white/70 text-xs truncate mt-0.5">
-                                      {image.imageDescription}
-                                    </p>
-                                  )}
-                                </div>
+                                <motion.button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const allImages = getAllImagesForModal();
+                                    const index = allImages.findIndex(
+                                      (img) => img.id === image.imageId,
+                                    );
+                                    openImageModal(index);
+                                  }}
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all"
+                                  title="View image"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </motion.button>
+                                
+                                <motion.button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditImage(image);
+                                  }}
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all"
+                                  title="Edit image"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </motion.button>
+                                
+                                <motion.button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onRemoveImage(image.imageId);
+                                  }}
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  className="p-2 rounded-full bg-red-500/80 hover:bg-red-600 text-white transition-all"
+                                  title="Remove image"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </motion.button>
                               </motion.div>
-                              <motion.button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onRemoveImage(image.imageId);
-                                }}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                whileHover={{ opacity: 1, scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500 text-white shadow-lg"
-                                title="Remove image"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </motion.button>
+                              
+                              {/* Image info at bottom */}
+                              <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
+                                <p className="text-white text-xs font-medium truncate">
+                                  {image.imageName}
+                                </p>
+                              </div>
                             </motion.div>
                           ),
                       )}
@@ -804,7 +985,7 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                             key={`new-${index}`}
                             variants={imageCardVariants}
                             whileHover="hover"
-                            className="relative rounded-xl overflow-hidden cursor-pointer"
+                            className="relative rounded-xl overflow-hidden cursor-pointer group"
                             style={{
                               border: `2px solid ${theme.success}`,
                               backgroundColor: `${theme.success}05`,
@@ -922,6 +1103,152 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
         showZoom={true}
         allowKeyboardNavigation={true}
       />
+
+      {/* Edit Image Modal */}
+      <AnimatePresence>
+        {editModalOpen && editingImage && (
+          <>
+            <motion.div
+              variants={modalOverlayVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000]"
+              onClick={() => setEditModalOpen(false)}
+            />
+            <motion.div
+              variants={editModalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-[1001]"
+            >
+              <div
+                className="rounded-2xl overflow-hidden shadow-2xl"
+                style={{
+                  backgroundColor: theme.surface,
+                  border: `1px solid ${theme.border}`,
+                }}
+              >
+                <div
+                  className="flex items-center justify-between px-5 py-4"
+                  style={{
+                    borderBottom: `1px solid ${theme.border}`,
+                    backgroundColor: `${theme.primary}08`,
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Edit className="w-4 h-4" style={{ color: theme.primary }} />
+                    <h3
+                      className="text-lg font-semibold"
+                      style={{ color: theme.text }}
+                    >
+                      Edit Image
+                    </h3>
+                  </div>
+                  <motion.button
+                    onClick={() => setEditModalOpen(false)}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="p-1 rounded transition-colors hover:bg-black/10"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    <X className="w-4 h-4" />
+                  </motion.button>
+                </div>
+
+                <div className="p-5 space-y-4">
+                  {/* Image Preview */}
+                  <div className="relative rounded-lg overflow-hidden">
+                    <img
+                      src={editingImage.imageUrl}
+                      alt={editingImage.imageName}
+                      className="w-full h-48 object-cover"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-xs font-medium mb-1.5"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Image Name <span style={{ color: theme.error }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.name}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all text-sm"
+                      style={{
+                        backgroundColor: theme.background,
+                        borderColor: theme.border,
+                        color: theme.text,
+                      }}
+                      {...focusHandlers}
+                      placeholder="Image name"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-xs font-medium mb-1.5"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Description
+                    </label>
+                    <textarea
+                      value={editFormData.description}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, description: e.target.value })
+                      }
+                      rows={3}
+                      className="w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all text-sm resize-none"
+                      style={{
+                        backgroundColor: theme.background,
+                        borderColor: theme.border,
+                        color: theme.text,
+                      }}
+                      {...focusHandlers}
+                      placeholder="Image description (optional)"
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <motion.button
+                      onClick={() => setEditModalOpen(false)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="flex-1 px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                      style={{
+                        backgroundColor: theme.background,
+                        border: `2px solid ${theme.border}`,
+                        color: theme.textSecondary,
+                      }}
+                    >
+                      Cancel
+                    </motion.button>
+                    <motion.button
+                      onClick={handleSaveEdit}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="flex-1 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 text-sm"
+                      style={{
+                        background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`,
+                        color: "#fff",
+                      }}
+                    >
+                      <Check className="w-4 h-4" />
+                      Save Changes
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };

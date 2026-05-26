@@ -10,33 +10,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-export interface ImageModalImage {
-  url: string;
-  name?: string;
-  description?: string;
-  id?: string | number;
-}
-
-interface ImageModalProps {
-  isOpen: boolean;
-  images: ImageModalImage[];
-  initialIndex?: number;
-  onClose: () => void;
-  showNavigation?: boolean;
-  showDownload?: boolean;
-  showZoom?: boolean;
-  allowKeyboardNavigation?: boolean;
-}
+import { ImageModalProps } from "@/types/common-components-types";
+import { hexToRgba } from "@/utils/functions";
 
 const ImageModal: React.FC<ImageModalProps> = ({
   isOpen,
@@ -60,9 +35,13 @@ const ImageModal: React.FC<ImageModalProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
-  const [pinchStartDistance, setPinchStartDistance] = useState<number | null>(null);
+  const [pinchStartDistance, setPinchStartDistance] = useState<number | null>(
+    null,
+  );
   const [pinchStartScale, setPinchStartScale] = useState(1);
-  const [slideDirection, setSlideDirection] = useState<"left" | "right" | null>(null);
+  const [slideDirection, setSlideDirection] = useState<"left" | "right" | null>(
+    null,
+  );
   const [isSliding, setIsSliding] = useState(false);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const thumbnailStripRef = useRef<HTMLDivElement>(null);
@@ -71,20 +50,16 @@ const ImageModal: React.FC<ImageModalProps> = ({
   const currentImage = images[currentIndex];
   const hasMultipleImages = images.length > 1;
 
-  // Animate in/out
   useEffect(() => {
     if (isOpen) {
       setIsClosing(false);
       setIsVisible(true);
-      // Reset scroll lock when opening
       document.body.style.overflow = "hidden";
     } else {
-      // Clean up when closed
       document.body.style.overflow = "";
     }
-    
+
     return () => {
-      // Cleanup on unmount
       document.body.style.overflow = "";
       if (closeTimeoutRef.current) {
         clearTimeout(closeTimeoutRef.current);
@@ -93,20 +68,17 @@ const ImageModal: React.FC<ImageModalProps> = ({
   }, [isOpen]);
 
   const handleClose = useCallback(() => {
-    if (isClosing) return; // Prevent multiple close calls
-    
+    if (isClosing) return;
+
     setIsClosing(true);
     setIsVisible(false);
-    
-    // Remove scroll lock immediately when closing starts
+
     document.body.style.overflow = "";
-    
-    // Clear any existing timeout
+
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
     }
-    
-    // Call onClose after animation
+
     closeTimeoutRef.current = setTimeout(() => {
       onClose();
       setIsClosing(false);
@@ -122,48 +94,57 @@ const ImageModal: React.FC<ImageModalProps> = ({
     }
   }, [isOpen, initialIndex]);
 
-  // Scroll active thumbnail into view
   useEffect(() => {
     if (thumbnailStripRef.current && hasMultipleImages && isVisible) {
       const strip = thumbnailStripRef.current;
       const active = strip.children[currentIndex] as HTMLElement;
       if (active) {
-        active.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        active.scrollIntoView({
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest",
+        });
       }
     }
   }, [currentIndex, hasMultipleImages, isVisible]);
 
-  // Keyboard navigation
   useEffect(() => {
     if (!isOpen || !allowKeyboardNavigation || isClosing) return;
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
-        case "Escape": 
-          handleClose(); 
+        case "Escape":
+          handleClose();
           break;
-        case "ArrowLeft": 
-          if (hasMultipleImages) navigatePrevious(); 
+        case "ArrowLeft":
+          if (hasMultipleImages) navigatePrevious();
           break;
-        case "ArrowRight": 
-          if (hasMultipleImages) navigateNext(); 
+        case "ArrowRight":
+          if (hasMultipleImages) navigateNext();
           break;
-        case "+": 
-        case "=": 
-          if (showZoom) zoomIn(); 
+        case "+":
+        case "=":
+          if (showZoom) zoomIn();
           break;
-        case "-": 
-          if (showZoom) zoomOut(); 
+        case "-":
+          if (showZoom) zoomOut();
           break;
-        case "0": 
-          if (showZoom) resetZoom(); 
+        case "0":
+          if (showZoom) resetZoom();
           break;
       }
     };
-    
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, allowKeyboardNavigation, hasMultipleImages, showZoom, handleClose, isClosing]);
+  }, [
+    isOpen,
+    allowKeyboardNavigation,
+    hasMultipleImages,
+    showZoom,
+    handleClose,
+    isClosing,
+  ]);
 
   const slideImage = (direction: "left" | "right", callback: () => void) => {
     setSlideDirection(direction);
@@ -180,7 +161,7 @@ const ImageModal: React.FC<ImageModalProps> = ({
     if (isSliding) return;
     resetZoom();
     slideImage("right", () =>
-      setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))
+      setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1)),
     );
   };
 
@@ -188,7 +169,7 @@ const ImageModal: React.FC<ImageModalProps> = ({
     if (isSliding) return;
     resetZoom();
     slideImage("left", () =>
-      setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))
+      setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0)),
     );
   };
 
@@ -203,9 +184,9 @@ const ImageModal: React.FC<ImageModalProps> = ({
   const zoomOut = () => {
     setScale((prev) => {
       const next = Math.max(prev - 0.3, 0.5);
-      if (next <= 1) { 
-        setIsZoomed(false); 
-        setPosition({ x: 0, y: 0 }); 
+      if (next <= 1) {
+        setIsZoomed(false);
+        setPosition({ x: 0, y: 0 });
       }
       return next;
     });
@@ -272,9 +253,9 @@ const ImageModal: React.FC<ImageModalProps> = ({
       const next = Math.min(Math.max(pinchStartScale * ratio, 0.5), 4);
       setScale(next);
       if (next > 1) setIsZoomed(true);
-      if (next <= 1) { 
-        setIsZoomed(false); 
-        setPosition({ x: 0, y: 0 }); 
+      if (next <= 1) {
+        setIsZoomed(false);
+        setPosition({ x: 0, y: 0 });
       }
     }
   };
@@ -286,7 +267,12 @@ const ImageModal: React.FC<ImageModalProps> = ({
     const endY = e.changedTouches[0].clientY;
     const deltaX = endX - touchStartX;
     const deltaY = endY - touchStartY;
-    if (!isZoomed && hasMultipleImages && Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY)) {
+    if (
+      !isZoomed &&
+      hasMultipleImages &&
+      Math.abs(deltaX) > 60 &&
+      Math.abs(deltaX) > Math.abs(deltaY)
+    ) {
       deltaX < 0 ? navigateNext() : navigatePrevious();
     }
     setTouchStartX(null);
@@ -310,87 +296,126 @@ const ImageModal: React.FC<ImageModalProps> = ({
     <>
       <style jsx global>{`
         @keyframes im-backdrop-in {
-          from { opacity: 0; }
-          to   { opacity: 1; }
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
         @keyframes im-backdrop-out {
-          from { opacity: 1; }
-          to   { opacity: 0; }
+          from {
+            opacity: 1;
+          }
+          to {
+            opacity: 0;
+          }
         }
         @keyframes im-panel-in {
-          from { opacity: 0; transform: scale(0.96) translateY(12px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
+          from {
+            opacity: 0;
+            transform: scale(0.96) translateY(12px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
         }
         @keyframes im-panel-out {
-          from { opacity: 1; transform: scale(1) translateY(0); }
-          to   { opacity: 0; transform: scale(0.96) translateY(12px); }
+          from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.96) translateY(12px);
+          }
         }
         @keyframes im-bar-in {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(16px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         @keyframes im-spin {
-          to { transform: rotate(360deg); }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .im-backdrop {
-          animation: im-backdrop-in 0.32s cubic-bezier(0.22,1,0.36,1) forwards;
+          animation: im-backdrop-in 0.32s cubic-bezier(0.22, 1, 0.36, 1)
+            forwards;
           pointer-events: auto;
         }
         .im-backdrop.closing {
-          animation: im-backdrop-out 0.28s cubic-bezier(0.22,1,0.36,1) forwards;
+          animation: im-backdrop-out 0.28s cubic-bezier(0.22, 1, 0.36, 1)
+            forwards;
           pointer-events: none;
         }
         .im-panel {
-          animation: im-panel-in 0.32s cubic-bezier(0.22,1,0.36,1) forwards;
+          animation: im-panel-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
           pointer-events: auto;
         }
         .im-panel.closing {
-          animation: im-panel-out 0.28s cubic-bezier(0.22,1,0.36,1) forwards;
+          animation: im-panel-out 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
           pointer-events: none;
         }
         .im-bar {
-          animation: im-bar-in 0.4s 0.08s cubic-bezier(0.22,1,0.36,1) both;
+          animation: im-bar-in 0.4s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
         .im-img {
-          transition: opacity 0.22s cubic-bezier(0.22,1,0.36,1),
-                      transform 0.22s cubic-bezier(0.22,1,0.36,1);
+          transition:
+            opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+            transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .im-spinner {
           animation: im-spin 0.9s linear infinite;
         }
         .im-nav-btn {
-          transition: background 0.18s, transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.18s;
+          transition:
+            background 0.18s,
+            transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+            opacity 0.18s;
         }
         .im-nav-btn:hover {
-          background: rgba(255,255,255,0.18) !important;
+          background: rgba(255, 255, 255, 0.18) !important;
           transform: translateY(-50%) scale(1.12);
         }
         .im-nav-btn:active {
           transform: translateY(-50%) scale(0.96);
         }
         .im-ctrl-btn {
-          transition: background 0.15s, transform 0.15s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s;
+          transition:
+            background 0.15s,
+            transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+            opacity 0.15s;
         }
         .im-ctrl-btn:hover:not(:disabled) {
-          background: rgba(255,255,255,0.18) !important;
+          background: rgba(255, 255, 255, 0.18) !important;
           transform: scale(1.12);
         }
         .im-ctrl-btn:active:not(:disabled) {
           transform: scale(0.93);
         }
         .im-close-btn {
-          transition: background 0.15s, transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+          transition:
+            background 0.15s,
+            transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .im-close-btn:hover {
-          background: rgba(220,60,60,0.82) !important;
+          background: rgba(220, 60, 60, 0.82) !important;
           transform: scale(1.1) rotate(90deg);
         }
         .im-close-btn:active {
           transform: scale(0.92) rotate(90deg);
         }
         .im-thumb {
-          transition: all 0.2s cubic-bezier(0.22,1,0.36,1);
+          transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
           flex-shrink: 0;
         }
         .im-thumb:hover {
@@ -400,14 +425,18 @@ const ImageModal: React.FC<ImageModalProps> = ({
           transform: scale(1.08) translateY(-3px);
         }
         .im-dot {
-          transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+          transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         @media (max-width: 480px) {
-          .im-nav-btn { display: none !important; }
+          .im-nav-btn {
+            display: none !important;
+          }
         }
         @media (max-width: 360px) {
-          .im-zoom-pct { display: none; }
+          .im-zoom-pct {
+            display: none;
+          }
         }
       `}</style>
 
@@ -426,7 +455,10 @@ const ImageModal: React.FC<ImageModalProps> = ({
       <div className="fixed inset-0 z-[999] flex items-center justify-center p-2 sm:p-4 pointer-events-none">
         <div
           className={`im-panel ${isClosing ? "closing" : ""} relative flex flex-col w-full h-full pointer-events-auto`}
-          style={{ maxWidth: "min(1280px, 96vw)", maxHeight: "min(90vh, 900px)" }}
+          style={{
+            maxWidth: "min(1280px, 96vw)",
+            maxHeight: "min(90vh, 900px)",
+          }}
           onClick={(e) => e.stopPropagation()}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -440,14 +472,25 @@ const ImageModal: React.FC<ImageModalProps> = ({
           >
             <div className="flex-1 min-w-0 pl-1">
               {currentImage?.name && (
-                <p className="text-sm sm:text-base font-semibold truncate leading-tight"
-                   style={{ color: "rgba(255,255,255,0.95)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "-0.01em" }}>
+                <p
+                  className="text-sm sm:text-base font-semibold truncate leading-tight"
+                  style={{
+                    color: "rgba(255,255,255,0.95)",
+                    fontFamily: "'DM Sans', sans-serif",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
                   {currentImage.name}
                 </p>
               )}
               {currentImage?.description && (
-                <p className="text-xs truncate mt-0.5"
-                   style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'DM Sans', sans-serif" }}>
+                <p
+                  className="text-xs truncate mt-0.5"
+                  style={{
+                    color: "rgba(255,255,255,0.5)",
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
                   {currentImage.description}
                 </p>
               )}
@@ -591,9 +634,10 @@ const ImageModal: React.FC<ImageModalProps> = ({
                     width: "clamp(40px, 8vw, 56px)",
                     height: "clamp(30px, 6vw, 42px)",
                     flexShrink: 0,
-                    border: idx === currentIndex
-                      ? `2px solid ${theme?.primary || "#0E9E8E"}`
-                      : "2px solid rgba(255,255,255,0.1)",
+                    border:
+                      idx === currentIndex
+                        ? `2px solid ${theme?.primary || "#0E9E8E"}`
+                        : "2px solid rgba(255,255,255,0.1)",
                     opacity: idx === currentIndex ? 1 : 0.55,
                     background: "rgba(255,255,255,0.05)",
                     padding: 0,
@@ -613,18 +657,26 @@ const ImageModal: React.FC<ImageModalProps> = ({
 
           {/* Dot indicators */}
           {hasMultipleImages && images.length > 20 && (
-            <div className="flex items-center justify-center gap-1.5 mt-2 flex-wrap px-2" style={{ flexShrink: 0 }}>
+            <div
+              className="flex items-center justify-center gap-1.5 mt-2 flex-wrap px-2"
+              style={{ flexShrink: 0 }}
+            >
               {images.map((_, idx) => (
                 <button
                   key={idx}
-                  onClick={() => { resetZoom(); setCurrentIndex(idx); setImageLoaded(false); }}
+                  onClick={() => {
+                    resetZoom();
+                    setCurrentIndex(idx);
+                    setImageLoaded(false);
+                  }}
                   className="im-dot rounded-full"
                   style={{
                     width: idx === currentIndex ? "20px" : "6px",
                     height: "6px",
-                    background: idx === currentIndex
-                      ? (theme?.primary || "#0E9E8E")
-                      : "rgba(255,255,255,0.25)",
+                    background:
+                      idx === currentIndex
+                        ? theme?.primary || "#0E9E8E"
+                        : "rgba(255,255,255,0.25)",
                   }}
                   aria-label={`Go to image ${idx + 1}`}
                 />
@@ -644,7 +696,10 @@ const ImageModal: React.FC<ImageModalProps> = ({
           >
             <div
               className="text-[10px] hidden sm:block"
-              style={{ color: "rgba(255,255,255,0.35)", fontFamily: "'DM Mono', monospace" }}
+              style={{
+                color: "rgba(255,255,255,0.35)",
+                fontFamily: "'DM Mono', monospace",
+              }}
             >
               {allowKeyboardNavigation && hasMultipleImages ? "← → " : ""}
               {showZoom ? "Ctrl+Scroll " : ""}
@@ -674,9 +729,15 @@ const ImageModal: React.FC<ImageModalProps> = ({
                     onClick={resetZoom}
                     className="im-zoom-pct im-ctrl-btn h-8 sm:h-9 px-2.5 rounded-lg flex items-center justify-center text-xs font-semibold"
                     style={{
-                      background: isZoomed ? `rgba(${hexToRgba(theme?.primary || "#0E9E8E", 0.18).slice(5)}` : "rgba(255,255,255,0.07)",
-                      border: isZoomed ? `1px solid ${theme?.primary || "#0E9E8E"}44` : "1px solid rgba(255,255,255,0.1)",
-                      color: isZoomed ? (theme?.primary || "#0E9E8E") : "rgba(255,255,255,0.7)",
+                      background: isZoomed
+                        ? `rgba(${hexToRgba(theme?.primary || "#0E9E8E", 0.18).slice(5)}`
+                        : "rgba(255,255,255,0.07)",
+                      border: isZoomed
+                        ? `1px solid ${theme?.primary || "#0E9E8E"}44`
+                        : "1px solid rgba(255,255,255,0.1)",
+                      color: isZoomed
+                        ? theme?.primary || "#0E9E8E"
+                        : "rgba(255,255,255,0.7)",
                       fontFamily: "'DM Mono', monospace",
                       minWidth: "44px",
                     }}

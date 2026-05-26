@@ -25,7 +25,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
-import { EmptyState } from "@/components/destinations-components/view-destinations-components/EmptyState";
+import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import { ACTIVITY_CATEGORIES_PAGE_URL, WEB_MANAGEMENT_URL } from "@/utils/urls";
 import ActivityCategoryCard from "@/components/activity-categories-components/view-activity-category-components/ActivityCategoryCard";

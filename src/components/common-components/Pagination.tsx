@@ -1,23 +1,14 @@
-// components/common-components/Pagination.tsx
 "use client";
 
-import React from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
-
-export interface PaginationProps {
-  currentPage: number;
-  totalItems: number;
-  pageSize: number;
-  onPageChange: (page: number) => void;
-  showResultsCount?: boolean;
-  showFirstLastButtons?: boolean;
-  showProgressBar?: boolean;
-  maxVisiblePages?: number;
-  className?: string;
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'minimal' | 'compact';
-}
+import React from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { PaginationProps } from "@/types/common-components-types";
 
 const Pagination: React.FC<PaginationProps> = ({
   currentPage,
@@ -28,9 +19,9 @@ const Pagination: React.FC<PaginationProps> = ({
   showFirstLastButtons = true,
   showProgressBar = true,
   maxVisiblePages = 7,
-  className = '',
-  size = 'md',
-  variant = 'default',
+  className = "",
+  size = "md",
+  variant = "default",
 }) => {
   const { theme } = useTheme();
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -42,7 +33,8 @@ const Pagination: React.FC<PaginationProps> = ({
   const progress = Math.round((currentPage / totalPages) * 100);
 
   const handlePrev = () => currentPage > 1 && onPageChange(currentPage - 1);
-  const handleNext = () => currentPage < totalPages && onPageChange(currentPage + 1);
+  const handleNext = () =>
+    currentPage < totalPages && onPageChange(currentPage + 1);
 
   const getPageNumbers = (): number[] => {
     if (totalPages <= maxVisiblePages) {
@@ -73,84 +65,85 @@ const Pagination: React.FC<PaginationProps> = ({
   // Size configurations
   const sizeConfig = {
     sm: {
-      height: '28px',
-      minWidth: '28px',
-      padding: '0 8px',
-      fontSize: '12px',
+      height: "28px",
+      minWidth: "28px",
+      padding: "0 8px",
+      fontSize: "12px",
       iconSize: 12,
-      gap: '2px',
+      gap: "2px",
     },
     md: {
-      height: '34px',
-      minWidth: '34px',
-      padding: '0 10px',
-      fontSize: '13px',
+      height: "34px",
+      minWidth: "34px",
+      padding: "0 10px",
+      fontSize: "13px",
       iconSize: 14,
-      gap: '4px',
+      gap: "4px",
     },
     lg: {
-      height: '40px',
-      minWidth: '40px',
-      padding: '0 14px',
-      fontSize: '14px',
+      height: "40px",
+      minWidth: "40px",
+      padding: "0 14px",
+      fontSize: "14px",
       iconSize: 16,
-      gap: '6px',
+      gap: "6px",
     },
   };
 
   const config = sizeConfig[size];
 
   const btnBase: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
     height: config.height,
     minWidth: config.minWidth,
     padding: config.padding,
     border: `1px solid ${theme.border}`,
-    borderRadius: variant === 'compact' ? '6px' : '8px',
+    borderRadius: variant === "compact" ? "6px" : "8px",
     background: theme.surface,
     color: theme.textSecondary,
     fontSize: config.fontSize,
     fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease',
-    userSelect: 'none' as const,
+    cursor: "pointer",
+    transition:
+      "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease",
+    userSelect: "none" as const,
     lineHeight: 1,
-    outline: 'none',
+    outline: "none",
     flexShrink: 0,
   };
 
   const btnDisabled: React.CSSProperties = {
     ...btnBase,
     opacity: 0.35,
-    cursor: 'not-allowed',
-    pointerEvents: 'none' as const,
+    cursor: "not-allowed",
+    pointerEvents: "none" as const,
   };
 
   const btnActive: React.CSSProperties = {
     ...btnBase,
     background: theme.primary,
     borderColor: theme.primary,
-    color: '#ffffff',
-    cursor: 'default',
-    pointerEvents: 'none' as const,
+    color: "#ffffff",
+    cursor: "default",
+    pointerEvents: "none" as const,
   };
 
   // Minimal variant button styles
-  if (variant === 'minimal') {
+  if (variant === "minimal") {
     Object.assign(btnBase, {
-      border: 'none',
-      background: 'transparent',
+      border: "none",
+      background: "transparent",
     });
     Object.assign(btnActive, {
       background: theme.primary,
-      border: 'none',
+      border: "none",
     });
   }
 
   // Compact variant has smaller gap
-  const containerGap = variant === 'compact' ? '2px' : config.gap;
+  const containerGap = variant === "compact" ? "2px" : config.gap;
 
   return (
     <>
@@ -175,29 +168,31 @@ const Pagination: React.FC<PaginationProps> = ({
       <div
         className={`pg-root ${className}`}
         style={{
-          borderTop: variant === 'minimal' ? 'none' : `1px solid ${theme.border}`,
-          backgroundColor: variant === 'minimal' ? 'transparent' : theme.surface,
-          padding: variant === 'compact' ? '0.5rem 0' : '0 1.25rem',
+          borderTop:
+            variant === "minimal" ? "none" : `1px solid ${theme.border}`,
+          backgroundColor:
+            variant === "minimal" ? "transparent" : theme.surface,
+          padding: variant === "compact" ? "0.5rem 0" : "0 1.25rem",
         }}
       >
         {/* Progress Bar */}
-        {showProgressBar && variant !== 'minimal' && (
+        {showProgressBar && variant !== "minimal" && (
           <div
             style={{
-              height: '2px',
+              height: "2px",
               background: theme.border,
-              borderRadius: '99px',
-              overflow: 'hidden',
-              margin: '14px 0',
+              borderRadius: "99px",
+              overflow: "hidden",
+              margin: "14px 0",
             }}
           >
             <div
               style={{
-                height: '100%',
+                height: "100%",
                 width: `${progress}%`,
                 background: theme.primary,
-                borderRadius: '99px',
-                transition: 'width 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                borderRadius: "99px",
+                transition: "width 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
               }}
             />
           </div>
@@ -206,10 +201,10 @@ const Pagination: React.FC<PaginationProps> = ({
         {/* Mobile Layout */}
         <div
           className="flex items-center justify-between sm:hidden"
-          style={{ paddingBottom: variant === 'compact' ? '0' : '14px' }}
+          style={{ paddingBottom: variant === "compact" ? "0" : "14px" }}
         >
           <button
-            className={currentPage > 1 ? 'pg-btn' : ''}
+            className={currentPage > 1 ? "pg-btn" : ""}
             onClick={handlePrev}
             style={currentPage === 1 ? btnDisabled : btnBase}
             aria-label="Previous page"
@@ -217,15 +212,21 @@ const Pagination: React.FC<PaginationProps> = ({
             <ChevronLeft size={config.iconSize} />
           </button>
 
-          <span style={{ fontSize: config.fontSize, color: theme.textSecondary }}>
-            Page{' '}
-            <strong style={{ fontWeight: 500, color: theme.text }}>{currentPage}</strong>
-            {' '}of{' '}
-            <strong style={{ fontWeight: 500, color: theme.text }}>{totalPages}</strong>
+          <span
+            style={{ fontSize: config.fontSize, color: theme.textSecondary }}
+          >
+            Page{" "}
+            <strong style={{ fontWeight: 500, color: theme.text }}>
+              {currentPage}
+            </strong>{" "}
+            of{" "}
+            <strong style={{ fontWeight: 500, color: theme.text }}>
+              {totalPages}
+            </strong>
           </span>
 
           <button
-            className={currentPage < totalPages ? 'pg-btn' : ''}
+            className={currentPage < totalPages ? "pg-btn" : ""}
             onClick={handleNext}
             style={currentPage === totalPages ? btnDisabled : btnBase}
             aria-label="Next page"
@@ -237,32 +238,42 @@ const Pagination: React.FC<PaginationProps> = ({
         {/* Desktop Layout */}
         <div
           className="hidden sm:flex sm:items-center sm:justify-between"
-          style={{ 
-            paddingBottom: variant === 'compact' ? '0' : '14px', 
-            gap: '1rem', 
-            flexWrap: 'wrap' as const 
+          style={{
+            paddingBottom: variant === "compact" ? "0" : "14px",
+            gap: "1rem",
+            flexWrap: "wrap" as const,
           }}
         >
           {/* Results Count */}
-          {showResultsCount && variant !== 'minimal' && (
-            <p style={{ fontSize: config.fontSize, color: theme.textSecondary, margin: 0 }}>
-              Showing{' '}
-              <strong style={{ fontWeight: 500, color: theme.text }}>{startItem}–{endItem}</strong>
-              {' '}of{' '}
-              <strong style={{ fontWeight: 500, color: theme.text }}>{totalItems}</strong>
-              {' '}results
+          {showResultsCount && variant !== "minimal" && (
+            <p
+              style={{
+                fontSize: config.fontSize,
+                color: theme.textSecondary,
+                margin: 0,
+              }}
+            >
+              Showing{" "}
+              <strong style={{ fontWeight: 500, color: theme.text }}>
+                {startItem}–{endItem}
+              </strong>{" "}
+              of{" "}
+              <strong style={{ fontWeight: 500, color: theme.text }}>
+                {totalItems}
+              </strong>{" "}
+              results
             </p>
           )}
 
           {/* Navigation */}
           <nav
-            style={{ display: 'flex', alignItems: 'center', gap: containerGap }}
+            style={{ display: "flex", alignItems: "center", gap: containerGap }}
             aria-label="Pagination"
           >
             {/* First Page Button */}
-            {showFirstLastButtons && variant !== 'minimal' && (
+            {showFirstLastButtons && variant !== "minimal" && (
               <button
-                className={currentPage > 1 ? 'pg-btn' : ''}
+                className={currentPage > 1 ? "pg-btn" : ""}
                 onClick={() => onPageChange(1)}
                 style={currentPage === 1 ? btnDisabled : btnBase}
                 aria-label="First page"
@@ -274,7 +285,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
             {/* Previous Button */}
             <button
-              className={currentPage > 1 ? 'pg-btn' : ''}
+              className={currentPage > 1 ? "pg-btn" : ""}
               onClick={handlePrev}
               style={currentPage === 1 ? btnDisabled : btnBase}
               aria-label="Previous page"
@@ -283,7 +294,14 @@ const Pagination: React.FC<PaginationProps> = ({
             </button>
 
             {/* Page Numbers */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: containerGap === '2px' ? '2px' : '2px', margin: '0 2px' }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: containerGap === "2px" ? "2px" : "2px",
+                margin: "0 2px",
+              }}
+            >
               {getPageNumbers().map((page, idx) => {
                 if (page < 0) {
                   return (
@@ -292,9 +310,9 @@ const Pagination: React.FC<PaginationProps> = ({
                       style={{
                         fontSize: config.fontSize,
                         color: theme.textSecondary,
-                        padding: '0 4px',
-                        userSelect: 'none',
-                        letterSpacing: '0.05em',
+                        padding: "0 4px",
+                        userSelect: "none",
+                        letterSpacing: "0.05em",
                       }}
                     >
                       ···
@@ -306,11 +324,11 @@ const Pagination: React.FC<PaginationProps> = ({
                 return (
                   <button
                     key={page}
-                    className={isActive ? '' : 'pg-btn'}
+                    className={isActive ? "" : "pg-btn"}
                     onClick={() => !isActive && onPageChange(page)}
                     style={isActive ? btnActive : btnBase}
                     aria-label={`Page ${page}`}
-                    aria-current={isActive ? 'page' : undefined}
+                    aria-current={isActive ? "page" : undefined}
                   >
                     {page}
                   </button>
@@ -320,7 +338,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
             {/* Next Button */}
             <button
-              className={currentPage < totalPages ? 'pg-btn' : ''}
+              className={currentPage < totalPages ? "pg-btn" : ""}
               onClick={handleNext}
               style={currentPage === totalPages ? btnDisabled : btnBase}
               aria-label="Next page"
@@ -329,9 +347,9 @@ const Pagination: React.FC<PaginationProps> = ({
             </button>
 
             {/* Last Page Button */}
-            {showFirstLastButtons && variant !== 'minimal' && (
+            {showFirstLastButtons && variant !== "minimal" && (
               <button
-                className={currentPage < totalPages ? 'pg-btn' : ''}
+                className={currentPage < totalPages ? "pg-btn" : ""}
                 onClick={() => onPageChange(totalPages)}
                 style={currentPage === totalPages ? btnDisabled : btnBase}
                 aria-label="Last page"

@@ -1,20 +1,9 @@
-// components/common-components/NavigationButton.tsx
 "use client";
 
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-export type NavigationDirection = "left" | "right";
-
-interface NavigationButtonProps {
-  direction: NavigationDirection;
-  onClick: (e: React.MouseEvent) => void;
-  className?: string;
-  size?: "sm" | "md" | "lg";
-  disabled?: boolean;
-  ariaLabel?: string;
-}
+import { NavigationButtonProps } from "@/types/common-components-types";
 
 const NavigationButton: React.FC<NavigationButtonProps> = ({
   direction,
@@ -46,7 +35,8 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
 
   const config = sizeConfig[size];
   const Icon = direction === "left" ? ChevronLeft : ChevronRight;
-  const defaultAriaLabel = ariaLabel || (direction === "left" ? "Previous" : "Next");
+  const defaultAriaLabel =
+    ariaLabel || (direction === "left" ? "Previous" : "Next");
 
   const getPositionClasses = () => {
     if (direction === "left") return "left-4 -translate-y-1/2";
@@ -73,7 +63,8 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
         if (disabled) return;
         e.currentTarget.style.backgroundColor = theme.surface;
         e.currentTarget.style.transform = `translateY(-50%) scale(1.1)`;
-        e.currentTarget.style.boxShadow = "0 10px 25px -5px rgba(0, 0, 0, 0.15)";
+        e.currentTarget.style.boxShadow =
+          "0 10px 25px -5px rgba(0, 0, 0, 0.15)";
       }}
       onMouseLeave={(e) => {
         if (disabled) return;

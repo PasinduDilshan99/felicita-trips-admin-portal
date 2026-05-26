@@ -1,8 +1,7 @@
-// components/destinations-components/DestinationCard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Destination } from "@/types/destination-types";
+import { DestinationCardProps } from "@/types/destination-types";
 import {
   MapPin,
   Tag,
@@ -18,50 +17,18 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-  PLACE_HOLDER_IMAGE,
-} from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
-  DESTINATION_CATEGORY_VIEW_DETAILS_URL,
+  DESTINATION_CATEGORY_VIEW_PAGE_URL,
   DESTINATION_DETAILS_VIEW_PAGE_URL,
 } from "@/utils/urls";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
-
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Helper function to truncate description to 130 characters
-const truncateDescription = (
-  description: string,
-  maxLength: number = 130,
-): string => {
-  if (!description) return "";
-  if (description.length <= maxLength) return description;
-
-  let truncated = description.substring(0, maxLength);
-  const lastSpaceIndex = truncated.lastIndexOf(" ");
-
-  if (lastSpaceIndex > 0 && lastSpaceIndex > maxLength - 20) {
-    truncated = truncated.substring(0, lastSpaceIndex);
-  }
-
-  return truncated + "...";
-};
-
-interface DestinationCardProps {
-  destination: Destination;
-  onImageClick?: (imageIndex: number) => void;
-}
+import { hexToRgba, truncateDescription } from "@/utils/functions";
+import { ImageModalImage } from "@/types/common-components-types";
+import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
+import ImageModal from "@/components/common-components/ImageModal";
+import PrivilegedButton from "@/components/common-components/PrivilegedButton";
+import { DESTINATION_DETAILS_VIEW_PRIVILEGE } from "@/utils/privileges";
 
 const DestinationCard: React.FC<DestinationCardProps> = ({
   destination,
@@ -70,14 +37,11 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
   const router = useRouter();
   const { theme } = useTheme();
 
-  // State for current image index and selected primary image
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  
-  // Image modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
 
@@ -87,7 +51,6 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
       ? Math.min(...destination.activities.map((a) => a.priceLocal))
       : 0;
 
-  // Get primary category and all categories
   const primaryCategory = destination.destinationCategoryDetailsDtos.find(
     (cat) => cat.isPrimary === true,
   );
@@ -151,7 +114,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
   const handleImageClick = (index: number) => {
     setCurrentImageIndex(index);
     setIsAutoRotating(false);
-    
+
     // If onImageClick prop is provided, use it (for external modal)
     if (onImageClick) {
       onImageClick(index);
@@ -285,9 +248,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
           e.currentTarget.style.borderColor = theme.border;
         }}
       >
-        {/* Enhanced Image Section with Gallery */}
         <div className="relative h-64 overflow-hidden">
-          {/* Main Image with Overlay */}
           <div className="relative w-full h-full">
             <img
               src={currentImage}
@@ -560,7 +521,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
                     key={category.id}
                     onClick={() => {
                       router.push(
-                        `${DESTINATION_CATEGORY_VIEW_DETAILS_URL}/${category.id}?name=${category.name}`,
+                        `${DESTINATION_CATEGORY_VIEW_PAGE_URL}/${category.id}?name=${category.name}`,
                       );
                     }}
                     className={`category-item inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-sm ${
@@ -672,57 +633,24 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
             </div>
           </div>
 
-          {/* View Details Button */}
-          <button
+          <PrivilegedButton
+            requiredPrivileges={[DESTINATION_DETAILS_VIEW_PRIVILEGE]}
+            variant="primary"
+            size="md"
+            fullWidth={true}
+            showShineEffect={true}
+            showTopBorder={true}
+            elevation="md"
             onClick={handleViewDetails}
-            className="group/btn relative cursor-pointer w-full mt-auto font-semibold py-3 px-5 rounded-xl flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 ease-out"
-            style={{
-              background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.accent} 100%)`,
-              color: "#fff",
-              boxShadow: `0 4px 15px -3px ${theme.primary}55, 0 2px 6px -2px ${theme.accent}33`,
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                `0 8px 25px -4px ${theme.primary}70, 0 4px 10px -3px ${theme.accent}50`;
-              (e.currentTarget as HTMLButtonElement).style.transform =
-                "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                `0 4px 15px -3px ${theme.primary}55, 0 2px 6px -2px ${theme.accent}33`;
-              (e.currentTarget as HTMLButtonElement).style.transform =
-                "translateY(0)";
-            }}
-            onMouseDown={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform =
-                "translateY(0) scale(0.97)";
-            }}
-            onMouseUp={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform =
-                "translateY(-2px) scale(1)";
-            }}
+            icon={<Eye className="w-4 h-4" />}
+            iconPosition="left"
           >
-            <span
-              className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out"
-              style={{
-                background:
-                  "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
-              }}
-            />
-
-            <span
-              className="absolute inset-x-0 top-0 h-px"
-              style={{ background: "rgba(255,255,255,0.35)" }}
-            />
-
-            <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:scale-110" />
-            <span className="relative tracking-wide text-sm">View Details</span>
-            <ArrowRight className="relative w-4 h-4 ml-1 transition-transform duration-300 group-hover/btn:translate-x-1.5" />
-          </button>
+            View Details
+            <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover/btn:translate-x-1" />
+          </PrivilegedButton>
         </div>
       </div>
 
-      {/* Internal Image Modal (only used if onImageClick prop is not provided) */}
       {!onImageClick && (
         <ImageModal
           isOpen={isModalOpen}

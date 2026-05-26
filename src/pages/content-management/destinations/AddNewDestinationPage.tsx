@@ -1,18 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import React, { useState } from "react";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { DestinationService } from "@/services/destinationService";
-import { OtherService } from "@/services/otherService";
 import {
   AddDestinationRequest,
   DestinationImageRequest,
@@ -20,8 +10,6 @@ import {
 import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Loader } from "lucide-react";
-
-// Import common components
 import { FormActions } from "@/components/common-components/FormActions";
 import { FormSummary } from "@/components/common-components/FormSummary";
 import { ImageUploader } from "@/components/common-components/ImageUploader";
@@ -30,33 +18,15 @@ import { LocationForm } from "@/components/destinations-components/add-destinati
 import { CategorySelector } from "@/components/common-components/CategorySelector";
 import { adaptDestinationCategories } from "@/utils/category-adapters";
 import { PricingForm } from "@/components/common-components/PricingForm";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-  destinationId?: number;
-}
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { DESTINATION_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { DESTINATION_DETAILS_VIEW_PAGE_URL } from "@/utils/urls";
+import { ToastState } from "@/types/common-components-types";
+import { CREATE_DESTINATION_TIPS } from "@/data/tips-data";
 
 const AddNewDestinationPage = () => {
-  const router = useRouter();
   const { categories, loading: categoriesLoading } = useCommon();
   const { theme } = useTheme();
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Add New",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/add`,
-    },
-  ];
 
   // Form state
   const [formData, setFormData] = useState<AddDestinationRequest>({
@@ -97,9 +67,6 @@ const AddNewDestinationPage = () => {
   );
   const selectedItems = selectedCategoryIds.map((id) => ({ id }));
 
-  // Get destination categories from context
-
-  // Helper functions
   const getCategoryName = (categoryId: number): string => {
     const category = destinationCategories.find(
       (cat) => cat.destinationCategoryId === categoryId,
@@ -107,13 +74,6 @@ const AddNewDestinationPage = () => {
     return category
       ? category.destinationCategoryName
       : `Category ${categoryId}`;
-  };
-
-  const getCategoryColor = (categoryId: number): string => {
-    const category = destinationCategories.find(
-      (cat) => cat.destinationCategoryId === categoryId,
-    );
-    return category?.destinationCategoryColor || theme.primary;
   };
 
   // Handle form input changes
@@ -138,37 +98,6 @@ const AddNewDestinationPage = () => {
 
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
-    }
-  };
-
-  // Handle category selection
-  const handleCategoryChange = (categoryId: number) => {
-    setSelectedCategoryIds((prev) => {
-      let newSelectedIds: number[];
-      if (prev.includes(categoryId)) {
-        newSelectedIds = prev.filter((id) => id !== categoryId);
-      } else {
-        newSelectedIds = [...prev, categoryId];
-      }
-      setFormData({
-        ...formData,
-        destinationCategoriesIdList: newSelectedIds,
-      });
-      if (errors.destinationCategoriesIdList) {
-        setErrors({ ...errors, destinationCategoriesIdList: "" });
-      }
-      return newSelectedIds;
-    });
-  };
-
-  // Upload image to Cloudinary
-  const uploadImageToCloudinary = async (file: File): Promise<string> => {
-    try {
-      const response = await OtherService.uploadImage(file);
-      return response.data.secure_url;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      throw new Error("Failed to upload image to Cloudinary");
     }
   };
 
@@ -232,9 +161,9 @@ const AddNewDestinationPage = () => {
     if (!formData.name.trim()) newErrors.name = "Destination name is required";
     if (!formData.description.trim())
       newErrors.description = "Description is required";
-    // if (formData.destinationCategoriesIdList.length === 0)
-    //   newErrors.destinationCategoriesIdList =
-    //     "At least one category is required";
+    if (formData.destinationCategoriesIdList.length === 0)
+      newErrors.destinationCategoriesIdList =
+        "At least one category is required";
     if (!formData.location.trim()) newErrors.location = "Location is required";
     if (formData.latitude < -90 || formData.latitude > 90)
       newErrors.latitude = "Latitude must be between -90 and 90";
@@ -358,9 +287,9 @@ const AddNewDestinationPage = () => {
   // Get destination detail link
   const getDestinationLink = (): string => {
     if (toast.destinationId) {
-      return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/${toast.destinationId}`;
+      return `${DESTINATION_DETAILS_VIEW_PAGE_URL}/${toast.destinationId}`;
     }
-    return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`;
+    return `${DESTINATION_DETAILS_VIEW_PAGE_URL}`;
   };
 
   if (categoriesLoading) {
@@ -411,7 +340,7 @@ const AddNewDestinationPage = () => {
           <PageHeader
             title="Add New Destination"
             description="Create a new travel destination with all details"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={DESTINATION_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -546,13 +475,7 @@ const AddNewDestinationPage = () => {
                   color: theme.error,
                 },
               ]}
-              tips={[
-                "Images are automatically uploaded to Cloudinary for optimal performance",
-                "Use descriptive names and detailed descriptions (max 1000 characters)",
-                "Add high-quality images (max 5MB each) for better presentation",
-                "You can select multiple categories for better discoverability",
-                "Verify coordinates for accurate location mapping",
-              ]}
+              tips={CREATE_DESTINATION_TIPS}
             />
           </div>
         </div>

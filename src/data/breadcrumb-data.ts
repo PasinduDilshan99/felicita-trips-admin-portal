@@ -14,6 +14,30 @@ export const DESTINATION_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
 ];
 
+export const DESTINATION_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
+  { label: "View", href: URLS.DESTINATION_VIEW_PAGE_URL },
+];
+
+export const DESTINATION_VIEW_DETAILS_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
+  { label: "View", href: URLS.DESTINATION_VIEW_PAGE_URL },
+];
+
+export const DESTINATION_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
+  { label: "Create", href: URLS.DESTINATION_ADD_PAGE_URL },
+];
+
+export const DESTINATION_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
+  { label: "Update", href: URLS.DESTINATION_UPDATE_PAGE_URL },
+];
+
 export const DESTINATION_CATEGORY_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
   { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },

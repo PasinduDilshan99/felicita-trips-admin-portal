@@ -1,4 +1,3 @@
-// components/destinations-components/DestinationDetailsForm.tsx
 import React from "react";
 import {
   SingleDestinationResponse,
@@ -8,7 +7,7 @@ import {
   NewImageRequest,
 } from "@/types/destination-types";
 import { DestinationCategory, ActivityCategory, SeasonType } from "@/types/common-types";
-import { CategorySelector } from "./CategorySelector";
+import { CategorySelector } from "@/components/common-components/CategorySelector";
 import { ImagesManagement } from "./ImagesManagement";
 import { ActivitiesManagement } from "./ActivitiesManagement";
 import { BasicInfoForm } from "./BasicInfoForm";
@@ -57,13 +56,42 @@ const DestinationDetailsForm: React.FC<DestinationDetailsFormProps> = ({
   onUpdateActivity,
   uploadingImages,
 }) => {
-  // Helper to check if a field has changed
   const hasChanged = (field: string): boolean => {
     if (!originalDestination) return false;
     return (
       originalDestination[field as keyof SingleDestinationResponse] !==
       destination[field as keyof SingleDestinationResponse]
     );
+  };
+
+  // Transform available categories to the format expected by Common CategorySelector
+  const transformedCategories = availableCategories.map((cat) => ({
+    id: cat.destinationCategoryId,
+    name: cat.destinationCategoryName,
+    color: cat.destinationCategoryColor || undefined,
+    description: cat.destinationCategoryDescription || undefined,
+  }));
+
+  // Transform selected category IDs to the format expected by Common CategorySelector
+  const selectedCategoryItems = currentCategoryIds.map((id) => ({
+    id,
+    isPrimary: false, // Simple mode doesn't use isPrimary
+  }));
+
+  // Handle category add/remove
+  const handleCategoryAdd = (categoryId: number) => {
+    onCategoryChange(categoryId);
+  };
+
+  const handleCategoryRemove = (categoryId: number) => {
+    onCategoryChange(categoryId);
+  };
+
+  // Get category changes for display (optional - can be used to show modification status)
+  const hasCategoryChanges = () => {
+    const removed = originalCategoryIds.filter(id => !currentCategoryIds.includes(id));
+    const added = currentCategoryIds.filter(id => !originalCategoryIds.includes(id));
+    return removed.length > 0 || added.length > 0;
   };
 
   return (
@@ -74,11 +102,16 @@ const DestinationDetailsForm: React.FC<DestinationDetailsFormProps> = ({
         onFieldChange={onFieldChange}
       />
 
+      {/* Use Common CategorySelector */}
       <CategorySelector
-        currentCategoryIds={currentCategoryIds}
-        originalCategoryIds={originalCategoryIds}
-        availableCategories={availableCategories}
-        onCategoryChange={onCategoryChange}
+        categories={transformedCategories}
+        selectedItems={selectedCategoryItems}
+        onCategoryAdd={handleCategoryAdd}
+        onCategoryRemove={handleCategoryRemove}
+        mode="simple"
+        title="Categories"
+        description="Select categories for this destination"
+        showDescriptions={true}
       />
 
       <ImagesManagement
