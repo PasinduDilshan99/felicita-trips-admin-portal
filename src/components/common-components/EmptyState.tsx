@@ -11,6 +11,17 @@ import {
   Star,
   Search,
   Filter,
+  Calendar,
+  Clock,
+  Layers,
+  Tag,
+  Sun,
+  Mountain,
+  Ship,
+  Car,
+  Plane,
+  Coffee,
+  Utensils,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { EmptyStateProps, EntityType } from "@/types/common-components-types";
@@ -28,6 +39,21 @@ const ENTITY_CONFIG: Record<
   review: { icon: Star, label: "reviews" },
   ticket: { icon: Ticket, label: "tickets" },
   generic: { icon: LayoutDashboard, label: "items" },
+  destinationCategory: { icon: Layers, label: "destination categories" },
+  activityCategory: { icon: Tag, label: "activity categories" },
+  tourCategory: { icon: Tag, label: "tour categories" },
+  tourType: { icon: Layers, label: "tour types" },
+  packageType: { icon: Layers, label: "package types" },
+  activitySchedule: { icon: Clock, label: "activity schedules" },
+  tourSchedule: { icon: Calendar, label: "tour schedules" },
+  packageSchedule: { icon: Calendar, label: "package schedules" },
+  season: { icon: Sun, label: "seasons" },
+  mountain: { icon: Mountain, label: "mountains" },
+  cruise: { icon: Ship, label: "cruises" },
+  transport: { icon: Car, label: "transportation" },
+  flight: { icon: Plane, label: "flights" },
+  restaurant: { icon: Utensils, label: "restaurants" },
+  cafe: { icon: Coffee, label: "cafes" },
 };
 
 export const EmptyState: React.FC<EmptyStateProps> = ({

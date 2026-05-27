@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   MapPin,
   Tag,
@@ -12,7 +12,6 @@ import {
   Eye,
   ArrowRight,
   Calendar,
-  DollarSign,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -20,165 +19,31 @@ import { useRouter } from "next/navigation";
 import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import {
   ACTIVITY_DETAILS_VIEW_PAGE_URL,
-  ACTIVITY_CATEGORY_VIEW_DETAILS_URL,
   DESTINATION_DETAILS_VIEW_PAGE_URL,
 } from "@/utils/urls";
 import { hexToRgba } from "@/utils/functions";
 import {
-  Activity,
   ActivityImage,
-  ActivityCategoryDetail,
+  ActivityCategoryFullDetail,
+  ActivityCardProps,
 } from "@/types/activity-types";
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-  hover: {
-    y: -4,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-};
-
-const imageVariants: Variants = {
-  rest: { scale: 1 },
-  hover: { scale: 1.05, transition: { duration: 0.4 } },
-};
-
-const overlayVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.3 } },
-};
-
-const quickViewVariants: Variants = {
-  hidden: { opacity: 0, y: -10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.1 } },
-};
-
-const thumbnailVariants: Variants = {
-  rest: { scale: 1, opacity: 0.7 },
-  active: { scale: 1.05, opacity: 1 },
-  hover: { scale: 1.02, transition: { duration: 0.15 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const descriptionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    height: 0,
-    transition: { duration: 0.25, ease: "easeIn" },
-  },
-};
-
-const buttonVariants: Variants = {
-  rest: { scale: 1, y: 0 },
-  hover: {
-    scale: 1.02,
-    y: -2,
-    boxShadow: "0 8px 25px -4px rgba(0,0,0,0.2)",
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  tap: {
-    scale: 0.98,
-    y: 0,
-    transition: { duration: 0.1 },
-  },
-};
-
-const shineVariants: Variants = {
-  rest: { x: "-100%" },
-  hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
-};
-
-const statCardVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-  hover: {
-    y: -2,
-    transition: { duration: 0.15 },
-  },
-};
-
-// Helper function to truncate description
-const truncateDescription = (
-  description: string,
-  maxLength: number = 120,
-): string => {
-  if (!description) return "";
-  if (typeof description !== "string") return String(description);
-  if (description.length <= maxLength) return description;
-
-  let truncated = description.substring(0, maxLength);
-  const lastSpaceIndex = truncated.lastIndexOf(" ");
-
-  if (lastSpaceIndex > 0 && lastSpaceIndex > maxLength - 20) {
-    truncated = truncated.substring(0, lastSpaceIndex);
-  }
-
-  return truncated + "...";
-};
-
-// Helper to safely get string value from any type
-const getSafeString = (value: any, fallback: string = ""): string => {
-  if (!value) return fallback;
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return value.toString();
-  if (typeof value === "object") {
-    if (value.name) return getSafeString(value.name, fallback);
-    if (value.label) return getSafeString(value.label, fallback);
-    try {
-      const stringified = JSON.stringify(value);
-      if (stringified.length > 50) return fallback;
-      return stringified;
-    } catch {
-      return fallback;
-    }
-  }
-  return fallback;
-};
-
-interface ActivityCardProps {
-  activity: Activity;
-  onImageClick?: (imageIndex: number) => void;
-}
+import { getSafeString, truncateDescription } from "@/utils/commonFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import {
+  buttonVariants,
+  cardVariants,
+  contentVariants,
+  imageVariants,
+  itemVariants,
+  overlayVariants,
+  quickViewVariants,
+  shineVariants,
+  statCardVariants,
+  thumbnailVariants,
+} from "@/app/animations/variants";
 
 const ActivityCard: React.FC<ActivityCardProps> = ({
   activity,
@@ -186,19 +51,13 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 }) => {
   const router = useRouter();
   const { theme } = useTheme();
-
-  // State for current image index and selected primary image
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-
-  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
-
-  // Safely extract data with fallbacks
   const images = activity?.images || [];
   const activityId = activity?.id;
   const activityName = getSafeString(activity?.name, "Unnamed Activity");
@@ -209,41 +68,22 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   const displayedDescription = isDescriptionExpanded
     ? fullDescription
     : truncatedDesc;
-
-  // Handle season - use seasonName if available
   const seasonName = activity?.seasonName || null;
-
-  // Handle categories - categories is an array of ActivityCategoryDetail
-  const categories = activity?.categories || [];
-
-  // Get primary category for badge display
+  const categories = activity?.activities_category || [];
   const primaryCategory = categories.find((cat) => cat.is_primary);
   const displayCategory = primaryCategory || categories[0];
   const categoryName = displayCategory?.name || "Uncategorized";
   const categoryId = displayCategory?.id;
-
-  // Handle status
   const status = activity?.status || "INACTIVE";
-
-  // Handle destination ID and name
   const destinationId = activity?.destination_id;
   const destinationName = activity?.destinationName || "N/A";
-
-  // Handle duration
   const duration = activity?.duration_hours || 0;
-
-  // Handle participants
   const minParticipate = activity?.min_participate || 1;
   const maxParticipate = activity?.max_participate || 10;
-
-  // Handle prices
   const priceLocal = activity?.price_local || 0;
-
-  // Handle availability times
   const availableFrom = activity?.available_from || "00:00";
   const availableTo = activity?.available_to || "23:59";
 
-  // Navigation handlers
   const handleCategoryClick = (
     e: React.MouseEvent,
     categoryId: number,
@@ -251,11 +91,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   ) => {
     e.stopPropagation();
     router.push(
-      `${ACTIVITY_CATEGORY_VIEW_DETAILS_URL}/${categoryId}?name=${encodeURIComponent(categoryName)}`,
+      `${ACTIVITY_DETAILS_VIEW_PAGE_URL}/${categoryId}?name=${encodeURIComponent(categoryName)}`,
     );
   };
 
-  // Prepare images for modal
   const getModalImages = (): ImageModalImage[] => {
     if (!images || !Array.isArray(images)) return [];
     return images.map((img: ActivityImage, idx: number) => ({
@@ -266,7 +105,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     }));
   };
 
-  // Auto-rotate images every 5 seconds
   useEffect(() => {
     if (!isAutoRotating || !images || images.length <= 1) return;
 
@@ -336,7 +174,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   const currentImage =
     images?.[currentImageIndex]?.image_url || PLACE_HOLDER_IMAGE;
 
-  // Calculate availability status
   const isAvailableToday = () => {
     try {
       const now = new Date();
@@ -352,7 +189,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     }
   };
 
-  // If activity is not valid, show nothing
   if (!activity || !activity.id) {
     return null;
   }
@@ -435,7 +271,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
               animate={isHovered ? "visible" : "hidden"}
               onClick={handleQuickView}
               className="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-              whileHover={{ scale: 1.05, backgroundColor: "white", color: "#1f2937" }}
+              whileHover={{
+                scale: 1.05,
+                backgroundColor: "white",
+                color: "#1f2937",
+              }}
               whileTap={{ scale: 0.95 }}
             >
               <Eye className="w-3.5 h-3.5" />
@@ -581,7 +421,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                     handleCategoryClick(e, categoryId, categoryName)
                   }
                 >
-                  <Tag className="w-3.5 h-3.5" style={{ color: theme.success }} />
+                  <Tag
+                    className="w-3.5 h-3.5"
+                    style={{ color: theme.success }}
+                  />
                 </motion.div>
                 <span
                   className="text-xs sm:text-sm font-medium cursor-pointer"
@@ -628,32 +471,37 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                   className="w-3.5 h-3.5 mr-1.5"
                   style={{ color: theme.textSecondary }}
                 />
-                <span className="text-xs" style={{ color: theme.textSecondary }}>
+                <span
+                  className="text-xs"
+                  style={{ color: theme.textSecondary }}
+                >
                   All Categories:
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {categories.slice(0, 3).map((category: ActivityCategoryDetail) => (
-                  <motion.span
-                    key={category.id}
-                    className="px-2 py-1 rounded text-xs cursor-pointer transition-all duration-200"
-                    style={{
-                      background: hexToRgba(theme.primary, 0.1),
-                      color: theme.primary,
-                    }}
-                    whileHover={{ scale: 1.05, x: 1 }}
-                    onClick={(e) =>
-                      handleCategoryClick(e, category.id, category.name)
-                    }
-                  >
-                    {category.name}
-                    {category.is_primary && (
-                      <span className="ml-1 text-[10px] opacity-75">
-                        (Primary)
-                      </span>
-                    )}
-                  </motion.span>
-                ))}
+                {categories
+                  .slice(0, 3)
+                  .map((category: ActivityCategoryFullDetail) => (
+                    <motion.span
+                      key={category.id}
+                      className="px-2 py-1 rounded text-xs cursor-pointer transition-all duration-200"
+                      style={{
+                        background: hexToRgba(theme.primary, 0.1),
+                        color: theme.primary,
+                      }}
+                      whileHover={{ scale: 1.05, x: 1 }}
+                      onClick={(e) =>
+                        handleCategoryClick(e, category.id, category.name)
+                      }
+                    >
+                      {category.name}
+                      {category.is_primary && (
+                        <span className="ml-1 text-[10px] opacity-75">
+                          (Primary)
+                        </span>
+                      )}
+                    </motion.span>
+                  ))}
                 {categories.length > 3 && (
                   <span
                     className="px-2 py-1 rounded text-xs"
@@ -711,8 +559,18 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
             }}
           >
             {[
-              { icon: Clock, label: "Duration", value: `${duration}h`, color: theme.accent },
-              { icon: Users, label: "Group Size", value: `${minParticipate}-${maxParticipate}`, color: theme.warning },
+              {
+                icon: Clock,
+                label: "Duration",
+                value: `${duration}h`,
+                color: theme.accent,
+              },
+              {
+                icon: Users,
+                label: "Group Size",
+                value: `${minParticipate}-${maxParticipate}`,
+                color: theme.warning,
+              },
             ].map((stat, idx) => (
               <motion.div
                 key={stat.label}
@@ -727,13 +585,22 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                       background: `linear-gradient(135deg, ${hexToRgba(stat.color, 0.1)}, ${hexToRgba(stat.color, 0.05)})`,
                     }}
                   >
-                    <stat.icon className="w-4 h-4" style={{ color: stat.color }} />
+                    <stat.icon
+                      className="w-4 h-4"
+                      style={{ color: stat.color }}
+                    />
                   </div>
                 </div>
-                <div className="text-xs mb-1" style={{ color: theme.textSecondary }}>
+                <div
+                  className="text-xs mb-1"
+                  style={{ color: theme.textSecondary }}
+                >
                   {stat.label}
                 </div>
-                <div className="text-sm font-bold" style={{ color: theme.text }}>
+                <div
+                  className="text-sm font-bold"
+                  style={{ color: theme.text }}
+                >
                   {stat.value}
                 </div>
               </motion.div>
@@ -748,7 +615,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                   className="w-3.5 h-3.5 mr-1.5"
                   style={{ color: theme.textSecondary }}
                 />
-                <span className="text-xs" style={{ color: theme.textSecondary }}>
+                <span
+                  className="text-xs"
+                  style={{ color: theme.textSecondary }}
+                >
                   Best Season:
                 </span>
               </div>
@@ -786,10 +656,14 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
               animate={isHovered ? "hover" : "rest"}
               className="absolute inset-0"
               style={{
-                background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
+                background:
+                  "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
               }}
             />
-            <span className="absolute inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.35)" }} />
+            <span
+              className="absolute inset-x-0 top-0 h-px"
+              style={{ background: "rgba(255,255,255,0.35)" }}
+            />
             <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
             <span className="relative tracking-wide text-sm">View Details</span>
             <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />

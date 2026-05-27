@@ -215,17 +215,17 @@ export interface UpdateActivityRequest {
   maxParticipate: number;
   seasonId: number;
   status: "ACTIVE" | "INACTIVE";
-  
+
   // Category operations
   removeCategoryIds: number[];
   addCategories: AddCategoryRequest[];
   updatedCategories: UpdateCategoryRequest[];
-  
+
   // Image operations
   removeImagesIds: number[];
   addImages: ActivityImageRequest[];
   updatedImages: UpdateImageRequest[];
-  
+
   // Requirement operations
   removeRequirementsIds: number[];
   addRequirements: ActivityRequirementRequest[];
@@ -389,7 +389,8 @@ export interface ActivityScheduleStatisticsData {
   summary: ActivityScheduleSummary;
 }
 
-export type ActivityScheduleStatisticsApiResponse = ApiResponse<ActivityScheduleStatisticsData>;
+export type ActivityScheduleStatisticsApiResponse =
+  ApiResponse<ActivityScheduleStatisticsData>;
 
 export interface CategoryActivityCount {
   categoryId: number;
@@ -437,7 +438,8 @@ export interface ActivityCategoriesStatisticsData {
   summary: ActivityCategoriesSummary;
 }
 
-export type ActivityCategoriesStatisticsApiResponse = ApiResponse<ActivityCategoriesStatisticsData>;
+export type ActivityCategoriesStatisticsApiResponse =
+  ApiResponse<ActivityCategoriesStatisticsData>;
 
 // Add these to your existing types/activity-types.ts file
 
@@ -474,9 +476,16 @@ export interface ActivityByDestination {
   images: ActivityImageDetail[];
 }
 
-export type ActivitiesByDestinationResponse = ApiResponse<ActivityByDestination[]>;
+export type ActivitiesByDestinationResponse = ApiResponse<
+  ActivityByDestination[]
+>;
 
 // Request type
 export interface GetActivitiesByDestinationRequest {
   destinationId: number;
+}
+
+export interface ActivityCardProps {
+  activity: Activity;
+  onImageClick?: (imageIndex: number) => void;
 }

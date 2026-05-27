@@ -13,10 +13,10 @@ export const DESTINATION_TERMINATE_PAGE_TITLE = "Terminate Destination";
 
 export const DESTINATION_CATEGORIES_PAGE_TITLE = "Destination Categories";
 export const DESTINATION_CATEGORIES_VIEW_PAGE_TITLE = "Destination Categories";
-export const VIEW_DESTINATION_CATEGORY_DETAILS_PAGE_TITLE ="Destination Category Details";
-export const ADD_DESTINATION_CATEGORY_PAGE_TITLE ="Add New Destination Category";
-export const UPDATE_DESTINATION_CATEGORY_PAGE_TITLE ="Update Destination Category";
-export const REMOVE_DESTINATION_CATEGORY_PAGE_TITLE ="Terminate Destination Category";
+export const DESTINATION_CATEGORY_VIEW_DETAILS_PAGE_TITLE ="Destination Category Details";
+export const DESTINATION_CATEGORY_CREATE_PAGE_TITLE ="Add New Destination Category";
+export const DESTINATION_CATEGORY_UPDATE_PAGE_TITLE ="Update Destination Category";
+export const DESTINATION_CATEGORY_TERMINATE_PAGE_TITLE ="Terminate Destination Category";
 
 export const ACTIVITY_PAGE_TITLE = "Activities";
 export const VIEW_ACTIVITY_PAGE_TITLE = "View Activities";

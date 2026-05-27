@@ -1,19 +1,9 @@
-// app/activities/view/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_ACTIVITIES_PATH,
-} from "@/utils/constant";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
+import FilterPanel from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { ActivityService } from "@/services/activityService";
 import { ActivityFilterParams, Activity } from "@/types/activity-types";
@@ -25,76 +15,25 @@ import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import ActivityCard from "@/components/activities-components/ActivityCard";
 import ActivityListCard from "@/components/activities-components/ActivityListCard";
-import { ACTIVITIES_PAGE_URL, ACTIVITIES_VIEW_PAGE_URL, WEB_MANAGEMENT_URL } from "@/utils/urls";
+import {
+  ActivityViewFiltersToUrlParams,
+  ActivityViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import { ACTIVITIES_VIEW_SORTING_OPTIONS } from "@/data/sorting-options";
+import { FilterField } from "@/types/filter-types";
+import { ACTIVITIES_VIEW_PAGE_URL } from "@/utils/urls";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITIES_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
-// Sort options for activities
-const SORT_OPTIONS = [
-  { value: "name", label: "Activity Name" },
-  { value: "activity_id", label: "Activity ID" },
-  { value: "created_at", label: "Created Date" },
-  { value: "updated_at", label: "Updated Date" },
-  { value: "price_local", label: "Price (Local)" },
-  { value: "duration_hours", label: "Duration" },
-];
-
-// Utility functions for URL params management
-const filtersToUrlParams = (
-  filters: ActivityFilterParams,
-): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.activityCategory) params.set("activityCategory", filters.activityCategory);
-  if (filters.season) params.set("season", filters.season);
-  if (filters.status) params.set("status", filters.status);
-  if (filters.duration) params.set("duration", filters.duration.toString());
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
-
-  return params;
-};
-
-const urlParamsToFilters = (
-  params: URLSearchParams,
-): ActivityFilterParams => {
-  return {
-    name: params.get("name") || null,
-    minPrice: null,
-    maxPrice: null,
-    duration: params.get("duration")
-      ? parseFloat(params.get("duration")!)
-      : null,
-    activityCategory: params.get("activityCategory") || null,
-    season: params.get("season") || null,
-    status: (params.get("status") as "ACTIVE" | "INACTIVE" | null) || null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-    sortBy: params.get("sortBy") || undefined,
-    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
-  };
-};
-
-// Main component wrapped with Suspense for useSearchParams
 const ActivitiesViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { categories, loading: categoriesLoading } = useCommon();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    { label: "Activities", href: ACTIVITIES_PAGE_URL },
-    { label: "View", href: ACTIVITIES_VIEW_PAGE_URL },
-  ];
-
   const [filters, setFilters] = useState<ActivityFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    ActivityViewUrlParamsToFilters(searchParams || new URLSearchParams()),
   );
 
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -104,13 +43,10 @@ const ActivitiesViewContent = () => {
   const [availableSeasons, setAvailableSeasons] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [modalImages, setModalImages] = useState<ImageModalImage[]>([]);
 
-  // Get activity categories from CommonContext
   const getActivityCategories = useCallback((): {
     value: string;
     label: string;
@@ -132,7 +68,9 @@ const ActivitiesViewContent = () => {
 
   // Get sort label
   const getSortLabel = (sortBy: string): string => {
-    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
+    const option = ACTIVITIES_VIEW_SORTING_OPTIONS.find(
+      (opt) => opt.value === sortBy,
+    );
     return option ? option.label : sortBy;
   };
 
@@ -180,14 +118,13 @@ const ActivitiesViewContent = () => {
     },
   ];
 
-  // Update URL with current filters
   const updateURL = useCallback(
     (newFilters: ActivityFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = ActivityViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
-        ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/view?${queryString}`
-        : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_ACTIVITIES_PATH}/view`;
+        ? `${ACTIVITIES_VIEW_PAGE_URL}?${queryString}`
+        : ACTIVITIES_VIEW_PAGE_URL;
 
       router.replace(newURL, { scroll: false });
     },
@@ -210,9 +147,13 @@ const ActivitiesViewContent = () => {
         setActivities(data.activityResponseDtos);
         setTotalItems(data.activityCount);
 
-        const categories = ActivityService.extractCategories(data.activityResponseDtos);
-        const seasons = ActivityService.extractSeasons(data.activityResponseDtos);
-        
+        const categories = ActivityService.extractCategories(
+          data.activityResponseDtos,
+        );
+        const seasons = ActivityService.extractSeasons(
+          data.activityResponseDtos,
+        );
+
         setAvailableCategories(categories);
         setAvailableSeasons(seasons);
       } catch (error) {
@@ -225,19 +166,17 @@ const ActivitiesViewContent = () => {
     [],
   );
 
-  // Initial load from URL params
   useEffect(() => {
-    const initialFilters = urlParamsToFilters(
+    const initialFilters = ActivityViewUrlParamsToFilters(
       searchParams || new URLSearchParams(),
     );
     setFilters(initialFilters);
     fetchActivities(initialFilters);
   }, []);
 
-  // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = ActivityViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -391,9 +330,7 @@ const ActivitiesViewContent = () => {
   };
 
   const currentStart =
-    activities.length > 0
-      ? (filters.pageNumber - 1) * filters.pageSize + 1
-      : 0;
+    activities.length > 0 ? (filters.pageNumber - 1) * filters.pageSize + 1 : 0;
   const currentEnd = Math.min(
     filters.pageNumber * filters.pageSize,
     totalItems,
@@ -435,7 +372,7 @@ const ActivitiesViewContent = () => {
           <PageHeader
             title="Activities View"
             description="Explore and manage travel activities and experiences"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITIES_VIEW_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -455,7 +392,7 @@ const ActivitiesViewContent = () => {
             pageSizeOptions={[6, 9, 12, 24, 48]}
             showPageSize={true}
             showSorting={true}
-            sortOptions={SORT_OPTIONS}
+            sortOptions={ACTIVITIES_VIEW_SORTING_OPTIONS}
             sortBy={filters.sortBy || ""}
             sortDirection={filters.sortDirection || "ASC"}
             title="Filter Activities"
@@ -499,7 +436,7 @@ const ActivitiesViewContent = () => {
             size="lg"
           />
         )}
-        
+
         {/* Activities Grid/List */}
         {!loading && (
           <>

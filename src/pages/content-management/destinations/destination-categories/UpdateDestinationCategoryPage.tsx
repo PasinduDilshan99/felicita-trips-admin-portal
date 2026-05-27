@@ -1,97 +1,106 @@
-// app/destinations/categories/update/page.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { useSearchParams, useRouter } from "next/navigation";
 import { DestinationService } from "@/services/destinationService";
-import { useCommon } from "@/contexts/CommonContext";
+import { OtherService } from "@/services/otherService";
+import {
+  CategoryDetailsByIdResponse,
+  UpdateDestinationCategoryRequest,
+  AddDestinationCategoryImageRequest,
+  UpdateDestinationCategoryImageRequest,
+} from "@/types/destination-types";
+import {
+  Search,
+  Edit,
+  Save,
+  RefreshCw,
+  Loader2,
+  Palette,
+  ChevronDown,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { UpdateDestinationCategoryRequest } from "@/types/destination-types";
+import { useCommon } from "@/contexts/CommonContext";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
-import { ToastNotification } from "@/components/common-components/ToastNotification";
-import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonSearch, {
   SearchItem,
 } from "@/components/common-components/CommonSearch";
-import CategoryBasicInfoForm from "@/components/destination-categories-components/destination-categories-update-components/CategoryBasicInfoForm";
-import ExistingImagesManager from "@/components/destination-categories-components/destination-categories-update-components/ExistingImagesManager";
-import RemovedImagesManager from "@/components/destination-categories-components/destination-categories-update-components/RemovedImagesManager";
-import NewImagesUploader from "@/components/destination-categories-components/destination-categories-update-components/NewImagesUploader";
-import { OtherService } from "@/services/otherService";
-import CategoryColorsForm from "@/components/destination-categories-components/destination-categories-add-components/CategoryColorsForm";
-import CategoryPreview from "@/components/destination-categories-components/destination-categories-add-components/CategoryPreview";
-import { CategoryUpdateFormActions } from "@/components/destination-categories-components/destination-categories-update-components/CategoryUpdateFormActions";
-import { hexToRgba } from "@/utils/functions";
+import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import {
-  DESTINATION_CATEGORIES_PAGE_URL,
-  DESTINATION_CATEGORY_VIEW_PAGE_URL,
-  DESTINATION_PAGE_URL,
-  WEB_MANAGEMENT_URL,
-} from "@/utils/urls";
-
-interface ExistingImage {
-  imageId: number;
-  name: string;
-  description: string;
-  imageUrl: string;
-  status: "ACTIVE" | "INACTIVE";
-  isRemoved?: boolean;
-}
-
-interface NewImage {
-  name: string;
-  description: string;
-  imageUrl: string;
-  status: "ACTIVE" | "INACTIVE";
-  imageFile?: File;
-  uploadProgress?: number;
-  previewUrl?: string;
-  isNew?: boolean;
-}
-
-// Category search item interface
-interface CategorySearchItem extends SearchItem {
-  id: number;
-  name: string;
-  description?: string;
-}
+  UpdateConfirmationModal,
+  ChangedField,
+} from "@/components/common-components/UpdateConfirmationModal";
+import { hexToRgba } from "@/utils/functions";
+import { motion, AnimatePresence } from "framer-motion";
+import { DESTINATION_CATEGORIES_PAGE_URL } from "@/utils/urls";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { DestinationCategoryReadOnlyDetails } from "@/components/destination-categories-components/destination-categories-update-components/DestinationCategoryReadOnlyDetails";
+import { DESTINATION_CATEGORY_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
+import { DESTINATION_CATEGORY_UPDATE_PRESET_COLORS } from "@/data/colors-data";
+import { DESTINATION_CATEGORY_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
 
 const UpdateDestinationCategoryPage = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { theme } = useTheme();
-  const { categories, loading: categoriesLoading } = useCommon();
+  const {
+    categories,
+    loading: commonLoading,
+    error: commonError,
+  } = useCommon();
 
-  const categoryIdFromQuery = searchParams?.get("categoryId") ?? null;
+  const initialCategoryName = searchParams?.get("category-name") || "";
+  const initialCategoryId = searchParams?.get("category-id") || "";
 
+  const categoriesList = React.useMemo(() => {
+    if (categories?.destinationCategoryList) {
+      return categories.destinationCategoryList.map((cat) => ({
+        id: cat.destinationCategoryId,
+        name: cat.destinationCategoryName,
+      }));
+    }
+    return [];
+  }, [categories]);
+
+  // State for selected category
   const [selectedCategory, setSelectedCategory] = useState<{
     id: number;
     name: string;
-  } | null>(null);
+  } | null>(
+    initialCategoryId && initialCategoryName
+      ? {
+          id: parseInt(initialCategoryId),
+          name: initialCategoryName,
+        }
+      : null,
+  );
 
-  const [formData, setFormData] = useState({
-    categoryId: 0,
-    category: "",
-    description: "",
-    status: "ACTIVE" as "ACTIVE" | "INACTIVE" | string,
-    color: "#3B82F6",
-    hoverColor: "#2563EB",
-  });
-
-  const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
-  const [newImages, setNewImages] = useState<NewImage[]>([]);
-  const [removeImageIds, setRemoveImageIds] = useState<number[]>([]);
-
+  const [originalCategory, setOriginalCategory] =
+    useState<CategoryDetailsByIdResponse | null>(null);
+  const [editedCategory, setEditedCategory] =
+    useState<CategoryDetailsByIdResponse | null>(null);
+  const [basicDetailsChanged, setBasicDetailsChanged] = useState(false);
+  const [removedImageIds, setRemovedImageIds] = useState<number[]>([]);
+  const [newImages, setNewImages] = useState<
+    AddDestinationCategoryImageRequest[]
+  >([]);
+  const [updatedImages, setUpdatedImages] = useState<
+    UpdateDestinationCategoryImageRequest[]
+  >([]);
   const [loading, setLoading] = useState(false);
-  const [loadingCategory, setLoadingCategory] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(["basic", "destinations", "images"]),
+  );
+
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
@@ -99,135 +108,68 @@ const UpdateDestinationCategoryPage = () => {
     actionLink?: string;
   } | null>(null);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    {
-      label: "Destinations",
-      href: DESTINATION_PAGE_URL,
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(section)) newSet.delete(section);
+      else newSet.add(section);
+      return newSet;
+    });
+  };
+  const updateUrlWithSelectedCategory = useCallback(
+    (category: { id: number; name: string } | null) => {
+      const url = new URL(window.location.href);
+      if (category) {
+        url.searchParams.set("category-id", category.id.toString());
+        url.searchParams.set("category-name", category.name);
+      } else {
+        url.searchParams.delete("category-id");
+        url.searchParams.delete("category-name");
+      }
+      router.replace(url.toString(), { scroll: false });
     },
-    {
-      label: "Categories",
-      href: DESTINATION_CATEGORIES_PAGE_URL,
-    },
-    { label: "Update", href: "#" },
-  ];
-
-  const destinationCategories = categories?.destinationCategoryList || [];
-
-  // Convert categories to search items format
-  const searchItems: CategorySearchItem[] = destinationCategories.map(
-    (cat) => ({
-      id: cat.destinationCategoryId,
-      name: cat.destinationCategoryName,
-      description: cat.destinationCategoryDescription,
-    }),
+    [router],
   );
 
-  const selectedSearchItem: CategorySearchItem | null = selectedCategory
-    ? {
-        id: selectedCategory.id,
-        name: selectedCategory.name,
-        description: destinationCategories.find(
-          (cat) => cat.destinationCategoryId === selectedCategory.id,
-        )?.destinationCategoryDescription,
-      }
-    : null;
+  // If initialCategoryId is provided, fetch details
+  useEffect(() => {
+    if (initialCategoryId && !originalCategory && !loadingDetails) {
+      handleSelectCategory(parseInt(initialCategoryId), initialCategoryName);
+    }
+  }, [initialCategoryId, initialCategoryName]);
 
-  const loadCategoryData = useCallback(async (categoryId: number) => {
-    setLoadingCategory(true);
-    setErrors({});
+  const handleSelectCategory = async (id: number, name: string) => {
+    const newSelectedCategory = { id, name };
+    setSelectedCategory(newSelectedCategory);
+    updateUrlWithSelectedCategory(newSelectedCategory);
+    await fetchCategoryDetails(id);
+  };
+
+  const fetchCategoryDetails = async (id: number) => {
+    setLoadingDetails(true);
+    setError(null);
+    setOriginalCategory(null);
+    setEditedCategory(null);
+    setBasicDetailsChanged(false);
+    setRemovedImageIds([]);
+    setNewImages([]);
+    setUpdatedImages([]);
+
     try {
-      const response =
-        await DestinationService.getCategoryDetailsById(categoryId);
-      const data = response.data;
-
-      setFormData({
-        categoryId: data.categoryId,
-        category: data.category,
-        description: data.categoryDescription,
-        status: data.categoryStatus,
-        color: data.color,
-        hoverColor: data.hoverColor,
-      });
-
-      setExistingImages(
-        data.images.map((img: any) => ({
-          imageId: img.imageId,
-          name: img.imageName,
-          description: img.imageDescription || "",
-          imageUrl: img.imageUrl,
-          status: img.imageStatus as "ACTIVE" | "INACTIVE",
-          isRemoved: false,
-        })),
-      );
-
-      setNewImages([]);
-      setRemoveImageIds([]);
-    } catch (error) {
-      console.error("Error loading category:", error);
-      setErrors({ load: "Failed to load category details" });
+      const response = await DestinationService.getCategoryDetailsById(id);
+      const categoryData = response.data;
+      setOriginalCategory(categoryData);
+      setEditedCategory(categoryData);
+    } catch (err: any) {
+      setError(err.message || "Failed to load category details");
       setToast({
         type: "error",
-        title: "Error",
-        message: "Failed to load category details",
+        title: "Load Failed",
+        message: err.message || "Failed to load category details",
       });
     } finally {
-      setLoadingCategory(false);
+      setLoadingDetails(false);
     }
-  }, []);
-
-  useEffect(() => {
-    if (categoryIdFromQuery) {
-      const id = parseInt(categoryIdFromQuery);
-      if (!isNaN(id)) {
-        const foundCategory = destinationCategories.find(
-          (cat) => cat.destinationCategoryId === id,
-        );
-        setSelectedCategory({
-          id,
-          name: foundCategory?.destinationCategoryName || "",
-        });
-        loadCategoryData(id);
-      }
-    }
-  }, [categoryIdFromQuery, loadCategoryData, destinationCategories]);
-
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.category.trim()) {
-      newErrors.category = "Category name is required";
-    } else if (formData.category.length < 2) {
-      newErrors.category = "Category name must be at least 2 characters";
-    } else if (formData.category.length > 100) {
-      newErrors.category = "Category name must be less than 100 characters";
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = "Category description is required";
-    } else if (formData.description.length < 10) {
-      newErrors.description = "Description must be at least 10 characters";
-    } else if (formData.description.length > 500) {
-      newErrors.description = "Description must be less than 500 characters";
-    }
-
-    if (!formData.color) {
-      newErrors.color = "Primary color is required";
-    }
-
-    if (!formData.hoverColor) {
-      newErrors.hoverColor = "Hover color is required";
-    }
-
-    for (let i = 0; i < newImages.length; i++) {
-      if (!newImages[i].name.trim()) {
-        newErrors[`new_image_${i}_name`] = `Image ${i + 1} name is required`;
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const uploadImageToCloudinary = async (file: File): Promise<string> => {
@@ -236,399 +178,336 @@ const UpdateDestinationCategoryPage = () => {
       return response.data.secure_url;
     } catch (error) {
       console.error("Error uploading image:", error);
-      throw new Error(`Failed to upload ${file.name}`);
+      throw new Error("Failed to upload image to Cloudinary");
     }
   };
 
-  const uploadNewImages = async (): Promise<any[]> => {
-    const uploadedImages = [];
-
-    for (let i = 0; i < newImages.length; i++) {
-      const image = newImages[i];
-
-      if (image.imageUrl) {
-        uploadedImages.push({
-          name: image.name,
-          description: image.description,
-          imageUrl: image.imageUrl,
-          status: image.status,
-        });
-      } else if (image.imageFile) {
-        setNewImages((prev) =>
-          prev.map((img, idx) =>
-            idx === i ? { ...img, uploadProgress: 50 } : img,
-          ),
-        );
-
-        const uploadedUrl = await uploadImageToCloudinary(image.imageFile);
-
-        setNewImages((prev) =>
-          prev.map((img, idx) =>
-            idx === i
-              ? { ...img, imageUrl: uploadedUrl, uploadProgress: 100 }
-              : img,
-          ),
-        );
-
-        uploadedImages.push({
-          name: image.name,
-          description: image.description,
-          imageUrl: uploadedUrl,
-          status: image.status,
-        });
-      }
-    }
-
-    return uploadedImages;
-  };
-
-  const handleSubmit = async () => {
-    if (!selectedCategory) {
-      setErrors({ select: "Please select a category to update" });
-      return;
-    }
-    if (!validateForm()) return;
-
-    setLoading(true);
-    setToast(null);
-
+  const handleAddNewImage = async (
+    imageFile: File,
+    imageName: string,
+    imageDescription: string,
+  ) => {
+    setUploadingImages(true);
     try {
-      const uploadedNewImages = await uploadNewImages();
+      const cloudinaryUrl = await uploadImageToCloudinary(imageFile);
 
-      const updateImages = existingImages
-        .filter((img) => !img.isRemoved)
-        .map((img) => ({
-          imageId: img.imageId,
-          name: img.name,
-          description: img.description,
-          imageUrl: img.imageUrl,
-          status: img.status,
-        }));
-
-      const requestData: UpdateDestinationCategoryRequest = {
-        categoryId: formData.categoryId,
-        category: formData.category,
-        description: formData.description,
-        status: formData.status,
-        color: formData.color,
-        hoverColor: formData.hoverColor,
-        removeImageIds: removeImageIds,
-        updateImages: updateImages,
-        newImages: uploadedNewImages,
+      const newImage: AddDestinationCategoryImageRequest = {
+        name: imageName,
+        description: imageDescription,
+        imageUrl: cloudinaryUrl,
+        status: "ACTIVE",
       };
 
+      setNewImages((prev) => [...prev, newImage]);
+
+      if (editedCategory) {
+        const tempImage = {
+          imageId: Date.now(),
+          imageName: imageName,
+          imageDescription: imageDescription,
+          imageUrl: cloudinaryUrl,
+          imageStatus: "ACTIVE",
+          imageCreatedAt: new Date().toISOString(),
+        };
+        setEditedCategory({
+          ...editedCategory,
+          images: [...editedCategory.images, tempImage],
+        });
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to upload image");
+      setToast({
+        type: "error",
+        title: "Upload Failed",
+        message: error.message || "Failed to upload image",
+      });
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  // Handle basic field changes
+  const handleBasicFieldChange = (field: string, value: any) => {
+    if (!editedCategory) return;
+    setBasicDetailsChanged(true);
+    setEditedCategory({
+      ...editedCategory,
+      [field]: value,
+    });
+  };
+
+  // Handle image changes
+  const handleRemoveImage = (imageId: number) => {
+    setRemovedImageIds((prev) => [...prev, imageId]);
+    setEditedCategory((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        images: prev.images.filter((img) => img.imageId !== imageId),
+      };
+    });
+  };
+
+  const handleUpdateImage = (
+    imageId: number,
+    name: string,
+    description: string,
+  ) => {
+    const existingUpdate = updatedImages.find((u) => u.imageId === imageId);
+    if (existingUpdate) {
+      setUpdatedImages((prev) =>
+        prev.map((u) =>
+          u.imageId === imageId ? { ...u, name, description } : u,
+        ),
+      );
+    } else {
+      const originalImage = originalCategory?.images.find(
+        (img) => img.imageId === imageId,
+      );
+      setUpdatedImages((prev) => [
+        ...prev,
+        {
+          imageId,
+          name,
+          description,
+          imageUrl: originalImage?.imageUrl || "",
+          status: "ACTIVE",
+        },
+      ]);
+    }
+    setEditedCategory((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        images: prev.images.map((img) =>
+          img.imageId === imageId
+            ? { ...img, imageName: name, imageDescription: description }
+            : img,
+        ),
+      };
+    });
+  };
+
+  // Check if there are any changes
+  const hasChanges = useCallback(() => {
+    return (
+      basicDetailsChanged ||
+      removedImageIds.length > 0 ||
+      newImages.length > 0 ||
+      updatedImages.length > 0
+    );
+  }, [basicDetailsChanged, removedImageIds, newImages, updatedImages]);
+
+  // Prepare update data
+  const prepareUpdateData = (): UpdateDestinationCategoryRequest | null => {
+    if (!editedCategory || !selectedCategory) return null;
+
+    return {
+      categoryId: selectedCategory.id,
+      category: editedCategory.category,
+      description: editedCategory.categoryDescription,
+      status: editedCategory.categoryStatus,
+      color: editedCategory.color,
+      hoverColor: editedCategory.hoverColor,
+      removeImageIds: removedImageIds,
+      updateImages: updatedImages,
+      newImages: newImages,
+    };
+  };
+
+  // Handle update submission
+  const handleUpdateSubmit = async () => {
+    const updateData = prepareUpdateData();
+    if (!updateData) return;
+
+    setLoadingUpdate(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
       const response =
-        await DestinationService.updateDestinationCategory(requestData);
+        await DestinationService.updateDestinationCategory(updateData);
+
+      setSuccess(
+        `Category "${editedCategory?.category}" updated successfully!`,
+      );
 
       setToast({
         type: "success",
-        title: "Success!",
-        message: response.message || "Category updated successfully!",
-        actionLink: DESTINATION_CATEGORY_VIEW_PAGE_URL,
+        title: "Update Successful!",
+        message: `${editedCategory?.category} has been updated successfully.`,
+        actionLink: `${DESTINATION_CATEGORIES_PAGE_URL}/view?id=${selectedCategory?.id}`,
       });
+
+      setShowConfirmModal(false);
 
       setTimeout(() => {
-        router.push(DESTINATION_CATEGORY_VIEW_PAGE_URL);
+        if (selectedCategory) {
+          fetchCategoryDetails(selectedCategory.id);
+        }
       }, 2000);
-    } catch (error) {
-      console.error("Error updating category:", error);
+    } catch (err: any) {
+      setError(err.message || "Failed to update category");
       setToast({
         type: "error",
-        title: "Error",
-        message: "Failed to update category. Please try again.",
+        title: "Update Failed",
+        message: err.message || "Failed to update category. Please try again.",
       });
     } finally {
-      setLoading(false);
+      setLoadingUpdate(false);
     }
   };
 
-  const handleCancel = () => {
-    router.back();
-  };
+  // Reset all changes
+  const handleResetChanges = () => {
+    if (originalCategory) {
+      setEditedCategory(originalCategory);
+      setBasicDetailsChanged(false);
+      setRemovedImageIds([]);
+      setNewImages([]);
+      setUpdatedImages([]);
+      setError(null);
+      setSuccess(null);
 
-  const handleReset = () => {
-    if (selectedCategory) {
-      loadCategoryData(selectedCategory.id);
+      setToast({
+        type: "success",
+        title: "Changes Reset",
+        message: "All unsaved changes have been discarded.",
+      });
     }
-    setToast(null);
   };
 
-  const handleClearSelection = () => {
+  const handleClearCategorySelection = () => {
     setSelectedCategory(null);
-    const url = new URL(window.location.href);
-    url.searchParams.delete("categoryId");
-    router.replace(url.toString(), { scroll: false });
-    setFormData({
-      categoryId: 0,
-      category: "",
-      description: "",
-      status: "ACTIVE",
-      color: "#3B82F6",
-      hoverColor: "#2563EB",
-    });
-    setExistingImages([]);
-    setNewImages([]);
-    setRemoveImageIds([]);
+    setOriginalCategory(null);
+    setEditedCategory(null);
     setToast(null);
+    updateUrlWithSelectedCategory(null);
   };
 
-  const handleFieldChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
+  // Get changed fields for confirmation modal
+  const getChangedFields = (): ChangedField[] => {
+    if (!originalCategory || !editedCategory) return [];
+
+    const changes: ChangedField[] = [];
+
+    const basicFields = [
+      { key: "category", label: "Category Name" },
+      { key: "categoryDescription", label: "Description" },
+      { key: "categoryStatus", label: "Status" },
+    ];
+
+    basicFields.forEach(({ key, label }) => {
+      const oldValue =
+        originalCategory[key as keyof CategoryDetailsByIdResponse];
+      const newValue = editedCategory[key as keyof CategoryDetailsByIdResponse];
+      if (oldValue !== newValue) {
+        changes.push({ field: label, oldValue, newValue });
+      }
+    });
+
+    if (originalCategory.color !== editedCategory.color) {
+      changes.push({
+        field: "Color",
+        oldValue: originalCategory.color,
+        newValue: editedCategory.color,
+      });
     }
-  };
-
-  const handleRemoveExistingImage = (imageId: number) => {
-    setExistingImages((prev) =>
-      prev.map((img) =>
-        img.imageId === imageId ? { ...img, isRemoved: true } : img,
-      ),
-    );
-    setRemoveImageIds((prev) => [...prev, imageId]);
-  };
-
-  const handleRestoreExistingImage = (imageId: number) => {
-    setExistingImages((prev) =>
-      prev.map((img) =>
-        img.imageId === imageId ? { ...img, isRemoved: false } : img,
-      ),
-    );
-    setRemoveImageIds((prev) => prev.filter((id) => id !== imageId));
-  };
-
-  const handleUpdateExistingImage = (
-    imageId: number,
-    updates: {
-      name?: string;
-      description?: string;
-      status?: "ACTIVE" | "INACTIVE";
-    },
-  ) => {
-    setExistingImages((prev) =>
-      prev.map((img) =>
-        img.imageId === imageId ? { ...img, ...updates } : img,
-      ),
-    );
-  };
-
-  const handleAddNewImages = (images: NewImage[]) => {
-    setNewImages((prev) => [...prev, ...images]);
-  };
-
-  const handleRemoveNewImage = (index: number) => {
-    setNewImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleUpdateNewImage = (
-    index: number,
-    updates: {
-      name?: string;
-      description?: string;
-      status?: "ACTIVE" | "INACTIVE";
-    },
-  ) => {
-    setNewImages((prev) =>
-      prev.map((img, i) => (i === index ? { ...img, ...updates } : img)),
-    );
-    if (updates.name && errors[`new_image_${index}_name`]) {
-      setErrors((prev) => ({ ...prev, [`new_image_${index}_name`]: "" }));
+    if (originalCategory.hoverColor !== editedCategory.hoverColor) {
+      changes.push({
+        field: "Hover Color",
+        oldValue: originalCategory.hoverColor,
+        newValue: editedCategory.hoverColor,
+      });
     }
+
+    if (
+      removedImageIds.length > 0 ||
+      newImages.length > 0 ||
+      updatedImages.length > 0
+    ) {
+      changes.push({
+        field: "Images",
+        oldValue: originalCategory.images.length,
+        newValue: editedCategory.images.length,
+      });
+    }
+
+    return changes;
   };
 
-  const handleUpdateImageProgress = (index: number, progress: number) => {
-    setNewImages((prev) =>
-      prev.map((img, i) =>
-        i === index ? { ...img, uploadProgress: progress } : img,
-      ),
-    );
+  // Build search items from destination categories (from common context)
+  const searchItems: SearchItem[] = categoriesList.map((cat) => ({
+    id: cat.id,
+    name: cat.name,
+  }));
+
+  const selectedSearchItem = selectedCategory
+    ? {
+        id: selectedCategory.id,
+        name: selectedCategory.name,
+      }
+    : null;
+
+  const focusHandlers = {
+    onFocus: (
+      e: React.FocusEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
+      e.currentTarget.style.borderColor = theme.primary;
+      e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}18`;
+    },
+    onBlur: (
+      e: React.FocusEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
+      e.currentTarget.style.borderColor = theme.border;
+      e.currentTarget.style.boxShadow = "none";
+    },
   };
 
-  const handleSelectCategory = (item: CategorySearchItem) => {
-    const id = item.id as number;
-    const name = item.name;
-    setSelectedCategory({ id, name });
-    const url = new URL(window.location.href);
-    url.searchParams.set("categoryId", id.toString());
-    router.replace(url.toString(), { scroll: false });
-    loadCategoryData(id);
+  const fieldBase: React.CSSProperties = {
+    backgroundColor: theme.background,
+    color: theme.text,
+    transition: "border-color 0.18s ease, box-shadow 0.18s ease",
   };
 
-  // Custom render function for category items
-  const renderCategoryItem = (
-    item: CategorySearchItem,
-    searchTerm: string,
-    isActive: boolean,
-  ) => {
-    const highlightMatch = (text: string, query: string) => {
-      if (!query.trim()) return text;
-      const parts = text.split(new RegExp(`(${query})`, "gi"));
-      return parts.map((part, i) =>
-        part.toLowerCase() === query.toLowerCase() ? (
-          <mark
-            key={i}
-            style={{
-              backgroundColor: hexToRgba(theme.primary, 0.18),
-              color: theme.primary,
-              fontWeight: 600,
-              borderRadius: "2px",
-              padding: "0 1px",
-            }}
-          >
-            {part}
-          </mark>
-        ) : (
-          part
-        ),
-      );
-    };
-
-    return (
-      <>
-        <div
-          className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
-          style={{
-            background: isActive
-              ? `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`
-              : hexToRgba(theme.primary, 0.1),
-          }}
-        >
-          <span
-            className="text-sm"
-            style={{ color: isActive ? "#fff" : theme.primary }}
-          >
-            📁
-          </span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="font-medium text-sm" style={{ color: theme.text }}>
-            {highlightMatch(item.name, searchTerm)}
-          </div>
-          {item.description && (
-            <div
-              className="text-xs mt-0.5"
-              style={{ color: theme.textSecondary }}
-            >
-              {item.description.length > 60
-                ? `${item.description.substring(0, 60)}...`
-                : item.description}
-            </div>
-          )}
-        </div>
-      </>
-    );
-  };
-
-  if (categoriesLoading) {
+  // Show loading state from common context
+  if (commonLoading) {
     return (
       <CommonLoading
-        message="Loading categories..."
+        message="Loading destination categories..."
         subMessage="Please wait while we fetch available categories"
         size="lg"
-        fullScreen={true}
       />
     );
   }
 
-  if (!selectedCategory && !categoryIdFromQuery) {
-    return (
-      <div
-        className="min-h-screen transition-colors duration-300"
-        style={{ backgroundColor: theme.background }}
-      >
-        <div
-          className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
-          style={{
-            backgroundColor: `${theme.surface}D9`,
-            borderColor: theme.border,
-          }}
-        >
-          <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <PageHeader
-              title="Update Category"
-              description="Search and select a category to update"
-              breadcrumbItems={breadcrumbItems}
-            />
-          </div>
-        </div>
-
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div
-            className="rounded-2xl shadow-lg p-8"
-            style={{
-              backgroundColor: theme.surface,
-              border: `1px solid ${theme.border}`,
-            }}
-          >
-            <h2
-              className="text-xl font-semibold mb-6 flex items-center gap-2"
-              style={{ color: theme.text }}
-            >
-              Select Category to Update
-            </h2>
-
-            {errors.select && (
-              <p className="text-sm mb-4" style={{ color: theme.error }}>
-                {errors.select}
-              </p>
-            )}
-
-            <CommonSearch<CategorySearchItem>
-              items={searchItems}
-              loading={categoriesLoading}
-              selectedItem={selectedSearchItem}
-              onSelectItem={handleSelectCategory}
-              onClearSelection={handleClearSelection}
-              initialSearchTerm=""
-              placeholder="Search categories..."
-              title="Categories"
-              variant="primary"
-              size="md"
-              getBadgeText={(item) => `ID: ${item.id}`}
-              renderItem={renderCategoryItem}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (loadingCategory) {
-    return (
-      <CommonLoading
-        message="Loading category details..."
-        subMessage="Please wait while we fetch category information"
-        size="lg"
-        fullScreen={true}
-      />
-    );
-  }
-
-  if (errors.load) {
+  // Show error state
+  if (commonError) {
     return (
       <CommonErrorState
-        error={errors.load}
-        title="Failed to Load Category"
-        message="The category couldn't be loaded. Please try again."
+        error={commonError}
+        title="Failed to Load Data"
+        message="Unable to load destination categories. Please try again."
         variant="error"
-        showBackButton={true}
+        showBackButton={false}
         showRetryButton={true}
-        onBack={handleClearSelection}
-        onRetry={() =>
-          selectedCategory && loadCategoryData(selectedCategory.id)
-        }
-        backButtonText="Go Back to Selection"
-        retryButtonText="Try Again"
+        onRetry={() => window.location.reload()}
+        retryButtonText="Retry"
         fullScreen={true}
       />
     );
   }
 
   return (
-    <div
+    <motion.div
       className="min-h-screen transition-colors duration-300"
       style={{ backgroundColor: theme.background }}
     >
+      {/* Toast Notifications */}
       {toast && (
         <ToastNotification
           type={toast.type}
@@ -636,117 +515,558 @@ const UpdateDestinationCategoryPage = () => {
           message={toast.message}
           onClose={() => setToast(null)}
           actionLink={toast.actionLink}
-          actionText="View Categories"
+          actionText="View Category"
         />
       )}
 
+      {/* Header with Breadcrumb */}
       <div
         className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
         style={{
-          backgroundColor: `${theme.surface}D9`,
+          backgroundColor: `${theme.surface}CC`,
           borderColor: theme.border,
         }}
       >
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
-            title={`Update Category: ${formData.category}`}
-            description="Edit destination category details"
-            breadcrumbItems={breadcrumbItems}
+            title="Update Destination Category"
+            description="Edit and update existing destination category information"
+            breadcrumbItems={DESTINATION_CATEGORY_UPDATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <SelectedItemBar
-          item={
-            selectedCategory
-              ? {
-                  id: selectedCategory.id,
-                  name: selectedCategory.name,
-                }
-              : null
-          }
-          onClear={handleClearSelection}
-          variant="primary"
-          title="Currently Editing"
-          showId={true}
-          clearButtonText="Change Category"
-          size="md"
-        />
+        {/* Search Section */}
+        {!selectedCategory && (
+          <div
+            className="rounded-2xl shadow-lg p-8 mb-8 transition-all duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            <h2
+              className="text-2xl font-bold mb-6 flex items-center gap-3"
+              style={{ color: theme.text }}
+            >
+              <Search className="w-6 h-6" style={{ color: theme.primary }} />
+              Select Destination Category to Update
+            </h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <CategoryBasicInfoForm
-              category={formData.category}
-              description={formData.description}
-              status={formData.status}
-              errors={errors}
-              onFieldChange={handleFieldChange}
-            />
-
-            <ExistingImagesManager
-              images={existingImages.filter((img) => !img.isRemoved)}
-              onRemoveImage={handleRemoveExistingImage}
-              onUpdateImage={handleUpdateExistingImage}
-            />
-
-            <RemovedImagesManager
-              images={existingImages.filter((img) => img.isRemoved)}
-              onRestoreImage={handleRestoreExistingImage}
-            />
-
-            <NewImagesUploader
-              images={newImages}
-              errors={errors}
-              onAddImages={handleAddNewImages}
-              onRemoveImage={handleRemoveNewImage}
-              onUpdateImage={handleUpdateNewImage}
-              onUpdateImageProgress={handleUpdateImageProgress}
-            />
-          </div>
-
-          <div className="space-y-6">
-            <CategoryColorsForm
-              color={formData.color}
-              hoverColor={formData.hoverColor}
-              errors={errors}
-              onColorChange={(color) => handleFieldChange("color", color)}
-              onHoverColorChange={(color) =>
-                handleFieldChange("hoverColor", color)
+            <CommonSearch
+              items={searchItems}
+              loading={loading}
+              selectedItem={selectedSearchItem}
+              onSelectItem={(item) =>
+                handleSelectCategory(item.id as number, item.name)
               }
-            />
-
-            <CategoryPreview
-              categoryName={formData.category}
-              description={formData.description}
-              color={formData.color}
-              hoverColor={formData.hoverColor}
-              images={[
-                ...existingImages
-                  .filter((img) => !img.isRemoved)
-                  .map((img) => ({
-                    previewUrl: img.imageUrl,
-                    imageUrl: img.imageUrl,
-                    name: img.name,
-                  })),
-                ...newImages,
-              ]}
+              onClearSelection={handleClearCategorySelection}
+              initialSearchTerm={initialCategoryName}
+              placeholder="Search destination categories..."
+              title="Destination Categories"
+              variant="primary"
+              size="md"
+              getBadgeText={(item) => `ID: ${item.id}`}
             />
           </div>
-        </div>
+        )}
 
-        {/* Form Actions at Bottom */}
-        <div className="mt-8">
-          <CategoryUpdateFormActions
-            loading={loading}
-            uploadingImages={uploadingImages}
-            onSave={handleSubmit}
-            onReset={handleReset}
-            errors={errors}
+        {/* Selected Category Info Bar */}
+        {selectedCategory && (
+          <SelectedItemBar
+            item={{
+              id: selectedCategory.id,
+              name: selectedCategory.name,
+            }}
+            onClear={handleClearCategorySelection}
+            variant="primary"
+            title="Currently Editing"
+            showId={true}
+            clearButtonText="Change Category"
+            size="md"
           />
-        </div>
+        )}
+
+        {/* Loading Details */}
+        {loadingDetails && (
+          <CommonLoading
+            message="Loading category details..."
+            subMessage="Please wait while we fetch the category information"
+            size="lg"
+            fullScreen={false}
+            className="rounded-2xl shadow-lg border"
+          />
+        )}
+
+        {/* Category Details Form */}
+        {editedCategory && selectedCategory && (
+          <div className="space-y-6">
+            {/* Basic Information Section */}
+            <motion.div
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              className="rounded-2xl overflow-hidden"
+              style={{
+                backgroundColor: theme.surface,
+                border: `1px solid ${theme.border}`,
+                boxShadow: "0 2px 16px rgba(0,0,0,0.07)",
+              }}
+            >
+              <button
+                onClick={() => toggleSection("basic")}
+                className="w-full flex items-center justify-between p-4 cursor-pointer transition-colors"
+                style={{
+                  backgroundColor: expandedSections.has("basic")
+                    ? `${theme.primary}05`
+                    : "transparent",
+                  borderBottom: expandedSections.has("basic")
+                    ? `1px solid ${theme.border}`
+                    : "none",
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className="flex items-center justify-center w-8 h-8 rounded-lg"
+                    style={{
+                      backgroundColor: `${theme.primary}18`,
+                      color: theme.primary,
+                    }}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <h2
+                      className="text-sm sm:text-base font-semibold"
+                      style={{ color: theme.text }}
+                    >
+                      Basic Information
+                    </h2>
+                    <p
+                      className="text-xs mt-0.5"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Core details about the category (editable)
+                    </p>
+                  </div>
+                </div>
+                <ChevronDown
+                  className="w-4 h-4 transition-transform duration-200"
+                  style={{
+                    transform: expandedSections.has("basic")
+                      ? "rotate(180deg)"
+                      : "none",
+                    color: theme.textSecondary,
+                  }}
+                />
+              </button>
+
+              <AnimatePresence>
+                {expandedSections.has("basic") && (
+                  <motion.div
+                    variants={sectionVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                    className="p-6 space-y-5"
+                  >
+                    {/* Category Name */}
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ color: theme.textSecondary }}
+                      >
+                        Category Name{" "}
+                        <span style={{ color: theme.error }}>*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={editedCategory.category}
+                        onChange={(e) =>
+                          handleBasicFieldChange("category", e.target.value)
+                        }
+                        className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
+                        style={{
+                          ...fieldBase,
+                          borderColor: basicDetailsChanged
+                            ? theme.primary
+                            : theme.border,
+                        }}
+                        placeholder="e.g., Historical Sites"
+                        {...focusHandlers}
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ color: theme.textSecondary }}
+                      >
+                        Description
+                      </label>
+                      <textarea
+                        value={editedCategory.categoryDescription}
+                        onChange={(e) =>
+                          handleBasicFieldChange(
+                            "categoryDescription",
+                            e.target.value,
+                          )
+                        }
+                        rows={3}
+                        className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none"
+                        style={{ ...fieldBase, borderColor: theme.border }}
+                        placeholder="Category description..."
+                        {...focusHandlers}
+                      />
+                    </div>
+
+                    {/* Colors */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label
+                          className="block text-sm font-medium mb-2 flex items-center gap-1.5"
+                          style={{ color: theme.textSecondary }}
+                        >
+                          <Palette className="w-3.5 h-3.5" />
+                          Color
+                        </label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {DESTINATION_CATEGORY_UPDATE_PRESET_COLORS.map(
+                            (color) => (
+                              <button
+                                key={color}
+                                type="button"
+                                onClick={() =>
+                                  handleBasicFieldChange("color", color)
+                                }
+                                className="w-8 h-8 rounded-full border-2 transition-all"
+                                style={{
+                                  backgroundColor: color,
+                                  borderColor:
+                                    editedCategory.color === color
+                                      ? theme.text
+                                      : "transparent",
+                                  boxShadow:
+                                    editedCategory.color === color
+                                      ? `0 0 0 2px ${theme.background}, 0 0 0 4px ${color}`
+                                      : "none",
+                                }}
+                              />
+                            ),
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={editedCategory.color}
+                            onChange={(e) =>
+                              handleBasicFieldChange("color", e.target.value)
+                            }
+                            className="w-12 h-10 rounded border cursor-pointer"
+                            style={{ borderColor: theme.border }}
+                          />
+                          <input
+                            type="text"
+                            value={editedCategory.color}
+                            onChange={(e) =>
+                              handleBasicFieldChange("color", e.target.value)
+                            }
+                            className="flex-1 px-4 py-2.5 rounded-xl border-2 text-sm"
+                            style={{ ...fieldBase, borderColor: theme.border }}
+                            placeholder="#000000"
+                            {...focusHandlers}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label
+                          className="block text-sm font-medium mb-2 flex items-center gap-1.5"
+                          style={{ color: theme.textSecondary }}
+                        >
+                          <Palette className="w-3.5 h-3.5" />
+                          Hover Color
+                        </label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {DESTINATION_CATEGORY_UPDATE_PRESET_COLORS.map(
+                            (color) => (
+                              <button
+                                key={color}
+                                type="button"
+                                onClick={() =>
+                                  handleBasicFieldChange("hoverColor", color)
+                                }
+                                className="w-8 h-8 rounded-full border-2 transition-all"
+                                style={{
+                                  backgroundColor: color,
+                                  borderColor:
+                                    editedCategory.hoverColor === color
+                                      ? theme.text
+                                      : "transparent",
+                                  boxShadow:
+                                    editedCategory.hoverColor === color
+                                      ? `0 0 0 2px ${theme.background}, 0 0 0 4px ${color}`
+                                      : "none",
+                                }}
+                              />
+                            ),
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={editedCategory.hoverColor}
+                            onChange={(e) =>
+                              handleBasicFieldChange(
+                                "hoverColor",
+                                e.target.value,
+                              )
+                            }
+                            className="w-12 h-10 rounded border cursor-pointer"
+                            style={{ borderColor: theme.border }}
+                          />
+                          <input
+                            type="text"
+                            value={editedCategory.hoverColor}
+                            onChange={(e) =>
+                              handleBasicFieldChange(
+                                "hoverColor",
+                                e.target.value,
+                              )
+                            }
+                            className="flex-1 px-4 py-2.5 rounded-xl border-2 text-sm"
+                            style={{ ...fieldBase, borderColor: theme.border }}
+                            placeholder="#000000"
+                            {...focusHandlers}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status */}
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        style={{ color: theme.textSecondary }}
+                      >
+                        Status
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {DESTINATION_CATEGORY_UPDATE_STATUS_OPTIONS.map(
+                          (opt) => {
+                            const isSelected =
+                              editedCategory.categoryStatus === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() =>
+                                  handleBasicFieldChange(
+                                    "categoryStatus",
+                                    opt.value,
+                                  )
+                                }
+                                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 text-left cursor-pointer transition-all"
+                                style={{
+                                  backgroundColor: isSelected
+                                    ? `${opt.color}10`
+                                    : theme.background,
+                                  borderColor: isSelected
+                                    ? opt.color
+                                    : theme.border,
+                                }}
+                              >
+                                <span
+                                  className="w-2 h-2 rounded-full flex-shrink-0"
+                                  style={{ backgroundColor: opt.color }}
+                                />
+                                <div className="flex-1">
+                                  <span
+                                    className="text-sm font-medium"
+                                    style={{
+                                      color: isSelected
+                                        ? opt.color
+                                        : theme.text,
+                                    }}
+                                  >
+                                    {opt.label}
+                                  </span>
+                                  <p
+                                    className="text-xs mt-0.5"
+                                    style={{ color: theme.textSecondary }}
+                                  >
+                                    {opt.description}
+                                  </p>
+                                </div>
+                                {isSelected && (
+                                  <svg
+                                    className="w-4 h-4"
+                                    style={{ color: opt.color }}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M5 13l4 4L19 7"
+                                    />
+                                  </svg>
+                                )}
+                              </button>
+                            );
+                          },
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Read-only Destination Category Details Components */}
+            <DestinationCategoryReadOnlyDetails
+              category={editedCategory}
+              expandedSections={expandedSections}
+              onToggleSection={toggleSection}
+              onRemoveImage={handleRemoveImage}
+              onAddNewImage={handleAddNewImage}
+              onUpdateImage={handleUpdateImage}
+              uploadingImages={uploadingImages}
+              theme={theme}
+            />
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {editedCategory && originalCategory && (
+          <div
+            className="rounded-2xl shadow-lg p-8 mt-8 transition-colors duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={handleResetChanges}
+                disabled={!hasChanges() || loadingUpdate || uploadingImages}
+                className="cursor-pointer flex-1 px-6 py-4 rounded-xl border-2 transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: theme.background,
+                  borderColor: theme.border,
+                  color: theme.textSecondary,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = theme.primary;
+                  e.currentTarget.style.backgroundColor = hexToRgba(
+                    theme.primary,
+                    0.05,
+                  );
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = theme.border;
+                  e.currentTarget.style.backgroundColor = theme.background;
+                }}
+              >
+                <RefreshCw className="w-5 h-5" />
+                Reset Changes
+              </button>
+
+              <button
+                onClick={() => setShowConfirmModal(true)}
+                disabled={!hasChanges() || loadingUpdate || uploadingImages}
+                className="cursor-pointer flex-1 px-6 py-4 rounded-xl text-white font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`,
+                }}
+              >
+                <Save className="w-5 h-5" />
+                {loadingUpdate ? "Updating..." : "Update Category"}
+              </button>
+            </div>
+
+            {/* Uploading Indicator */}
+            {uploadingImages && (
+              <div
+                className="mt-6 p-4 rounded-xl transition-colors duration-300"
+                style={{
+                  backgroundColor: hexToRgba(theme.primary, 0.1),
+                  border: `1px solid ${hexToRgba(theme.primary, 0.2)}`,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <Loader2
+                    className="w-5 h-5 animate-spin"
+                    style={{ color: theme.primary }}
+                  />
+                  <div>
+                    <p className="font-medium" style={{ color: theme.primary }}>
+                      Uploading images to Cloudinary...
+                    </p>
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Please wait for all images to finish uploading before
+                      updating
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Change Indicator */}
+            {hasChanges() && !uploadingImages && (
+              <div
+                className="mt-6 p-4 rounded-xl transition-colors duration-300"
+                style={{
+                  backgroundColor: hexToRgba(theme.primary, 0.1),
+                  border: `1px solid ${hexToRgba(theme.primary, 0.2)}`,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <Edit className="w-5 h-5" style={{ color: theme.primary }} />
+                  <div>
+                    <p className="font-medium" style={{ color: theme.primary }}>
+                      You have unsaved changes
+                    </p>
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Click "Update Category" to save your changes
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Confirmation Modal */}
+        {showConfirmModal && originalCategory && editedCategory && (
+          <UpdateConfirmationModal
+            isOpen={showConfirmModal}
+            onClose={() => setShowConfirmModal(false)}
+            onConfirm={handleUpdateSubmit}
+            isLoading={loadingUpdate}
+            type="update"
+            itemName={editedCategory.category}
+            changedFields={getChangedFields()}
+            confirmText="Update Category"
+            cancelText="Cancel"
+            title="Confirm Category Update"
+            message={`You are about to update "${editedCategory.category}". Please review the changes below before confirming.`}
+            showFieldComparisons={true}
+          />
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

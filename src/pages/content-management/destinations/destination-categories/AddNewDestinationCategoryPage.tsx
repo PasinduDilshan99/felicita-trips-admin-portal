@@ -1,57 +1,28 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { DestinationService } from "@/services/destinationService";
-import { AddDestinationCategoryRequest, AddDestinationCategoryImageRequest } from "@/types/destination-types";
+import {
+  AddDestinationCategoryRequest,
+  AddDestinationCategoryImageRequest,
+} from "@/types/destination-types";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Tag, Palette, FileText, Image as ImageIcon, MapPin } from "lucide-react";
+import { Palette, MapPin } from "lucide-react";
 import { FormActions } from "@/components/common-components/FormActions";
 import { FormSummary } from "@/components/common-components/FormSummary";
 import { InputField } from "@/components/common-components/create-components/InputField";
 import { StatusSelector } from "@/components/common-components/StatusSelector";
 import { ImageUploader } from "@/components/common-components/ImageUploader";
 import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-}
+import { ToastState } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { DESTINATION_CATEGORY_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { CREATE_DESTINATION_CATEGORY_TIPS } from "@/data/tips-data";
 
 const AddNewDestinationCategoryPage = () => {
-  const router = useRouter();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Destination Categories",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/destination-categories`,
-    },
-    {
-      label: "Add New Category",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/destination-categories/add`,
-    },
-  ];
-
-  // Form state
   const [formData, setFormData] = useState<AddDestinationCategoryRequest>({
     category: "",
     description: "",
@@ -61,7 +32,6 @@ const AddNewDestinationCategoryPage = () => {
     images: [],
   });
 
-  // Image state
   const [imagePreviews, setImagePreviews] = useState<
     { url: string; file?: File; uploading?: boolean; uploadError?: string }[]
   >([]);
@@ -78,27 +48,25 @@ const AddNewDestinationCategoryPage = () => {
     message: "",
   });
 
-  // Handle input changes
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     if (errors[name]) setErrors({ ...errors, [name]: "" });
   };
 
-  // Handle color change
   const handleColorChange = (color: string, field: "color" | "hoverColor") => {
     setFormData({ ...formData, [field]: color });
     if (errors[field]) setErrors({ ...errors, [field]: "" });
   };
 
-  // Handle status change
   const handleStatusChange = (value: "ACTIVE" | "INACTIVE") => {
     setFormData({ ...formData, status: value });
   };
 
-  // Image handling
   const handleImagePreviewsChange = (previews: typeof imagePreviews) => {
     setImagePreviews(previews);
   };
@@ -111,7 +79,6 @@ const AddNewDestinationCategoryPage = () => {
     setUploadingImages(uploading);
   };
 
-  // Validate form
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -135,7 +102,9 @@ const AddNewDestinationCategoryPage = () => {
       newErrors.hoverColor = "Hover color is required";
     }
 
-    const hasUploadingImages = imagePreviews.some((preview) => preview.uploading);
+    const hasUploadingImages = imagePreviews.some(
+      (preview) => preview.uploading,
+    );
     if (hasUploadingImages) {
       newErrors.images = "Please wait for all images to finish uploading";
     }
@@ -144,11 +113,11 @@ const AddNewDestinationCategoryPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Submit destination category
   const submitDestinationCategory = async () => {
     setLoading(true);
     try {
-      const response = await DestinationService.addDestinationCategory(formData);
+      const response =
+        await DestinationService.addDestinationCategory(formData);
       if (response.code === 200) {
         setToast({
           show: true,
@@ -159,7 +128,9 @@ const AddNewDestinationCategoryPage = () => {
         handleReset();
         return response;
       } else {
-        throw new Error(response.message || "Failed to add destination category");
+        throw new Error(
+          response.message || "Failed to add destination category",
+        );
       }
     } catch (error: any) {
       console.error("Submission error:", error);
@@ -169,7 +140,6 @@ const AddNewDestinationCategoryPage = () => {
     }
   };
 
-  // Handle create button click - opens dialog
   const handleCreateClick = () => {
     if (validateForm()) {
       setShowConfirmDialog(true);
@@ -181,7 +151,6 @@ const AddNewDestinationCategoryPage = () => {
     }
   };
 
-  // Handle confirm create from dialog
   const handleConfirmCreate = async () => {
     await submitDestinationCategory();
   };
@@ -205,7 +174,6 @@ const AddNewDestinationCategoryPage = () => {
     setErrors({});
   };
 
-  // Close toast
   const handleCloseToast = () => {
     setToast((prev) => ({ ...prev, show: false }));
   };
@@ -237,7 +205,7 @@ const AddNewDestinationCategoryPage = () => {
           <PageHeader
             title="Add New Destination Category"
             description="Create a new category to organize your destinations"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={DESTINATION_CATEGORY_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -377,7 +345,9 @@ const AddNewDestinationCategoryPage = () => {
                           <input
                             type="color"
                             value={formData.color}
-                            onChange={(e) => handleColorChange(e.target.value, "color")}
+                            onChange={(e) =>
+                              handleColorChange(e.target.value, "color")
+                            }
                             className="w-12 h-12 rounded-xl border-2 cursor-pointer"
                             style={{ borderColor: theme.border }}
                           />
@@ -385,27 +355,40 @@ const AddNewDestinationCategoryPage = () => {
                         <input
                           type="text"
                           value={formData.color}
-                          onChange={(e) => handleColorChange(e.target.value, "color")}
+                          onChange={(e) =>
+                            handleColorChange(e.target.value, "color")
+                          }
                           className="flex-1 px-4 py-2.5 rounded-xl border-2 text-sm font-mono"
                           style={{
                             backgroundColor: theme.background,
-                            borderColor: errors.color ? theme.error : theme.border,
+                            borderColor: errors.color
+                              ? theme.error
+                              : theme.border,
                             color: theme.text,
                           }}
                           placeholder="#000000"
                         />
                       </div>
                       {errors.color && (
-                        <p className="mt-1.5 text-xs" style={{ color: theme.error }}>
+                        <p
+                          className="mt-1.5 text-xs"
+                          style={{ color: theme.error }}
+                        >
                           {errors.color}
                         </p>
                       )}
                       <div className="mt-3 flex items-center gap-2">
                         <div
                           className="w-8 h-8 rounded-full border-2 transition-all duration-200"
-                          style={{ backgroundColor: formData.color, borderColor: theme.border }}
+                          style={{
+                            backgroundColor: formData.color,
+                            borderColor: theme.border,
+                          }}
                         />
-                        <span className="text-xs" style={{ color: theme.textSecondary }}>
+                        <span
+                          className="text-xs"
+                          style={{ color: theme.textSecondary }}
+                        >
                           Preview color
                         </span>
                       </div>
@@ -425,7 +408,9 @@ const AddNewDestinationCategoryPage = () => {
                           <input
                             type="color"
                             value={formData.hoverColor}
-                            onChange={(e) => handleColorChange(e.target.value, "hoverColor")}
+                            onChange={(e) =>
+                              handleColorChange(e.target.value, "hoverColor")
+                            }
                             className="w-12 h-12 rounded-xl border-2 cursor-pointer"
                             style={{ borderColor: theme.border }}
                           />
@@ -433,27 +418,40 @@ const AddNewDestinationCategoryPage = () => {
                         <input
                           type="text"
                           value={formData.hoverColor}
-                          onChange={(e) => handleColorChange(e.target.value, "hoverColor")}
+                          onChange={(e) =>
+                            handleColorChange(e.target.value, "hoverColor")
+                          }
                           className="flex-1 px-4 py-2.5 rounded-xl border-2 text-sm font-mono"
                           style={{
                             backgroundColor: theme.background,
-                            borderColor: errors.hoverColor ? theme.error : theme.border,
+                            borderColor: errors.hoverColor
+                              ? theme.error
+                              : theme.border,
                             color: theme.text,
                           }}
                           placeholder="#000000"
                         />
                       </div>
                       {errors.hoverColor && (
-                        <p className="mt-1.5 text-xs" style={{ color: theme.error }}>
+                        <p
+                          className="mt-1.5 text-xs"
+                          style={{ color: theme.error }}
+                        >
                           {errors.hoverColor}
                         </p>
                       )}
                       <div className="mt-3 flex items-center gap-2">
                         <div
                           className="w-8 h-8 rounded-full border-2 transition-all duration-200 hover:scale-110"
-                          style={{ backgroundColor: formData.hoverColor, borderColor: theme.border }}
+                          style={{
+                            backgroundColor: formData.hoverColor,
+                            borderColor: theme.border,
+                          }}
                         />
-                        <span className="text-xs" style={{ color: theme.textSecondary }}>
+                        <span
+                          className="text-xs"
+                          style={{ color: theme.textSecondary }}
+                        >
                           Preview on hover
                         </span>
                       </div>
@@ -526,7 +524,10 @@ const AddNewDestinationCategoryPage = () => {
                   label: "Status",
                   value: formData.status || "Not set",
                   icon: "eye",
-                  color: formData.status === "ACTIVE" ? theme.success : theme.textSecondary,
+                  color:
+                    formData.status === "ACTIVE"
+                      ? theme.success
+                      : theme.textSecondary,
                 },
                 {
                   label: "Images",
@@ -538,14 +539,7 @@ const AddNewDestinationCategoryPage = () => {
                   color: theme.error,
                 },
               ]}
-              tips={[
-                "Choose a unique and descriptive category name",
-                "Select colors that represent the category well",
-                "Upload representative images for better visualization",
-                "Inactive categories won't be visible to customers",
-                "Categories help organize destinations and improve navigation",
-                "Destinations can be filtered by categories on the frontend",
-              ]}
+              tips={CREATE_DESTINATION_CATEGORY_TIPS}
             />
           </div>
         </div>
@@ -574,7 +568,7 @@ const AddNewDestinationCategoryPage = () => {
         confirmText="Create Category"
         cancelText="Cancel"
         onSuccess={() => {
-          console.log("Destination category created successfully");
+          // console.log("Destination category created successfully");
           // Optional: Redirect after success
           // setTimeout(() => {
           //   router.push(`${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/destination-categories`);
@@ -586,7 +580,9 @@ const AddNewDestinationCategoryPage = () => {
             show: true,
             type: "error",
             title: "Creation Failed",
-            message: error.message || "Failed to create destination category. Please try again.",
+            message:
+              error.message ||
+              "Failed to create destination category. Please try again.",
           });
         }}
       />

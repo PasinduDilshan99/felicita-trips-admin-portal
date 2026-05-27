@@ -7,3 +7,19 @@ export const DESTINATION_VIEW_SORTING_OPTIONS: SortOption[] = [
   { value: "updated_at", label: "Updated Date" },
   { value: "location", label: "Location" },
 ];
+
+export const DESTINATION_CATEGORY_VIEW_SORTING_OPTIONS: SortOption[] = [
+  { value: "category", label: "Category Name" },
+  { value: "createdAt", label: "Created Date" },
+  { value: "updatedAt", label: "Updated Date" },
+  { value: "categoryId", label: "Category ID" },
+];
+
+export const ACTIVITIES_VIEW_SORTING_OPTIONS: SortOption[] = [
+  { value: "name", label: "Activity Name" },
+  { value: "activity_id", label: "Activity ID" },
+  { value: "created_at", label: "Created Date" },
+  { value: "updated_at", label: "Updated Date" },
+  { value: "price_local", label: "Price (Local)" },
+  { value: "duration_hours", label: "Duration" },
+];

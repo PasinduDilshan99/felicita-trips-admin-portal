@@ -1,367 +1,223 @@
-// app/destinations/categories/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { useSearchParams, useRouter } from "next/navigation";
 import { DestinationService } from "@/services/destinationService";
-import { useCommon } from "@/contexts/CommonContext";
+import { CategoryDetailsByIdResponse } from "@/types/destination-types";
+import {
+  AlertTriangle,
+  Search,
+  Palette,
+  MapPin,
+  Star,
+  AlertCircle,
+  Image as ImageIcon,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
+import ImageModal from "@/components/common-components/ImageModal";
+import CommonSearch from "@/components/common-components/CommonSearch";
+import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
-import SelectedItemBar from "@/components/common-components/SelectedItemBar";
-import CommonSearch, {
-  SearchItem,
-} from "@/components/common-components/CommonSearch";
-import { CategoryDetailsByIdResponse } from "@/types/destination-types";
+import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
+import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
+import {
+  TerminationItem,
+  TerminationModal,
+} from "@/components/common-components/terminate-components/TerminationModal";
+import { useCommon } from "@/contexts/CommonContext";
+import { DestinationCategorySearchItem } from "@/types/destination-category-types";
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { DESTINATION_CATEGORY_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 import { hexToRgba } from "@/utils/functions";
-import CategoryTerminationDetails from "@/components/destination-categories-components/destination-categories-terminate-components/CategoryTerminationDetails";
-import TerminationConfirmationModal from "@/components/destination-categories-components/destination-categories-terminate-components/TerminationConfirmationModal";
-
-// Category search item interface
-interface CategorySearchItem extends SearchItem {
-  id: number;
-  name: string;
-  description?: string;
-}
+import { DestinationCategoryStats } from "@/components/destination-categories-components/destination-categories-terminate-components/DestinationCategoryStats";
+import { BasicInfoPanel } from "@/components/destination-categories-components/destination-categories-terminate-components/BasicInfoPanel";
+import { DestinationsList } from "@/components/destination-categories-components/destination-categories-terminate-components/DestinationsList";
 
 const TerminateDestinationCategoryPage = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const { theme } = useTheme();
-  const { categories, loading: categoriesLoading } = useCommon();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { categories, loading: commonLoading } = useCommon();
 
-  const categoryIdFromQuery = searchParams?.get("categoryId") ?? null;
+  const initialCategoryName = searchParams?.get("category-name") || "";
+  const initialCategoryId = searchParams?.get("category-id") || "";
 
   const [selectedCategory, setSelectedCategory] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
-
+    categoryId: number;
+    categoryName: string;
+  } | null>(
+    initialCategoryId && initialCategoryName
+      ? {
+          categoryId: parseInt(initialCategoryId),
+          categoryName: initialCategoryName,
+        }
+      : null,
+  );
   const [categoryDetails, setCategoryDetails] =
     useState<CategoryDetailsByIdResponse | null>(null);
+  const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const [terminating, setTerminating] = useState(false);
+  const [loadingTerminate, setLoadingTerminate] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
     message: string;
+    actionLink?: string;
   } | null>(null);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Categories",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/categories/view`,
-    },
-    { label: "Terminate", href: "#" },
-  ];
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const destinationCategories = categories?.destinationCategoryList || [];
 
-  // Convert categories to search items format
-  const searchItems: CategorySearchItem[] = destinationCategories.map(
-    (cat) => ({
+  const searchItems: DestinationCategorySearchItem[] =
+    destinationCategories.map((cat) => ({
       id: cat.destinationCategoryId,
       name: cat.destinationCategoryName,
-      description: cat.destinationCategoryDescription,
-    }),
-  );
+    }));
 
-  const selectedSearchItem: CategorySearchItem | null = selectedCategory
-    ? {
-        id: selectedCategory.id,
-        name: selectedCategory.name,
-        description: destinationCategories.find(
-          (cat) => cat.destinationCategoryId === selectedCategory.id,
-        )?.destinationCategoryDescription,
-      }
-    : null;
-
-  // Load category details when selected
-  const loadCategoryDetails = async (categoryId: number) => {
+  const fetchCategoryDetails = async (id: number) => {
     setLoadingDetails(true);
+    setError(null);
+    setCategoryDetails(null);
     try {
-      const response =
-        await DestinationService.getCategoryDetailsById(categoryId);
+      const response = await DestinationService.getCategoryDetailsById(id);
       setCategoryDetails(response.data);
     } catch (err: any) {
-      console.error("Error loading category details:", err);
+      setError(err.message || "Failed to load category details");
       setToast({
         type: "error",
-        title: "Error",
-        message: "Failed to load category details",
+        title: "Load Failed",
+        message: err.message || "Failed to load category details",
       });
     } finally {
       setLoadingDetails(false);
     }
   };
 
-  // Load category if categoryId is in URL query params
-  useEffect(() => {
-    if (categoryIdFromQuery) {
-      const id = parseInt(categoryIdFromQuery);
-      if (!isNaN(id)) {
-        const foundCategory = destinationCategories.find(
-          (cat) => cat.destinationCategoryId === id,
-        );
-        setSelectedCategory({
-          id,
-          name: foundCategory?.destinationCategoryName || "",
-        });
-        loadCategoryDetails(id);
-      }
-    }
-  }, [categoryIdFromQuery, destinationCategories]);
+  const handleSelectCategory = async (id: number, name: string) => {
+    setSelectedCategory({ categoryId: id, categoryName: name });
+    await fetchCategoryDetails(id);
 
-  const handleSelectCategory = (item: CategorySearchItem) => {
-    const id = item.id as number;
-    const name = item.name;
-    setSelectedCategory({ id, name });
-
-    // Update URL with selected category as query param
+    // Update URL
     const url = new URL(window.location.href);
-    url.searchParams.set("categoryId", id.toString());
+    url.searchParams.set("category-id", id.toString());
+    url.searchParams.set("category-name", name);
     router.replace(url.toString(), { scroll: false });
-
-    loadCategoryDetails(id);
   };
 
-  const handleClearSelection = () => {
+  const handleClearCategorySelection = () => {
     setSelectedCategory(null);
     setCategoryDetails(null);
+    setError(null);
+    setSuccess(null);
+
+    // Update URL to remove query params
     const url = new URL(window.location.href);
-    url.searchParams.delete("categoryId");
+    url.searchParams.delete("category-id");
+    url.searchParams.delete("category-name");
     router.replace(url.toString(), { scroll: false });
   };
 
-  const handleTerminate = async () => {
+  const handleTerminateClick = () => {
+    if (!selectedCategory) return;
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmTerminate = async () => {
     if (!selectedCategory) return;
 
-    setTerminating(true);
-    setToast(null);
+    setLoadingTerminate(true);
+    setError(null);
+    setSuccess(null);
 
     try {
-      const response = await DestinationService.terminateDestinationCategory(
-        selectedCategory.id,
+      await DestinationService.terminateDestinationCategory(
+        selectedCategory.categoryId,
       );
+
+      setSuccess("Destination category terminated successfully!");
       setToast({
         type: "success",
-        title: "Success!",
-        message: response.message || "Category terminated successfully!",
+        title: "Termination Successful!",
+        message: `"${selectedCategory.categoryName}" has been permanently removed from the system.`,
       });
 
+      setShowConfirmModal(false);
+
       setTimeout(() => {
-        router.push(
-          `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/categories/view`,
-        );
+        handleClearCategorySelection();
       }, 2000);
     } catch (err: any) {
-      console.error("Error terminating category:", err);
+      setError(err.message || "Failed to terminate category");
       setToast({
         type: "error",
-        title: "Error",
-        message: err.message || "Failed to terminate category",
+        title: "Termination Failed",
+        message:
+          err.message || "Failed to terminate category. Please try again.",
       });
-      setShowConfirmModal(false);
     } finally {
-      setTerminating(false);
+      setLoadingTerminate(false);
     }
   };
 
-  // Custom render function for category items
-  const renderCategoryItem = (
-    item: CategorySearchItem,
-    searchTerm: string,
-    isActive: boolean,
-  ) => {
-    const hexToRgba = (hex: string, opacity: number) => {
-      if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-      hex = hex.replace("#", "");
-      const r = parseInt(hex.substring(0, 2), 16);
-      const g = parseInt(hex.substring(2, 4), 16);
-      const b = parseInt(hex.substring(4, 6), 16);
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-    };
-
-    const highlightMatch = (text: string, query: string) => {
-      if (!query.trim()) return text;
-      const parts = text.split(new RegExp(`(${query})`, "gi"));
-      return parts.map((part, i) =>
-        part.toLowerCase() === query.toLowerCase() ? (
-          <mark
-            key={i}
-            style={{
-              backgroundColor: hexToRgba(theme.error, 0.18),
-              color: theme.error,
-              fontWeight: 600,
-              borderRadius: "2px",
-              padding: "0 1px",
-            }}
-          >
-            {part}
-          </mark>
-        ) : (
-          part
-        ),
-      );
-    };
-
-    return (
-      <>
-        <div
-          className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
-          style={{
-            background: isActive
-              ? `linear-gradient(135deg, ${theme.error}, ${theme.error}CC)`
-              : hexToRgba(theme.error, 0.1),
-          }}
-        >
-          <span
-            className="text-sm"
-            style={{ color: isActive ? "#fff" : theme.error }}
-          >
-            🏷️
-          </span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="font-medium text-sm" style={{ color: theme.text }}>
-            {highlightMatch(item.name, searchTerm)}
-          </div>
-          {item.description && (
-            <div
-              className="text-xs mt-0.5"
-              style={{ color: theme.textSecondary }}
-            >
-              {item.description.length > 60
-                ? `${item.description.substring(0, 60)}...`
-                : item.description}
-            </div>
-          )}
-        </div>
-      </>
-    );
+  // Prepare images for modal
+  const getModalImages = (): ImageModalImage[] => {
+    if (!categoryDetails?.images) return [];
+    return categoryDetails.images.map((img) => ({
+      url: img.imageUrl,
+      name: img.imageName,
+      description: img.imageDescription || "",
+      id: img.imageId,
+    }));
   };
 
-  if (categoriesLoading) {
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setImageModalOpen(true);
+  };
+
+  const selectedSearchItem: DestinationCategorySearchItem | null =
+    selectedCategory
+      ? {
+          id: selectedCategory.categoryId,
+          name: selectedCategory.categoryName,
+        }
+      : null;
+
+  // Prepare termination item for modal
+  const terminationItem: TerminationItem | null = selectedCategory
+    ? {
+        id: selectedCategory.categoryId,
+        name: selectedCategory.categoryName,
+        type: "custom",
+        additionalInfo: "Destination Category",
+      }
+    : null;
+
+  useEffect(() => {
+    if (initialCategoryId && !categoryDetails) {
+      handleSelectCategory(parseInt(initialCategoryId), initialCategoryName);
+    }
+  }, [initialCategoryId, initialCategoryName]);
+
+  if (
+    (commonLoading && destinationCategories.length === 0) ||
+    (loading && !selectedCategory)
+  ) {
     return (
       <CommonLoading
-        message="Loading categories..."
+        message="Loading destination categories..."
         subMessage="Please wait while we fetch available categories"
         size="lg"
-        fullScreen={true}
-      />
-    );
-  }
-
-  if (!selectedCategory && !categoryIdFromQuery) {
-    return (
-      <div
-        className="min-h-screen transition-colors duration-300"
-        style={{ backgroundColor: theme.background }}
-      >
-        <div
-          className="sticky top-0 z-10 backdrop-blur-sm border-b transition-all duration-300"
-          style={{
-            backgroundColor: `${theme.surface}D9`,
-            borderColor: theme.border,
-          }}
-        >
-          <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <PageHeader
-              title="Terminate Category"
-              description="Search and select a category to terminate"
-              breadcrumbItems={breadcrumbItems}
-            />
-          </div>
-        </div>
-
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div
-            className="rounded-2xl shadow-lg p-8"
-            style={{
-              backgroundColor: theme.surface,
-              border: `1px solid ${theme.border}`,
-            }}
-          >
-            <div
-              className="flex items-center gap-3 mb-6 p-3 rounded-xl"
-              style={{
-                backgroundColor: hexToRgba(theme.error, 0.1),
-                border: `1px solid ${hexToRgba(theme.error, 0.3)}`,
-              }}
-            >
-              <span className="text-lg">⚠️</span>
-              <p className="text-sm" style={{ color: theme.textSecondary }}>
-                Warning: Terminating a category will permanently remove it. This
-                action cannot be undone.
-              </p>
-            </div>
-
-            <h2
-              className="text-xl font-semibold mb-6 flex items-center gap-2"
-              style={{ color: theme.text }}
-            >
-              Select Category to Terminate
-            </h2>
-
-            <CommonSearch<CategorySearchItem>
-              items={searchItems}
-              loading={categoriesLoading}
-              selectedItem={selectedSearchItem}
-              onSelectItem={handleSelectCategory}
-              onClearSelection={handleClearSelection}
-              initialSearchTerm=""
-              placeholder="Search categories..."
-              title="Categories"
-              variant="error"
-              size="md"
-              getBadgeText={(item) => `ID: ${item.id}`}
-              renderItem={renderCategoryItem}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (loadingDetails) {
-    return (
-      <CommonLoading
-        message="Loading category details..."
-        subMessage="Please wait while we fetch category information"
-        size="lg"
-        fullScreen={true}
-      />
-    );
-  }
-
-  if (!categoryDetails) {
-    return (
-      <CommonErrorState
-        error="Failed to load category details"
-        title="Failed to Load Category"
-        message="The category couldn't be loaded. Please try again."
-        variant="error"
-        showBackButton={true}
-        showRetryButton={true}
-        onBack={handleClearSelection}
-        onRetry={() =>
-          selectedCategory && loadCategoryDetails(selectedCategory.id)
-        }
-        backButtonText="Go Back to Selection"
-        retryButtonText="Try Again"
         fullScreen={true}
       />
     );
@@ -379,6 +235,8 @@ const TerminateDestinationCategoryPage = () => {
           title={toast.title}
           message={toast.message}
           onClose={() => setToast(null)}
+          actionLink={toast.actionLink}
+          actionText="View Details"
         />
       )}
 
@@ -386,140 +244,331 @@ const TerminateDestinationCategoryPage = () => {
       <div
         className="sticky top-0 z-10 backdrop-blur-sm border-b transition-all duration-300"
         style={{
-          backgroundColor: `${theme.surface}D9`,
+          backgroundColor: `${theme.surface}CC`,
           borderColor: theme.border,
         }}
       >
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PageHeader
-            title="Terminate Category"
-            description="Permanently remove a destination category"
-            breadcrumbItems={breadcrumbItems}
+            title="Terminate Destination Category"
+            description="Permanently remove a destination category from the system"
+            breadcrumbItems={
+              DESTINATION_CATEGORY_TERMINATE_PAGE_BREADCRUMB_DATA
+            }
           />
         </div>
       </div>
 
       {/* Main Content */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section - Only show when no category is selected */}
+        {!selectedCategory && (
+          <div
+            className="rounded-2xl shadow-lg mb-8 transition-all duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            <div
+              className="px-5 sm:px-6 py-4 flex items-center gap-3 border-b"
+              style={{ borderColor: theme.border }}
+            >
+              <span
+                className="w-9 h-9 flex items-center justify-center rounded-xl"
+                style={{
+                  background: hexToRgba(theme.error, 0.1),
+                  color: theme.error,
+                }}
+              >
+                <Search className="w-4 h-4" />
+              </span>
+              <div>
+                <h2
+                  className="text-sm sm:text-base font-semibold"
+                  style={{ color: theme.text }}
+                >
+                  Select Destination Category to Terminate
+                </h2>
+                <p
+                  className="text-xs mt-0.5"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Search and select a category to review its data before
+                  termination
+                </p>
+              </div>
+            </div>
+
+            <div className="px-5 sm:px-6 py-5">
+              <CommonSearch<DestinationCategorySearchItem>
+                items={searchItems}
+                loading={commonLoading}
+                selectedItem={selectedSearchItem}
+                onSelectItem={(item) =>
+                  handleSelectCategory(item.id, item.name)
+                }
+                onClearSelection={handleClearCategorySelection}
+                initialSearchTerm={initialCategoryName}
+                placeholder="Search destination categories..."
+                title="Destination Categories"
+                variant="error"
+                size="md"
+                getBadgeText={(item) => `ID: ${item.id}`}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Selected Category Info Bar */}
         <SelectedItemBar
           item={
             selectedCategory
               ? {
-                  id: selectedCategory.id,
-                  name: selectedCategory.name,
+                  id: selectedCategory.categoryId,
+                  name: selectedCategory.categoryName,
                 }
               : null
           }
-          onClear={handleClearSelection}
+          onClear={handleClearCategorySelection}
           variant="error"
           title="Selected for Termination"
           showId={true}
-          clearButtonText="Change Category"
+          clearButtonText="Change Selection"
           size="md"
         />
 
-        {/* Category Details */}
-        <CategoryTerminationDetails
-          categoryDetails={categoryDetails}
-          onTerminate={() => setShowConfirmModal(true)}
-          terminating={terminating}
-        />
-
-        {/* Warning Card */}
-        <div
-          className="mt-6 rounded-2xl shadow-lg p-6"
-          style={{
-            backgroundColor: hexToRgba(theme.error, 0.05),
-            border: `1px solid ${hexToRgba(theme.error, 0.3)}`,
-          }}
-        >
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">⚠️</span>
-            <div>
-              <h3 className="font-semibold mb-1" style={{ color: theme.error }}>
-                Warning: This action cannot be undone
-              </h3>
-              <p className="text-sm" style={{ color: theme.textSecondary }}>
-                Terminating this category will permanently remove it from the
-                system. Any destinations associated with this category will no
-                longer have this category assigned.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Terminate Button */}
-        <button
-          onClick={() => setShowConfirmModal(true)}
-          disabled={terminating}
-          className="cursor-pointer relative w-full mt-6 py-3.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2.5 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed outline-none active:scale-[0.98] hover:scale-[1.01] transition-all duration-200"
-          style={{
-            background: terminating
-              ? `${theme.error}99`
-              : `linear-gradient(135deg, ${theme.error}EE 0%, ${theme.error}BB 100%)`,
-            boxShadow: terminating
-              ? "none"
-              : `0 4px 14px ${theme.error}40, 0 1px 3px rgba(0,0,0,0.12)`,
-            border: `1px solid ${theme.error}30`,
-          }}
-        >
-          {/* Shimmer */}
-          {!terminating && (
-            <span
-              className="absolute inset-0 pointer-events-none"
+        {/* Category Details Section */}
+        {selectedCategory && (
+          <div
+            className="rounded-2xl overflow-hidden transition-all duration-300"
+            style={{
+              backgroundColor: theme.surface,
+              border: `1.5px solid ${hexToRgba(theme.error, 0.5)}`,
+              boxShadow: `0 4px 32px ${hexToRgba(theme.error, 0.07)}`,
+            }}
+          >
+            {/* Warning Header */}
+            <div
+              className="px-5 sm:px-6 py-4 flex flex-wrap items-center gap-4"
               style={{
-                background:
-                  "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.10) 50%, transparent 60%)",
-                backgroundSize: "200% 100%",
-                animation: "shimmer 2.8s infinite",
+                background: `linear-gradient(90deg, ${hexToRgba(theme.error, 0.08)}, ${hexToRgba(theme.error, 0.03)})`,
+                borderBottom: `1.5px solid ${hexToRgba(theme.error, 0.3)}`,
               }}
-            />
-          )}
-
-          {terminating ? (
-            <span className="flex items-center gap-2.5">
-              <svg
-                className="w-4 h-4 animate-spin"
-                viewBox="0 0 24 24"
-                fill="none"
+            >
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.error}, ${theme.error})`,
+                  color: "#fff",
+                }}
               >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="rgba(255,255,255,0.25)"
-                  strokeWidth="2.5"
-                />
-                <path
-                  d="M12 2a10 10 0 0 1 10 10"
-                  stroke="white"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span className="tracking-wide">Terminating…</span>
-            </span>
-          ) : (
-            <span className="tracking-wide">Terminate Category</span>
-          )}
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2
+                  className="text-base font-bold"
+                  style={{ color: theme.error }}
+                >
+                  Destination Category Termination Review
+                </h2>
+                <p className="text-xs mt-0.5" style={{ color: theme.error }}>
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
+                </p>
+              </div>
+              <div
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl flex-shrink-0"
+                style={{
+                  background: hexToRgba(theme.error, 0.08),
+                  border: `1px solid ${hexToRgba(theme.error, 0.2)}`,
+                }}
+              >
+                <span className="text-xs" style={{ color: theme.error }}>
+                  ID
+                </span>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: theme.error }}
+                >
+                  #{selectedCategory.categoryId}
+                </span>
+              </div>
+            </div>
 
-          <style>{`
-    @keyframes shimmer {
-      0%   { background-position: 200% center; }
-      100% { background-position: -200% center; }
-    }
-  `}</style>
-        </button>
+            {/* Loading Details */}
+            {loadingDetails && (
+              <CommonLoading
+                message="Loading category details..."
+                subMessage="Please wait while we fetch the category information"
+                size="lg"
+              />
+            )}
+
+            {/* Category Details Content */}
+            {!loadingDetails && categoryDetails && (
+              <div className="p-5 sm:p-6 space-y-6">
+                <DestinationCategoryStats categoryDetails={categoryDetails} />
+
+                <div
+                  className="grid gap-6"
+                  style={{
+                    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                  }}
+                >
+                  {/* Left Column */}
+                  <div className="space-y-5">
+                    <BasicInfoPanel categoryDetails={categoryDetails} />
+                    <ImagesPanel
+                      images={categoryDetails.images.map((img) => ({
+                        id: img.imageId,
+                        url: img.imageUrl,
+                        name: img.imageName,
+                        description: img.imageDescription || "",
+                      }))}
+                      onImageClick={handleImageClick}
+                      title="Category Images"
+                      showDeletionBadge={true}
+                      deletionBadgeText="Will be deleted"
+                    />
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="space-y-5">
+                    <DestinationsList
+                      destinations={categoryDetails.destinations}
+                    />
+
+                    {/* Custom Impact Warning for Destination Categories */}
+                    <ImpactWarning
+                      title="Category Termination Impact"
+                      customItems={[
+                        {
+                          icon: <MapPin size={11} />,
+                          text: `All ${categoryDetails.destinations.length} destination(s) associated with this category will lose their categorization`,
+                        },
+                        {
+                          icon: <Star size={11} />,
+                          text: "Destinations that have this as primary category will need to be reassigned",
+                        },
+                        {
+                          icon: <Palette size={11} />,
+                          text: "All color and styling settings will be permanently removed",
+                        },
+                        {
+                          icon: <ImageIcon size={11} />,
+                          text: "All category images will be permanently deleted from storage",
+                        },
+                        {
+                          icon: <AlertCircle size={11} />,
+                          text: "This action cannot be undone — recovery is not possible",
+                        },
+                        {
+                          icon: <AlertCircle size={11} />,
+                          text: "This termination will be logged for audit trail purposes",
+                        },
+                      ]}
+                    />
+                  </div>
+                </div>
+
+                {/* Termination Button */}
+                <div
+                  className="flex justify-center pt-4"
+                  style={{
+                    borderTop: `1.5px solid ${hexToRgba(theme.error, 0.2)}`,
+                  }}
+                >
+                  <button
+                    onClick={handleTerminateClick}
+                    disabled={loadingTerminate}
+                    className="cursor-pointer flex items-center gap-3 px-8 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-xl active:scale-95 disabled:hover:scale-100"
+                    style={{
+                      background: loadingTerminate
+                        ? `linear-gradient(135deg, ${theme.error}, ${theme.error}dd)`
+                        : `linear-gradient(135deg, ${theme.error}, ${hexToRgba(theme.error, 0.8)})`,
+                      color: "#fff",
+                      opacity: loadingTerminate ? 0.6 : 1,
+                      boxShadow: `0 4px 16px ${hexToRgba(theme.error, 0.3)}`,
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
+                  >
+                    {loadingTerminate ? (
+                      <>
+                        <div className="relative w-4 h-4">
+                          <div className="absolute inset-0 border-2 border-white/30 rounded-full" />
+                          <div className="absolute inset-0 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        </div>
+                        <span className="animate-pulse">Processing…</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="w-4 h-4 transition-transform duration-200 group-hover:rotate-12"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                        Terminate Category Permanently
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {!loadingDetails && !categoryDetails && error && (
+              <CommonErrorState
+                error={error}
+                title="Failed to Load Category"
+                message="The category couldn't be loaded. Please try again."
+                variant="error"
+                showBackButton={true}
+                showRetryButton={true}
+                onBack={handleClearCategorySelection}
+                onRetry={() =>
+                  selectedCategory &&
+                  fetchCategoryDetails(selectedCategory.categoryId)
+                }
+                backButtonText="Change Selection"
+                retryButtonText="Try Again"
+                fullScreen={false}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       {/* Confirmation Modal */}
-      <TerminationConfirmationModal
+      <TerminationModal
         isOpen={showConfirmModal}
-        categoryName={selectedCategory?.name || ""}
+        item={terminationItem}
+        loading={loadingTerminate}
         onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleTerminate}
-        loading={terminating}
+        onConfirm={handleConfirmTerminate}
+        title="Confirm Category Termination"
+        description="You are about to permanently terminate:"
+        warningMessage={`All ${categoryDetails?.destinations.length || 0} destination(s) associated with this category will lose their categorization, and all category images will be permanently deleted.`}
+      />
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModalOpen}
+        images={getModalImages()}
+        initialIndex={selectedImageIndex}
+        onClose={() => setImageModalOpen(false)}
+        showNavigation={true}
+        showDownload={true}
+        showZoom={true}
+        allowKeyboardNavigation={true}
       />
     </div>
   );

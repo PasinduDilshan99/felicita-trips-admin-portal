@@ -549,3 +549,60 @@ export const statCardVariants: Variants = {
     },
   },
 };
+
+export const destinationCardVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    transition: { duration: 0.2, ease: "easeIn" },
+  },
+};
+
+export const detailVariants: Variants = {
+  hidden: { opacity: 0, height: 0, marginTop: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    marginTop: 12,
+    transition: {
+      duration: 0.25,
+      ease: EASE_OUT,
+    },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    marginTop: 0,
+    transition: {
+      duration: 0.2,
+      ease: "easeIn",
+    },
+  },
+};
+
+export const imageVariants: Variants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.05, transition: { duration: 0.4 } },
+};
+
+export const quickViewVariants: Variants = {
+  hidden: { opacity: 0, y: -10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.1 } },
+};
+
+export const thumbnailVariants: Variants = {
+  rest: { scale: 1, opacity: 0.7 },
+  active: { scale: 1.05, opacity: 1 },
+  hover: { scale: 1.02, transition: { duration: 0.15 } },
+};
+
+export const shineVariants: Variants = {
+  rest: { x: "-100%" },
+  hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
+};

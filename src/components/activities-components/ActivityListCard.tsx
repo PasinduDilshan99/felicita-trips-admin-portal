@@ -9,7 +9,6 @@ import {
   Users,
   Calendar,
   AlertCircle,
-  DollarSign,
   Target,
   Eye,
   ArrowRight,
@@ -23,160 +22,14 @@ import { useRouter } from "next/navigation";
 import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import {
   ACTIVITY_DETAILS_VIEW_PAGE_URL,
-  ACTIVITY_CATEGORY_VIEW_DETAILS_URL,
   SEASONS_VIEW_PAGE_URL,
   DESTINATION_DETAILS_VIEW_PAGE_URL,
 } from "@/utils/urls";
 import { Activity, ActivityImage, Requirement } from "@/types/activity-types";
 import { hexToRgba } from "@/utils/functions";
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-  hover: {
-    y: -4,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-};
-
-const imageVariants: Variants = {
-  rest: { scale: 1 },
-  hover: { scale: 1.05, transition: { duration: 0.4 } },
-};
-
-const overlayVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.3 } },
-};
-
-const quickViewVariants: Variants = {
-  hidden: { opacity: 0, y: -10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.1 } },
-};
-
-const thumbnailVariants: Variants = {
-  rest: { scale: 1, opacity: 0.7 },
-  active: { scale: 1.05, opacity: 1 },
-  hover: { scale: 1.02, transition: { duration: 0.15 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const statVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-  hover: {
-    y: -2,
-    transition: { duration: 0.15 },
-  },
-};
-
-const requirementsVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    transition: { duration: 0.3, ease: EASE_OUT, staggerChildren: 0.03 },
-  },
-  exit: {
-    opacity: 0,
-    height: 0,
-    transition: { duration: 0.25, ease: "easeIn" },
-  },
-};
-
-const requirementItemVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    x: -10,
-    transition: { duration: 0.15 },
-  },
-};
-
-const seasonVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  hover: {
-    scale: 1.05,
-    transition: { duration: 0.15 },
-  },
-};
-
-const buttonVariants: Variants = {
-  rest: { scale: 1, y: 0 },
-  hover: {
-    scale: 1.02,
-    y: -2,
-    boxShadow: "0 8px 25px -4px rgba(0,0,0,0.2)",
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  tap: {
-    scale: 0.98,
-    y: 0,
-    transition: { duration: 0.1 },
-  },
-};
-
-const shineVariants: Variants = {
-  rest: { x: "-100%" },
-  hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
-};
-
-const categoryBadgeVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  hover: {
-    scale: 1.05,
-    x: 2,
-    transition: { duration: 0.15 },
-  },
-};
 
 // Helper to safely get string value from any type
 const getSafeString = (value: any, fallback: string = ""): string => {
@@ -480,7 +333,9 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                     <>
                       <motion.div
                         className="w-1.5 h-1.5 bg-white rounded-full"
-                        animate={isAvailableToday() ? { scale: [1, 1.2, 1] } : {}}
+                        animate={
+                          isAvailableToday() ? { scale: [1, 1.2, 1] } : {}
+                        }
                         transition={{ duration: 1, repeat: Infinity }}
                       />
                       {isAvailableToday() ? "Available Now" : "Available"}
@@ -514,7 +369,11 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                 animate={isHovered ? "visible" : "hidden"}
                 onClick={handleViewDetails}
                 className="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-                whileHover={{ scale: 1.05, backgroundColor: "white", color: "#1f2937" }}
+                whileHover={{
+                  scale: 1.05,
+                  backgroundColor: "white",
+                  color: "#1f2937",
+                }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Eye className="w-3.5 h-3.5" />
@@ -570,7 +429,9 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                         key={imageId}
                         variants={thumbnailVariants}
                         initial="rest"
-                        animate={currentImageIndex === index ? "active" : "rest"}
+                        animate={
+                          currentImageIndex === index ? "active" : "rest"
+                        }
                         whileHover="hover"
                         className="relative flex-shrink-0"
                         onClick={() => handleImageClick(index)}
@@ -654,7 +515,10 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                     <Tag className="w-5 h-5" style={{ color: theme.success }} />
                   </motion.div>
                   <div>
-                    <div className="text-xs sm:text-sm" style={{ color: theme.textSecondary }}>
+                    <div
+                      className="text-xs sm:text-sm"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Category
                     </div>
                     <div
@@ -682,13 +546,22 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                       background: `linear-gradient(135deg, ${hexToRgba(theme.primary, 0.1)}, ${hexToRgba(theme.accent, 0.1)})`,
                     }}
                   >
-                    <MapPin className="w-5 h-5" style={{ color: theme.primary }} />
+                    <MapPin
+                      className="w-5 h-5"
+                      style={{ color: theme.primary }}
+                    />
                   </div>
                   <div>
-                    <div className="text-xs sm:text-sm" style={{ color: theme.textSecondary }}>
+                    <div
+                      className="text-xs sm:text-sm"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Destination
                     </div>
-                    <div className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+                    <div
+                      className="text-base sm:text-lg font-semibold"
+                      style={{ color: theme.text }}
+                    >
                       {destinationName}
                     </div>
                   </div>
@@ -699,8 +572,14 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
               {categories.length > 1 && (
                 <div className="mt-4">
                   <div className="flex items-center mb-2">
-                    <Target className="w-4 h-4 mr-2" style={{ color: theme.accent }} />
-                    <span className="text-xs" style={{ color: theme.textSecondary }}>
+                    <Target
+                      className="w-4 h-4 mr-2"
+                      style={{ color: theme.accent }}
+                    />
+                    <span
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
                       All Categories ({categories.length})
                     </span>
                   </div>
@@ -757,10 +636,30 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
               }}
             >
               {[
-                { icon: Clock, label: "Duration", value: `${duration}h`, color: theme.accent },
-                { icon: Users, label: "Group Size", value: `${minParticipate}-${maxParticipate}`, color: theme.warning },
-                { icon: Calendar, label: "Seasons", value: seasons.length, color: theme.success },
-                { icon: Target, label: "Schedules", value: schedulesCount, color: theme.error },
+                {
+                  icon: Clock,
+                  label: "Duration",
+                  value: `${duration}h`,
+                  color: theme.accent,
+                },
+                {
+                  icon: Users,
+                  label: "Group Size",
+                  value: `${minParticipate}-${maxParticipate}`,
+                  color: theme.warning,
+                },
+                {
+                  icon: Calendar,
+                  label: "Seasons",
+                  value: seasons.length,
+                  color: theme.success,
+                },
+                {
+                  icon: Target,
+                  label: "Schedules",
+                  value: schedulesCount,
+                  color: theme.error,
+                },
               ].map((stat, idx) => (
                 <motion.div
                   key={stat.label}
@@ -774,13 +673,22 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                       background: `linear-gradient(135deg, ${hexToRgba(stat.color, 0.1)}, ${hexToRgba(stat.color, 0.05)})`,
                     }}
                   >
-                    <stat.icon className="w-5 h-5" style={{ color: stat.color }} />
+                    <stat.icon
+                      className="w-5 h-5"
+                      style={{ color: stat.color }}
+                    />
                   </div>
                   <div>
-                    <div className="text-xs" style={{ color: theme.textSecondary }}>
+                    <div
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
                       {stat.label}
                     </div>
-                    <div className="text-sm font-semibold" style={{ color: theme.text }}>
+                    <div
+                      className="text-sm font-semibold"
+                      style={{ color: theme.text }}
+                    >
                       {stat.value}
                     </div>
                   </div>
@@ -794,8 +702,14 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
               {seasons.length > 0 && (
                 <motion.div variants={itemVariants} className="flex-1">
                   <div className="flex items-center mb-3">
-                    <Calendar className="w-4 h-4 mr-2" style={{ color: theme.textSecondary }} />
-                    <span className="text-xs font-semibold" style={{ color: theme.textSecondary }}>
+                    <Calendar
+                      className="w-4 h-4 mr-2"
+                      style={{ color: theme.textSecondary }}
+                    />
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Best Seasons:
                     </span>
                   </div>
@@ -837,8 +751,14 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
               {requirements.length > 0 && (
                 <motion.div variants={itemVariants} className="flex-1">
                   <div className="flex items-center mb-3 flex-wrap gap-2">
-                    <AlertCircle className="w-4 h-4" style={{ color: theme.textSecondary }} />
-                    <span className="text-xs font-semibold" style={{ color: theme.textSecondary }}>
+                    <AlertCircle
+                      className="w-4 h-4"
+                      style={{ color: theme.textSecondary }}
+                    />
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Requirements:
                     </span>
                     {hasMoreRequirements && (
@@ -872,28 +792,30 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                       exit="exit"
                       className="flex flex-wrap gap-2"
                     >
-                      {visibleRequirements.map((req: Requirement, index: number) => {
-                        const reqName = req?.name;
-                        const reqValue = req?.value;
-                        const reqColor = req?.color || theme.error;
+                      {visibleRequirements.map(
+                        (req: Requirement, index: number) => {
+                          const reqName = req?.name;
+                          const reqValue = req?.value;
+                          const reqColor = req?.color || theme.error;
 
-                        return (
-                          <motion.span
-                            key={req?.id || index}
-                            variants={requirementItemVariants}
-                            className="px-2 py-1 text-xs rounded-lg transition-all duration-200"
-                            style={{
-                              background: hexToRgba(theme.error, 0.1),
-                              color: theme.error,
-                              border: `1px solid ${hexToRgba(theme.error, 0.2)}`,
-                              borderLeftColor: reqColor,
-                              borderLeftWidth: "4px",
-                            }}
-                          >
-                            {reqName}: {reqValue}
-                          </motion.span>
-                        );
-                      })}
+                          return (
+                            <motion.span
+                              key={req?.id || index}
+                              variants={requirementItemVariants}
+                              className="px-2 py-1 text-xs rounded-lg transition-all duration-200"
+                              style={{
+                                background: hexToRgba(theme.error, 0.1),
+                                color: theme.error,
+                                border: `1px solid ${hexToRgba(theme.error, 0.2)}`,
+                                borderLeftColor: reqColor,
+                                borderLeftWidth: "4px",
+                              }}
+                            >
+                              {reqName}: {reqValue}
+                            </motion.span>
+                          );
+                        },
+                      )}
                     </motion.div>
                   </AnimatePresence>
                 </motion.div>
@@ -907,9 +829,15 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
             >
               <div className="flex-1">
                 <div className="flex items-center mb-2">
-                  <Clock className="w-4 h-4 mr-2" style={{ color: theme.textSecondary }} />
+                  <Clock
+                    className="w-4 h-4 mr-2"
+                    style={{ color: theme.textSecondary }}
+                  />
                   <div>
-                    <span className="text-xs font-semibold" style={{ color: theme.textSecondary }}>
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Available:{" "}
                     </span>
                     <span className="text-xs" style={{ color: theme.text }}>
@@ -943,12 +871,18 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
                   animate={isHovered ? "hover" : "rest"}
                   className="absolute inset-0"
                   style={{
-                    background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
+                    background:
+                      "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
                   }}
                 />
-                <span className="absolute inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.35)" }} />
+                <span
+                  className="absolute inset-x-0 top-0 h-px"
+                  style={{ background: "rgba(255,255,255,0.35)" }}
+                />
                 <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:scale-110" />
-                <span className="relative tracking-wide text-sm">View Details</span>
+                <span className="relative tracking-wide text-sm">
+                  View Details
+                </span>
                 <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1.5" />
               </motion.button>
             </motion.div>

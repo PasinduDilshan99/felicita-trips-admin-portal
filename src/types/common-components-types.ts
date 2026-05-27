@@ -32,14 +32,29 @@ export interface ImageModalProps {
 
 export type EntityType =
   | "destination"
-  | "tour"
-  | "package"
+  | "destinationCategory"
   | "activity"
+  | "activityCategory"
+  | "tour"
+  | "tourType"
+  | "tourCategory"
+  | "package"
+  | "packageType"
+  | "activitySchedule"
+  | "tourSchedule"
+  | "packageSchedule"
+  | "season"
   | "category"
   | "hotel"
   | "review"
   | "ticket"
-  | "generic";
+  | "generic"
+  | "mountain"
+  | "cruise"
+  | "transport"
+  | "flight"
+  | "restaurant"
+  | "cafe";
 
 export interface EmptyStateProps {
   entityType?: EntityType;
@@ -101,4 +116,13 @@ export interface ToastNotificationProps {
   onClose: () => void;
   actionLink?: string;
   actionText?: string;
+}
+
+export interface ResultsHeaderProps {
+  title: string;
+  currentStart: number;
+  currentEnd: number;
+  totalItems: number;
+  viewMode: "grid" | "list";
+  onViewModeChange: (mode: "grid" | "list") => void;
 }

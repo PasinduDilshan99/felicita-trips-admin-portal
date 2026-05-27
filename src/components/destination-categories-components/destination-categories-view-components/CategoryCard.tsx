@@ -1,4 +1,3 @@
-// components/destination-categories-components/destination-categories-view-components/CategoryCard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -6,32 +5,22 @@ import {
   Tag,
   Image as ImageIcon,
   Calendar,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   ArrowRight,
-  Layers,
   Info,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-  PLACE_HOLDER_IMAGE,
-} from "@/utils/constant";
+import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
-import { ActiveCategory } from "@/types/destination-types";
 import { hexToRgba } from "@/utils/functions";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
+import { ImageModalImage } from "@/types/common-components-types";
+import { DestinationCategoryCardProps } from "@/types/destination-category-types";
+import { DESTINATION_CATEGORY_DETAILS_VIEW_URL } from "@/utils/urls";
+import { formatDate } from "@/utils/utils";
 
-interface CategoryCardProps {
-  category: ActiveCategory;
-}
-
-const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
+const CategoryCard: React.FC<DestinationCategoryCardProps> = ({ category }) => {
   const router = useRouter();
   const { theme } = useTheme();
 
@@ -43,17 +32,15 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
   const images = category.images;
   const hasMultipleImages = images.length > 1;
 
-  // Prepare images for modal
   const getModalImages = (): ImageModalImage[] => {
     return images.map((img) => ({
       url: img.imageUrl,
       name: img.imageName,
-      description: img.imageDescription || undefined, // Convert null to undefined
+      description: img.imageDescription || undefined,
       id: img.imageId,
     }));
   };
 
-  // Auto-rotate images every 5 seconds
   useEffect(() => {
     if (!isAutoRotating || images.length <= 1) return;
 
@@ -96,21 +83,12 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
 
   const handleViewDetails = () => {
     router.push(
-      `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/categories/view/${category.categoryId}`,
+      `${DESTINATION_CATEGORY_DETAILS_VIEW_URL}/${category.categoryId}?name=${category.category}`,
     );
   };
 
   const currentImage =
     images[currentImageIndex]?.imageUrl || PLACE_HOLDER_IMAGE;
-
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   return (
     <>

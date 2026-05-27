@@ -1,4 +1,3 @@
-// components/destination-categories-components/destination-categories-view-components/CategoryListCard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -6,40 +5,25 @@ import {
   Tag,
   Image as ImageIcon,
   Calendar,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   ArrowRight,
   Info,
   Clock,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-  PLACE_HOLDER_IMAGE,
-} from "@/utils/constant";
+import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
-import { ActiveCategory } from "@/types/destination-types";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
+import { DestinationCategoryListCardProps } from "@/types/destination-category-types";
+import { ImageModalImage } from "@/types/common-components-types";
+import { DESTINATION_CATEGORY_DETAILS_VIEW_URL } from "@/utils/urls";
+import { hexToRgba } from "@/utils/functions";
+import { formatDate } from "@/utils/utils";
 
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-interface CategoryListCardProps {
-  category: ActiveCategory;
-}
-
-const CategoryListCard: React.FC<CategoryListCardProps> = ({ category }) => {
+const CategoryListCard: React.FC<DestinationCategoryListCardProps> = ({
+  category,
+}) => {
   const router = useRouter();
   const { theme } = useTheme();
 
@@ -47,21 +31,18 @@ const CategoryListCard: React.FC<CategoryListCardProps> = ({ category }) => {
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
-
   const images = category.images;
   const hasMultipleImages = images.length > 1;
 
-  // Prepare images for modal
   const getModalImages = (): ImageModalImage[] => {
     return images.map((img) => ({
       url: img.imageUrl,
       name: img.imageName,
-      description: img.imageDescription || undefined, // Convert null to undefined
+      description: img.imageDescription || undefined,
       id: img.imageId,
     }));
   };
 
-  // Auto-rotate images every 5 seconds
   useEffect(() => {
     if (!isAutoRotating || images.length <= 1) return;
 
@@ -104,21 +85,12 @@ const CategoryListCard: React.FC<CategoryListCardProps> = ({ category }) => {
 
   const handleViewDetails = () => {
     router.push(
-      `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/categories/view/${category.categoryId}`,
+      `${DESTINATION_CATEGORY_DETAILS_VIEW_URL}/${category.categoryId}?name=${category.category}`,
     );
   };
 
   const currentImage =
     images[currentImageIndex]?.imageUrl || PLACE_HOLDER_IMAGE;
-
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
 
   return (
     <>

@@ -50,9 +50,55 @@ export const DESTINATION_CATEGORY_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Categories", href: URLS.DESTINATION_CATEGORIES_PAGE_URL },
 ];
 
+export const DESTINATION_CATEGORY_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
+    { label: "Categories", href: URLS.DESTINATION_CATEGORIES_PAGE_URL },
+    { label: "View", href: URLS.DESTINATION_CATEGORY_VIEW_PAGE_URL },
+  ];
+
+export const DESTINATION_CATEGORY_VIEW_DETAILS_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
+    { label: "Categories", href: URLS.DESTINATION_CATEGORIES_PAGE_URL },
+    { label: "View", href: URLS.DESTINATION_CATEGORY_VIEW_PAGE_URL },
+  ];
+
+export const DESTINATION_CATEGORY_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
+    { label: "Categories", href: URLS.DESTINATION_CATEGORIES_PAGE_URL },
+    { label: "Create", href: URLS.DESTINATION_CATEGORY_ADD_URL },
+  ];
+
+export const DESTINATION_CATEGORY_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
+    { label: "Categories", href: URLS.DESTINATION_CATEGORIES_PAGE_URL },
+    { label: "Update", href: URLS.DESTINATION_CATEGORY_UPDATE_URL },
+  ];
+
+export const DESTINATION_CATEGORY_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Destinations", href: URLS.DESTINATION_PAGE_URL },
+    { label: "Categories", href: URLS.DESTINATION_CATEGORIES_PAGE_URL },
+    { label: "Terminate", href: URLS.DESTINATION_CATEGORY_TERMINATE_URL },
+  ];
+
 export const ACTIVITY_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
   { label: "Activities", href: URLS.ACTIVITIES_PAGE_URL },
+];
+
+export const ACTIVITIES_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Activities", href: URLS.ACTIVITIES_PAGE_URL },
+  { label: "View", href: URLS.ACTIVITIES_VIEW_PAGE_URL },
 ];
 
 export const ACTIVITY_CATEGORY_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
