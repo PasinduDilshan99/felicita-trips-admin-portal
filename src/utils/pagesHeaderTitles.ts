@@ -46,6 +46,13 @@ export const TOUR_CATEGORY_CREATE_PAGE_TITLE = "Tour Categories";
 export const TOUR_CATEGORY_UPDATE_PAGE_TITLE = "Tour Categories";
 export const TOUR_CATEGORY_TERMINATE_PAGE_TITLE = "Tour Categories";
 
+export const TOUR_TYPES_PAGE_TITLE = "Tour Categories";
+export const TOUR_TYPES_VIEW_PAGE_TITLE = "Tour Categories";
+export const TOUR_TYPE_VIEW_DETAILS_PAGE_TITLE = "Tour Categories";
+export const TOUR_TYPE_CREATE_PAGE_TITLE = "Tour Categories";
+export const TOUR_TYPE_UPDATE_PAGE_TITLE = "Tour Categories";
+export const TOUR_TYPE_TERMINATE_PAGE_TITLE = "Tour Categories";
+
 
 export const WEB_PAGE_MANAGEMENT_PAGE_TITLE = "Web Page Management";
 export const HOME_PAGE_MANAGEMENT_PAGE_TITLE = "Home Page Management";

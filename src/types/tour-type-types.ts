@@ -1,6 +1,7 @@
 // types/tour-type-types.ts
 
 import { ApiResponse } from "./common-types";
+import { TourNameId } from "./tour-types";
 
 // Image Types
 export interface TourTypeImage {
@@ -138,7 +139,8 @@ export interface TerminateTourTypeResponse {
   message: string;
 }
 
-export type TerminateTourTypeApiResponse = ApiResponse<TerminateTourTypeResponse>;
+export type TerminateTourTypeApiResponse =
+  ApiResponse<TerminateTourTypeResponse>;
 
 // Get Tour Type Details Request
 export interface GetTourTypeDetailsRequest {
@@ -148,4 +150,76 @@ export interface GetTourTypeDetailsRequest {
 // Get Tour Type Basic Details Request
 export interface GetTourTypeBasicDetailsRequest {
   id: number;
+}
+
+export interface TourTypeFilterParams {
+  name: string | null;
+  status: string | null;
+  pageSize: number;
+  pageNumber: number;
+  sortBy: string;
+  sortDirection: "ASC" | "DESC";
+}
+
+export interface TourTypeCardProps {
+  tourType: TourTypeListItem;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface TourTypeListCardProps {
+  tourType: TourTypeListItem;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface TourTypeOverviewProps {
+  name: string;
+  description: string;
+  color: string | null;
+  hoverColor: string | null;
+}
+
+export interface TourTypeToursListProps {
+  tours: TourReference[];
+  tourTypeColor: string;
+}
+
+export interface TourTypeReadOnlyDetailsProps {
+  tourType: TourTypeDetails;
+  allTours: TourNameId[];
+  loadingTours: boolean;
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+  onAddTour: (tourId: number) => void;
+  onRemoveTour: (tourId: number) => void;
+  onSetPrimaryTour: (tourId: number) => void;
+  onRemoveImage: (imageId: number) => void;
+  onAddNewImage: (
+    file: File,
+    name: string,
+    description: string,
+  ) => Promise<void>;
+  onUpdateImage: (imageId: number, name: string, description: string) => void;
+  uploadingImages: boolean;
+  theme: any;
+}
+
+export interface TourTypeSearchItem {
+  id: number;
+  name: string;
+}
+
+export interface BasicInfoPanelProps {
+  tourTypeDetails: TourTypeBasic;
+}
+
+export interface TourTypeStatsProps {
+  tourTypeDetails: TourTypeBasic;
+}
+ 
+export interface StatItem {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  color: string;
+  formatter?: (value: number | string) => string | number;
 }

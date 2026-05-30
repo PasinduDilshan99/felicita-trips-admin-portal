@@ -1,9 +1,7 @@
-// app/tours/update/page.tsx (FULL CORRECTED VERSION)
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { TourService } from "@/services/tourService";
 import { ActivityService } from "@/services/activityService";
 import { DestinationService } from "@/services/destinationService";
@@ -12,7 +10,6 @@ import {
   TourNameId,
   TourAllDetails,
   UpdateTourRequest,
-  UpdateTourBasicDetails,
   UpdateTourType,
   UpdateTourCategory,
   TourDestinationInput,
@@ -28,13 +25,6 @@ import {
   TravelTipInput,
   UpdateTravelTipInput,
 } from "@/types/tour-types";
-import {
-  ActivityCategory,
-  DestinationCategory,
-  TourType,
-  TourCategory,
-  SeasonType,
-} from "@/types/common-types";
 import { ActivityIdName } from "@/types/activity-types";
 import { DestinationForTour } from "@/types/destination-types";
 import { Search, Edit, Save, RefreshCw, Loader2 } from "lucide-react";
@@ -54,6 +44,8 @@ import {
 import { hexToRgba } from "@/utils/functions";
 import { TOURS_PAGE_URL } from "@/utils/urls";
 import TourDetailsForm from "@/components/tours-components/tour-update-components/TourDetailsForm";
+import { TOUR_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
 
 const UpdateTourPage = () => {
   const searchParams = useSearchParams();
@@ -127,9 +119,10 @@ const UpdateTourPage = () => {
   const [updatedDestinations, setUpdatedDestinations] = useState<
     UpdateDestinationInput[]
   >([]);
-  
+
   // State for added activities to existing destinations
-  const [addedActivitiesToDestinations, setAddedActivitiesToDestinations] = useState<{ destinationId: number; activityId: number }[]>([]);
+  const [addedActivitiesToDestinations, setAddedActivitiesToDestinations] =
+    useState<{ destinationId: number; activityId: number }[]>([]);
 
   // State for inclusions
   const [addedInclusions, setAddedInclusions] = useState<InclusionInput[]>([]);
@@ -176,16 +169,6 @@ const UpdateTourPage = () => {
     actionLink?: string;
   } | null>(null);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Tours", href: TOURS_PAGE_URL },
-    {
-      label: "Update",
-      href: TOURS_PAGE_URL,
-    },
-  ];
-
-  // Fetch tours list on initial load
   useEffect(() => {
     if (!selectedTour) {
       fetchTours();
@@ -546,8 +529,14 @@ const UpdateTourPage = () => {
   };
 
   // Handle adding activity to existing destination
-  const handleAddActivityToDestination = (destinationId: number, activityId: number) => {
-    setAddedActivitiesToDestinations((prev) => [...prev, { destinationId, activityId }]);
+  const handleAddActivityToDestination = (
+    destinationId: number,
+    activityId: number,
+  ) => {
+    setAddedActivitiesToDestinations((prev) => [
+      ...prev,
+      { destinationId, activityId },
+    ]);
   };
 
   // Handle inclusion changes
@@ -831,7 +820,7 @@ const UpdateTourPage = () => {
 
     // Find season ID from season name
     const season = categories?.seasonsList?.find(
-      (s) => s.seasonName === editedTour.seasonName
+      (s) => s.seasonName === editedTour.seasonName,
     );
 
     // Note: addedActivitiesToDestinations would need to be handled through the updateDestinations mechanism
@@ -1192,7 +1181,7 @@ const UpdateTourPage = () => {
           <PageHeader
             title="Update Tour"
             description="Edit and update existing tour information"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={TOUR_UPDATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -1293,7 +1282,9 @@ const UpdateTourPage = () => {
             updatedTravelTips={updatedTravelTips}
             availableTourTypes={categories.tourTypeList || []}
             availableTourCategories={categories.tourCategoryList || []}
-            availableDestinationCategories={categories.destinationCategoryList || []}
+            availableDestinationCategories={
+              categories.destinationCategoryList || []
+            }
             availableActivityCategories={categories.activityCategoryList || []}
             availableSeasons={categories.seasonsList || []}
             availableDestinations={destinations}

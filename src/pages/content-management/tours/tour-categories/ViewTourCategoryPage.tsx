@@ -1,104 +1,46 @@
-// app/tour-categories/view/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  Suspense,
-} from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
+import FilterPanel from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { TourCategoryService } from "@/services/tourCategoryService";
 import {
   TourCategoryListItem,
   TourCategoryImage,
+  TourCategoryFilterParams,
 } from "@/types/tour-category-types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import { TOUR_CATEGORIES_PAGE_URL, WEB_MANAGEMENT_URL } from "@/utils/urls";
+import { TOUR_CATEGORY_VIEW_PAGE_URL } from "@/utils/urls";
 import TourCategoryCard from "@/components/tour-category-components/view-tour-category-components/TourCategoryCard";
 import TourCategoryListCard from "@/components/tour-category-components/view-tour-category-components/TourCategoryListCard";
+import {
+  tourCategoryViewFiltersToUrlParams,
+  tourCategoryViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import { FilterField } from "@/types/filter-types";
+import { TOUR_CATEGORIES_VIEW_SORTING_OPTIONS } from "@/data/sorting-options";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { TOUR_CATEGORY_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
-// Sort options for tour categories
-const SORT_OPTIONS = [
-  { value: "categoryName", label: "Category Name" },
-  { value: "categoryId", label: "Category ID" },
-  { value: "status", label: "Status" },
-];
-
-// Filter params interface
-interface TourCategoryFilterParams {
-  name: string | null;
-  status: string | null;
-  pageSize: number;
-  pageNumber: number;
-  sortBy: string;
-  sortDirection: "ASC" | "DESC";
-}
-
-// Utility functions for URL params management
-const filtersToUrlParams = (
-  filters: TourCategoryFilterParams,
-): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.status) params.set("status", filters.status);
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
-
-  return params;
-};
-
-const urlParamsToFilters = (
-  params: URLSearchParams,
-): TourCategoryFilterParams => {
-  const sortDirection = params.get("sortDirection");
-  return {
-    name: params.get("name") || null,
-    status: params.get("status") || null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-    sortBy: params.get("sortBy") || "categoryName",
-    sortDirection: (sortDirection === "DESC" ? "DESC" : "ASC") as "ASC" | "DESC",
-  };
-};
-
-// Main component wrapped with Suspense for useSearchParams
 const TourCategoriesViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    { label: "Tour Categories", href: TOUR_CATEGORIES_PAGE_URL },
-    { label: "View", href: TOUR_CATEGORIES_PAGE_URL },
-  ];
-
   const [filters, setFilters] = useState<TourCategoryFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    tourCategoryViewUrlParamsToFilters(searchParams || new URLSearchParams()),
   );
 
-  const [allCategories, setAllCategories] = useState<TourCategoryListItem[]>([]);
+  const [allCategories, setAllCategories] = useState<TourCategoryListItem[]>(
+    [],
+  );
   const [filteredCategories, setFilteredCategories] = useState<
     TourCategoryListItem[]
   >([]);
@@ -128,9 +70,7 @@ const TourCategoriesViewContent = () => {
         setAllCategories(response.data);
 
         // Extract unique statuses for filter options
-        const statuses = [
-          ...new Set(response.data.map((cat) => cat.status)),
-        ];
+        const statuses = [...new Set(response.data.map((cat) => cat.status))];
         setAvailableStatuses(statuses);
 
         return response.data;
@@ -165,9 +105,7 @@ const TourCategoriesViewContent = () => {
 
       // Apply status filter
       if (currentFilters.status) {
-        result = result.filter(
-          (cat) => cat.status === currentFilters.status,
-        );
+        result = result.filter((cat) => cat.status === currentFilters.status);
       }
 
       // Apply sorting
@@ -232,7 +170,7 @@ const TourCategoriesViewContent = () => {
   // Apply URL filters after data is loaded and when searchParams change
   useEffect(() => {
     if (!isInitialLoad && allCategories.length > 0) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = tourCategoryViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -241,11 +179,11 @@ const TourCategoriesViewContent = () => {
 
   const updateURL = useCallback(
     (newFilters: TourCategoryFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = tourCategoryViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
-        ? `${WEB_MANAGEMENT_PATH}${TOUR_CATEGORIES_PAGE_URL}/view?${queryString}`
-        : `${WEB_MANAGEMENT_PATH}${TOUR_CATEGORIES_PAGE_URL}/view`;
+        ? `${TOUR_CATEGORY_VIEW_PAGE_URL}?${queryString}`
+        : TOUR_CATEGORY_VIEW_PAGE_URL;
 
       router.replace(newURL, { scroll: false });
     },
@@ -261,19 +199,19 @@ const TourCategoriesViewContent = () => {
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
-    const updatedFilters: TourCategoryFilterParams = { 
-      ...filters, 
-      pageSize: newPageSize, 
-      pageNumber: 1 
+    const updatedFilters: TourCategoryFilterParams = {
+      ...filters,
+      pageSize: newPageSize,
+      pageNumber: 1,
     };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
   };
 
   const handlePageChange = (page: number) => {
-    const updatedFilters: TourCategoryFilterParams = { 
-      ...filters, 
-      pageNumber: page 
+    const updatedFilters: TourCategoryFilterParams = {
+      ...filters,
+      pageNumber: page,
     };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
@@ -293,10 +231,10 @@ const TourCategoriesViewContent = () => {
   };
 
   const handleRemoveFilter = (key: string) => {
-    const updatedFilters: TourCategoryFilterParams = { 
-      ...filters, 
-      [key]: null, 
-      pageNumber: 1 
+    const updatedFilters: TourCategoryFilterParams = {
+      ...filters,
+      [key]: null,
+      pageNumber: 1,
     };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
@@ -332,7 +270,10 @@ const TourCategoriesViewContent = () => {
   };
 
   // Handle image click for modal
-  const handleImageClick = (category: TourCategoryListItem, imageIndex: number) => {
+  const handleImageClick = (
+    category: TourCategoryListItem,
+    imageIndex: number,
+  ) => {
     const images: ImageModalImage[] = (category.images || []).map(
       (img: TourCategoryImage) => ({
         url: img.imageUrl,
@@ -350,7 +291,12 @@ const TourCategoriesViewContent = () => {
   const getStatusOptions = () => {
     return availableStatuses.map((status) => ({
       value: status,
-      label: status === "ACTIVE" ? "Active" : status === "INACTIVE" ? "Inactive" : status,
+      label:
+        status === "ACTIVE"
+          ? "Active"
+          : status === "INACTIVE"
+            ? "Inactive"
+            : status,
     }));
   };
 
@@ -374,7 +320,9 @@ const TourCategoriesViewContent = () => {
 
   // Get sort label
   const getSortLabel = (sortBy: string): string => {
-    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
+    const option = TOUR_CATEGORIES_VIEW_SORTING_OPTIONS.find(
+      (opt) => opt.value === sortBy,
+    );
     return option ? option.label : sortBy;
   };
 
@@ -453,7 +401,7 @@ const TourCategoriesViewContent = () => {
           <PageHeader
             title="Tour Categories View"
             description="Explore and manage tour categories for different travel experiences"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={TOUR_CATEGORY_VIEW_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -473,7 +421,7 @@ const TourCategoriesViewContent = () => {
             pageSizeOptions={[6, 9, 12, 24, 48]}
             showPageSize={true}
             showSorting={true}
-            sortOptions={SORT_OPTIONS}
+            sortOptions={TOUR_CATEGORIES_VIEW_SORTING_OPTIONS}
             sortBy={filters.sortBy}
             sortDirection={filters.sortDirection}
             title="Filter Categories"
@@ -593,8 +541,6 @@ const TourCategoriesViewContent = () => {
 
 // Wrap with Suspense for useSearchParams
 const ViewTourCategoryPage = () => {
-  const { theme } = useTheme();
-
   return (
     <Suspense
       fallback={

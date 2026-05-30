@@ -1,69 +1,22 @@
-// components/tours-components/terminate-tour-components/BasicInfoPanel.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { MapPin, Navigation, Info, Tag, Calendar, Clock } from "lucide-react";
-import { Tour } from "@/types/tour-types";
+import { motion } from "framer-motion";
+import { MapPin, Navigation, Info, Tag, Calendar } from "lucide-react";
+import { BasicInfoPanelProps } from "@/types/tour-types";
 import { useTheme } from "@/contexts/ThemeContext";
+import {
+  cardVariants,
+  contentVariants,
+  headerVariants,
+  infoRowVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const infoRowVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-};
-
-interface BasicInfoPanelProps {
-  tourDetails: Tour;
-}
-
-export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) => {
+export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({
+  tourDetails,
+}) => {
   const { theme } = useTheme();
 
   return (
@@ -100,7 +53,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) =
       >
         {/* Tour Name */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Tour Name
           </p>
           <motion.div
@@ -114,7 +70,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) =
 
         {/* Description */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Description
           </p>
           <motion.div
@@ -127,9 +86,15 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) =
         </motion.div>
 
         {/* Start & End Locations */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <MapPin size={11} />
               Start Location
             </p>
@@ -142,7 +107,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) =
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Navigation size={11} />
               End Location
             </p>
@@ -158,7 +126,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) =
 
         {/* Coordinates */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Coordinates
           </p>
           <motion.div
@@ -166,14 +137,21 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) =
             className="text-xs font-mono"
             style={{ color: theme.text }}
           >
-            {tourDetails.latitude?.toFixed(6)}°, {tourDetails.longitude?.toFixed(6)}°
+            {tourDetails.latitude?.toFixed(6)}°,{" "}
+            {tourDetails.longitude?.toFixed(6)}°
           </motion.div>
         </motion.div>
 
         {/* Tour Type & Category */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Tag size={11} />
               Tour Type
             </p>
@@ -185,13 +163,19 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) =
               {tourDetails.tourTypeName || "N/A"}
             </motion.div>
             {tourDetails.tourTypeDescription && (
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
                 {tourDetails.tourTypeDescription}
               </p>
             )}
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Tag size={11} />
               Category
             </p>
@@ -203,7 +187,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) =
               {tourDetails.tourCategoryName || "N/A"}
             </motion.div>
             {tourDetails.tourCategoryDescription && (
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
                 {tourDetails.tourCategoryDescription}
               </p>
             )}
@@ -212,7 +199,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) =
 
         {/* Season */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1 flex items-center gap-1"
+            style={{ color: theme.textSecondary }}
+          >
             <Calendar size={11} />
             Season
           </p>
@@ -224,7 +214,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ tourDetails }) =
             {tourDetails.seasonName || "All seasons"}
           </motion.div>
           {tourDetails.seasonDescription && (
-            <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs mt-0.5"
+              style={{ color: theme.textSecondary }}
+            >
               {tourDetails.seasonDescription}
             </p>
           )}

@@ -1,4 +1,4 @@
-import { ApiResponse } from "./common-types";
+import { ApiResponse, SeasonType } from "./common-types";
 
 // types/tour-types.ts
 export interface Schedule {
@@ -817,4 +817,36 @@ export interface TourInfoFormProps {
     >,
   ) => void;
   onStatusChange: (value: "ACTIVE" | "INACTIVE") => void;
+}
+
+export interface BasicInfoFormProps {
+  tour: TourAllDetails;
+  hasChanged: (field: string) => boolean;
+  onFieldChange: (field: string, value: any) => void;
+  availableSeasons: SeasonType[];
+}
+
+export interface TourSearchItem {
+  id: number;
+  name: string;
+}
+
+export interface BasicInfoPanelProps {
+  tourDetails: Tour;
+}
+
+export interface SchedulesListProps {
+  schedules: Schedule[];
+}
+
+ export interface TourStatsProps {
+  tourDetails: Tour;
+}
+
+export interface StatItem {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  color: string;
+  formatter?: (value: number | string) => string | number;
 }

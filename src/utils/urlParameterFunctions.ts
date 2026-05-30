@@ -2,6 +2,8 @@ import { ActivityCategoryFilterParams } from "@/types/activity-category-types";
 import { ActivityFilterParams } from "@/types/activity-types";
 import { CategoryFilterParams } from "@/types/destination-category-types";
 import { DestinationFilterParams } from "@/types/destination-types";
+import { TourCategoryFilterParams } from "@/types/tour-category-types";
+import { TourTypeFilterParams } from "@/types/tour-type-types";
 import { TourFilterParams } from "@/types/tour-types";
 
 export const destinationViewFiltersToUrlParams = (
@@ -197,5 +199,73 @@ export const tourViewUrlParamsToFilters = (
     pageNumber: params.get("pageNumber")
       ? parseInt(params.get("pageNumber")!)
       : 1,
+  };
+};
+
+export const tourCategoryViewFiltersToUrlParams = (
+  filters: TourCategoryFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
+
+  return params;
+};
+
+export const tourCategoryViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): TourCategoryFilterParams => {
+  const sortDirection = params.get("sortDirection");
+  return {
+    name: params.get("name") || null,
+    status: params.get("status") || null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") || "categoryName",
+    sortDirection: (sortDirection === "DESC" ? "DESC" : "ASC") as
+      | "ASC"
+      | "DESC",
+  };
+};
+
+export const tourTypeViewFiltersToUrlParams = (
+  filters: TourTypeFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
+
+  return params;
+};
+
+export const tourTypeViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): TourTypeFilterParams => {
+  const sortDirection = params.get("sortDirection");
+  return {
+    name: params.get("name") || null,
+    status: params.get("status") || null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") || "typeName",
+    sortDirection: (sortDirection === "DESC" ? "DESC" : "ASC") as
+      | "ASC"
+      | "DESC",
   };
 };

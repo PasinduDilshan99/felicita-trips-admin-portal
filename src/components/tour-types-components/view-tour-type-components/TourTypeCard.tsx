@@ -1,114 +1,34 @@
-// components/tour-types-components/view-tour-type-components/TourTypeCard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, type Variants } from "framer-motion";
-import {
-  Eye,
-  ArrowRight,
-  Star,
-  Check,
-  Tag,
-  Hash,
-} from "lucide-react";
+import { motion } from "framer-motion";
+import { Eye, ArrowRight, Star, Check, Hash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
-import { TourTypeListItem, TourTypeImage } from "@/types/tour-type-types";
+import ImageModal from "@/components/common-components/ImageModal";
+import { TourTypeImage, TourTypeCardProps } from "@/types/tour-type-types";
 import { hexToRgba } from "@/utils/functions";
-import { TOUR_TYPES_PAGE_URL } from "@/utils/urls";
+import { TOUR_TYPE_DETAILS_VIEW_URL } from "@/utils/urls";
+import { getSafeString } from "@/utils/commonFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import {
+  buttonVariants,
+  cardVariants,
+  contentVariants,
+  imageVariants,
+  itemVariants,
+  overlayVariants,
+  quickViewVariants,
+  shineVariants,
+  thumbnailVariants,
+} from "@/app/animations/variants";
 
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-  hover: {
-    y: -4,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-};
-
-const imageVariants: Variants = {
-  rest: { scale: 1 },
-  hover: { scale: 1.05, transition: { duration: 0.4 } },
-};
-
-const overlayVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.3 } },
-};
-
-const quickViewVariants: Variants = {
-  hidden: { opacity: 0, y: -10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.1 } },
-};
-
-const thumbnailVariants: Variants = {
-  rest: { scale: 1, opacity: 0.7 },
-  active: { scale: 1.05, opacity: 1 },
-  hover: { scale: 1.02, transition: { duration: 0.15 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const buttonVariants: Variants = {
-  rest: { scale: 1, y: 0 },
-  hover: {
-    scale: 1.02,
-    y: -2,
-    boxShadow: "0 8px 25px -4px rgba(0,0,0,0.2)",
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  tap: {
-    scale: 0.98,
-    y: 0,
-    transition: { duration: 0.1 },
-  },
-};
-
-const shineVariants: Variants = {
-  rest: { x: "-100%" },
-  hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
-};
-
-// Helper functions
-const getSafeString = (value: any, fallback: string = ""): string => {
-  if (!value) return fallback;
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return value.toString();
-  return fallback;
-};
-
-interface TourTypeCardProps {
-  tourType: TourTypeListItem;
-  onImageClick?: (imageIndex: number) => void;
-}
-
-const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) => {
+const TourTypeCard: React.FC<TourTypeCardProps> = ({
+  tourType,
+  onImageClick,
+}) => {
   const router = useRouter();
   const { theme } = useTheme();
 
@@ -127,7 +47,9 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
   const hoverColor = tourType?.hoverColor || theme.accent;
 
   const handleViewDetails = () => {
-    router.push(`${TOUR_TYPES_PAGE_URL}/${tourType.typeId}?name=${encodeURIComponent(typeName)}`);
+    router.push(
+      `${TOUR_TYPE_DETAILS_VIEW_URL}/${tourType.typeId}?name=${encodeURIComponent(typeName)}`,
+    );
   };
 
   const getModalImages = (): ImageModalImage[] => {
@@ -151,7 +73,7 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1,
     );
     setIsAutoRotating(false);
   };
@@ -180,7 +102,8 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
     }
   };
 
-  const currentImage = images[currentImageIndex]?.imageUrl || PLACE_HOLDER_IMAGE;
+  const currentImage =
+    images[currentImageIndex]?.imageUrl || PLACE_HOLDER_IMAGE;
   const isActive = status === "ACTIVE";
 
   if (!tourType || !tourType.typeId) return null;
@@ -259,7 +182,11 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
               animate={isHovered ? "visible" : "hidden"}
               onClick={handleViewDetails}
               className="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-              whileHover={{ scale: 1.05, backgroundColor: "white", color: "#1f2937" }}
+              whileHover={{
+                scale: 1.05,
+                backgroundColor: "white",
+                color: "#1f2937",
+              }}
               whileTap={{ scale: 0.95 }}
             >
               <Eye className="w-3.5 h-3.5" />
@@ -283,8 +210,16 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
             {/* Navigation Arrows */}
             {images.length > 1 && (
               <>
-                <NavigationButton direction="left" onClick={handlePrevImage} size="sm" />
-                <NavigationButton direction="right" onClick={handleNextImage} size="sm" />
+                <NavigationButton
+                  direction="left"
+                  onClick={handlePrevImage}
+                  size="sm"
+                />
+                <NavigationButton
+                  direction="right"
+                  onClick={handleNextImage}
+                  size="sm"
+                />
               </>
             )}
 
@@ -305,7 +240,10 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
 
         {/* Thumbnail Gallery */}
         {images.length > 1 && (
-          <div className="px-4 pt-4 pb-2" style={{ borderBottom: `1px solid ${theme.border}` }}>
+          <div
+            className="px-4 pt-4 pb-2"
+            style={{ borderBottom: `1px solid ${theme.border}` }}
+          >
             <div className="flex gap-2 overflow-x-auto pb-2">
               {images.map((image: TourTypeImage, index: number) => (
                 <motion.div
@@ -324,7 +262,8 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
                       currentImageIndex === index ? "scale-105" : ""
                     }`}
                     style={{
-                      borderColor: currentImageIndex === index ? color : theme.border,
+                      borderColor:
+                        currentImageIndex === index ? color : theme.border,
                     }}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = PLACE_HOLDER_IMAGE;
@@ -337,7 +276,11 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
                         ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
                         : "bg-white/90 backdrop-blur-sm text-gray-600 opacity-0 group-hover/thumb:opacity-100 hover:bg-blue-500 hover:text-white"
                     }`}
-                    title={primaryImageIndex === index ? "Primary Image" : "Set as Primary"}
+                    title={
+                      primaryImageIndex === index
+                        ? "Primary Image"
+                        : "Set as Primary"
+                    }
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
@@ -354,7 +297,12 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
         )}
 
         {/* Content Section */}
-        <motion.div variants={contentVariants} initial="hidden" animate="visible" className="p-5 flex-grow flex flex-col">
+        <motion.div
+          variants={contentVariants}
+          initial="hidden"
+          animate="visible"
+          className="p-5 flex-grow flex flex-col"
+        >
           <motion.div variants={itemVariants} className="mb-3">
             <motion.h3
               className="text-lg sm:text-xl font-bold mb-2 transition-colors duration-200 cursor-pointer"
@@ -365,7 +313,10 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
               {typeName}
             </motion.h3>
             <div className="flex items-center gap-2">
-              <Hash className="w-3.5 h-3.5" style={{ color: theme.textSecondary }} />
+              <Hash
+                className="w-3.5 h-3.5"
+                style={{ color: theme.textSecondary }}
+              />
               <span className="text-xs" style={{ color: theme.textSecondary }}>
                 ID: {tourType.typeId}
               </span>
@@ -394,17 +345,24 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
             }}
           >
             <div className="flex items-center gap-2">
-              <span className="text-xs" style={{ color: theme.textSecondary }}>Color:</span>
+              <span className="text-xs" style={{ color: theme.textSecondary }}>
+                Color:
+              </span>
               <div
                 className="w-6 h-6 rounded-full border-2"
                 style={{ backgroundColor: color, borderColor: theme.border }}
               />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs" style={{ color: theme.textSecondary }}>Hover:</span>
+              <span className="text-xs" style={{ color: theme.textSecondary }}>
+                Hover:
+              </span>
               <div
                 className="w-6 h-6 rounded-full border-2"
-                style={{ backgroundColor: hoverColor, borderColor: theme.border }}
+                style={{
+                  backgroundColor: hoverColor,
+                  borderColor: theme.border,
+                }}
               />
             </div>
           </motion.div>
@@ -429,10 +387,14 @@ const TourTypeCard: React.FC<TourTypeCardProps> = ({ tourType, onImageClick }) =
               animate={isHovered ? "hover" : "rest"}
               className="absolute inset-0"
               style={{
-                background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
+                background:
+                  "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
               }}
             />
-            <span className="absolute inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.35)" }} />
+            <span
+              className="absolute inset-x-0 top-0 h-px"
+              style={{ background: "rgba(255,255,255,0.35)" }}
+            />
             <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
             <span className="relative tracking-wide text-sm">View Details</span>
             <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />

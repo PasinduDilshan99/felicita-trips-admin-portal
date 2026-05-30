@@ -40,3 +40,15 @@ export const TOURS_VIEW_SORTING_OPTIONS = [
   { value: "tourCategoryName", label: "Category" },
   { value: "seasonName", label: "Season" },
 ];
+
+export const TOUR_CATEGORIES_VIEW_SORTING_OPTIONS = [
+  { value: "categoryName", label: "Category Name" },
+  { value: "categoryId", label: "Category ID" },
+  { value: "status", label: "Status" },
+];
+
+export const TOUR_TYPES_VIEW_SORTING_OPTIONS = [
+  { value: "typeName", label: "Type Name" },
+  { value: "typeId", label: "Type ID" },
+  { value: "status", label: "Status" },
+];

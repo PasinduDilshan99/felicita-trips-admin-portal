@@ -22,3 +22,28 @@ export const CREATE_ACTIVITY_TIPS = [
   "Add images to showcase the activity",
   "Include any special requirements participants should know",
 ];
+
+export const CREATE_TOUR_TIPS = [
+  "Make sure all images are uploaded successfully",
+  "Double-check the itinerary and destinations",
+  "Verify inclusions and exclusions are accurate",
+  "Review pricing and duration details",
+  "You can edit this tour anytime after creation",
+];
+
+export const CREATE_TOUR_CATEGORY_TIPS = [
+  "Make sure all images are uploaded successfully",
+  "Verify that the selected tours belong to this category",
+  "Check that colors are visually appealing and accessible",
+  "You can edit this category anytime after creation",
+  "Tours will be organized under this category for better filtering",
+  "Categories improve navigation and search experience",
+];
+
+export const CREATE_TOUR_TYPE_TIPS = [
+  "Make sure all images are uploaded successfully",
+  "Verify that the selected tours belong to this type",
+  "Check that colors are visually appealing and accessible",
+  "You can edit this tour type anytime after creation",
+  "Tours will be organized under this type for better filtering",
+];

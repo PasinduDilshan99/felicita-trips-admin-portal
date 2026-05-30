@@ -1,18 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
+import {} from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Tag, Palette, FileText, Image as ImageIcon } from "lucide-react";
+import { Tag, Palette } from "lucide-react";
 import { FormActions } from "@/components/common-components/FormActions";
 import { FormSummary } from "@/components/common-components/FormSummary";
 import { InputField } from "@/components/common-components/create-components/InputField";
@@ -25,37 +17,14 @@ import {
 import { TourCategoryService } from "@/services/tourCategoryService";
 import { TourSelector } from "@/components/common-components/TourSelector";
 import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-}
+import { ToastState } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { TOUR_CATEGORY_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { CREATE_TOUR_CATEGORY_TIPS } from "@/data/tips-data";
 
 const AddNewTourCategoryPage = () => {
-  const router = useRouter();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Tour Categories",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/tour-categories`,
-    },
-    {
-      label: "Add New Category",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/tour-categories/add`,
-    },
-  ];
-
-  // Form state
   const [formData, setFormData] = useState<AddTourCategoryRequest>({
     categoryName: "",
     description: "",
@@ -66,7 +35,6 @@ const AddNewTourCategoryPage = () => {
     images: [],
   });
 
-  // Image state
   const [imagePreviews, setImagePreviews] = useState<
     { url: string; file?: File; uploading?: boolean; uploadError?: string }[]
   >([]);
@@ -257,7 +225,7 @@ const AddNewTourCategoryPage = () => {
           <PageHeader
             title="Add New Tour Category"
             description="Create a new category to organize your tours"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={TOUR_CATEGORY_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -629,14 +597,7 @@ const AddNewTourCategoryPage = () => {
           itemName: formData.categoryName || "Untitled Category",
           type: "create",
           estimatedTime: "~2-3 seconds",
-          tips: [
-            "Make sure all images are uploaded successfully",
-            "Verify that the selected tours belong to this category",
-            "Check that colors are visually appealing and accessible",
-            "You can edit this category anytime after creation",
-            "Tours will be organized under this category for better filtering",
-            "Categories improve navigation and search experience",
-          ],
+          tips: CREATE_TOUR_CATEGORY_TIPS,
         }}
         confirmText="Create Category"
         cancelText="Cancel"

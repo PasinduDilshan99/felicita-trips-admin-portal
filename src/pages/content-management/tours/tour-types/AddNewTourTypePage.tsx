@@ -1,26 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { useTheme } from "@/contexts/ThemeContext";
-import {
-  Loader,
-  Tag,
-  Palette,
-  FileText,
-  Image as ImageIcon,
-  Hash,
-} from "lucide-react";
-import { FormCard } from "@/components/common-components/create-components/FormCard";
+import { Tag, Palette } from "lucide-react";
 import { FormActions } from "@/components/common-components/FormActions";
 import { FormSummary } from "@/components/common-components/FormSummary";
 import { InputField } from "@/components/common-components/create-components/InputField";
@@ -33,35 +17,14 @@ import {
 import { TourTypeService } from "@/services/tourTypeService";
 import { TourSelector } from "@/components/common-components/TourSelector";
 import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-}
+import { ToastState } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { TOUR_TYPE_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { CREATE_TOUR_TYPE_TIPS } from "@/data/tips-data";
 
 const AddNewTourTypePage = () => {
   const router = useRouter();
   const { theme } = useTheme();
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Tour Types",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/tour-types`,
-    },
-    {
-      label: "Add New Tour Type",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/tour-types/add`,
-    },
-  ];
 
   // Form state
   const [formData, setFormData] = useState<AddTourTypeRequest>({
@@ -265,7 +228,7 @@ const AddNewTourTypePage = () => {
           <PageHeader
             title="Add New Tour Type"
             description="Create a new type to categorize your tours"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={TOUR_TYPE_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -637,13 +600,7 @@ const AddNewTourTypePage = () => {
           itemName: formData.typeName || "Untitled Tour Type",
           type: "create",
           estimatedTime: "~2-3 seconds",
-          tips: [
-            "Make sure all images are uploaded successfully",
-            "Verify that the selected tours belong to this type",
-            "Check that colors are visually appealing and accessible",
-            "You can edit this tour type anytime after creation",
-            "Tours will be organized under this type for better filtering",
-          ],
+          tips: CREATE_TOUR_TYPE_TIPS,
         }}
         confirmText="Create Tour Type"
         cancelText="Cancel"

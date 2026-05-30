@@ -33,6 +33,7 @@ import { ToastState } from "@/types/common-components-types";
 import { TOUR_CATEGORY_VIEW_PAGE_URL } from "@/utils/urls";
 import PageHeader from "@/components/common-components/static-components/PageHeader";
 import { TOUR_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { CREATE_TOUR_TIPS } from "@/data/tips-data";
 
 const AddNewTourPage = () => {
   const { categories, loading: categoriesLoading } = useCommon();
@@ -653,13 +654,7 @@ const AddNewTourPage = () => {
           itemName: formData.name || "Untitled Tour",
           type: "create",
           estimatedTime: "~3-4 seconds",
-          tips: [
-            "Make sure all images are uploaded successfully",
-            "Double-check the itinerary and destinations",
-            "Verify inclusions and exclusions are accurate",
-            "Review pricing and duration details",
-            "You can edit this tour anytime after creation",
-          ],
+          tips: CREATE_TOUR_TIPS,
         }}
         confirmText="Create Tour"
         cancelText="Cancel"

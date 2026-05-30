@@ -1,3 +1,4 @@
+import { TOUR_CATEGORY_CREATE_PAGE_TITLE } from "./../utils/pagesHeaderTitles";
 import * as URLS from "@/utils/urls";
 
 interface breadcrumbType {
@@ -163,12 +164,13 @@ export const ACTIVITY_CATEGORY_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Create", href: URLS.ACTIVITY_CATEGORY_UPDATE_URL },
 ];
 
-export const ACTIVITY_CATEGORY_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
-  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
-  { label: "Activities", href: URLS.ACTIVITIES_PAGE_URL },
-  { label: "Categories", href: URLS.ACTIVITY_CATEGORIES_PAGE_URL },
-  { label: "Create", href: URLS.ACTIVITY_CATEGORY_TERMINATE_URL },
-];
+export const ACTIVITY_CATEGORY_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Activities", href: URLS.ACTIVITIES_PAGE_URL },
+    { label: "Categories", href: URLS.ACTIVITY_CATEGORIES_PAGE_URL },
+    { label: "Create", href: URLS.ACTIVITY_CATEGORY_TERMINATE_URL },
+  ];
 
 export const PACKAGE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
@@ -204,16 +206,99 @@ export const TOUR_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Create", href: URLS.TOUR_ADD_PAGE_URL },
 ];
 
+export const TOUR_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Update", href: URLS.TOUR_UPDATE_PAGE_URL },
+];
+
+export const TOUR_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Terminate", href: URLS.TOUR_TERMINATE_PAGE_URL },
+];
+
 export const TOUR_TYPE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
   { label: "Tours", href: URLS.TOURS_PAGE_URL },
   { label: "Types", href: URLS.TOUR_TYPES_PAGE_URL },
 ];
 
+export const TOUR_TYPE_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Types", href: URLS.TOUR_TYPES_PAGE_URL },
+  { label: "View", href: URLS.TOUR_TYPE_VIEW_PAGE_URL },
+];
+
+export const TOUR_TYPE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Types", href: URLS.TOUR_TYPES_PAGE_URL },
+  { label: "View", href: URLS.TOUR_TYPE_VIEW_PAGE_URL },
+];
+
+export const TOUR_TYPE_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Types", href: URLS.TOUR_TYPES_PAGE_URL },
+  { label: "Create", href: URLS.TOUR_TYPE_ADD_URL },
+];
+
+export const TOUR_TYPE_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Types", href: URLS.TOUR_TYPES_PAGE_URL },
+  { label: "Update", href: URLS.TOUR_TYPE_UPDATE_URL },
+];
+
+export const TOUR_TYPE_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Types", href: URLS.TOUR_TYPES_PAGE_URL },
+  { label: "Terminate", href: URLS.TOUR_TYPE_TERMINATE_URL },
+];
+
 export const TOUR_CATEGORY_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
   { label: "Tours", href: URLS.TOURS_PAGE_URL },
   { label: "Categories", href: URLS.TOUR_CATEGORIES_PAGE_URL },
+];
+
+export const TOUR_CATEGORY_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Categories", href: URLS.TOUR_CATEGORIES_PAGE_URL },
+  { label: "View", href: URLS.TOUR_CATEGORY_VIEW_PAGE_URL },
+];
+
+export const TOUR_CATEGORY_VIEW_DETAILS_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Tours", href: URLS.TOURS_PAGE_URL },
+    { label: "Categories", href: URLS.TOUR_CATEGORIES_PAGE_URL },
+    { label: "View", href: URLS.TOUR_CATEGORY_VIEW_PAGE_URL },
+  ];
+
+export const TOUR_CATEGORY_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Categories", href: URLS.TOUR_CATEGORIES_PAGE_URL },
+  { label: "Create", href: URLS.TOUR_CATEGORY_ADD_URL },
+];
+
+export const TOUR_CATEGORY_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Categories", href: URLS.TOUR_CATEGORIES_PAGE_URL },
+  { label: "Update", href: URLS.TOUR_CATEGORY_UPDATE_URL },
+];
+
+export const TOUR_CATEGORY_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tours", href: URLS.TOURS_PAGE_URL },
+  { label: "Categories", href: URLS.TOUR_CATEGORIES_PAGE_URL },
+  { label: "Terminate", href: URLS.TOUR_CATEGORY_TERMINATE_URL },
 ];
 
 export const ACTIVITY_SCHEDULE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [

@@ -44,12 +44,11 @@ import {
   TourTypeBubbleTooltip,
 } from "@/components/statistics-components";
 
-/* ─────────────────────────────────────────────
-   Main Page
-───────────────────────────────────────────── */
 const TourTypesPage = () => {
   const { theme, isDarkMode } = useTheme();
-  const [statistics, setStatistics] = useState<TourTypeStatisticsData | null>(null);
+  const [statistics, setStatistics] = useState<TourTypeStatisticsData | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,22 +79,23 @@ const TourTypesPage = () => {
   const barChartData = statistics?.typeBookingPerformance || [];
   const comboData = statistics?.typeRatingOverview || [];
   const stackedData = statistics?.typePrimarySecondaryUsage || [];
-  
+
   // Prepare bubble chart data by combining multiple data sources
-  const bubbleData = statistics?.typeParticipationImpact.map(impact => {
-    const rating = statistics.typeRatingOverview.find(
-      r => r.typeId === impact.typeId
-    );
-    const distribution = statistics.typeDistribution.find(
-      d => d.typeName === impact.typeName
-    );
-    return {
-      typeName: impact.typeName,
-      totalParticipants: impact.totalParticipants,
-      averageRating: rating?.averageRating || 0,
-      totalTours: distribution?.totalTours || 0,
-    };
-  }) || [];
+  const bubbleData =
+    statistics?.typeParticipationImpact.map((impact) => {
+      const rating = statistics.typeRatingOverview.find(
+        (r) => r.typeId === impact.typeId,
+      );
+      const distribution = statistics.typeDistribution.find(
+        (d) => d.typeName === impact.typeName,
+      );
+      return {
+        typeName: impact.typeName,
+        totalParticipants: impact.totalParticipants,
+        averageRating: rating?.averageRating || 0,
+        totalTours: distribution?.totalTours || 0,
+      };
+    }) || [];
 
   /* Chart Colors */
   const PIE_COLORS = [
@@ -317,7 +317,9 @@ const TourTypesPage = () => {
                                 duration={950 + i * 70}
                                 decimals={1}
                               />
-                              <span className="tt-stat-suffix">{card.suffix}</span>
+                              <span className="tt-stat-suffix">
+                                {card.suffix}
+                              </span>
                             </>
                           ) : (
                             <AnimatedCount
@@ -353,7 +355,9 @@ const TourTypesPage = () => {
                             <span className="tt-chart-dot tt-chart-dot--p" />
                             Type Distribution
                           </div>
-                          <span className="tt-chart-sub">{pieChartData.length} types</span>
+                          <span className="tt-chart-sub">
+                            {pieChartData.length} types
+                          </span>
                         </div>
                         {pieChartData.length > 0 ? (
                           <>
@@ -370,8 +374,16 @@ const TourTypesPage = () => {
                                         x2="1"
                                         y2="1"
                                       >
-                                        <stop offset="0%" stopColor={color} stopOpacity={0.9} />
-                                        <stop offset="100%" stopColor={color} stopOpacity={0.7} />
+                                        <stop
+                                          offset="0%"
+                                          stopColor={color}
+                                          stopOpacity={0.9}
+                                        />
+                                        <stop
+                                          offset="100%"
+                                          stopColor={color}
+                                          stopOpacity={0.7}
+                                        />
                                       </linearGradient>
                                     ))}
                                   </defs>
@@ -405,7 +417,10 @@ const TourTypesPage = () => {
                                 <div key={i} className="tt-pie-legend-item">
                                   <span
                                     className="tt-pie-legend-dot"
-                                    style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
+                                    style={{
+                                      background:
+                                        PIE_COLORS[i % PIE_COLORS.length],
+                                    }}
                                   />
                                   {item.typeName}
                                   <span className="tt-pie-legend-count">
@@ -417,7 +432,9 @@ const TourTypesPage = () => {
                           </>
                         ) : (
                           <div className="tt-empty-state">
-                            <p className="tt-empty-text">No distribution data available</p>
+                            <p className="tt-empty-text">
+                              No distribution data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -429,19 +446,40 @@ const TourTypesPage = () => {
                             <span className="tt-chart-dot tt-chart-dot--acc" />
                             Booking Performance
                           </div>
-                          <span className="tt-chart-sub">Total bookings per type</span>
+                          <span className="tt-chart-sub">
+                            Total bookings per type
+                          </span>
                         </div>
                         {barChartData.length > 0 ? (
                           <div style={{ height: 320 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart
                                 data={barChartData}
-                                margin={{ top: 4, right: 4, bottom: 60, left: 0 }}
+                                margin={{
+                                  top: 4,
+                                  right: 4,
+                                  bottom: 60,
+                                  left: 0,
+                                }}
                               >
                                 <defs>
-                                  <linearGradient id="bookingGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.6} />
+                                  <linearGradient
+                                    id="bookingGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.6}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -483,7 +521,9 @@ const TourTypesPage = () => {
                           </div>
                         ) : (
                           <div className="tt-empty-state">
-                            <p className="tt-empty-text">No booking data available</p>
+                            <p className="tt-empty-text">
+                              No booking data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -507,19 +547,40 @@ const TourTypesPage = () => {
                             <span className="tt-chart-dot tt-chart-dot--p" />
                             Rating Overview
                           </div>
-                          <span className="tt-chart-sub">Average rating & review count</span>
+                          <span className="tt-chart-sub">
+                            Average rating & review count
+                          </span>
                         </div>
                         {comboData.length > 0 ? (
                           <div style={{ height: 320 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <ComposedChart
                                 data={comboData}
-                                margin={{ top: 20, right: 30, bottom: 60, left: 0 }}
+                                margin={{
+                                  top: 20,
+                                  right: 30,
+                                  bottom: 60,
+                                  left: 0,
+                                }}
                               >
                                 <defs>
-                                  <linearGradient id="ratingGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.4} />
+                                  <linearGradient
+                                    id="ratingGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.4}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -550,7 +611,10 @@ const TourTypesPage = () => {
                                     value: "Rating",
                                     angle: -90,
                                     position: "insideLeft",
-                                    style: { fill: textSecondary, fontSize: 11 }
+                                    style: {
+                                      fill: textSecondary,
+                                      fontSize: 11,
+                                    },
                                   }}
                                 />
                                 <YAxis
@@ -563,7 +627,10 @@ const TourTypesPage = () => {
                                     value: "Reviews",
                                     angle: 90,
                                     position: "insideRight",
-                                    style: { fill: textSecondary, fontSize: 11 }
+                                    style: {
+                                      fill: textSecondary,
+                                      fontSize: 11,
+                                    },
                                   }}
                                 />
                                 <Tooltip content={<TourTypeComboTooltip />} />
@@ -594,7 +661,9 @@ const TourTypesPage = () => {
                           </div>
                         ) : (
                           <div className="tt-empty-state">
-                            <p className="tt-empty-text">No rating data available</p>
+                            <p className="tt-empty-text">
+                              No rating data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -606,7 +675,9 @@ const TourTypesPage = () => {
                             <span className="tt-chart-dot tt-chart-dot--acc" />
                             Primary vs Secondary Usage
                           </div>
-                          <span className="tt-chart-sub">Type assignment patterns</span>
+                          <span className="tt-chart-sub">
+                            Type assignment patterns
+                          </span>
                         </div>
                         {stackedData.length > 0 ? (
                           <div style={{ height: 320 }}>
@@ -614,17 +685,50 @@ const TourTypesPage = () => {
                               <BarChart
                                 data={stackedData}
                                 layout="vertical"
-                                margin={{ top: 4, right: 30, bottom: 4, left: 100 }}
+                                margin={{
+                                  top: 4,
+                                  right: 30,
+                                  bottom: 4,
+                                  left: 100,
+                                }}
                                 barSize={28}
                               >
                                 <defs>
-                                  <linearGradient id="primaryGrad" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.7} />
+                                  <linearGradient
+                                    id="primaryGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="1"
+                                    y2="0"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.7}
+                                    />
                                   </linearGradient>
-                                  <linearGradient id="secondaryGrad" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor={successColor} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={successColor} stopOpacity={0.7} />
+                                  <linearGradient
+                                    id="secondaryGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="1"
+                                    y2="0"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={successColor}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={successColor}
+                                      stopOpacity={0.7}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -656,7 +760,12 @@ const TourTypesPage = () => {
                                   height={36}
                                   iconType="circle"
                                   formatter={(value) => (
-                                    <span style={{ color: textSecondary, fontSize: 12 }}>
+                                    <span
+                                      style={{
+                                        color: textSecondary,
+                                        fontSize: 12,
+                                      }}
+                                    >
                                       {value}
                                     </span>
                                   )}
@@ -684,7 +793,9 @@ const TourTypesPage = () => {
                           </div>
                         ) : (
                           <div className="tt-empty-state">
-                            <p className="tt-empty-text">No usage data available</p>
+                            <p className="tt-empty-text">
+                              No usage data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -706,19 +817,40 @@ const TourTypesPage = () => {
                           <span className="tt-chart-dot tt-chart-dot--p" />
                           Type Impact Analysis
                         </div>
-                        <span className="tt-chart-sub">Bubble size = Total Participants</span>
+                        <span className="tt-chart-sub">
+                          Bubble size = Total Participants
+                        </span>
                       </div>
                       {bubbleData.length > 0 ? (
                         <>
                           <div style={{ height: 400 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <ScatterChart
-                                margin={{ top: 20, right: 30, bottom: 60, left: 60 }}
+                                margin={{
+                                  top: 20,
+                                  right: 30,
+                                  bottom: 60,
+                                  left: 60,
+                                }}
                               >
                                 <defs>
-                                  <linearGradient id="bubbleGrad" x1="0" y1="0" x2="1" y2="1">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.8} />
-                                    <stop offset="100%" stopColor={acc} stopOpacity={0.5} />
+                                  <linearGradient
+                                    id="bubbleGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="1"
+                                    y2="1"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.8}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={acc}
+                                      stopOpacity={0.5}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -736,7 +868,10 @@ const TourTypesPage = () => {
                                     value: "Number of Tours",
                                     position: "bottom",
                                     offset: 40,
-                                    style: { fill: textSecondary, fontSize: 12 }
+                                    style: {
+                                      fill: textSecondary,
+                                      fontSize: 12,
+                                    },
                                   }}
                                 />
                                 <YAxis
@@ -751,7 +886,10 @@ const TourTypesPage = () => {
                                     value: "Average Rating",
                                     angle: -90,
                                     position: "insideLeft",
-                                    style: { fill: textSecondary, fontSize: 12 }
+                                    style: {
+                                      fill: textSecondary,
+                                      fontSize: 12,
+                                    },
                                   }}
                                 />
                                 <ZAxis
@@ -765,7 +903,12 @@ const TourTypesPage = () => {
                                   verticalAlign="bottom"
                                   height={50}
                                   formatter={() => (
-                                    <span style={{ color: textSecondary, fontSize: 11 }}>
+                                    <span
+                                      style={{
+                                        color: textSecondary,
+                                        fontSize: 11,
+                                      }}
+                                    >
                                       Circle size = Total Participants
                                     </span>
                                   )}
@@ -795,7 +938,9 @@ const TourTypesPage = () => {
                         </>
                       ) : (
                         <div className="tt-empty-state">
-                          <p className="tt-empty-text">No participation data available</p>
+                          <p className="tt-empty-text">
+                            No participation data available
+                          </p>
                         </div>
                       )}
                     </div>

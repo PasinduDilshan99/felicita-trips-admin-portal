@@ -1,43 +1,30 @@
-// app/web-management/tour-types/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-} from "@/utils/constant";
 import { TourTypeService } from "@/services/tourTypeService";
-import { TourTypeBasic } from "@/types/tour-type-types";
-import { AlertTriangle, Search, Calendar, User, Clock, Palette, Info, Hash } from "lucide-react";
+import { TourTypeBasic, TourTypeSearchItem } from "@/types/tour-type-types";
+import { AlertTriangle, Search, Palette, Info, Hash } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
 import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
-import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
+import {
+  TerminationItem,
+  TerminationModal,
+} from "@/components/common-components/terminate-components/TerminationModal";
 import { useCommon } from "@/contexts/CommonContext";
 import { TourTypeStats } from "@/components/tour-types-components/terminate-tour-type-components/TourTypeStats";
 import { BasicInfoPanel } from "@/components/tour-types-components/terminate-tour-type-components/BasicInfoPanel";
-
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface TourTypeSearchItem {
-  id: number;
-  name: string;
-}
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { TOUR_TYPE_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { hexToRgba } from "@/utils/functions";
 
 const TerminateTourTypePage = () => {
   const { theme } = useTheme();
@@ -48,7 +35,10 @@ const TerminateTourTypePage = () => {
   const initialTourTypeName = searchParams?.get("tour-type-name") || "";
   const initialTourTypeId = searchParams?.get("tour-type-id") || "";
 
-  const [selectedTourType, setSelectedTourType] = useState<{ typeId: number; typeName: string } | null>(
+  const [selectedTourType, setSelectedTourType] = useState<{
+    typeId: number;
+    typeName: string;
+  } | null>(
     initialTourTypeId && initialTourTypeName
       ? {
           typeId: parseInt(initialTourTypeId),
@@ -56,7 +46,9 @@ const TerminateTourTypePage = () => {
         }
       : null,
   );
-  const [tourTypeDetails, setTourTypeDetails] = useState<TourTypeBasic | null>(null);
+  const [tourTypeDetails, setTourTypeDetails] = useState<TourTypeBasic | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingTerminate, setLoadingTerminate] = useState(false);
@@ -72,26 +64,11 @@ const TerminateTourTypePage = () => {
     actionLink?: string;
   } | null>(null);
 
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Tour Types",
-      href: `${WEB_MANAGEMENT_PATH}/tour-types`,
-    },
-    {
-      label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}/tour-types/terminate`,
-    },
-  ];
-
-  // Get tour types from common context
   const tourTypes = categories?.tourTypeList || [];
-  
+
   const searchItems: TourTypeSearchItem[] = tourTypes.map((type) => ({
     id: type.tourTypeId,
     name: type.tourTypeName,
@@ -172,7 +149,8 @@ const TerminateTourTypePage = () => {
       setToast({
         type: "error",
         title: "Termination Failed",
-        message: err.message || "Failed to terminate tour type. Please try again.",
+        message:
+          err.message || "Failed to terminate tour type. Please try again.",
       });
     } finally {
       setLoadingTerminate(false);
@@ -218,7 +196,10 @@ const TerminateTourTypePage = () => {
     }
   }, [initialTourTypeId, initialTourTypeName]);
 
-  if ((commonLoading && tourTypes.length === 0) || (loading && !selectedTourType)) {
+  if (
+    (commonLoading && tourTypes.length === 0) ||
+    (loading && !selectedTourType)
+  ) {
     return (
       <CommonLoading
         message="Loading tour types..."
@@ -258,7 +239,7 @@ const TerminateTourTypePage = () => {
           <PageHeader
             title="Terminate Tour Type"
             description="Permanently remove a tour type from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={TOUR_TYPE_TERMINATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -298,7 +279,8 @@ const TerminateTourTypePage = () => {
                   className="text-xs mt-0.5"
                   style={{ color: theme.textSecondary }}
                 >
-                  Search and select a tour type to review its data before termination
+                  Search and select a tour type to review its data before
+                  termination
                 </p>
               </div>
             </div>
@@ -308,7 +290,9 @@ const TerminateTourTypePage = () => {
                 items={searchItems}
                 loading={commonLoading}
                 selectedItem={selectedSearchItem}
-                onSelectItem={(item) => handleSelectTourType(item.id, item.name)}
+                onSelectItem={(item) =>
+                  handleSelectTourType(item.id, item.name)
+                }
                 onClearSelection={handleClearTourTypeSelection}
                 initialSearchTerm={initialTourTypeName}
                 placeholder="Search tour types..."
@@ -367,11 +351,15 @@ const TerminateTourTypePage = () => {
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold" style={{ color: theme.error }}>
+                <h2
+                  className="text-base font-bold"
+                  style={{ color: theme.error }}
+                >
                   Tour Type Termination Review
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: theme.error }}>
-                  Review all data carefully. This action is permanent and cannot be undone.
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
                 </p>
               </div>
               <div
@@ -384,7 +372,10 @@ const TerminateTourTypePage = () => {
                 <span className="text-xs" style={{ color: theme.error }}>
                   ID
                 </span>
-                <span className="text-sm font-bold" style={{ color: theme.error }}>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: theme.error }}
+                >
                   #{selectedTourType.typeId}
                 </span>
               </div>
@@ -521,7 +512,8 @@ const TerminateTourTypePage = () => {
                 showRetryButton={true}
                 onBack={handleClearTourTypeSelection}
                 onRetry={() =>
-                  selectedTourType && fetchTourTypeDetails(selectedTourType.typeId)
+                  selectedTourType &&
+                  fetchTourTypeDetails(selectedTourType.typeId)
                 }
                 backButtonText="Change Selection"
                 retryButtonText="Try Again"

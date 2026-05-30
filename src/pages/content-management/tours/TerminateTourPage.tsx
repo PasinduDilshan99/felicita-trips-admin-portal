@@ -1,18 +1,13 @@
-// app/web-management/tours/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-} from "@/utils/constant";
 import { TourService } from "@/services/tourService";
-import { Tour, TourNameId } from "@/types/tour-types";
+import { Tour, TourNameId, TourSearchItem } from "@/types/tour-types";
 import { AlertTriangle, Search, MapPin, Calendar, Clock } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
@@ -22,22 +17,14 @@ import { BasicInfoPanel } from "@/components/tours-components/terminate-tour-com
 import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
 import { SchedulesList } from "@/components/tours-components/terminate-tour-components/SchedulesList";
 import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
-import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
-
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface TourSearchItem {
-  id: number;
-  name: string;
-}
+import {
+  TerminationItem,
+  TerminationModal,
+} from "@/components/common-components/terminate-components/TerminationModal";
+import { ImageModalImage } from "@/types/common-components-types";
+import { TOUR_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { hexToRgba } from "@/utils/functions";
 
 const TerminateTourPage = () => {
   const { theme } = useTheme();
@@ -64,7 +51,6 @@ const TerminateTourPage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
@@ -72,22 +58,8 @@ const TerminateTourPage = () => {
     actionLink?: string;
   } | null>(null);
 
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Tours",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PATH}`,
-    },
-    {
-      label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PATH}/terminate`,
-    },
-  ];
 
   const fetchTours = async () => {
     setLoading(true);
@@ -281,7 +253,7 @@ const TerminateTourPage = () => {
           <PageHeader
             title="Terminate Tour"
             description="Permanently remove a tour from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={TOUR_TERMINATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -390,11 +362,15 @@ const TerminateTourPage = () => {
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold" style={{ color: theme.error }}>
+                <h2
+                  className="text-base font-bold"
+                  style={{ color: theme.error }}
+                >
                   Tour Termination Review
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: theme.error }}>
-                  Review all data carefully. This action is permanent and cannot be undone.
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
                 </p>
               </div>
               <div
@@ -407,7 +383,10 @@ const TerminateTourPage = () => {
                 <span className="text-xs" style={{ color: theme.error }}>
                   ID
                 </span>
-                <span className="text-sm font-bold" style={{ color: theme.error }}>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: theme.error }}
+                >
                   #{selectedTour.tourId}
                 </span>
               </div>

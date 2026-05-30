@@ -1,38 +1,41 @@
-// app/tour-types/view/[typeId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { TourTypeService } from "@/services/tourTypeService";
 import { TourTypeDetails, TourTypeImage } from "@/types/tour-type-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useImageGallery } from "@/hooks/useImageGallery";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
 import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
 import { TourTypeToursList } from "@/components/tour-types-components/tour-type-details-components/TourTypeToursList";
-
-import { TOUR_TYPES_PAGE_URL } from "@/utils/urls";
+import {
+  TOUR_TYPE_TERMINATE_URL,
+  TOUR_TYPE_UPDATE_URL,
+  TOUR_TYPES_PAGE_URL,
+} from "@/utils/urls";
 import { TourTypeOverview } from "@/components/tour-types-components/tour-type-details-components/TourTypeOverview";
 import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
-import { Package, Image, CheckCircle, XCircle, AlertCircle, User, Clock, UserX } from "lucide-react";
+import {
+  Package,
+  Image,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  User,
+  Clock,
+  UserX,
+} from "lucide-react";
 import { CommonQuickStats } from "@/components/common-components/details-view/CommonQuickStats";
 import { CommonMetadata } from "@/components/common-components/details-view/CommonMetadata";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { TOUR_TYPE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { ImageModalImage } from "@/types/common-components-types";
+import { hexToRgba } from "@/utils/functions";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
 
 const TourTypeDetailsViewPage = () => {
   const params = useParams();
@@ -60,9 +63,7 @@ const TourTypeDetailsViewPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Tour Types", href: TOUR_TYPES_PAGE_URL },
-    { label: "View", href: TOUR_TYPES_PAGE_URL },
+    ...TOUR_TYPE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA,
     {
       label: tourType?.typeName || "Details",
       href: `${TOUR_TYPES_PAGE_URL}/${typeId}`,
@@ -111,13 +112,15 @@ const TourTypeDetailsViewPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(TOUR_TYPES_PAGE_URL);
+  const handleBack = () => router.back();
 
   const handleEdit = () =>
-    router.push(`${TOUR_TYPES_PAGE_URL}/${typeId}?name=${tourType?.typeName}`);
+    router.push(`${TOUR_TYPE_UPDATE_URL}/${typeId}?name=${tourType?.typeName}`);
 
   const handleDelete = () =>
-    router.push(`${TOUR_TYPES_PAGE_URL}/${typeId}?name=${tourType?.typeName}`);
+    router.push(
+      `${TOUR_TYPE_TERMINATE_URL}/${typeId}?name=${tourType?.typeName}`,
+    );
 
   const handleShare = () => {
     if (navigator.share) {

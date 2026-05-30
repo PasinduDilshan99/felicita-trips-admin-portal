@@ -1,9 +1,7 @@
-// app/tour-categories/view/[categoryId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { TourCategoryService } from "@/services/tourCategoryService";
 import {
   TourCategoryDetails,
@@ -11,9 +9,7 @@ import {
 } from "@/types/tour-category-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useImageGallery } from "@/hooks/useImageGallery";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
 import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
 import { CommonQuickStats } from "@/components/common-components/details-view/CommonQuickStats";
@@ -21,10 +17,6 @@ import { CommonMetadata } from "@/components/common-components/details-view/Comm
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-
-// Import sub-components
-
-// Icons
 import {
   Package,
   Image,
@@ -34,23 +26,15 @@ import {
   User,
   Clock,
   UserX,
-  Tag,
 } from "lucide-react";
-
-// Constants for routing
-import { TOUR_CATEGORIES_PAGE_URL } from "@/utils/urls";
+import { TOUR_CATEGORIES_PAGE_URL, TOUR_CATEGORY_TERMINATE_URL, TOUR_CATEGORY_UPDATE_URL } from "@/utils/urls";
 import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
 import { TourCategoryOverview } from "@/components/tour-types-components/tour-category-details-components/TourCategoryOverview";
 import { TourCategoryToursList } from "@/components/tour-types-components/tour-category-details-components/TourCategoryToursList";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { ImageModalImage } from "@/types/common-components-types";
+import { hexToRgba } from "@/utils/functions";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { TOUR_CATEGORY_VIEW_DETAILS_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const TourCategoryDetailsViewPage = () => {
   const params = useParams();
@@ -80,9 +64,7 @@ const TourCategoryDetailsViewPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Tour Categories", href: TOUR_CATEGORIES_PAGE_URL },
-    { label: "View", href: TOUR_CATEGORIES_PAGE_URL },
+    ...TOUR_CATEGORY_VIEW_DETAILS_PAGE_BREADCRUMB_DATA,
     {
       label: tourCategory?.categoryName || "Details",
       href: `${TOUR_CATEGORIES_PAGE_URL}/${categoryId}`,
@@ -133,16 +115,16 @@ const TourCategoryDetailsViewPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(TOUR_CATEGORIES_PAGE_URL);
+  const handleBack = () => router.back();
 
   const handleEdit = () =>
     router.push(
-      `${TOUR_CATEGORIES_PAGE_URL}/${categoryId}?name=${tourCategory?.categoryName}`,
+      `${TOUR_CATEGORY_UPDATE_URL}/${categoryId}?name=${tourCategory?.categoryName}`,
     );
 
   const handleDelete = () =>
     router.push(
-      `${TOUR_CATEGORIES_PAGE_URL}/${categoryId}?name=${tourCategory?.categoryName}`,
+      `${TOUR_CATEGORY_TERMINATE_URL}/${categoryId}?name=${tourCategory?.categoryName}`,
     );
 
   const handleShare = () => {
