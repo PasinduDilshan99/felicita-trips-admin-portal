@@ -1,5 +1,6 @@
 // types/activity-category-types.ts
 
+import { ActivityIdName } from "./activity-types";
 import { ApiResponse } from "./common-types";
 
 // Image Types
@@ -143,4 +144,63 @@ export type TerminateActivityCategoryApiResponse =
 // Get Activity Category Details Request
 export interface GetActivityCategoryDetailsRequest {
   id: number;
+}
+
+export interface ActivityCategoryFilterParams {
+  name: string | null;
+  status: string | null;
+  pageSize: number;
+  pageNumber: number;
+  sortBy: string;
+  sortDirection: "ASC" | "DESC";
+}
+
+export interface ActivityCategoryCardProps {
+  category: ActivityCategory;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface ActivityCategoryListCardProps {
+  category: ActivityCategory;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface ActivityCategoryOverviewProps {
+  name: string;
+  description: string;
+  color: string;
+  hoverColor: string;
+}
+
+export interface ActivityCategoryActivitiesListProps {
+  primaryActivities: PrimaryActivity[];
+  otherActivities: OtherActivity[];
+  categoryColor: string;
+  onViewActivity: (activityId: number, activityName: string) => void;
+}
+
+export interface ActivityCategoryReadOnlyDetailsProps {
+  category: ActivityCategoryDetails;
+  allActivities: ActivityIdName[];
+  loadingActivities: boolean;
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+  onAddActivity: (activityId: number) => void;
+  onRemoveActivity: (activityId: number, isPrimary: boolean) => void;
+  onMakePrimary: (activityId: number) => void;
+  onRemovePrimary: (activityId: number) => void;
+  onRemoveImage: (imageId: number) => void;
+  onAddNewImage: (
+    file: File,
+    name: string,
+    description: string,
+  ) => Promise<void>;
+  onUpdateImage: (imageId: number, name: string, description: string) => void;
+  uploadingImages: boolean;
+  theme: any;
+}
+
+export interface ActivityCategorySearchItem {
+  id: number;
+  name: string;
 }

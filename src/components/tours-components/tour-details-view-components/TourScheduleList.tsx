@@ -1,39 +1,25 @@
-// components/tours-components/tour-details-view-components/TourScheduleList.tsx
 "use client";
 
 import React, { useState } from "react";
-import { Calendar, Clock, ChevronDown, ChevronUp, FileText, AlertCircle } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  AlertCircle,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface Schedule {
-  scheduleId: number;
-  scheduleName: string;
-  assumeStartDate: string;
-  assumeEndDate: string;
-  durationStart: number;
-  durationEnd: number;
-  specialNote: string;
-  scheduleDescription: string;
-}
-
-interface TourScheduleListProps {
-  schedules: Schedule[];
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { hexToRgba } from "@/utils/functions";
+import { TourScheduleListProps } from "@/types/tour-types";
 
 export const TourScheduleList: React.FC<TourScheduleListProps> = ({
   schedules,
 }) => {
   const { theme } = useTheme();
-  const [expandedSchedules, setExpandedSchedules] = useState<Set<number>>(new Set());
+  const [expandedSchedules, setExpandedSchedules] = useState<Set<number>>(
+    new Set(),
+  );
 
   const toggleSchedule = (id: number) => {
     setExpandedSchedules((prev) => {
@@ -69,7 +55,10 @@ export const TourScheduleList: React.FC<TourScheduleListProps> = ({
           className="px-4 sm:px-6 py-3 sm:py-4"
           style={{ borderBottom: `1px solid ${theme.border}` }}
         >
-          <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+          <h2
+            className="text-base sm:text-lg font-semibold"
+            style={{ color: theme.text }}
+          >
             Tour Schedules
           </h2>
         </div>
@@ -95,7 +84,10 @@ export const TourScheduleList: React.FC<TourScheduleListProps> = ({
         className="px-4 sm:px-6 py-3 sm:py-4"
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
-        <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+        <h2
+          className="text-base sm:text-lg font-semibold"
+          style={{ color: theme.text }}
+        >
           Tour Schedules ({schedules.length})
         </h2>
         <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
@@ -121,32 +113,56 @@ export const TourScheduleList: React.FC<TourScheduleListProps> = ({
                 onClick={() => toggleSchedule(schedule.scheduleId)}
                 className="w-full flex items-center justify-between p-3 sm:p-4 text-left cursor-pointer transition-colors duration-200 hover:bg-opacity-50"
                 style={{
-                  backgroundColor: isExpanded ? hexToRgba(theme.primary, 0.05) : "transparent",
+                  backgroundColor: isExpanded
+                    ? hexToRgba(theme.primary, 0.05)
+                    : "transparent",
                 }}
               >
                 <div className="flex-1">
-                  <h3 className="font-semibold text-sm sm:text-base" style={{ color: theme.text }}>
+                  <h3
+                    className="font-semibold text-sm sm:text-base"
+                    style={{ color: theme.text }}
+                  >
                     {schedule.scheduleName}
                   </h3>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
                     <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" style={{ color: theme.textSecondary }} />
-                      <span className="text-xs" style={{ color: theme.textSecondary }}>
-                        {formatDate(schedule.assumeStartDate)} - {formatDate(schedule.assumeEndDate)}
+                      <Calendar
+                        className="w-3 h-3"
+                        style={{ color: theme.textSecondary }}
+                      />
+                      <span
+                        className="text-xs"
+                        style={{ color: theme.textSecondary }}
+                      >
+                        {formatDate(schedule.assumeStartDate)} -{" "}
+                        {formatDate(schedule.assumeEndDate)}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" style={{ color: theme.textSecondary }} />
-                      <span className="text-xs" style={{ color: theme.textSecondary }}>
+                      <Clock
+                        className="w-3 h-3"
+                        style={{ color: theme.textSecondary }}
+                      />
+                      <span
+                        className="text-xs"
+                        style={{ color: theme.textSecondary }}
+                      >
                         {schedule.durationStart} - {schedule.durationEnd} days
                       </span>
                     </div>
                   </div>
                 </div>
                 {isExpanded ? (
-                  <ChevronUp className="w-4 h-4" style={{ color: theme.textSecondary }} />
+                  <ChevronUp
+                    className="w-4 h-4"
+                    style={{ color: theme.textSecondary }}
+                  />
                 ) : (
-                  <ChevronDown className="w-4 h-4" style={{ color: theme.textSecondary }} />
+                  <ChevronDown
+                    className="w-4 h-4"
+                    style={{ color: theme.textSecondary }}
+                  />
                 )}
               </button>
 
@@ -155,8 +171,14 @@ export const TourScheduleList: React.FC<TourScheduleListProps> = ({
                 <div className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-3">
                   {schedule.scheduleDescription && (
                     <div className="flex gap-2">
-                      <FileText className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: theme.textSecondary }} />
-                      <p className="text-xs sm:text-sm" style={{ color: theme.textSecondary }}>
+                      <FileText
+                        className="w-3.5 h-3.5 mt-0.5 flex-shrink-0"
+                        style={{ color: theme.textSecondary }}
+                      />
+                      <p
+                        className="text-xs sm:text-sm"
+                        style={{ color: theme.textSecondary }}
+                      >
                         {schedule.scheduleDescription}
                       </p>
                     </div>

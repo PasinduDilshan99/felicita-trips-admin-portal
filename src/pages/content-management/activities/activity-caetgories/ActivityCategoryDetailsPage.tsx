@@ -1,9 +1,7 @@
-// app/activity-categories/view/[categoryId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { ActivityCategoryService } from "@/services/activityCategoryService";
 import {
   ActivityCategoryDetails,
@@ -11,9 +9,7 @@ import {
 } from "@/types/activity-category-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useImageGallery } from "@/hooks/useImageGallery";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
 import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
 import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
@@ -22,9 +18,6 @@ import { CommonMetadata } from "@/components/common-components/details-view/Comm
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-
-// Import sub-components
-// Icons
 import {
   Tag,
   Image,
@@ -35,20 +28,18 @@ import {
   Clock,
   Activity,
 } from "lucide-react";
-
-// Constants for routing
-import { ACTIVITIES_VIEW_PAGE_URL } from "@/utils/urls";
+import {
+  ACTIVITY_CATEGORY_DETAILS_VIEW_URL,
+  ACTIVITY_CATEGORY_TERMINATE_URL,
+  ACTIVITY_CATEGORY_UPDATE_URL,
+  ACTIVITY_DETAILS_VIEW_PAGE_URL,
+} from "@/utils/urls";
 import { ActivityCategoryOverview } from "@/components/activity-categories-components/activity-category-details-view-components/ActivityCategoryOverview";
 import { ActivityCategoryActivitiesList } from "@/components/activity-categories-components/activity-category-details-view-components/ActivityCategoryActivitiesList";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { ACTIVITY_CATEGORY_DETAILS_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { ImageModalImage } from "@/types/common-components-types";
+import { hexToRgba } from "@/utils/functions";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
 
 const ActivityCategoryDetailsPage = () => {
   const params = useParams();
@@ -77,12 +68,10 @@ const ActivityCategoryDetailsPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Activity Categories", href: ACTIVITIES_VIEW_PAGE_URL },
-    { label: "View", href: ACTIVITIES_VIEW_PAGE_URL },
+    ...ACTIVITY_CATEGORY_DETAILS_VIEW_PAGE_BREADCRUMB_DATA,
     {
       label: activityCategory?.categoryName || "Details",
-      href: `${ACTIVITIES_VIEW_PAGE_URL}/${categoryId}`,
+      href: `${ACTIVITY_CATEGORY_DETAILS_VIEW_URL}/${categoryId}`,
     },
   ];
 
@@ -130,16 +119,16 @@ const ActivityCategoryDetailsPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(ACTIVITIES_VIEW_PAGE_URL);
+  const handleBack = () => router.back();
 
   const handleEdit = () =>
     router.push(
-      `${ACTIVITIES_VIEW_PAGE_URL}/${categoryId}?name=${activityCategory?.categoryName}`,
+      `${ACTIVITY_CATEGORY_UPDATE_URL}/${categoryId}?name=${activityCategory?.categoryName}`,
     );
 
   const handleDelete = () =>
     router.push(
-      `${ACTIVITIES_VIEW_PAGE_URL}/${categoryId}?name=${activityCategory?.categoryName}`,
+      `${ACTIVITY_CATEGORY_TERMINATE_URL}/${categoryId}?name=${activityCategory?.categoryName}`,
     );
 
   const handleShare = () => {
@@ -155,8 +144,10 @@ const ActivityCategoryDetailsPage = () => {
     }
   };
 
-  const handleViewActivity = (activityId: number) => {
-    router.push(`${ACTIVITIES_VIEW_PAGE_URL}/${activityId}`);
+  const handleViewActivity = (activityId: number, activityName: string) => {
+    router.push(
+      `${ACTIVITY_DETAILS_VIEW_PAGE_URL}/${activityId}?name=${activityName}`,
+    );
   };
 
   // Status badge component

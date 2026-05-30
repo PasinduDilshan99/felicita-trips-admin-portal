@@ -23,3 +23,20 @@ export const ACTIVITIES_VIEW_SORTING_OPTIONS: SortOption[] = [
   { value: "price_local", label: "Price (Local)" },
   { value: "duration_hours", label: "Duration" },
 ];
+
+export const ACTIVITY_CATEGORY_VIEW_SORTING_OPTIONS: SortOption[] = [
+  { value: "categoryName", label: "Category Name" },
+  { value: "createdAt", label: "Created Date" },
+  { value: "categoryStatus", label: "Status" },
+  { value: "numberOfActivities", label: "Number of Activities" },
+  { value: "updatedAt", label: "Updated Date" },
+];
+
+export const TOURS_VIEW_SORTING_OPTIONS = [
+  { value: "tourName", label: "Tour Name" },
+  { value: "tourId", label: "Tour ID" },
+  { value: "duration", label: "Duration" },
+  { value: "tourTypeName", label: "Tour Type" },
+  { value: "tourCategoryName", label: "Category" },
+  { value: "seasonName", label: "Season" },
+];

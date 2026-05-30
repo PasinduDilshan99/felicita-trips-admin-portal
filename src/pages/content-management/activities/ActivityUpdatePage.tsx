@@ -1,9 +1,7 @@
-// app/activities/update/page.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import {
   UpdateActivityRequest,
   AddCategoryRequest,
@@ -13,15 +11,13 @@ import {
   ActivityRequirementRequest,
   UpdateRequirementRequest,
   ActivityCategoryFullDetail,
+  Requirement,
 } from "@/types/activity-types";
 import { OtherService } from "@/services/otherService";
 import {
   Activity,
   ActivityIdName,
-  ActivityCategoryDetail,
   ActivityImage,
-  Requirement,
-  Schedule,
 } from "@/types/activity-types";
 import { ActivityCategory, SeasonType } from "@/types/common-types";
 import { Search, Edit, Save, RefreshCw, Loader2 } from "lucide-react";
@@ -39,6 +35,8 @@ import { ACTIVITY_DETAILS_VIEW_PAGE_URL } from "@/utils/urls";
 import { ActivityService } from "@/services/activityService";
 import ActivityDetailsForm from "@/components/activities-components/activity-update-components/ActivityDetailsForm";
 import { UpdateConfirmationModal } from "@/components/common-components/UpdateConfirmationModal";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITIES_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const ActivityUpdatePage = () => {
   const searchParams = useSearchParams();
@@ -53,11 +51,7 @@ const ActivityUpdatePage = () => {
 
   const initialActivityName = searchParams?.get("activity-name") || "";
   const initialActivityId = searchParams?.get("activity-id") || "";
-
-  // State for activities list
   const [activities, setActivities] = useState<ActivityIdName[]>([]);
-
-  // State for selected activity
   const [selectedActivity, setSelectedActivity] =
     useState<ActivityIdName | null>(
       initialActivityId && initialActivityName
@@ -68,20 +62,13 @@ const ActivityUpdatePage = () => {
         : null,
     );
 
-  // State for original activity details
   const [originalActivity, setOriginalActivity] = useState<Activity | null>(
     null,
   );
-
-  // State for edited activity
   const [editedActivity, setEditedActivity] = useState<Activity | null>(null);
-
-  // State for removed items
   const [removedImages, setRemovedImages] = useState<number[]>([]);
   const [removedCategories, setRemovedCategories] = useState<number[]>([]);
   const [removedRequirements, setRemovedRequirements] = useState<number[]>([]);
-
-  // State for new/updated items
   const [newImages, setNewImages] = useState<ActivityImageRequest[]>([]);
   const [updatedImages, setUpdatedImages] = useState<UpdateImageRequest[]>([]);
   const [newCategories, setNewCategories] = useState<AddCategoryRequest[]>([]);
@@ -94,8 +81,6 @@ const ActivityUpdatePage = () => {
   const [updatedRequirements, setUpdatedRequirements] = useState<
     UpdateRequirementRequest[]
   >([]);
-
-  // UI state
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -117,15 +102,6 @@ const ActivityUpdatePage = () => {
     ActivityCategory[]
   >([]);
   const [availableSeasons, setAvailableSeasons] = useState<SeasonType[]>([]);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Activities", href: ACTIVITY_DETAILS_VIEW_PAGE_URL },
-    {
-      label: "Update",
-      href: ACTIVITY_DETAILS_VIEW_PAGE_URL,
-    },
-  ];
 
   // Extract data from context
   useEffect(() => {
@@ -257,7 +233,6 @@ const ActivityUpdatePage = () => {
     }
   };
 
-  // Handle field changes
   const handleFieldChange = (field: string, value: any) => {
     if (!editedActivity) return;
 
@@ -267,7 +242,6 @@ const ActivityUpdatePage = () => {
     });
   };
 
-  // Handle category changes
   const handleCategoryPrimaryChange = (
     categoryId: number,
     isPrimary: boolean,
@@ -278,7 +252,6 @@ const ActivityUpdatePage = () => {
       cat.id === categoryId ? { ...cat, is_primary: isPrimary } : cat,
     );
 
-    // Track category update if it exists in original
     const originalCat = originalActivity?.activities_category.find(
       (c) => c.id === categoryId,
     );
@@ -308,7 +281,6 @@ const ActivityUpdatePage = () => {
     });
   };
 
-  // Handle category removal
   const handleRemoveCategory = (categoryId: number) => {
     if (!editedActivity) return;
 
@@ -354,7 +326,6 @@ const ActivityUpdatePage = () => {
     }
   };
 
-  // Handle image removal
   const handleRemoveImage = (imageId: number) => {
     if (!editedActivity) return;
 
@@ -366,7 +337,6 @@ const ActivityUpdatePage = () => {
     });
   };
 
-  // Handle requirement removal
   const handleRemoveRequirement = (requirementId: number) => {
     if (!editedActivity) return;
 
@@ -380,7 +350,6 @@ const ActivityUpdatePage = () => {
     });
   };
 
-  // Handle new requirement addition
   const handleAddNewRequirement = (requirement: ActivityRequirementRequest) => {
     setNewRequirements((prev) => [...prev, requirement]);
 
@@ -400,7 +369,6 @@ const ActivityUpdatePage = () => {
     }
   };
 
-  // Handle update existing requirement
   const handleUpdateRequirement = (
     updatedRequirement: UpdateRequirementRequest,
   ) => {
@@ -438,7 +406,6 @@ const ActivityUpdatePage = () => {
     });
   };
 
-  // Handle update existing image
   const handleUpdateImage = (updatedImage: UpdateImageRequest) => {
     if (!editedActivity) return;
 
@@ -470,7 +437,6 @@ const ActivityUpdatePage = () => {
     });
   };
 
-  // Check if there are any changes
   const hasChanges = useCallback(() => {
     if (!originalActivity || !editedActivity) return false;
 
@@ -513,7 +479,6 @@ const ActivityUpdatePage = () => {
     updatedRequirements,
   ]);
 
-  // Prepare update data
   const prepareUpdateData = (): UpdateActivityRequest | null => {
     if (!editedActivity || !selectedActivity) return null;
 
@@ -543,7 +508,6 @@ const ActivityUpdatePage = () => {
     };
   };
 
-  // Handle update submission
   const handleUpdateSubmit = async () => {
     const updateData = prepareUpdateData();
     if (!updateData) return;
@@ -561,7 +525,7 @@ const ActivityUpdatePage = () => {
         type: "success",
         title: "Update Successful!",
         message: `${editedActivity?.name} has been updated successfully.`,
-        actionLink: `${ACTIVITY_DETAILS_VIEW_PAGE_URL}/view?id=${selectedActivity?.activityId}`,
+        actionLink: `${ACTIVITY_DETAILS_VIEW_PAGE_URL}/${selectedActivity?.activityId}?name=${selectedActivity?.activityName}`,
       });
 
       setShowConfirmModal(false);
@@ -719,7 +683,6 @@ const ActivityUpdatePage = () => {
     return changes;
   };
 
-  // Convert activities to search items format
   const searchItems: SearchItem[] = activities.map((act) => ({
     id: act.activityId,
     name: act.activityName,
@@ -732,7 +695,6 @@ const ActivityUpdatePage = () => {
       }
     : null;
 
-  // Show loading state if common data is loading
   if (commonLoading) {
     return (
       <CommonLoading
@@ -743,7 +705,6 @@ const ActivityUpdatePage = () => {
     );
   }
 
-  // Show error state if common data failed to load
   if (commonError) {
     return (
       <CommonErrorState
@@ -765,7 +726,6 @@ const ActivityUpdatePage = () => {
       className="min-h-screen transition-colors duration-300"
       style={{ backgroundColor: theme.background }}
     >
-      {/* Toast Notifications */}
       {toast && (
         <ToastNotification
           type={toast.type}
@@ -777,7 +737,6 @@ const ActivityUpdatePage = () => {
         />
       )}
 
-      {/* Header with Breadcrumb */}
       <div
         className="sticky top-0 z-10 backdrop-blur-sm border-b transition-colors duration-300"
         style={{
@@ -789,14 +748,12 @@ const ActivityUpdatePage = () => {
           <PageHeader
             title="Update Activity"
             description="Edit and update existing activity information"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITIES_UPDATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Section - Only show when no activity is selected */}
         {!selectedActivity && (
           <div
             className="rounded-2xl shadow-lg p-8 mb-8 transition-all duration-300"
@@ -831,7 +788,6 @@ const ActivityUpdatePage = () => {
           </div>
         )}
 
-        {/* Selected Activity Info Bar */}
         {selectedActivity && (
           <SelectedItemBar
             item={{
@@ -847,7 +803,6 @@ const ActivityUpdatePage = () => {
           />
         )}
 
-        {/* Loading Details */}
         {loadingDetails && (
           <CommonLoading
             message="Loading activity details..."
@@ -858,7 +813,6 @@ const ActivityUpdatePage = () => {
           />
         )}
 
-        {/* Activity Details Form */}
         {editedActivity && selectedActivity && (
           <ActivityDetailsForm
             activity={editedActivity}
@@ -885,7 +839,6 @@ const ActivityUpdatePage = () => {
           />
         )}
 
-        {/* Action Buttons */}
         {editedActivity && originalActivity && (
           <div
             className="rounded-2xl shadow-lg p-8 mt-8 transition-colors duration-300"
@@ -933,7 +886,6 @@ const ActivityUpdatePage = () => {
               </button>
             </div>
 
-            {/* Uploading Indicator */}
             {uploadingImages && (
               <div
                 className="mt-6 p-4 rounded-xl transition-colors duration-300"
@@ -963,7 +915,6 @@ const ActivityUpdatePage = () => {
               </div>
             )}
 
-            {/* Change Indicator */}
             {hasChanges() && !uploadingImages && (
               <div
                 className="mt-6 p-4 rounded-xl transition-colors duration-300"
@@ -991,7 +942,6 @@ const ActivityUpdatePage = () => {
           </div>
         )}
 
-        {/* Confirmation Modal */}
         {showConfirmModal && originalActivity && editedActivity && (
           <UpdateConfirmationModal
             isOpen={showConfirmModal}

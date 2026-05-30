@@ -1,25 +1,10 @@
-// components/activities-components/view-activity-details-components/ActivityPricing.tsx
 "use client";
 
 import React from "react";
 import { DollarSign, Users, TrendingUp } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface ActivityPricingProps {
-  priceLocal: number;
-  priceForeigners: number;
-  minParticipants: number;
-  maxParticipants: number;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { ActivityPricingProps } from "@/types/activity-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const ActivityPricing: React.FC<ActivityPricingProps> = ({
   priceLocal,
@@ -48,55 +33,82 @@ export const ActivityPricing: React.FC<ActivityPricingProps> = ({
       }}
     >
       <div
-        className="px-6 py-4"
+        className="px-4 sm:px-6 py-3 sm:py-4"
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
-        <h2 className="text-lg font-semibold" style={{ color: theme.text }}>
+        <h2
+          className="text-base sm:text-lg font-semibold"
+          style={{ color: theme.text }}
+        >
           Pricing & Participants
         </h2>
       </div>
 
-      <div className="px-6 py-5 space-y-5">
+      <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4">
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div
-            className="rounded-xl p-4 transition-all duration-200"
+            className="rounded-xl p-3 sm:p-4 transition-all duration-200"
             style={{
               backgroundColor: hexToRgba(theme.primary, 0.06),
               border: `1px solid ${hexToRgba(theme.primary, 0.15)}`,
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="w-4 h-4" style={{ color: theme.primary }} />
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <DollarSign
+                className="w-4 h-4"
+                style={{ color: theme.primary }}
+              />
+              <p
+                className="text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+                style={{ color: theme.textSecondary }}
+              >
                 Local Price
               </p>
             </div>
-            <p className="text-2xl font-bold" style={{ color: theme.primary }}>
+            <p
+              className="text-xl sm:text-2xl font-bold"
+              style={{ color: theme.primary }}
+            >
               {formatPrice(priceLocal)}
             </p>
-            <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs mt-1"
+              style={{ color: theme.textSecondary }}
+            >
               per person
             </p>
           </div>
 
           <div
-            className="rounded-xl p-4 transition-all duration-200"
+            className="rounded-xl p-3 sm:p-4 transition-all duration-200"
             style={{
               backgroundColor: hexToRgba(theme.accent || theme.primary, 0.06),
               border: `1px solid ${hexToRgba(theme.accent || theme.primary, 0.15)}`,
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-4 h-4" style={{ color: theme.accent || theme.primary }} />
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <TrendingUp
+                className="w-4 h-4"
+                style={{ color: theme.accent || theme.primary }}
+              />
+              <p
+                className="text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+                style={{ color: theme.textSecondary }}
+              >
                 Foreigner Price
               </p>
             </div>
-            <p className="text-2xl font-bold" style={{ color: theme.accent || theme.primary }}>
+            <p
+              className="text-xl sm:text-2xl font-bold"
+              style={{ color: theme.accent || theme.primary }}
+            >
               {formatPrice(priceForeigners)}
             </p>
-            <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs mt-1"
+              style={{ color: theme.textSecondary }}
+            >
               per person
             </p>
           </div>
@@ -104,7 +116,7 @@ export const ActivityPricing: React.FC<ActivityPricingProps> = ({
 
         {/* Participant Info */}
         <div
-          className="rounded-xl p-4"
+          className="rounded-xl p-3 sm:p-4"
           style={{
             backgroundColor: hexToRgba(theme.success, 0.06),
             border: `1px solid ${hexToRgba(theme.success, 0.15)}`,
@@ -112,14 +124,23 @@ export const ActivityPricing: React.FC<ActivityPricingProps> = ({
         >
           <div className="flex items-center gap-2 mb-2">
             <Users className="w-4 h-4" style={{ color: theme.success }} />
-            <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+              style={{ color: theme.textSecondary }}
+            >
               Group Size
             </p>
           </div>
-          <p className="text-lg font-semibold" style={{ color: theme.success }}>
+          <p
+            className="text-base sm:text-lg font-semibold"
+            style={{ color: theme.success }}
+          >
             {minParticipants} - {maxParticipants} participants
           </p>
-          <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-[10px] sm:text-xs mt-1"
+            style={{ color: theme.textSecondary }}
+          >
             Minimum {minParticipants} participants required to run this activity
           </p>
         </div>

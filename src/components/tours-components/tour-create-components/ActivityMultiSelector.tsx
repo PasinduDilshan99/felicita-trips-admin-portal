@@ -2,27 +2,17 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Activity, ChevronDown, Check, Search, AlertCircle, X } from "lucide-react";
+import {
+  Activity,
+  ChevronDown,
+  Check,
+  Search,
+  AlertCircle,
+  X,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ActivityService } from "@/services/activityService";
-
-interface ActivityItem {
-  activityId: number;
-  name: string;
-  description?: string;
-  durationHours?: number;
-  priceLocal?: number;
-  priceForeigners?: number;
-}
-
-interface ActivityMultiSelectorProps {
-  destinationId?: number;
-  selectedActivities: number[];
-  onActivitiesChange: (activities: number[]) => void;
-  error?: string;
-  placeholder?: string;
-  disabled?: boolean;
-}
+import { ActivityItem, ActivityMultiSelectorProps } from "@/types/tour-types";
 
 export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
   destinationId,
@@ -37,7 +27,11 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -49,7 +43,8 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
       const fetchActivities = async () => {
         try {
           setLoading(true);
-          const response = await ActivityService.getActivitiesByDestinationId(destinationId);
+          const response =
+            await ActivityService.getActivitiesByDestinationId(destinationId);
           if (response.code === 200 && response.data) {
             setActivities(
               response.data.map((activity) => ({
@@ -59,7 +54,7 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
                 durationHours: activity.durationHours,
                 priceLocal: activity.priceLocal,
                 priceForeigners: activity.priceForeigners,
-              }))
+              })),
             );
           } else {
             setActivities([]);
@@ -115,7 +110,9 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
       const clickedInsideWrapper = wrapperRef.current?.contains(target);
-      const clickedInsidePortal = target?.closest?.("[data-activity-multi-dropdown]");
+      const clickedInsidePortal = target?.closest?.(
+        "[data-activity-multi-dropdown]",
+      );
 
       if (!clickedInsideWrapper && !clickedInsidePortal) {
         setIsOpen(false);
@@ -129,28 +126,30 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
 
   const toggleActivity = (activityId: number) => {
     if (selectedActivities.includes(activityId)) {
-      onActivitiesChange(selectedActivities.filter(id => id !== activityId));
+      onActivitiesChange(selectedActivities.filter((id) => id !== activityId));
     } else {
       onActivitiesChange([...selectedActivities, activityId]);
     }
   };
 
   const removeActivity = (activityId: number) => {
-    onActivitiesChange(selectedActivities.filter(id => id !== activityId));
+    onActivitiesChange(selectedActivities.filter((id) => id !== activityId));
   };
 
   const getActivityName = (activityId: number): string => {
-    const activity = activities.find(a => a.activityId === activityId);
+    const activity = activities.find((a) => a.activityId === activityId);
     return activity?.name || `Activity ${activityId}`;
   };
 
   const filteredActivities = activities.filter((activity) =>
-    activity.name.toLowerCase().includes(searchQuery.toLowerCase())
+    activity.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const isDisabled = disabled || !destinationId || destinationId === 0;
 
-  const selectedActivityObjects = activities.filter(a => selectedActivities.includes(a.activityId));
+  const selectedActivityObjects = activities.filter((a) =>
+    selectedActivities.includes(a.activityId),
+  );
 
   const dropdownContent = (
     <div
@@ -165,7 +164,8 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
         border: `1px solid ${theme.border}`,
         borderRadius: "0.75rem",
         overflow: "hidden",
-        boxShadow: "0 10px 25px -5px rgba(0,0,0,0.15), 0 10px 10px -5px rgba(0,0,0,0.06)",
+        boxShadow:
+          "0 10px 25px -5px rgba(0,0,0,0.15), 0 10px 10px -5px rgba(0,0,0,0.06)",
       }}
     >
       {/* Search */}
@@ -201,15 +201,24 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
       {/* List */}
       <div className="max-h-64 overflow-y-auto">
         {loading ? (
-          <div className="p-4 text-center" style={{ color: theme.textSecondary }}>
+          <div
+            className="p-4 text-center"
+            style={{ color: theme.textSecondary }}
+          >
             <div
               className="inline-block w-5 h-5 border-2 rounded-full animate-spin"
-              style={{ borderColor: theme.primary, borderTopColor: "transparent" }}
+              style={{
+                borderColor: theme.primary,
+                borderTopColor: "transparent",
+              }}
             />
             <p className="mt-2 text-sm">Loading activities...</p>
           </div>
         ) : filteredActivities.length === 0 ? (
-          <div className="p-4 text-center text-sm" style={{ color: theme.textSecondary }}>
+          <div
+            className="p-4 text-center text-sm"
+            style={{ color: theme.textSecondary }}
+          >
             {searchQuery
               ? "No activities match your search"
               : "No activities found for this destination"}
@@ -224,7 +233,9 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
                 onClick={() => toggleActivity(activity.activityId)}
                 className="w-full px-4 py-3 text-left flex items-start justify-between transition-colors hover:bg-opacity-10"
                 style={{
-                  backgroundColor: isSelected ? `${theme.primary}10` : "transparent",
+                  backgroundColor: isSelected
+                    ? `${theme.primary}10`
+                    : "transparent",
                 }}
                 onMouseEnter={(e) => {
                   if (!isSelected) {
@@ -242,28 +253,45 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
                     <span
                       className="w-4 h-4 rounded border-2 flex items-center justify-center"
                       style={{
-                        backgroundColor: isSelected ? theme.primary : "transparent",
+                        backgroundColor: isSelected
+                          ? theme.primary
+                          : "transparent",
                         borderColor: isSelected ? theme.primary : theme.border,
                       }}
                     >
-                      {isSelected && <Check className="w-3 h-3" style={{ color: "white" }} />}
+                      {isSelected && (
+                        <Check className="w-3 h-3" style={{ color: "white" }} />
+                      )}
                     </span>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {activity.name}
                     </p>
                   </div>
                   {activity.durationHours && (
-                    <p className="text-xs mt-1 ml-6" style={{ color: theme.textSecondary }}>
+                    <p
+                      className="text-xs mt-1 ml-6"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Duration: {activity.durationHours} hours
                     </p>
                   )}
                   {activity.priceLocal && (
-                    <p className="text-xs ml-6" style={{ color: theme.textSecondary }}>
-                      From: Rs {activity.priceLocal} / ${activity.priceForeigners}
+                    <p
+                      className="text-xs ml-6"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      From: Rs {activity.priceLocal} / $
+                      {activity.priceForeigners}
                     </p>
                   )}
                   {activity.description && (
-                    <p className="text-xs mt-1 ml-6 opacity-75" style={{ color: theme.textSecondary }}>
+                    <p
+                      className="text-xs mt-1 ml-6 opacity-75"
+                      style={{ color: theme.textSecondary }}
+                    >
                       {activity.description.substring(0, 100)}
                       {activity.description.length > 100 ? "..." : ""}
                     </p>
@@ -278,8 +306,14 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
   );
 
   return (
-    <div className={`relative ${isDisabled ? "opacity-60" : ""}`} ref={wrapperRef}>
-      <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+    <div
+      className={`relative ${isDisabled ? "opacity-60" : ""}`}
+      ref={wrapperRef}
+    >
+      <label
+        className="block text-xs font-medium mb-1"
+        style={{ color: theme.textSecondary }}
+      >
         Activities
       </label>
 
@@ -317,20 +351,27 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
         className="w-full px-3 py-2 rounded-lg border focus:outline-none text-left flex items-center justify-between transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         style={{
           backgroundColor: theme.background,
-          borderColor: error ? theme.error : isOpen ? theme.primary : theme.border,
+          borderColor: error
+            ? theme.error
+            : isOpen
+              ? theme.primary
+              : theme.border,
           color: theme.text,
         }}
       >
         <div className="flex items-center gap-2">
-          <Activity className="w-3.5 h-3.5" style={{ color: theme.textSecondary }} />
+          <Activity
+            className="w-3.5 h-3.5"
+            style={{ color: theme.textSecondary }}
+          />
           <span className="text-xs" style={{ color: theme.textSecondary }}>
             {isDisabled
               ? "Select destination first"
               : loading
-              ? "Loading activities..."
-              : selectedActivities.length > 0
-              ? `${selectedActivities.length} activity(ies) selected`
-              : placeholder}
+                ? "Loading activities..."
+                : selectedActivities.length > 0
+                  ? `${selectedActivities.length} activity(ies) selected`
+                  : placeholder}
           </span>
         </div>
         <ChevronDown
@@ -342,11 +383,16 @@ export const ActivityMultiSelector: React.FC<ActivityMultiSelectorProps> = ({
         />
       </button>
 
-      {isOpen && !isDisabled && typeof window !== "undefined" &&
+      {isOpen &&
+        !isDisabled &&
+        typeof window !== "undefined" &&
         createPortal(dropdownContent, document.body)}
 
       {error && (
-        <p className="mt-1 text-xs flex items-center gap-1" style={{ color: theme.error }}>
+        <p
+          className="mt-1 text-xs flex items-center gap-1"
+          style={{ color: theme.error }}
+        >
           <AlertCircle className="w-3 h-3" />
           {error}
         </p>

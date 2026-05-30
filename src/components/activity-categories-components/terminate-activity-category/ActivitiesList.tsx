@@ -1,68 +1,15 @@
-// components/activity-categories-components/terminate-activity-category-components/ActivitiesList.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { Activity, Star, AlertCircle } from "lucide-react";
-import { PrimaryActivity, OtherActivity } from "@/types/activity-category-types";
+import {
+  PrimaryActivity,
+  OtherActivity,
+} from "@/types/activity-category-types";
 import { useTheme } from "@/contexts/ThemeContext";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.04,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const activityVariants: Variants = {
-  hidden: { opacity: 0, x: -8 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-  hover: {
-    x: 4,
-    transition: { duration: 0.15 },
-  },
-};
-
-const emptyVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
+import { hexToRgba } from "@/utils/functions";
+import { activityBodyVariants, cardVariants, contentVariants, emptyVariants, headerVariants } from "@/app/animations/variants";
 
 interface ActivitiesListProps {
   title: string;
@@ -70,7 +17,11 @@ interface ActivitiesListProps {
   variant: "primary" | "secondary";
 }
 
-export const ActivitiesList: React.FC<ActivitiesListProps> = ({ title, activities, variant }) => {
+export const ActivitiesList: React.FC<ActivitiesListProps> = ({
+  title,
+  activities,
+  variant,
+}) => {
   const { theme } = useTheme();
 
   const getVariantColors = () => {
@@ -115,8 +66,14 @@ export const ActivitiesList: React.FC<ActivitiesListProps> = ({ title, activitie
           </h3>
         </div>
         <div className="px-4 py-4 text-center">
-          <AlertCircle size={24} className="mx-auto mb-2 opacity-30" style={{ color: theme.textSecondary }} />
-          <p className="text-xs" style={{ color: theme.textSecondary }}>No {title.toLowerCase()} found</p>
+          <AlertCircle
+            size={24}
+            className="mx-auto mb-2 opacity-30"
+            style={{ color: theme.textSecondary }}
+          />
+          <p className="text-xs" style={{ color: theme.textSecondary }}>
+            No {title.toLowerCase()} found
+          </p>
         </div>
       </motion.div>
     );
@@ -170,7 +127,7 @@ export const ActivitiesList: React.FC<ActivitiesListProps> = ({ title, activitie
           {activities.map((activity, idx) => (
             <motion.div
               key={activity.activityId}
-              variants={activityVariants}
+              variants={activityBodyVariants}
               initial="hidden"
               animate="visible"
               whileHover="hover"
@@ -188,10 +145,17 @@ export const ActivitiesList: React.FC<ActivitiesListProps> = ({ title, activitie
                   color: colors.color,
                 }}
               >
-                {variant === "primary" ? <Star size={13} /> : <Activity size={13} />}
+                {variant === "primary" ? (
+                  <Star size={13} />
+                ) : (
+                  <Activity size={13} />
+                )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate" style={{ color: theme.text }}>
+                <p
+                  className="text-sm font-medium truncate"
+                  style={{ color: theme.text }}
+                >
                   {activity.activityName}
                 </p>
                 <p className="text-xs" style={{ color: theme.textSecondary }}>

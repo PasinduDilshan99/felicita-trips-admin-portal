@@ -1,4 +1,3 @@
-// components/tours-components/tour-details-view-components/TourOverview.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -11,11 +10,11 @@ import {
   MessageCircle,
   ChevronDown,
   ChevronUp,
-  Info,
   ChevronRight,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { TourType, TourCategory } from "@/types/tour-types";
+import { hexToRgba } from "@/utils/functions";
 
 interface TourOverviewProps {
   description: string;
@@ -29,15 +28,6 @@ interface TourOverviewProps {
   assignToName: string;
   assignMessage: string;
 }
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
 
 export const TourOverview: React.FC<TourOverviewProps> = ({
   description,
@@ -61,8 +51,12 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
       ? description.slice(0, 400) + "..."
       : description;
 
-  const visibleTourTypes = showAllTourTypes ? tourTypeDtos : tourTypeDtos?.slice(0, 2);
-  const visibleCategories = showAllCategories ? tourCategoryDto : tourCategoryDto?.slice(0, 2);
+  const visibleTourTypes = showAllTourTypes
+    ? tourTypeDtos
+    : tourTypeDtos?.slice(0, 2);
+  const visibleCategories = showAllCategories
+    ? tourCategoryDto
+    : tourCategoryDto?.slice(0, 2);
 
   return (
     <div
@@ -77,7 +71,10 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
         className="px-4 sm:px-6 py-3 sm:py-4"
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
-        <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+        <h2
+          className="text-base sm:text-lg font-semibold"
+          style={{ color: theme.text }}
+        >
           Tour Overview
         </h2>
       </div>
@@ -86,60 +83,105 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
         {/* Basic Info Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div className="flex items-start gap-3">
-            <Clock className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+            <Clock
+              className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0"
+              style={{ color: theme.primary }}
+            />
             <div>
-              <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+                style={{ color: theme.textSecondary }}
+              >
                 Duration
               </p>
-              <p className="text-sm sm:text-base font-medium mt-0.5" style={{ color: theme.text }}>
+              <p
+                className="text-sm sm:text-base font-medium mt-0.5"
+                style={{ color: theme.text }}
+              >
                 {duration} {duration === 1 ? "day" : "days"}
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+            <Calendar
+              className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0"
+              style={{ color: theme.primary }}
+            />
             <div>
-              <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+                style={{ color: theme.textSecondary }}
+              >
                 Season
               </p>
-              <p className="text-sm sm:text-base font-medium mt-0.5" style={{ color: theme.text }}>
+              <p
+                className="text-sm sm:text-base font-medium mt-0.5"
+                style={{ color: theme.text }}
+              >
                 {seasonName}
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+            <MapPin
+              className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0"
+              style={{ color: theme.primary }}
+            />
             <div>
-              <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+                style={{ color: theme.textSecondary }}
+              >
                 Start Location
               </p>
-              <p className="text-sm sm:text-base font-medium mt-0.5" style={{ color: theme.text }}>
+              <p
+                className="text-sm sm:text-base font-medium mt-0.5"
+                style={{ color: theme.text }}
+              >
                 {startLocation}
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+            <MapPin
+              className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0"
+              style={{ color: theme.primary }}
+            />
             <div>
-              <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+                style={{ color: theme.textSecondary }}
+              >
                 End Location
               </p>
-              <p className="text-sm sm:text-base font-medium mt-0.5" style={{ color: theme.text }}>
+              <p
+                className="text-sm sm:text-base font-medium mt-0.5"
+                style={{ color: theme.text }}
+              >
                 {endLocation}
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <User className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+            <User
+              className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0"
+              style={{ color: theme.primary }}
+            />
             <div>
-              <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+                style={{ color: theme.textSecondary }}
+              >
                 Assigned To
               </p>
-              <p className="text-sm sm:text-base font-medium mt-0.5" style={{ color: theme.text }}>
+              <p
+                className="text-sm sm:text-base font-medium mt-0.5"
+                style={{ color: theme.text }}
+              >
                 {assignToName}
               </p>
             </div>
@@ -150,8 +192,14 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
         {tourTypeDtos && tourTypeDtos.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: theme.primary }} />
-              <p className="text-xs font-semibold" style={{ color: theme.primary }}>
+              <Tag
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                style={{ color: theme.primary }}
+              />
+              <p
+                className="text-xs font-semibold"
+                style={{ color: theme.primary }}
+              >
                 Tour Types ({tourTypeDtos.length})
               </p>
             </div>
@@ -170,12 +218,18 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
                       className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: theme.primary }}
                     />
-                    <h4 className="text-sm font-semibold" style={{ color: theme.text }}>
+                    <h4
+                      className="text-sm font-semibold"
+                      style={{ color: theme.text }}
+                    >
                       {tourType.tourTypeName}
                     </h4>
                   </div>
                   {tourType.tourTypeDescription && (
-                    <p className="text-xs sm:text-sm pl-4" style={{ color: theme.textSecondary }}>
+                    <p
+                      className="text-xs sm:text-sm pl-4"
+                      style={{ color: theme.textSecondary }}
+                    >
                       {tourType.tourTypeDescription}
                     </p>
                   )}
@@ -188,8 +242,12 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
                 className="flex items-center gap-1 text-xs font-medium mt-2 transition-colors hover:opacity-80"
                 style={{ color: theme.primary }}
               >
-                {showAllTourTypes ? "Show Less" : `Show All ${tourTypeDtos.length} Tour Types`}
-                <ChevronRight className={`w-3 h-3 transition-transform ${showAllTourTypes ? "rotate-90" : ""}`} />
+                {showAllTourTypes
+                  ? "Show Less"
+                  : `Show All ${tourTypeDtos.length} Tour Types`}
+                <ChevronRight
+                  className={`w-3 h-3 transition-transform ${showAllTourTypes ? "rotate-90" : ""}`}
+                />
               </button>
             )}
           </div>
@@ -199,8 +257,14 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
         {tourCategoryDto && tourCategoryDto.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: theme.accent || theme.primary }} />
-              <p className="text-xs font-semibold" style={{ color: theme.accent || theme.primary }}>
+              <Tag
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                style={{ color: theme.accent || theme.primary }}
+              />
+              <p
+                className="text-xs font-semibold"
+                style={{ color: theme.accent || theme.primary }}
+              >
                 Categories ({tourCategoryDto.length})
               </p>
             </div>
@@ -210,7 +274,10 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
                   key={category.tourCategoryId}
                   className="rounded-xl p-3"
                   style={{
-                    backgroundColor: hexToRgba(theme.accent || theme.primary, 0.04),
+                    backgroundColor: hexToRgba(
+                      theme.accent || theme.primary,
+                      0.04,
+                    ),
                     border: `1px solid ${hexToRgba(theme.accent || theme.primary, 0.1)}`,
                   }}
                 >
@@ -219,12 +286,18 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
                       className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: theme.accent || theme.primary }}
                     />
-                    <h4 className="text-sm font-semibold" style={{ color: theme.text }}>
+                    <h4
+                      className="text-sm font-semibold"
+                      style={{ color: theme.text }}
+                    >
                       {category.tourCategoryName}
                     </h4>
                   </div>
                   {category.tourCategoryDescription && (
-                    <p className="text-xs sm:text-sm pl-4" style={{ color: theme.textSecondary }}>
+                    <p
+                      className="text-xs sm:text-sm pl-4"
+                      style={{ color: theme.textSecondary }}
+                    >
                       {category.tourCategoryDescription}
                     </p>
                   )}
@@ -237,8 +310,12 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
                 className="flex items-center gap-1 text-xs font-medium mt-2 transition-colors hover:opacity-80"
                 style={{ color: theme.accent || theme.primary }}
               >
-                {showAllCategories ? "Show Less" : `Show All ${tourCategoryDto.length} Categories`}
-                <ChevronRight className={`w-3 h-3 transition-transform ${showAllCategories ? "rotate-90" : ""}`} />
+                {showAllCategories
+                  ? "Show Less"
+                  : `Show All ${tourCategoryDto.length} Categories`}
+                <ChevronRight
+                  className={`w-3 h-3 transition-transform ${showAllCategories ? "rotate-90" : ""}`}
+                />
               </button>
             )}
           </div>
@@ -254,12 +331,21 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: theme.success }} />
-              <p className="text-xs font-semibold" style={{ color: theme.success }}>
+              <Calendar
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                style={{ color: theme.success }}
+              />
+              <p
+                className="text-xs font-semibold"
+                style={{ color: theme.success }}
+              >
                 Best Time to Visit
               </p>
             </div>
-            <p className="text-xs sm:text-sm" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs sm:text-sm"
+              style={{ color: theme.textSecondary }}
+            >
               {seasonDescription}
             </p>
           </div>
@@ -268,7 +354,10 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
         {/* Tour Description */}
         {description && (
           <div>
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2"
+              style={{ color: theme.textSecondary }}
+            >
               Description
             </p>
             <div
@@ -278,7 +367,9 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
                 border: `1px solid ${hexToRgba(theme.primary, 0.08)}`,
               }}
             >
-              <p style={{ color: theme.textSecondary }}>{truncatedDescription}</p>
+              <p style={{ color: theme.textSecondary }}>
+                {truncatedDescription}
+              </p>
               {description.length > 400 && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
@@ -311,7 +402,10 @@ export const TourOverview: React.FC<TourOverviewProps> = ({
               border: `1px solid ${hexToRgba(theme.warning, 0.15)}`,
             }}
           >
-            <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" style={{ color: theme.warning }} />
+            <MessageCircle
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5"
+              style={{ color: theme.warning }}
+            />
             <p className="text-xs sm:text-sm" style={{ color: theme.warning }}>
               {assignMessage}
             </p>

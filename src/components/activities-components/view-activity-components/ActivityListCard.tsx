@@ -27,55 +27,36 @@ import {
   ACTIVITY_DETAILS_VIEW_PAGE_URL,
   SEASONS_VIEW_PAGE_URL,
   DESTINATION_DETAILS_VIEW_PAGE_URL,
+  ACTIVITY_CATEGORY_DETAILS_VIEW_URL,
 } from "@/utils/urls";
-import { Activity, ActivityImage, Requirement } from "@/types/activity-types";
+import {
+  ActivityImage,
+  ActivityListCardProps,
+  Requirement,
+} from "@/types/activity-types";
 import { hexToRgba } from "@/utils/functions";
-
-// Helper to safely get string value from any type
-const getSafeString = (value: any, fallback: string = ""): string => {
-  if (!value) return fallback;
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return value.toString();
-  if (typeof value === "object") {
-    if (value.name) return getSafeString(value.name, fallback);
-    if (value.label) return getSafeString(value.label, fallback);
-    if (value.value) return getSafeString(value.value, fallback);
-    return fallback;
-  }
-  return fallback;
-};
-
-// Helper to safely get number value
-const getSafeNumber = (value: any, fallback: number = 0): number => {
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return parseFloat(value) || fallback;
-  if (typeof value === "object") return fallback;
-  return fallback;
-};
-
-// Helper to safely get array from any value
-const getSafeArray = (value: any, fallback: any[] = []): any[] => {
-  if (Array.isArray(value)) return value;
-  if (typeof value === "string" && value.includes(",")) {
-    return value.split(",").map((s) => s.trim());
-  }
-  return fallback;
-};
-
-// Helper to format time from HH:MM:SS to HH:MM
-const formatTime = (timeString: string): string => {
-  if (!timeString) return "N/A";
-  if (timeString.match(/^\d{2}:\d{2}$/)) return timeString;
-  if (timeString.match(/^\d{2}:\d{2}:\d{2}$/)) {
-    return timeString.substring(0, 5);
-  }
-  return timeString;
-};
-
-interface ActivityListCardProps {
-  activity: Activity;
-  onImageClick?: (imageIndex: number) => void;
-}
+import {
+  formatTime,
+  getSafeArray,
+  getSafeString,
+} from "@/utils/commonFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import {
+  buttonVariants,
+  cardVariants,
+  categoryBadgeVariants,
+  contentVariants,
+  imageVariants,
+  itemVariants,
+  overlayVariants,
+  quickViewVariants,
+  requirementItemVariants,
+  requirementsVariants,
+  seasonVariants,
+  shineVariants,
+  statCardVariants,
+  thumbnailVariants,
+} from "@/app/animations/variants";
 
 const ActivityListCard: React.FC<ActivityListCardProps> = ({
   activity,
@@ -84,18 +65,13 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
   const router = useRouter();
   const { theme } = useTheme();
 
-  // State for current image index and selected primary image
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [showAllRequirements, setShowAllRequirements] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-
-  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
-
-  // Safely extract all data
   const images = getSafeArray(activity?.images);
   const activityId = activity?.id || "unknown";
   const activityName = getSafeString(activity?.name, "Unnamed Activity");
@@ -104,7 +80,6 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
     "No description available",
   );
 
-  // Handle season - parse comma-separated string or array
   let seasons: string[] = [];
   const seasonData = activity?.seasonName as any;
   if (seasonData) {
@@ -117,45 +92,31 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
     }
   }
 
-  // Handle categories
-  const categories = activity?.categories || [];
+  const categories = activity?.activities_category || [];
   const primaryCategory = categories.find((cat) => cat.is_primary);
   const displayCategory = primaryCategory || categories[0];
   const categoryName = displayCategory?.name || "Uncategorized";
   const categoryId = displayCategory?.id;
 
-  // Handle status
   const status = activity?.status || "INACTIVE";
 
-  // Handle destination
   const destinationId = activity?.destination_id || "N/A";
   const destinationName = activity?.destinationName || "N/A";
 
-  // Handle duration
   const duration = activity?.duration_hours || 0;
 
-  // Handle participants
   const minParticipate = activity?.min_participate || 1;
   const maxParticipate = activity?.max_participate || 10;
-
-  // Handle availability times - format them
   const availableFrom = formatTime(activity?.available_from || "00:00:00");
   const availableTo = formatTime(activity?.available_to || "23:59:59");
-
-  // Handle schedules
   const schedulesCount = getSafeArray(activity?.schedules).length;
-
-  // Handle requirements
   const requirements = getSafeArray(activity?.requirements);
   const visibleRequirements = showAllRequirements
     ? requirements
     : requirements.slice(0, 3);
   const hasMoreRequirements = requirements.length > 3;
-
-  // Handle updated at
   const updatedAt = activity?.updated_at;
 
-  // Navigation handlers
   const handleCategoryClick = (
     e: React.MouseEvent,
     categoryId: number,
@@ -163,7 +124,7 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
   ) => {
     e.stopPropagation();
     router.push(
-      `${ACTIVITY_CATEGORY_VIEW_DETAILS_URL}/${categoryId}?name=${encodeURIComponent(categoryName)}`,
+      `${ACTIVITY_CATEGORY_DETAILS_VIEW_URL}/${categoryId}?name=${encodeURIComponent(categoryName)}`,
     );
   };
 
@@ -175,7 +136,9 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
   const handleDestinationClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (destinationId && destinationId !== "N/A") {
-      router.push(`${DESTINATION_DETAILS_VIEW_PAGE_URL}/${destinationId}`);
+      router.push(
+        `${DESTINATION_DETAILS_VIEW_PAGE_URL}/${destinationId}name=${destinationName}`,
+      );
     }
   };
 
@@ -663,7 +626,7 @@ const ActivityListCard: React.FC<ActivityListCardProps> = ({
               ].map((stat, idx) => (
                 <motion.div
                   key={stat.label}
-                  variants={statVariants}
+                  variants={statCardVariants}
                   whileHover="hover"
                   className="flex items-center"
                 >

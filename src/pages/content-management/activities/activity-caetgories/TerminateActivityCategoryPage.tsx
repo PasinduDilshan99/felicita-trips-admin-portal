@@ -1,43 +1,40 @@
-// app/web-management/activity-categories/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-} from "@/utils/constant";
 import { ActivityCategoryService } from "@/services/activityCategoryService";
-import { ActivityCategoryDetails } from "@/types/activity-category-types";
-import { AlertTriangle, Search, Calendar, Users, Image as ImageIcon, Palette, Info } from "lucide-react";
+import {
+  ActivityCategoryDetails,
+  ActivityCategorySearchItem,
+} from "@/types/activity-category-types";
+import {
+  AlertTriangle,
+  Search,
+  Image as ImageIcon,
+  Palette,
+  Users,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
 import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
-import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
+import {
+  TerminationItem,
+  TerminationModal,
+} from "@/components/common-components/terminate-components/TerminationModal";
 import { useCommon } from "@/contexts/CommonContext";
 import { ActivityCategoryStats } from "@/components/activity-categories-components/terminate-activity-category/ActivityCategoryStats";
 import { BasicInfoPanel } from "@/components/activity-categories-components/terminate-activity-category/BasicInfoPanel";
 import { ActivitiesList } from "@/components/activity-categories-components/terminate-activity-category/ActivitiesList";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface ActivityCategorySearchItem {
-  id: number;
-  name: string;
-}
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITY_CATEGORY_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { hexToRgba } from "@/utils/functions";
 
 const TerminateActivityCategoryPage = () => {
   const { theme } = useTheme();
@@ -48,7 +45,10 @@ const TerminateActivityCategoryPage = () => {
   const initialCategoryName = searchParams?.get("category-name") || "";
   const initialCategoryId = searchParams?.get("category-id") || "";
 
-  const [selectedCategory, setSelectedCategory] = useState<{ categoryId: number; categoryName: string } | null>(
+  const [selectedCategory, setSelectedCategory] = useState<{
+    categoryId: number;
+    categoryName: string;
+  } | null>(
     initialCategoryId && initialCategoryName
       ? {
           categoryId: parseInt(initialCategoryId),
@@ -56,7 +56,8 @@ const TerminateActivityCategoryPage = () => {
         }
       : null,
   );
-  const [categoryDetails, setCategoryDetails] = useState<ActivityCategoryDetails | null>(null);
+  const [categoryDetails, setCategoryDetails] =
+    useState<ActivityCategoryDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingTerminate, setLoadingTerminate] = useState(false);
@@ -64,7 +65,6 @@ const TerminateActivityCategoryPage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
@@ -72,37 +72,25 @@ const TerminateActivityCategoryPage = () => {
     actionLink?: string;
   } | null>(null);
 
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Activity Categories",
-      href: `${WEB_MANAGEMENT_PATH}/activity-categories`,
-    },
-    {
-      label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}/activity-categories/terminate`,
-    },
-  ];
-
-  // Get activity categories from common context
   const activityCategories = categories?.activityCategoryList || [];
-  
-  const searchItems: ActivityCategorySearchItem[] = activityCategories.map((cat) => ({
-    id: cat.activityCategoryId,
-    name: cat.activityCategoryName,
-  }));
+
+  const searchItems: ActivityCategorySearchItem[] = activityCategories.map(
+    (cat) => ({
+      id: cat.activityCategoryId,
+      name: cat.activityCategoryName,
+    }),
+  );
 
   const fetchCategoryDetails = async (id: number) => {
     setLoadingDetails(true);
     setError(null);
     setCategoryDetails(null);
     try {
-      const response = await ActivityCategoryService.getActivityCategoryDetails(id);
+      const response =
+        await ActivityCategoryService.getActivityCategoryDetails(id);
       setCategoryDetails(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load category details");
@@ -153,7 +141,9 @@ const TerminateActivityCategoryPage = () => {
     setSuccess(null);
 
     try {
-      await ActivityCategoryService.terminateActivityCategory(selectedCategory.categoryId);
+      await ActivityCategoryService.terminateActivityCategory(
+        selectedCategory.categoryId,
+      );
 
       setSuccess("Activity category terminated successfully!");
       setToast({
@@ -172,7 +162,8 @@ const TerminateActivityCategoryPage = () => {
       setToast({
         type: "error",
         title: "Termination Failed",
-        message: err.message || "Failed to terminate category. Please try again.",
+        message:
+          err.message || "Failed to terminate category. Please try again.",
       });
     } finally {
       setLoadingTerminate(false);
@@ -218,7 +209,10 @@ const TerminateActivityCategoryPage = () => {
     }
   }, [initialCategoryId, initialCategoryName]);
 
-  if ((commonLoading && activityCategories.length === 0) || (loading && !selectedCategory)) {
+  if (
+    (commonLoading && activityCategories.length === 0) ||
+    (loading && !selectedCategory)
+  ) {
     return (
       <CommonLoading
         message="Loading activity categories..."
@@ -258,7 +252,7 @@ const TerminateActivityCategoryPage = () => {
           <PageHeader
             title="Terminate Activity Category"
             description="Permanently remove an activity category from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITY_CATEGORY_TERMINATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -298,7 +292,8 @@ const TerminateActivityCategoryPage = () => {
                   className="text-xs mt-0.5"
                   style={{ color: theme.textSecondary }}
                 >
-                  Search and select a category to review its data before termination
+                  Search and select a category to review its data before
+                  termination
                 </p>
               </div>
             </div>
@@ -308,7 +303,9 @@ const TerminateActivityCategoryPage = () => {
                 items={searchItems}
                 loading={commonLoading}
                 selectedItem={selectedSearchItem}
-                onSelectItem={(item) => handleSelectCategory(item.id, item.name)}
+                onSelectItem={(item) =>
+                  handleSelectCategory(item.id, item.name)
+                }
                 onClearSelection={handleClearCategorySelection}
                 initialSearchTerm={initialCategoryName}
                 placeholder="Search activity categories..."
@@ -367,11 +364,15 @@ const TerminateActivityCategoryPage = () => {
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold" style={{ color: theme.error }}>
+                <h2
+                  className="text-base font-bold"
+                  style={{ color: theme.error }}
+                >
                   Activity Category Termination Review
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: theme.error }}>
-                  Review all data carefully. This action is permanent and cannot be undone.
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
                 </p>
               </div>
               <div
@@ -384,7 +385,10 @@ const TerminateActivityCategoryPage = () => {
                 <span className="text-xs" style={{ color: theme.error }}>
                   ID
                 </span>
-                <span className="text-sm font-bold" style={{ color: theme.error }}>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: theme.error }}
+                >
                   #{selectedCategory.categoryId}
                 </span>
               </div>
@@ -434,7 +438,7 @@ const TerminateActivityCategoryPage = () => {
                       activities={categoryDetails.primaryActivities}
                       variant="primary"
                     />
-                    
+
                     <ActivitiesList
                       title="Other Activities"
                       activities={categoryDetails.otherActivities}
@@ -537,7 +541,8 @@ const TerminateActivityCategoryPage = () => {
                 showRetryButton={true}
                 onBack={handleClearCategorySelection}
                 onRetry={() =>
-                  selectedCategory && fetchCategoryDetails(selectedCategory.categoryId)
+                  selectedCategory &&
+                  fetchCategoryDetails(selectedCategory.categoryId)
                 }
                 backButtonText="Change Selection"
                 retryButtonText="Try Again"

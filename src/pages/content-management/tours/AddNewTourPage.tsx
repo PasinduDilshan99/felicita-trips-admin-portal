@@ -1,20 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import React, { useState } from "react";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { TourService } from "@/services/tourService";
 import {
   AddTourRequest,
-  TourDestinationInput,
   InclusionInput,
   ExclusionInput,
   ConditionInput,
@@ -31,8 +21,6 @@ import { ImageUploader } from "@/components/common-components/ImageUploader";
 import { PricingForm } from "@/components/common-components/PricingForm";
 import { CategorySelector } from "@/components/common-components/CategorySelector";
 import { adaptTourCategories, adaptTourTypes } from "@/utils/category-adapters";
-
-// Import tour-specific components
 import { TourLocationForm } from "@/components/tours-components/tour-create-components/TourLocationForm";
 import { TourDestinationsForm } from "@/components/tours-components/tour-create-components/TourDestinationsForm";
 import { InclusionsExclusionsForm } from "@/components/tours-components/tour-create-components/InclusionsExclusionsForm";
@@ -41,39 +29,15 @@ import { AssignToSelector } from "@/components/tours-components/tour-create-comp
 import { TourInfoForm } from "@/components/tours-components/tour-create-components/TourInfoForm";
 import { SeasonSelector } from "@/components/common-components/SeasonSelector";
 import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-  tourId?: number;
-}
+import { ToastState } from "@/types/common-components-types";
+import { TOUR_CATEGORY_VIEW_PAGE_URL } from "@/utils/urls";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { TOUR_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const AddNewTourPage = () => {
-  const router = useRouter();
   const { categories, loading: categoriesLoading } = useCommon();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Tours",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/tours`,
-    },
-    {
-      label: "Add New Tour",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/tours/add`,
-    },
-  ];
-
-  // Form state
   const [formData, setFormData] = useState<AddTourRequest>({
     name: "",
     description: "",
@@ -96,12 +60,10 @@ const AddNewTourPage = () => {
     travelTips: [],
   });
 
-  // Image state
   const [imagePreviews, setImagePreviews] = useState<
     { url: string; file?: File; uploading?: boolean; uploadError?: string }[]
   >([]);
 
-  // UI state
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -111,7 +73,6 @@ const AddNewTourPage = () => {
     type: "success",
     title: "",
     message: "",
-    tourId: undefined,
   });
 
   // Get categories from context
@@ -418,10 +379,7 @@ const AddNewTourPage = () => {
 
   // Get tour detail link
   const getTourLink = (): string => {
-    if (toast.tourId) {
-      return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/tours/${toast.tourId}`;
-    }
-    return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/tours`;
+    return `${TOUR_CATEGORY_VIEW_PAGE_URL}`;
   };
 
   if (categoriesLoading) {
@@ -470,7 +428,7 @@ const AddNewTourPage = () => {
           <PageHeader
             title="Add New Tour"
             description="Create a new tour package with all details"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={TOUR_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -716,7 +674,6 @@ const AddNewTourPage = () => {
             title: "Creation Failed",
             message:
               error.message || "Failed to create tour. Please try again.",
-            tourId: undefined,
           });
         }}
       />

@@ -1,35 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle, XCircle, Plus, X, AlertCircle, ChevronDown, GripVertical } from "lucide-react";
+import { CheckCircle, XCircle, Plus, X, ChevronDown } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { FormHeader } from "@/components/common-components/create-components/FormHeader";
+import { InclusionsExclusionsFormProps } from "@/types/tour-types";
 
-interface Inclusion {
-  inclusionText: string;
-  displayOrder: number;
-  status: "ACTIVE" | "INACTIVE";
-}
-
-interface Exclusion {
-  exclusionText: string;
-  displayOrder: number;
-  status: "ACTIVE" | "INACTIVE";
-}
-
-interface InclusionsExclusionsFormProps {
-  inclusions: Inclusion[];
-  exclusions: Exclusion[];
-  onInclusionsChange: (inclusions: Inclusion[]) => void;
-  onExclusionsChange: (exclusions: Exclusion[]) => void;
-}
-
-export const InclusionsExclusionsForm: React.FC<InclusionsExclusionsFormProps> = ({
-  inclusions,
-  exclusions,
-  onInclusionsChange,
-  onExclusionsChange,
-}) => {
+export const InclusionsExclusionsForm: React.FC<
+  InclusionsExclusionsFormProps
+> = ({ inclusions, exclusions, onInclusionsChange, onExclusionsChange }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(true);
   const [newInclusion, setNewInclusion] = useState("");
@@ -50,7 +28,10 @@ export const InclusionsExclusionsForm: React.FC<InclusionsExclusionsFormProps> =
 
   const removeInclusion = (index: number) => {
     const newInclusions = inclusions.filter((_, i) => i !== index);
-    const reordered = newInclusions.map((inc, idx) => ({ ...inc, displayOrder: idx }));
+    const reordered = newInclusions.map((inc, idx) => ({
+      ...inc,
+      displayOrder: idx,
+    }));
     onInclusionsChange(reordered);
   };
 
@@ -69,7 +50,10 @@ export const InclusionsExclusionsForm: React.FC<InclusionsExclusionsFormProps> =
 
   const removeExclusion = (index: number) => {
     const newExclusions = exclusions.filter((_, i) => i !== index);
-    const reordered = newExclusions.map((exc, idx) => ({ ...exc, displayOrder: idx }));
+    const reordered = newExclusions.map((exc, idx) => ({
+      ...exc,
+      displayOrder: idx,
+    }));
     onExclusionsChange(reordered);
   };
 
@@ -98,10 +82,16 @@ export const InclusionsExclusionsForm: React.FC<InclusionsExclusionsFormProps> =
             <CheckCircle className="w-4 h-4" />
           </span>
           <div>
-            <h2 className="text-base font-semibold leading-tight" style={{ color: theme.text }}>
+            <h2
+              className="text-base font-semibold leading-tight"
+              style={{ color: theme.text }}
+            >
               Inclusions & Exclusions
             </h2>
-            <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs mt-0.5"
+              style={{ color: theme.textSecondary }}
+            >
               What's included and what's not
             </p>
           </div>
@@ -121,12 +111,18 @@ export const InclusionsExclusionsForm: React.FC<InclusionsExclusionsFormProps> =
             {/* Inclusions */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <CheckCircle className="w-4 h-4" style={{ color: theme.success }} />
-                <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                <CheckCircle
+                  className="w-4 h-4"
+                  style={{ color: theme.success }}
+                />
+                <h3
+                  className="text-sm font-semibold"
+                  style={{ color: theme.text }}
+                >
                   Inclusions
                 </h3>
               </div>
-              
+
               <div className="space-y-2 mb-4">
                 {inclusions.map((inc, index) => (
                   <div
@@ -151,7 +147,7 @@ export const InclusionsExclusionsForm: React.FC<InclusionsExclusionsFormProps> =
                   </div>
                 ))}
               </div>
-              
+
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -185,11 +181,14 @@ export const InclusionsExclusionsForm: React.FC<InclusionsExclusionsFormProps> =
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <XCircle className="w-4 h-4" style={{ color: theme.error }} />
-                <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                <h3
+                  className="text-sm font-semibold"
+                  style={{ color: theme.text }}
+                >
                   Exclusions
                 </h3>
               </div>
-              
+
               <div className="space-y-2 mb-4">
                 {exclusions.map((exc, index) => (
                   <div
@@ -214,7 +213,7 @@ export const InclusionsExclusionsForm: React.FC<InclusionsExclusionsFormProps> =
                   </div>
                 ))}
               </div>
-              
+
               <div className="flex gap-2">
                 <input
                   type="text"

@@ -1,16 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { ActivityService } from "@/services/activityService";
 import {
   AddActivityRequest,
@@ -34,39 +26,17 @@ import { adaptActivityCategories } from "@/utils/category-adapters";
 import { PricingForm } from "@/components/common-components/PricingForm";
 import { SeasonSelector } from "@/components/common-components/SeasonSelector";
 import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-  activityId?: number;
-}
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITIES_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { ACTIVITIES_VIEW_PAGE_URL } from "@/utils/urls";
+import { ToastState } from "@/types/common-components-types";
+import { CREATE_ACTIVITY_TIPS } from "@/data/tips-data";
 
 const AddNewActivityPage = () => {
   const router = useRouter();
   const { categories, loading: categoriesLoading } = useCommon();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Activities",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activities`,
-    },
-    {
-      label: "Add New Activity",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activities/add`,
-    },
-  ];
-
-  // Form state
   const [formData, setFormData] = useState<AddActivityRequest>({
     destinationId: 0,
     name: "",
@@ -100,7 +70,6 @@ const AddNewActivityPage = () => {
     type: "success",
     title: "",
     message: "",
-    activityId: undefined,
   });
 
   // Get destination categories for activity categories
@@ -415,10 +384,7 @@ const AddNewActivityPage = () => {
 
   // Get activity detail link
   const getActivityLink = (): string => {
-    if (toast.activityId) {
-      return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activities/${toast.activityId}`;
-    }
-    return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activities`;
+    return ACTIVITIES_VIEW_PAGE_URL;
   };
 
   if (categoriesLoading) {
@@ -467,7 +433,7 @@ const AddNewActivityPage = () => {
           <PageHeader
             title="Add New Activity"
             description="Create a new activity with all details"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITIES_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -665,13 +631,7 @@ const AddNewActivityPage = () => {
                   color: theme.warning,
                 },
               ]}
-              tips={[
-                "Set accurate pricing for local and foreign participants",
-                "Define clear participation limits for better planning",
-                "Select the appropriate season for availability",
-                "Add images to showcase the activity",
-                "Include any special requirements participants should know",
-              ]}
+              tips={CREATE_ACTIVITY_TIPS}
             />
           </div>
         </div>
@@ -708,7 +668,6 @@ const AddNewActivityPage = () => {
             title: "Creation Failed",
             message:
               error.message || "Failed to create activity. Please try again.",
-            activityId: undefined,
           });
         }}
       />

@@ -19,13 +19,32 @@ export const DESTINATION_CATEGORY_UPDATE_PAGE_TITLE ="Update Destination Categor
 export const DESTINATION_CATEGORY_TERMINATE_PAGE_TITLE ="Terminate Destination Category";
 
 export const ACTIVITY_PAGE_TITLE = "Activities";
-export const VIEW_ACTIVITY_PAGE_TITLE = "View Activities";
-export const VIEW_ACTIVITY_DETAILS_PAGE_TITLE = "View Activity Details";
-export const ADD_ACTIVITY_PAGE_TITLE = "Add New Activity";
-export const UPDATE_ACTIVITY_PAGE_TITLE = "Update Activity";
-export const REMOVE_ACTIVITY_PAGE_TITLE = "Terminate Activity";
+export const ACTIVITY_VIEW_PAGE_TITLE = "View Activities";
+export const ACTIVITY_DETAILS_VIEW_PAGE_TITLE = "View Activity Details";
+export const ACTIVITY_CREATE_PAGE_TITLE = "Add New Activity";
+export const ACTIVITY_UPDATE_PAGE_TITLE = "Update Activity";
+export const ACTIVITY_TERMINATE_PAGE_TITLE = "Terminate Activity";
 
 export const ACTIVITY_CATEGORY_PAGE_TITLE = "Activity Categories";
+export const ACTIVITY_CATEGORY_VIEW_PAGE_TITLE = "Activity Categories";
+export const ACTIVITY_CATEGORY_VIEW_DETAILS_PAGE_TITLE = "Activity Categories";
+export const ACTIVITY_CATEGORY_CREATE_PAGE_TITLE = "Activity Categories";
+export const ACTIVITY_CATEGORY_UPDATE_PAGE_TITLE = "Activity Categories";
+export const ACTIVITY_CATEGORY_TERMINATE_PAGE_TITLE = "Activity Categories";
+
+export const TOUR_PAGE_TITLE = "Tours";
+export const TOUR_VIEW_PAGE_TITLE = "View Tours";
+export const TOUR_DETAILS_VIEW_PAGE_TITLE = "View Tour Details";
+export const TOUR_CREATE_PAGE_TITLE = "Add New Tour";
+export const TOUR_UPDATE_PAGE_TITLE = "Update Tour";
+export const TOUR_TERMINATE_PAGE_TITLE = "Terminate Tour";
+
+export const TOUR_CATEGORY_PAGE_TITLE = "Tour Categories";
+export const TOUR_CATEGORY_VIEW_PAGE_TITLE = "Tour Categories";
+export const TOUR_CATEGORY_VIEW_DETAILS_PAGE_TITLE = "Tour Categories";
+export const TOUR_CATEGORY_CREATE_PAGE_TITLE = "Tour Categories";
+export const TOUR_CATEGORY_UPDATE_PAGE_TITLE = "Tour Categories";
+export const TOUR_CATEGORY_TERMINATE_PAGE_TITLE = "Tour Categories";
 
 
 export const WEB_PAGE_MANAGEMENT_PAGE_TITLE = "Web Page Management";

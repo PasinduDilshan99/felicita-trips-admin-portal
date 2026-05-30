@@ -1,4 +1,3 @@
-// components/tours-components/tour-details-view-components/TourQuickStats.tsx
 "use client";
 
 import React from "react";
@@ -11,34 +10,10 @@ import {
   CheckCircle,
   XCircle,
   List,
-  Tag,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { TourType, TourCategory } from "@/types/tour-types";
-
-interface TourQuickStatsProps {
-  duration: number;
-  totalDays: number;
-  totalDestinations: number;
-  totalActivities: number;
-  totalSchedules: number;
-  totalInclusions: number;
-  totalExclusions: number;
-  totalImages: number;
-  status: string;
-  tourTypeDtos: TourType[];
-  tourCategoryDto: TourCategory[];
-  seasonName: string;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { TourQuickStatsProps } from "@/types/tour-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const TourQuickStats: React.FC<TourQuickStatsProps> = ({
   duration,

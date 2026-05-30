@@ -1,34 +1,33 @@
-// app/tours/view/[tourId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { TourService } from "@/services/tourService";
 import { TourAllDetails, TourImage } from "@/types/tour-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useImageGallery } from "@/hooks/useImageGallery";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
 import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-
-// Import sub-components
 import { TourQuickStats } from "@/components/tours-components/tour-details-view-components/TourQuickStats";
 import { TourScheduleList } from "@/components/tours-components/tour-details-view-components/TourScheduleList";
 import { TourDayByDay } from "@/components/tours-components/tour-details-view-components/TourDayByDay";
 import { TourInclusionsExclusions } from "@/components/tours-components/tour-details-view-components/TourInclusionsExclusions";
 import { TourConditionsTips } from "@/components/tours-components/tour-details-view-components/TourConditionsTips";
 import { TourLocationMap } from "@/components/tours-components/tour-details-view-components/TourLocationMap";
-
-// Constants for routing
-import { TOURS_VIEW_PAGE_URL, TOURS_PAGE_URL } from "@/utils/urls";
+import {
+  TOUR_TERMINATE_PAGE_URL,
+  TOUR_UPDATE_PAGE_URL,
+  TOURS_VIEW_PAGE_URL,
+} from "@/utils/urls";
 import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
 import { TourOverview } from "@/components/tours-components/tour-details-view-components/TourOverview";
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { TOUR_DETAILS_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const TourDetailsViewPage = () => {
   const params = useParams();
@@ -56,9 +55,7 @@ const TourDetailsViewPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Tours", href: TOURS_PAGE_URL },
-    { label: "View", href: TOURS_VIEW_PAGE_URL },
+    ...TOUR_DETAILS_VIEW_PAGE_BREADCRUMB_DATA,
     {
       label: tour?.tourName || "Details",
       href: `${TOURS_VIEW_PAGE_URL}/${tourId}`,
@@ -105,13 +102,13 @@ const TourDetailsViewPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(TOURS_VIEW_PAGE_URL);
+  const handleBack = () => router.back();
 
   const handleEdit = () =>
-    router.push(`${TOURS_VIEW_PAGE_URL}/${tourId}?name=${tour?.tourName}`);
+    router.push(`${TOUR_UPDATE_PAGE_URL}/${tourId}?name=${tour?.tourName}`);
 
   const handleDelete = () =>
-    router.push(`${TOURS_VIEW_PAGE_URL}/${tourId}?name=${tour?.tourName}`);
+    router.push(`${TOUR_TERMINATE_PAGE_URL}/${tourId}?name=${tour?.tourName}`);
 
   const handleShare = () => {
     if (navigator.share) {

@@ -6,6 +6,16 @@ export const formatDate = (dateString: string) => {
   });
 };
 
+export const formatTime = (timeString: string): string => {
+  if (!timeString) return "N/A";
+  if (timeString.match(/^\d{2}:\d{2}$/)) return timeString;
+  if (timeString.match(/^\d{2}:\d{2}:\d{2}$/)) {
+    return timeString.substring(0, 5);
+  }
+  return timeString;
+};
+
+
 export const truncateDescription = (
   description: string,
   maxLength: number = 120,
@@ -38,6 +48,14 @@ export const getSafeString = (value: any, fallback: string = ""): string => {
     } catch {
       return fallback;
     }
+  }
+  return fallback;
+};
+
+export const getSafeArray = (value: any, fallback: any[] = []): any[] => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string" && value.includes(",")) {
+    return value.split(",").map((s) => s.trim());
   }
   return fallback;
 };

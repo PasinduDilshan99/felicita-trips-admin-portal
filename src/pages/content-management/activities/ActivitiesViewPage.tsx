@@ -13,8 +13,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import ActivityCard from "@/components/activities-components/ActivityCard";
-import ActivityListCard from "@/components/activities-components/ActivityListCard";
+import ActivityCard from "@/components/activities-components/view-activity-components/ActivityCard";
+import ActivityListCard from "@/components/activities-components/view-activity-components/ActivityListCard";
 import {
   ActivityViewFiltersToUrlParams,
   ActivityViewUrlParamsToFilters,

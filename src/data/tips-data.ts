@@ -14,3 +14,11 @@ export const CREATE_DESTINATION_CATEGORY_TIPS = [
   "Categories help organize destinations and improve navigation",
   "Destinations can be filtered by categories on the frontend",
 ];
+
+export const CREATE_ACTIVITY_TIPS = [
+  "Set accurate pricing for local and foreign participants",
+  "Define clear participation limits for better planning",
+  "Select the appropriate season for availability",
+  "Add images to showcase the activity",
+  "Include any special requirements participants should know",
+];

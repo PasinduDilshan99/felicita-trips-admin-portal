@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { ActivityCategoryService } from "@/services/activityCategoryService";
 import { ActivityService } from "@/services/activityService";
 import { OtherService } from "@/services/otherService";
@@ -20,7 +19,6 @@ import {
   RefreshCw,
   Loader2,
   Palette,
-  Tag,
   ChevronDown,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -37,63 +35,14 @@ import {
   ChangedField,
 } from "@/components/common-components/UpdateConfirmationModal";
 import { hexToRgba } from "@/utils/functions";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ACTIVITY_CATEGORIES_PAGE_URL } from "@/utils/urls";
 import { ActivityCategoryReadOnlyDetails } from "@/components/activity-categories-components/update-activity-category-components/ActivityCategoryReadOnlyDetails";
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-};
-
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    transition: { duration: 0.32, ease: EASE_OUT },
-  },
-};
-
-const STATUS_OPTIONS = [
-  {
-    value: "ACTIVE",
-    label: "Active",
-    description: "Category is active",
-    color: "#059669",
-  },
-  {
-    value: "INACTIVE",
-    label: "Inactive",
-    description: "Category is inactive",
-    color: "#6b7280",
-  },
-  {
-    value: "TERMINATED",
-    label: "Terminated",
-    description: "Category is terminated",
-    color: "#ef4444",
-  },
-];
-
-const PRESET_COLORS = [
-  "#EF4444",
-  "#F59E0B",
-  "#10B981",
-  "#3B82F6",
-  "#8B5CF6",
-  "#EC4899",
-  "#14B8A6",
-  "#F97316",
-  "#06B6D4",
-  "#84CC16",
-];
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITY_CATEGORY_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
+import { ACTIVITY_CATEGORY_UPDATE_PRESET_COLORS } from "@/data/colors-data";
+import { ACTIVITY_CATEGORY_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
 
 const UpdateActivityCategoryPage = () => {
   const searchParams = useSearchParams();
@@ -108,7 +57,6 @@ const UpdateActivityCategoryPage = () => {
   const initialCategoryName = searchParams?.get("category-name") || "";
   const initialCategoryId = searchParams?.get("category-id") || "";
 
-  // Build categories list from common context
   const categoriesList = React.useMemo(() => {
     if (categories?.activityCategoryList) {
       return categories.activityCategoryList.map((cat) => ({
@@ -119,11 +67,8 @@ const UpdateActivityCategoryPage = () => {
     return [];
   }, [categories]);
 
-  // State for all activities (for adding/removing)
   const [allActivities, setAllActivities] = useState<ActivityIdName[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(false);
-
-  // State for selected category
   const [selectedCategory, setSelectedCategory] = useState<{
     id: number;
     name: string;
@@ -136,22 +81,13 @@ const UpdateActivityCategoryPage = () => {
       : null,
   );
 
-  // State for original category details
   const [originalCategory, setOriginalCategory] =
     useState<ActivityCategoryDetails | null>(null);
-
-  // State for edited category
   const [editedCategory, setEditedCategory] =
     useState<ActivityCategoryDetails | null>(null);
-
-  // State for basic details changes
   const [basicDetailsChanged, setBasicDetailsChanged] = useState(false);
-
-  // State for activities changes
   const [removedActivityIds, setRemovedActivityIds] = useState<number[]>([]);
   const [addedActivityIds, setAddedActivityIds] = useState<number[]>([]);
-
-  // State for images changes
   const [removedImageIds, setRemovedImageIds] = useState<number[]>([]);
   const [newImages, setNewImages] = useState<ActivityCategoryImageRequest[]>(
     [],
@@ -159,8 +95,6 @@ const UpdateActivityCategoryPage = () => {
   const [updatedImages, setUpdatedImages] = useState<
     UpdateActivityCategoryImageRequest[]
   >([]);
-
-  // UI state
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -171,23 +105,12 @@ const UpdateActivityCategoryPage = () => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(["basic", "activities", "images"]),
   );
-
-  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
     message: string;
     actionLink?: string;
   } | null>(null);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Activity Categories", href: ACTIVITY_CATEGORIES_PAGE_URL },
-    {
-      label: "Update",
-      href: ACTIVITY_CATEGORIES_PAGE_URL,
-    },
-  ];
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => {
@@ -198,7 +121,6 @@ const UpdateActivityCategoryPage = () => {
     });
   };
 
-  // Update URL when selected category changes
   const updateUrlWithSelectedCategory = useCallback(
     (category: { id: number; name: string } | null) => {
       const url = new URL(window.location.href);
@@ -738,7 +660,7 @@ const UpdateActivityCategoryPage = () => {
           <PageHeader
             title="Update Activity Category"
             description="Edit and update existing activity category information"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITY_CATEGORY_UPDATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -938,27 +860,29 @@ const UpdateActivityCategoryPage = () => {
                           Color
                         </label>
                         <div className="flex flex-wrap gap-2 mb-2">
-                          {PRESET_COLORS.map((color) => (
-                            <button
-                              key={color}
-                              type="button"
-                              onClick={() =>
-                                handleBasicFieldChange("color", color)
-                              }
-                              className="w-8 h-8 rounded-full border-2 transition-all"
-                              style={{
-                                backgroundColor: color,
-                                borderColor:
-                                  editedCategory.color === color
-                                    ? theme.text
-                                    : "transparent",
-                                boxShadow:
-                                  editedCategory.color === color
-                                    ? `0 0 0 2px ${theme.background}, 0 0 0 4px ${color}`
-                                    : "none",
-                              }}
-                            />
-                          ))}
+                          {ACTIVITY_CATEGORY_UPDATE_PRESET_COLORS.map(
+                            (color) => (
+                              <button
+                                key={color}
+                                type="button"
+                                onClick={() =>
+                                  handleBasicFieldChange("color", color)
+                                }
+                                className="w-8 h-8 rounded-full border-2 transition-all"
+                                style={{
+                                  backgroundColor: color,
+                                  borderColor:
+                                    editedCategory.color === color
+                                      ? theme.text
+                                      : "transparent",
+                                  boxShadow:
+                                    editedCategory.color === color
+                                      ? `0 0 0 2px ${theme.background}, 0 0 0 4px ${color}`
+                                      : "none",
+                                }}
+                              />
+                            ),
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           <input
@@ -993,27 +917,29 @@ const UpdateActivityCategoryPage = () => {
                           Hover Color
                         </label>
                         <div className="flex flex-wrap gap-2 mb-2">
-                          {PRESET_COLORS.map((color) => (
-                            <button
-                              key={color}
-                              type="button"
-                              onClick={() =>
-                                handleBasicFieldChange("hoverColor", color)
-                              }
-                              className="w-8 h-8 rounded-full border-2 transition-all"
-                              style={{
-                                backgroundColor: color,
-                                borderColor:
-                                  editedCategory.hoverColor === color
-                                    ? theme.text
-                                    : "transparent",
-                                boxShadow:
-                                  editedCategory.hoverColor === color
-                                    ? `0 0 0 2px ${theme.background}, 0 0 0 4px ${color}`
-                                    : "none",
-                              }}
-                            />
-                          ))}
+                          {ACTIVITY_CATEGORY_UPDATE_PRESET_COLORS.map(
+                            (color) => (
+                              <button
+                                key={color}
+                                type="button"
+                                onClick={() =>
+                                  handleBasicFieldChange("hoverColor", color)
+                                }
+                                className="w-8 h-8 rounded-full border-2 transition-all"
+                                style={{
+                                  backgroundColor: color,
+                                  borderColor:
+                                    editedCategory.hoverColor === color
+                                      ? theme.text
+                                      : "transparent",
+                                  boxShadow:
+                                    editedCategory.hoverColor === color
+                                      ? `0 0 0 2px ${theme.background}, 0 0 0 4px ${color}`
+                                      : "none",
+                                }}
+                              />
+                            ),
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           <input
@@ -1055,7 +981,7 @@ const UpdateActivityCategoryPage = () => {
                         Status
                       </label>
                       <div className="grid grid-cols-3 gap-3">
-                        {STATUS_OPTIONS.map((opt) => {
+                        {ACTIVITY_CATEGORY_UPDATE_STATUS_OPTIONS.map((opt) => {
                           const isSelected =
                             editedCategory.status === opt.value;
                           return (

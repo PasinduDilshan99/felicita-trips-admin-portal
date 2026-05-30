@@ -1,26 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import React, { useState } from "react";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { useTheme } from "@/contexts/ThemeContext";
-import {
-  Loader,
-  Tag,
-  Palette,
-  FileText,
-  Image as ImageIcon,
-  Hash,
-} from "lucide-react";
-import { FormCard } from "@/components/common-components/create-components/FormCard";
+import { Tag, Palette } from "lucide-react";
 import { FormActions } from "@/components/common-components/FormActions";
 import { FormSummary } from "@/components/common-components/FormSummary";
 import { InputField } from "@/components/common-components/create-components/InputField";
@@ -33,37 +16,13 @@ import {
 import { ActivityCategoryService } from "@/services/activityCategoryService";
 import { ActivitySelector } from "@/components/common-components/ActivitySelector";
 import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-}
+import { ToastState } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITY_CATEGORY_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const AddNewActivityCategoryPage = () => {
-  const router = useRouter();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Activity Categories",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activity-categories`,
-    },
-    {
-      label: "Add New Category",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activity-categories/add`,
-    },
-  ];
-
-  // Form state
   const [formData, setFormData] = useState<AddActivityCategoryRequest>({
     categoryName: "",
     description: "",
@@ -266,7 +225,7 @@ const AddNewActivityCategoryPage = () => {
           <PageHeader
             title="Add New Activity Category"
             description="Create a new category to organize your activities"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITY_CATEGORY_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>

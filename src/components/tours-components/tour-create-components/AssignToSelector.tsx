@@ -1,33 +1,20 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { User, ChevronDown, Check, Search, AlertCircle, Briefcase, Mail, Phone } from "lucide-react";
+import {
+  User,
+  ChevronDown,
+  Check,
+  Search,
+  AlertCircle,
+  Briefcase,
+  Mail,
+  Phone,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { EmployeeService } from "@/services/employeeService";
 import { InputField } from "@/components/common-components/create-components/InputField";
-
-interface Employee {
-  employeeId: number;
-  firstName: string;
-  lastName: string;
-  imageUrl: string;
-  email: string;
-  mobileNumber1: string;
-  designationName: string;
-  tours: {
-    name: string | null;
-    tour_id: number | null;
-  }[];
-}
-
-interface AssignToSelectorProps {
-  value?: number;
-  onChange: (employeeId: number) => void;
-  assignMessage: string;
-  onAssignMessageChange: (message: string) => void;
-  error?: string;
-  required?: boolean;
-}
+import { AssignToSelectorProps, Employee } from "@/types/tour-types";
 
 export const AssignToSelector: React.FC<AssignToSelectorProps> = ({
   value,
@@ -98,13 +85,16 @@ export const AssignToSelector: React.FC<AssignToSelectorProps> = ({
   });
 
   const getAssignedTourCount = (employee: Employee): number => {
-    return employee.tours?.filter(tour => tour.tour_id !== null).length || 0;
+    return employee.tours?.filter((tour) => tour.tour_id !== null).length || 0;
   };
 
   return (
     <div className="space-y-4">
       <div className="relative">
-        <label className="block text-sm font-medium mb-1.5" style={{ color: theme.textSecondary }}>
+        <label
+          className="block text-sm font-medium mb-1.5"
+          style={{ color: theme.textSecondary }}
+        >
           Assign To
           {required && <span style={{ color: theme.error }}> *</span>}
         </label>
@@ -128,7 +118,10 @@ export const AssignToSelector: React.FC<AssignToSelectorProps> = ({
                 className="w-5 h-5 rounded-full object-cover"
               />
             ) : (
-              <User className="w-4 h-4" style={{ color: theme.textSecondary }} />
+              <User
+                className="w-4 h-4"
+                style={{ color: theme.textSecondary }}
+              />
             )}
             <span className={!selectedEmployee ? "opacity-70" : ""}>
               {selectedEmployee
@@ -152,7 +145,8 @@ export const AssignToSelector: React.FC<AssignToSelectorProps> = ({
             style={{
               backgroundColor: theme.surface,
               border: `1px solid ${theme.border}`,
-              boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
+              boxShadow:
+                "0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
             }}
           >
             <div className="p-3 border-b" style={{ borderColor: theme.border }}>
@@ -188,20 +182,34 @@ export const AssignToSelector: React.FC<AssignToSelectorProps> = ({
 
             <div className="max-h-80 overflow-y-auto">
               {loading ? (
-                <div className="p-4 text-center" style={{ color: theme.textSecondary }}>
-                  <div className="inline-block w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: theme.primary, borderTopColor: "transparent" }} />
+                <div
+                  className="p-4 text-center"
+                  style={{ color: theme.textSecondary }}
+                >
+                  <div
+                    className="inline-block w-5 h-5 border-2 rounded-full animate-spin"
+                    style={{
+                      borderColor: theme.primary,
+                      borderTopColor: "transparent",
+                    }}
+                  />
                   <p className="mt-2">Loading employees...</p>
                 </div>
               ) : filteredEmployees.length === 0 ? (
-                <div className="p-4 text-center" style={{ color: theme.textSecondary }}>
-                  {searchQuery ? "No employees match your search" : "No employees found"}
+                <div
+                  className="p-4 text-center"
+                  style={{ color: theme.textSecondary }}
+                >
+                  {searchQuery
+                    ? "No employees match your search"
+                    : "No employees found"}
                 </div>
               ) : (
                 filteredEmployees.map((employee) => {
                   const fullName = getFullName(employee);
                   const assignedTourCount = getAssignedTourCount(employee);
                   const isSelected = value === employee.employeeId;
-                  
+
                   return (
                     <button
                       key={employee.employeeId}
@@ -213,7 +221,9 @@ export const AssignToSelector: React.FC<AssignToSelectorProps> = ({
                       }}
                       className="w-full px-4 py-3 text-left hover:bg-opacity-10 transition-colors"
                       style={{
-                        backgroundColor: isSelected ? `${theme.primary}10` : "transparent",
+                        backgroundColor: isSelected
+                          ? `${theme.primary}10`
+                          : "transparent",
                       }}
                       onMouseEnter={(e) => {
                         if (!isSelected) {
@@ -251,47 +261,74 @@ export const AssignToSelector: React.FC<AssignToSelectorProps> = ({
                         {/* Employee details */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium" style={{ color: theme.text }}>
+                            <p
+                              className="text-sm font-medium"
+                              style={{ color: theme.text }}
+                            >
                               {fullName}
                             </p>
                             {isSelected && (
-                              <Check className="w-4 h-4 flex-shrink-0 ml-2" style={{ color: theme.primary }} />
+                              <Check
+                                className="w-4 h-4 flex-shrink-0 ml-2"
+                                style={{ color: theme.primary }}
+                              />
                             )}
                           </div>
-                          
+
                           {/* Designation */}
                           {employee.designationName && (
                             <div className="flex items-center gap-1 mt-0.5">
-                              <Briefcase className="w-3 h-3" style={{ color: theme.textSecondary }} />
-                              <p className="text-xs" style={{ color: theme.textSecondary }}>
+                              <Briefcase
+                                className="w-3 h-3"
+                                style={{ color: theme.textSecondary }}
+                              />
+                              <p
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 {employee.designationName}
                               </p>
                             </div>
                           )}
-                          
+
                           {/* Email */}
                           {employee.email && (
                             <div className="flex items-center gap-1 mt-0.5">
-                              <Mail className="w-3 h-3" style={{ color: theme.textSecondary }} />
-                              <p className="text-xs" style={{ color: theme.textSecondary }}>
+                              <Mail
+                                className="w-3 h-3"
+                                style={{ color: theme.textSecondary }}
+                              />
+                              <p
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 {employee.email}
                               </p>
                             </div>
                           )}
-                          
+
                           {/* Phone */}
                           {employee.mobileNumber1 && (
                             <div className="flex items-center gap-1 mt-0.5">
-                              <Phone className="w-3 h-3" style={{ color: theme.textSecondary }} />
-                              <p className="text-xs" style={{ color: theme.textSecondary }}>
+                              <Phone
+                                className="w-3 h-3"
+                                style={{ color: theme.textSecondary }}
+                              />
+                              <p
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 {employee.mobileNumber1}
                               </p>
                             </div>
                           )}
-                          
+
                           {/* Assigned tours count */}
                           {assignedTourCount > 0 && (
-                            <p className="text-xs mt-1" style={{ color: theme.warning }}>
+                            <p
+                              className="text-xs mt-1"
+                              style={{ color: theme.warning }}
+                            >
                               Currently assigned to {assignedTourCount} tour(s)
                             </p>
                           )}
@@ -306,7 +343,10 @@ export const AssignToSelector: React.FC<AssignToSelectorProps> = ({
         )}
 
         {error && (
-          <p className="mt-1.5 text-xs flex items-center gap-1" style={{ color: theme.error }}>
+          <p
+            className="mt-1.5 text-xs flex items-center gap-1"
+            style={{ color: theme.error }}
+          >
             <AlertCircle className="w-3.5 h-3.5" />
             {error}
           </p>

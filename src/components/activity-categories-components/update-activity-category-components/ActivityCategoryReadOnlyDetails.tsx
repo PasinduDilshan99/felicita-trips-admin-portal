@@ -1,61 +1,28 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
-import { 
-  Users, 
-  ImageIcon, 
-  Plus, 
-  X, 
-  Star, 
-  ChevronDown, 
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Users,
+  ImageIcon,
+  Plus,
+  X,
+  Star,
+  ChevronDown,
   Loader2,
   Upload,
   Trash2,
   Edit2,
-  Camera
+  Camera,
 } from "lucide-react";
-import { ActivityCategoryDetails } from "@/types/activity-category-types";
-import { ActivityIdName } from "@/types/activity-types";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
-import { hexToRgba } from "@/utils/functions";
+import { ActivityCategoryReadOnlyDetailsProps } from "@/types/activity-category-types";
+import ImageModal from "@/components/common-components/ImageModal";
+import { ImageModalImage } from "@/types/common-components-types";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
 
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const }
-  },
-};
-
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: { 
-    opacity: 1, 
-    height: "auto", 
-    transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const }
-  },
-};
-
-interface ActivityCategoryReadOnlyDetailsProps {
-  category: ActivityCategoryDetails;
-  allActivities: ActivityIdName[];
-  loadingActivities: boolean;
-  expandedSections: Set<string>;
-  onToggleSection: (section: string) => void;
-  onAddActivity: (activityId: number) => void;
-  onRemoveActivity: (activityId: number, isPrimary: boolean) => void;
-  onMakePrimary: (activityId: number) => void;
-  onRemovePrimary: (activityId: number) => void;
-  onRemoveImage: (imageId: number) => void;
-  onAddNewImage: (file: File, name: string, description: string) => Promise<void>;
-  onUpdateImage: (imageId: number, name: string, description: string) => void;
-  uploadingImages: boolean;
-  theme: any;
-}
-
-export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyDetailsProps> = ({
+export const ActivityCategoryReadOnlyDetails: React.FC<
+  ActivityCategoryReadOnlyDetailsProps
+> = ({
   category,
   allActivities,
   loadingActivities,
@@ -74,27 +41,27 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showAddActivityForm, setShowAddActivityForm] = useState(false);
-  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null);
+  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(
+    null,
+  );
   const [showNewImageForm, setShowNewImageForm] = useState(false);
   const [editingImage, setEditingImage] = useState<any>(null);
   const [uploadingLocalImage, setUploadingLocalImage] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  
   const [newImageData, setNewImageData] = useState({
     name: "",
     description: "",
     file: null as File | null,
   });
-
   const [editImageData, setEditImageData] = useState({
     name: "",
     description: "",
   });
 
-  // Get activities not already in the category
   const availableActivities = allActivities.filter(
-    a => !category.primaryActivities.some(p => p.activityId === a.activityId) &&
-         !category.otherActivities.some(o => o.activityId === a.activityId)
+    (a) =>
+      !category.primaryActivities.some((p) => p.activityId === a.activityId) &&
+      !category.otherActivities.some((o) => o.activityId === a.activityId),
   );
 
   const modalImages: ImageModalImage[] = category.images.map((img) => ({
@@ -136,7 +103,11 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
 
     setUploadingLocalImage(true);
     try {
-      await onAddNewImage(newImageData.file, newImageData.name, newImageData.description);
+      await onAddNewImage(
+        newImageData.file,
+        newImageData.name,
+        newImageData.description,
+      );
       setNewImageData({ name: "", description: "", file: null });
       setShowNewImageForm(false);
       if (fileInputRef.current) {
@@ -156,7 +127,11 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
       alert("Image name is required");
       return;
     }
-    onUpdateImage(editingImage.imageId, editImageData.name, editImageData.description);
+    onUpdateImage(
+      editingImage.imageId,
+      editImageData.name,
+      editImageData.description,
+    );
     setEditingImage(null);
     setEditImageData({ name: "", description: "" });
   };
@@ -188,7 +163,6 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
 
   return (
     <div className="space-y-6">
-      {/* Activities Section */}
       <motion.div
         variants={cardVariants}
         initial="hidden"
@@ -204,43 +178,70 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
           onClick={() => onToggleSection("activities")}
           className="w-full flex items-center justify-between p-4 cursor-pointer transition-colors"
           style={{
-            backgroundColor: expandedSections.has("activities") ? `${theme.primary}05` : "transparent",
-            borderBottom: expandedSections.has("activities") ? `1px solid ${theme.border}` : "none",
+            backgroundColor: expandedSections.has("activities")
+              ? `${theme.primary}05`
+              : "transparent",
+            borderBottom: expandedSections.has("activities")
+              ? `1px solid ${theme.border}`
+              : "none",
           }}
         >
           <div className="flex items-center gap-3">
             <span
               className="flex items-center justify-center w-8 h-8 rounded-lg"
-              style={{ backgroundColor: `${theme.primary}18`, color: theme.primary }}
+              style={{
+                backgroundColor: `${theme.primary}18`,
+                color: theme.primary,
+              }}
             >
               <Users className="w-4 h-4" />
             </span>
             <div>
-              <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+              <h2
+                className="text-sm sm:text-base font-semibold"
+                style={{ color: theme.text }}
+              >
                 Associated Activities
               </h2>
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
                 Manage activities in this category
               </p>
             </div>
           </div>
           <ChevronDown
             className="w-4 h-4 transition-transform duration-200"
-            style={{ 
-              transform: expandedSections.has("activities") ? "rotate(180deg)" : "none", 
-              color: theme.textSecondary 
+            style={{
+              transform: expandedSections.has("activities")
+                ? "rotate(180deg)"
+                : "none",
+              color: theme.textSecondary,
             }}
           />
         </button>
 
         <AnimatePresence>
           {expandedSections.has("activities") && (
-            <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="hidden" className="p-6">
+            <motion.div
+              variants={sectionVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="p-6"
+            >
               {/* Primary Activities */}
               {category.primaryActivities.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-sm font-semibold mb-2 flex items-center gap-1" style={{ color: theme.text }}>
-                    <Star className="w-3.5 h-3.5" style={{ color: theme.warning }} />
+                  <h3
+                    className="text-sm font-semibold mb-2 flex items-center gap-1"
+                    style={{ color: theme.text }}
+                  >
+                    <Star
+                      className="w-3.5 h-3.5"
+                      style={{ color: theme.warning }}
+                    />
                     Primary Activities
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -254,7 +255,10 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                           border: `1px solid ${theme.warning}30`,
                         }}
                       >
-                        <Star className="w-3 h-3" style={{ fill: theme.warning }} />
+                        <Star
+                          className="w-3 h-3"
+                          style={{ fill: theme.warning }}
+                        />
                         {activity.activityName}
                         <button
                           onClick={() => onRemovePrimary(activity.activityId)}
@@ -271,7 +275,10 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
               {/* Other Activities */}
               {category.otherActivities.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                  <h3
+                    className="text-sm font-semibold mb-2"
+                    style={{ color: theme.textSecondary }}
+                  >
                     Other Activities
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -291,13 +298,21 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                           className="ml-1 p-0.5 rounded-full hover:bg-black/10 transition-all"
                           title="Make Primary"
                         >
-                          <Star className="w-3 h-3" style={{ color: theme.warning }} />
+                          <Star
+                            className="w-3 h-3"
+                            style={{ color: theme.warning }}
+                          />
                         </button>
                         <button
-                          onClick={() => onRemoveActivity(activity.activityId, false)}
+                          onClick={() =>
+                            onRemoveActivity(activity.activityId, false)
+                          }
                           className="p-0.5 rounded-full hover:bg-black/10 transition-all"
                         >
-                          <X className="w-3 h-3" style={{ color: theme.error }} />
+                          <X
+                            className="w-3 h-3"
+                            style={{ color: theme.error }}
+                          />
                         </button>
                       </span>
                     ))}
@@ -313,19 +328,31 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className="mt-4 p-3 rounded-lg"
-                    style={{ backgroundColor: `${theme.primary}10`, border: `1px solid ${theme.primary}30` }}
+                    style={{
+                      backgroundColor: `${theme.primary}10`,
+                      border: `1px solid ${theme.primary}30`,
+                    }}
                   >
                     <div className="flex items-center gap-2">
                       <select
                         value={selectedActivityId || ""}
-                        onChange={(e) => setSelectedActivityId(parseInt(e.target.value))}
+                        onChange={(e) =>
+                          setSelectedActivityId(parseInt(e.target.value))
+                        }
                         className="flex-1 px-3 py-1.5 rounded-lg border text-sm"
-                        style={{ backgroundColor: theme.background, borderColor: theme.border, color: theme.text }}
+                        style={{
+                          backgroundColor: theme.background,
+                          borderColor: theme.border,
+                          color: theme.text,
+                        }}
                         disabled={loadingActivities}
                       >
                         <option value="">Select an activity...</option>
                         {availableActivities.map((activity) => (
-                          <option key={activity.activityId} value={activity.activityId}>
+                          <option
+                            key={activity.activityId}
+                            value={activity.activityId}
+                          >
                             {activity.activityName}
                           </option>
                         ))}
@@ -341,7 +368,11 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                       <button
                         onClick={() => setShowAddActivityForm(false)}
                         className="px-3 py-1.5 rounded-lg text-sm"
-                        style={{ backgroundColor: theme.background, border: `1px solid ${theme.border}`, color: theme.textSecondary }}
+                        style={{
+                          backgroundColor: theme.background,
+                          border: `1px solid ${theme.border}`,
+                          color: theme.textSecondary,
+                        }}
                       >
                         Cancel
                       </button>
@@ -353,7 +384,10 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
               <button
                 onClick={() => setShowAddActivityForm(true)}
                 className="mt-3 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-                style={{ backgroundColor: `${theme.primary}10`, color: theme.primary }}
+                style={{
+                  backgroundColor: `${theme.primary}10`,
+                  color: theme.primary,
+                }}
               >
                 <Plus className="w-3.5 h-3.5" />
                 Add Activity
@@ -379,38 +413,59 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
           onClick={() => onToggleSection("images")}
           className="w-full flex items-center justify-between p-4 cursor-pointer transition-colors"
           style={{
-            backgroundColor: expandedSections.has("images") ? `${theme.error}05` : "transparent",
-            borderBottom: expandedSections.has("images") ? `1px solid ${theme.border}` : "none",
+            backgroundColor: expandedSections.has("images")
+              ? `${theme.error}05`
+              : "transparent",
+            borderBottom: expandedSections.has("images")
+              ? `1px solid ${theme.border}`
+              : "none",
           }}
         >
           <div className="flex items-center gap-3">
             <span
               className="flex items-center justify-center w-8 h-8 rounded-lg"
-              style={{ backgroundColor: `${theme.error}18`, color: theme.error }}
+              style={{
+                backgroundColor: `${theme.error}18`,
+                color: theme.error,
+              }}
             >
               <ImageIcon className="w-4 h-4" />
             </span>
             <div>
-              <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+              <h2
+                className="text-sm sm:text-base font-semibold"
+                style={{ color: theme.text }}
+              >
                 Category Images
               </h2>
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
                 Manage images for this category
               </p>
             </div>
           </div>
           <ChevronDown
             className="w-4 h-4 transition-transform duration-200"
-            style={{ 
-              transform: expandedSections.has("images") ? "rotate(180deg)" : "none", 
-              color: theme.textSecondary 
+            style={{
+              transform: expandedSections.has("images")
+                ? "rotate(180deg)"
+                : "none",
+              color: theme.textSecondary,
             }}
           />
         </button>
 
         <AnimatePresence>
           {expandedSections.has("images") && (
-            <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="hidden" className="p-6">
+            <motion.div
+              variants={sectionVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="p-6"
+            >
               {/* Edit Image Modal */}
               <AnimatePresence>
                 {editingImage && (
@@ -426,31 +481,50 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                       style={{ backgroundColor: theme.surface }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <h3 className="text-lg font-semibold mb-4" style={{ color: theme.text }}>
+                      <h3
+                        className="text-lg font-semibold mb-4"
+                        style={{ color: theme.text }}
+                      >
                         Edit Image
                       </h3>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
+                          <label
+                            className="block text-sm font-medium mb-1"
+                            style={{ color: theme.textSecondary }}
+                          >
                             Image Name
                           </label>
                           <input
                             type="text"
                             value={editImageData.name}
-                            onChange={(e) => setEditImageData({ ...editImageData, name: e.target.value })}
+                            onChange={(e) =>
+                              setEditImageData({
+                                ...editImageData,
+                                name: e.target.value,
+                              })
+                            }
                             className="w-full px-3 py-2 rounded-lg border-2"
                             style={{ ...fieldBase, borderColor: theme.border }}
                             {...focusHandlers}
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
+                          <label
+                            className="block text-sm font-medium mb-1"
+                            style={{ color: theme.textSecondary }}
+                          >
                             Description
                           </label>
                           <input
                             type="text"
                             value={editImageData.description}
-                            onChange={(e) => setEditImageData({ ...editImageData, description: e.target.value })}
+                            onChange={(e) =>
+                              setEditImageData({
+                                ...editImageData,
+                                description: e.target.value,
+                              })
+                            }
                             className="w-full px-3 py-2 rounded-lg border-2"
                             style={{ ...fieldBase, borderColor: theme.border }}
                             {...focusHandlers}
@@ -496,13 +570,20 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                     }}
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-sm font-semibold" style={{ color: theme.text }}>
+                      <h4
+                        className="text-sm font-semibold"
+                        style={{ color: theme.text }}
+                      >
                         Add New Image
                       </h4>
                       <button
                         onClick={() => {
                           setShowNewImageForm(false);
-                          setNewImageData({ name: "", description: "", file: null });
+                          setNewImageData({
+                            name: "",
+                            description: "",
+                            file: null,
+                          });
                         }}
                         className="p-1 rounded hover:bg-black/10"
                       >
@@ -512,8 +593,12 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
 
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
-                          Image File <span style={{ color: theme.error }}>*</span>
+                        <label
+                          className="block text-xs font-medium mb-1"
+                          style={{ color: theme.textSecondary }}
+                        >
+                          Image File{" "}
+                          <span style={{ color: theme.error }}>*</span>
                         </label>
                         <div
                           className="border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all"
@@ -527,9 +612,17 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                             onChange={handleFileSelect}
                             className="hidden"
                           />
-                          <Upload className="w-6 h-6 mx-auto mb-2" style={{ color: theme.textSecondary }} />
-                          <p className="text-sm" style={{ color: theme.textSecondary }}>
-                            {newImageData.file ? newImageData.file.name : "Click to select image"}
+                          <Upload
+                            className="w-6 h-6 mx-auto mb-2"
+                            style={{ color: theme.textSecondary }}
+                          />
+                          <p
+                            className="text-sm"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            {newImageData.file
+                              ? newImageData.file.name
+                              : "Click to select image"}
                           </p>
                         </div>
                       </div>
@@ -545,13 +638,22 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                       )}
 
                       <div>
-                        <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
-                          Image Name <span style={{ color: theme.error }}>*</span>
+                        <label
+                          className="block text-xs font-medium mb-1"
+                          style={{ color: theme.textSecondary }}
+                        >
+                          Image Name{" "}
+                          <span style={{ color: theme.error }}>*</span>
                         </label>
                         <input
                           type="text"
                           value={newImageData.name}
-                          onChange={(e) => setNewImageData({ ...newImageData, name: e.target.value })}
+                          onChange={(e) =>
+                            setNewImageData({
+                              ...newImageData,
+                              name: e.target.value,
+                            })
+                          }
                           className="w-full px-3 py-2 rounded-lg border-2 text-sm"
                           style={{ ...fieldBase, borderColor: theme.border }}
                           placeholder="e.g., Category Image"
@@ -560,13 +662,21 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+                        <label
+                          className="block text-xs font-medium mb-1"
+                          style={{ color: theme.textSecondary }}
+                        >
                           Description
                         </label>
                         <input
                           type="text"
                           value={newImageData.description}
-                          onChange={(e) => setNewImageData({ ...newImageData, description: e.target.value })}
+                          onChange={(e) =>
+                            setNewImageData({
+                              ...newImageData,
+                              description: e.target.value,
+                            })
+                          }
                           className="w-full px-3 py-2 rounded-lg border-2 text-sm"
                           style={{ ...fieldBase, borderColor: theme.border }}
                           placeholder="Optional description"
@@ -578,7 +688,11 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                         <button
                           onClick={() => {
                             setShowNewImageForm(false);
-                            setNewImageData({ name: "", description: "", file: null });
+                            setNewImageData({
+                              name: "",
+                              description: "",
+                              file: null,
+                            });
                           }}
                           className="flex-1 px-3 py-2 rounded-lg text-sm"
                           style={{
@@ -617,9 +731,15 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
               {category.images.length === 0 && (
                 <div
                   className="text-center py-8 rounded-xl"
-                  style={{ backgroundColor: `${theme.border}20`, border: `1px dashed ${theme.border}` }}
+                  style={{
+                    backgroundColor: `${theme.border}20`,
+                    border: `1px dashed ${theme.border}`,
+                  }}
                 >
-                  <Camera className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: theme.textSecondary }} />
+                  <Camera
+                    className="w-12 h-12 mx-auto mb-3 opacity-30"
+                    style={{ color: theme.textSecondary }}
+                  />
                   <p className="text-sm" style={{ color: theme.textSecondary }}>
                     No images added yet
                   </p>
@@ -631,14 +751,31 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                   <div
                     key={image.imageId}
                     className="relative group rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
-                    style={{ border: `1px solid ${theme.border}`, backgroundColor: theme.background }}
+                    style={{
+                      border: `1px solid ${theme.border}`,
+                      backgroundColor: theme.background,
+                    }}
                     onClick={() => openImageModal(index)}
                   >
-                    <img src={image.imageUrl} alt={image.imageName} className="w-full h-32 object-cover" />
+                    <img
+                      src={image.imageUrl}
+                      alt={image.imageName}
+                      className="w-full h-32 object-cover"
+                    />
                     <div className="p-2">
-                      <p className="text-xs font-medium truncate" style={{ color: theme.text }}>{image.imageName}</p>
+                      <p
+                        className="text-xs font-medium truncate"
+                        style={{ color: theme.text }}
+                      >
+                        {image.imageName}
+                      </p>
                       {image.imageDescription && (
-                        <p className="text-xs truncate mt-0.5" style={{ color: theme.textSecondary }}>{image.imageDescription}</p>
+                        <p
+                          className="text-xs truncate mt-0.5"
+                          style={{ color: theme.textSecondary }}
+                        >
+                          {image.imageDescription}
+                        </p>
                       )}
                     </div>
                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -646,7 +783,10 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
                         onClick={(e) => {
                           e.stopPropagation();
                           setEditingImage(image);
-                          setEditImageData({ name: image.imageName, description: image.imageDescription || "" });
+                          setEditImageData({
+                            name: image.imageName,
+                            description: image.imageDescription || "",
+                          });
                         }}
                         className="p-1.5 rounded-full bg-blue-500 text-white shadow-lg hover:scale-110 transition-transform"
                       >
@@ -669,7 +809,10 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
               <button
                 onClick={() => setShowNewImageForm(true)}
                 className="mt-4 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-                style={{ backgroundColor: `${theme.success}10`, color: theme.success }}
+                style={{
+                  backgroundColor: `${theme.success}10`,
+                  color: theme.success,
+                }}
               >
                 <Plus className="w-3.5 h-3.5" />
                 Add Image
@@ -677,10 +820,18 @@ export const ActivityCategoryReadOnlyDetails: React.FC<ActivityCategoryReadOnlyD
 
               {/* Uploading Indicator */}
               {(uploadingImages || uploadingLocalImage) && (
-                <div className="mt-4 p-3 rounded-lg flex items-center gap-2" style={{ backgroundColor: `${theme.primary}10` }}>
-                  <Loader2 className="w-4 h-4 animate-spin" style={{ color: theme.primary }} />
+                <div
+                  className="mt-4 p-3 rounded-lg flex items-center gap-2"
+                  style={{ backgroundColor: `${theme.primary}10` }}
+                >
+                  <Loader2
+                    className="w-4 h-4 animate-spin"
+                    style={{ color: theme.primary }}
+                  />
                   <span className="text-sm" style={{ color: theme.primary }}>
-                    {uploadingLocalImage ? "Uploading image to Cloudinary..." : "Processing images..."}
+                    {uploadingLocalImage
+                      ? "Uploading image to Cloudinary..."
+                      : "Processing images..."}
                   </span>
                 </div>
               )}

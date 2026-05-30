@@ -606,3 +606,84 @@ export const shineVariants: Variants = {
   rest: { x: "-100%" },
   hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
 };
+
+export const requirementsVariants: Variants = {
+  hidden: { opacity: 0, height: 0 },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    transition: { duration: 0.3, ease: EASE_OUT, staggerChildren: 0.03 },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    transition: { duration: 0.25, ease: "easeIn" },
+  },
+};
+
+export const requirementItemVariants: Variants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    x: -10,
+    transition: { duration: 0.15 },
+  },
+};
+
+export const seasonVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+  hover: {
+    scale: 1.05,
+    transition: { duration: 0.15 },
+  },
+};
+
+export const categoryBadgeVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+  hover: {
+    scale: 1.05,
+    x: 2,
+    transition: { duration: 0.15 },
+  },
+};
+
+export const imageCardVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.92 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.28, ease: EASE_OUT },
+  },
+  exit: { opacity: 0, scale: 0.92, transition: { duration: 0.2 } },
+  hover: { y: -4, transition: { duration: 0.2 } },
+};
+
+export const scheduleCardVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    transition: { duration: 0.2, ease: "easeIn" },
+  },
+};
+

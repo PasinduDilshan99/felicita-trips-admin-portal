@@ -1,8 +1,14 @@
-// components/activity-category-components/ActivitySelector.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Activity, Search, ChevronDown, Check, AlertCircle, Loader } from "lucide-react";
+import {
+  Activity,
+  Search,
+  ChevronDown,
+  Check,
+  AlertCircle,
+  Loader,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ActivityService } from "@/services/activityService";
 
@@ -36,7 +42,6 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Fetch activities on mount using getActivityIdsAndNames API
   useEffect(() => {
     const fetchActivities = async () => {
       try {
@@ -58,10 +63,12 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
     fetchActivities();
   }, []);
 
-  // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
         setSearchQuery("");
       }
@@ -70,7 +77,6 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Prevent body scroll when dropdown is open
   useEffect(() => {
     if (isDropdownOpen) {
       const originalOverflow = document.body.style.overflow;
@@ -82,7 +88,7 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
   }, [isDropdownOpen]);
 
   const filteredActivities = activities.filter((activity) =>
-    activity.activityName.toLowerCase().includes(searchQuery.toLowerCase())
+    activity.activityName.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleToggleActivity = (activityId: number) => {
@@ -122,7 +128,10 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
           <Activity className="w-4 h-4" />
         </span>
         <div>
-          <h2 className="text-base font-semibold leading-tight" style={{ color: theme.text }}>
+          <h2
+            className="text-base font-semibold leading-tight"
+            style={{ color: theme.text }}
+          >
             {label}
             {required && <span style={{ color: theme.error }}> *</span>}
           </h2>
@@ -147,7 +156,10 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
         {/* Selected Activities Tags */}
         {selectedActivityIds.length > 0 && (
           <div>
-            <p className="text-xs font-medium mb-2" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-2"
+              style={{ color: theme.textSecondary }}
+            >
               Selected Activities:
             </p>
             <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
@@ -231,29 +243,42 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
               }}
             >
               {loading ? (
-                <div className="p-4 text-center text-sm" style={{ color: theme.textSecondary }}>
-                  <Loader className="w-5 h-5 animate-spin mx-auto mb-2" style={{ color: theme.primary }} />
+                <div
+                  className="p-4 text-center text-sm"
+                  style={{ color: theme.textSecondary }}
+                >
+                  <Loader
+                    className="w-5 h-5 animate-spin mx-auto mb-2"
+                    style={{ color: theme.primary }}
+                  />
                   Loading activities...
                 </div>
               ) : filteredActivities.length === 0 ? (
-                <div className="p-4 text-center text-sm" style={{ color: theme.textSecondary }}>
-                  {searchQuery ? "No activities match your search" : "No activities available"}
+                <div
+                  className="p-4 text-center text-sm"
+                  style={{ color: theme.textSecondary }}
+                >
+                  {searchQuery
+                    ? "No activities match your search"
+                    : "No activities available"}
                 </div>
               ) : (
                 filteredActivities.map((activity) => {
-                  const isSelected = selectedActivityIds.includes(activity.activityId);
+                  const isSelected = selectedActivityIds.includes(
+                    activity.activityId,
+                  );
                   return (
                     <button
                       key={activity.activityId}
                       type="button"
                       onClick={() => {
                         handleToggleActivity(activity.activityId);
-                        // Keep dropdown open for multi-select
-                        // Don't close dropdown immediately
                       }}
                       className="w-full px-4 py-3 text-left transition-all duration-150 flex items-center justify-between group"
                       style={{
-                        backgroundColor: isSelected ? `${theme.primary}10` : "transparent",
+                        backgroundColor: isSelected
+                          ? `${theme.primary}10`
+                          : "transparent",
                       }}
                       onMouseEnter={(e) => {
                         if (!isSelected) {
@@ -271,16 +296,24 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
                           <span
                             className="w-1.5 h-1.5 rounded-full transition-all duration-200 group-hover:scale-150"
                             style={{
-                              backgroundColor: isSelected ? theme.primary : theme.textSecondary,
+                              backgroundColor: isSelected
+                                ? theme.primary
+                                : theme.textSecondary,
                             }}
                           />
-                          <p className="text-sm font-medium" style={{ color: theme.text }}>
+                          <p
+                            className="text-sm font-medium"
+                            style={{ color: theme.text }}
+                          >
                             {activity.activityName}
                           </p>
                         </div>
                       </div>
                       {isSelected && (
-                        <Check className="w-4 h-4 ml-2 flex-shrink-0 animate-in" style={{ color: theme.primary }} />
+                        <Check
+                          className="w-4 h-4 ml-2 flex-shrink-0 animate-in"
+                          style={{ color: theme.primary }}
+                        />
                       )}
                     </button>
                   );
@@ -290,16 +323,18 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
           )}
         </div>
 
-        {/* Helper Text */}
         {!error && activities.length > 0 && (
           <p className="text-xs" style={{ color: theme.textSecondary }}>
-            Click on activities to select/deselect. You can select multiple activities.
+            Click on activities to select/deselect. You can select multiple
+            activities.
           </p>
         )}
 
-        {/* Error Message */}
         {error && (
-          <p className="text-xs flex items-center gap-1 animate-in" style={{ color: theme.error }}>
+          <p
+            className="text-xs flex items-center gap-1 animate-in"
+            style={{ color: theme.error }}
+          >
             <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
             {error}
           </p>

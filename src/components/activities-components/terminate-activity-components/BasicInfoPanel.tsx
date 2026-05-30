@@ -1,63 +1,18 @@
-// components/activities-components/terminate-activity-components/BasicInfoPanel.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { Activity, Calendar, Clock, MapPin, FileText } from "lucide-react";
 import { Activity as ActivityType } from "@/types/activity-types";
 import { useTheme } from "@/contexts/ThemeContext";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const infoRowVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-};
+import {
+  cardVariants,
+  contentVariants,
+  headerVariants,
+  infoRowVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
 interface BasicInfoPanelProps {
   activityDetails: ActivityType;
@@ -220,12 +175,18 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({
             className="text-sm font-mono"
             style={{ color: theme.text }}
           >
-            {formatTimeRange(activityDetails.available_from, activityDetails.available_to)}
+            {formatTimeRange(
+              activityDetails.available_from,
+              activityDetails.available_to,
+            )}
           </motion.div>
         </motion.div>
 
         {/* Dates */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
             <p
               className="text-xs font-medium mb-1"

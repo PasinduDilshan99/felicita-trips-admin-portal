@@ -1,23 +1,25 @@
-// app/web-management/activities/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-} from "@/utils/constant";
 import { ActivityService } from "@/services/activityService";
-import { Activity, ActivityIdName } from "@/types/activity-types";
+import {
+  Activity,
+  ActivityIdName,
+  ActivitySearchItem,
+} from "@/types/activity-types";
 import { AlertTriangle, Search } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
-import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
+import {
+  TerminationItem,
+  TerminationModal,
+} from "@/components/common-components/terminate-components/TerminationModal";
 import { ActivityStats } from "@/components/activities-components/terminate-activity-components/ActivityStats";
 import { BasicInfoPanel } from "@/components/activities-components/terminate-activity-components/BasicInfoPanel";
 import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
@@ -25,20 +27,10 @@ import { CategoriesList } from "@/components/activities-components/terminate-act
 import { SchedulesList } from "@/components/activities-components/terminate-activity-components/SchedulesList";
 import { RequirementsList } from "@/components/activities-components/terminate-activity-components/RequirementsList";
 import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface ActivitySearchItem {
-  id: number;
-  name: string;
-}
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITY_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { hexToRgba } from "@/utils/functions";
 
 const TerminateActivityPage = () => {
   const { theme } = useTheme();
@@ -49,14 +41,15 @@ const TerminateActivityPage = () => {
   const initialActivityId = searchParams?.get("activity-id") || "";
 
   const [activities, setActivities] = useState<ActivityIdName[]>([]);
-  const [selectedActivity, setSelectedActivity] = useState<ActivityIdName | null>(
-    initialActivityId && initialActivityName
-      ? {
-          activityId: parseInt(initialActivityId),
-          activityName: initialActivityName,
-        }
-      : null,
-  );
+  const [selectedActivity, setSelectedActivity] =
+    useState<ActivityIdName | null>(
+      initialActivityId && initialActivityName
+        ? {
+            activityId: parseInt(initialActivityId),
+            activityName: initialActivityName,
+          }
+        : null,
+    );
   const [activityDetails, setActivityDetails] = useState<Activity | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
@@ -76,19 +69,6 @@ const TerminateActivityPage = () => {
   // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Activities",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PATH}`,
-    },
-    {
-      label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PATH}/terminate`,
-    },
-  ];
 
   const fetchActivities = async () => {
     setLoading(true);
@@ -184,7 +164,8 @@ const TerminateActivityPage = () => {
       setToast({
         type: "error",
         title: "Termination Failed",
-        message: err.message || "Failed to terminate activity. Please try again.",
+        message:
+          err.message || "Failed to terminate activity. Please try again.",
       });
     } finally {
       setLoadingTerminate(false);
@@ -282,7 +263,7 @@ const TerminateActivityPage = () => {
           <PageHeader
             title="Terminate Activity"
             description="Permanently remove an activity from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITY_TERMINATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -463,11 +444,15 @@ const TerminateActivityPage = () => {
 
                   {/* Right Column */}
                   <div className="space-y-5">
-                    <CategoriesList categories={activityDetails.activities_category} />
-                    
+                    <CategoriesList
+                      categories={activityDetails.activities_category}
+                    />
+
                     <SchedulesList schedules={activityDetails.schedules} />
-                    
-                    <RequirementsList requirements={activityDetails.requirements} />
+
+                    <RequirementsList
+                      requirements={activityDetails.requirements}
+                    />
 
                     <ImpactWarning entityType="activity" />
                   </div>

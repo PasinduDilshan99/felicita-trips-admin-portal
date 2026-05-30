@@ -9,18 +9,11 @@ import {
   ChevronDown,
   Calendar,
   Trash2,
-  Check,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DestinationSelector } from "@/components/common-components/DestinationSelector";
-import { TourDays } from "@/types/tour-types";
+import { TourDestinationsFormProps } from "@/types/tour-types";
 import { ActivityMultiSelector } from "./ActivityMultiSelector";
-
-interface TourDestinationsFormProps {
-  days: TourDays[];
-  onDaysChange: (days: TourDays[]) => void;
-  error?: string;
-}
 
 export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
   days,
@@ -89,7 +82,6 @@ export const TourDestinationsForm: React.FC<TourDestinationsFormProps> = ({
   ) => {
     const updatedDays = [...days];
     updatedDays[dayIndex].destinations[destIndex].destinationId = destinationId;
-    // Reset activities when destination changes
     updatedDays[dayIndex].destinations[destIndex].activities = [];
     onDaysChange(updatedDays);
   };

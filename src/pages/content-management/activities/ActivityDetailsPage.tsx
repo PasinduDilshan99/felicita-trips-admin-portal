@@ -1,36 +1,46 @@
-// app/activities/view/[activityId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { ActivityService } from "@/services/activityService";
 import { Activity, ActivityImage } from "@/types/activity-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useImageGallery } from "@/hooks/useImageGallery";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
-import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
-import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
+import ImageModal from "@/components/common-components/ImageModal";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
 
-// Import sub-components
+import {
+  Calendar,
+  Clock,
+  Image,
+  DollarSign,
+  Users,
+  Tag,
+  Activity as ActivityIcon,
+} from "lucide-react";
+
+import {
+  ACTIVITIES_VIEW_PAGE_URL,
+  ACTIVITY_UPDATE_PAGE_URL,
+  ACTIVITY_TERMINATE_PAGE_URL,
+  DESTINATION_DETAILS_VIEW_PAGE_URL,
+} from "@/utils/urls";
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITIES_DETAILS_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
 import { ActivityOverview } from "@/components/activities-components/activity-details-view-components/ActivityOverview";
 import { ActivityPricing } from "@/components/activities-components/activity-details-view-components/ActivityPricing";
 import { ActivityScheduleList } from "@/components/activities-components/activity-details-view-components/ActivityScheduleList";
 import { ActivityRequirements } from "@/components/activities-components/activity-details-view-components/ActivityRequirements";
 import { ActivityCategories } from "@/components/activities-components/activity-details-view-components/ActivityCategories";
-import { ActivityQuickStats } from "@/components/activities-components/activity-details-view-components/ActivityQuickStats";
-
-// Constants for routing
-import {
-  ACTIVITIES_VIEW_PAGE_URL,
-  ACTIVITY_CATEGORIES_PAGE_URL,
-} from "@/utils/urls";
+import { CommonQuickStats } from "@/components/common-components/details-view/CommonQuickStats";
+import { CommonMetadata } from "@/components/common-components/details-view/CommonMetadata";
+import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
 import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
+import { hexToRgba } from "@/utils/functions";
 
 const ActivityDetailsPage = () => {
   const params = useParams();
@@ -58,9 +68,7 @@ const ActivityDetailsPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Activities", href: ACTIVITY_CATEGORIES_PAGE_URL },
-    { label: "View", href: ACTIVITIES_VIEW_PAGE_URL },
+    ...ACTIVITIES_DETAILS_VIEW_PAGE_BREADCRUMB_DATA,
     {
       label: activity?.name || "Details",
       href: `${ACTIVITIES_VIEW_PAGE_URL}/${activityId}`,
@@ -78,8 +86,10 @@ const ActivityDetailsPage = () => {
     try {
       const response = await ActivityService.getActivityById(activityId);
       setActivity(response.data);
-    } catch {
-      setError("Failed to load activity details. Please try again.");
+    } catch (err: any) {
+      setError(
+        err.message || "Failed to load activity details. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -107,16 +117,16 @@ const ActivityDetailsPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(ACTIVITIES_VIEW_PAGE_URL);
+  const handleBack = () => router.back();
 
   const handleEdit = () =>
     router.push(
-      `${ACTIVITIES_VIEW_PAGE_URL}/${activityId}?name=${activity?.name}`,
+      `${ACTIVITY_UPDATE_PAGE_URL}/${activityId}?name=${activity?.name}`,
     );
 
   const handleDelete = () =>
     router.push(
-      `${ACTIVITIES_VIEW_PAGE_URL}/${activityId}?name=${activity?.name}`,
+      `${ACTIVITY_TERMINATE_PAGE_URL}/${activityId}?name=${activity?.name}`,
     );
 
   const handleShare = () => {
@@ -129,6 +139,14 @@ const ActivityDetailsPage = () => {
     } else {
       navigator.clipboard.writeText(window.location.href);
       alert("Link copied to clipboard!");
+    }
+  };
+
+  const handleViewDestination = () => {
+    if (activity?.destination_id) {
+      router.push(
+        `${DESTINATION_DETAILS_VIEW_PAGE_URL}/${activity.destination_id}name=${activity.destinationName}`,
+      );
     }
   };
 
@@ -147,13 +165,89 @@ const ActivityDetailsPage = () => {
     );
   };
 
-  // Calculate stats
-  const totalSchedules = activity?.schedules?.length ?? 0;
-  const totalRequirements = activity?.requirements?.length ?? 0;
-  const totalImages = activity?.images?.length ?? 0;
-  const priceRange = activity
-    ? `$${activity.price_local} - $${activity.price_foreigners}`
-    : "N/A";
+  // Prepare quick stats
+  const quickStats = [
+    {
+      label: "Duration",
+      value: `${activity?.duration_hours || 0} hours`,
+      icon: Clock,
+      color: theme.primary,
+    },
+    {
+      label: "Price (Local)",
+      value: `$${activity?.price_local?.toLocaleString() || 0}`,
+      icon: DollarSign,
+      color: theme.success,
+    },
+    {
+      label: "Price (Foreigners)",
+      value: `$${activity?.price_foreigners?.toLocaleString() || 0}`,
+      icon: DollarSign,
+      color: theme.primary,
+    },
+    {
+      label: "Participant Range",
+      value: `${activity?.min_participate || 0} - ${activity?.max_participate || 0} persons`,
+      icon: Users,
+      color: theme.warning,
+    },
+    {
+      label: "Categories",
+      value: activity?.activities_category?.length || 0,
+      icon: Tag,
+      color: theme.accent || theme.primary,
+    },
+    {
+      label: "Schedules",
+      value: activity?.schedules?.length || 0,
+      icon: Calendar,
+      color: theme.primary,
+    },
+    {
+      label: "Requirements",
+      value: activity?.requirements?.length || 0,
+      icon: ActivityIcon,
+      color: theme.warning,
+    },
+    {
+      label: "Images",
+      value: activity?.images?.length || 0,
+      icon: Image,
+      color: theme.warning,
+    },
+  ];
+
+  // Prepare metadata items
+  const metadataItems = [
+    {
+      label: "Created At",
+      value: new Date(activity?.created_at || "").toLocaleDateString(),
+      icon: Calendar,
+      date: activity?.created_at,
+      color: theme.success,
+    },
+    {
+      label: "Updated At",
+      value: new Date(activity?.updated_at || "").toLocaleDateString(),
+      icon: Clock,
+      date: activity?.updated_at,
+      color: theme.primary,
+    },
+    {
+      label: "Available From",
+      value: new Date(activity?.available_from || "").toLocaleDateString(),
+      icon: Calendar,
+      date: activity?.available_from,
+      color: theme.success,
+    },
+    {
+      label: "Available To",
+      value: new Date(activity?.available_to || "").toLocaleDateString(),
+      icon: Calendar,
+      date: activity?.available_to,
+      color: theme.error,
+    },
+  ];
 
   if (loading)
     return (
@@ -216,7 +310,7 @@ const ActivityDetailsPage = () => {
           onDelete={handleDelete}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5 sm:gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 sm:gap-6 items-start">
           {/* LEFT COLUMN */}
           <div className="flex flex-col gap-4 sm:gap-5">
             <CommonHeroImage
@@ -230,15 +324,29 @@ const ActivityDetailsPage = () => {
               aspectRatio="video"
               showThumbnails={true}
               showCounter={true}
+              fallbackIcon={
+                <div
+                  className="w-20 h-20 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: hexToRgba(theme.primary, 0.1) }}
+                >
+                  <ActivityIcon
+                    className="w-10 h-10"
+                    style={{ color: theme.primary }}
+                  />
+                </div>
+              }
             />
 
             <ActivityOverview
               name={activity.name}
               description={activity.description}
               destinationName={activity.destinationName}
+              destinationId={activity.destination_id}
               availableFrom={activity.available_from}
               availableTo={activity.available_to}
               durationHours={activity.duration_hours}
+              seasonName={activity.seasonName}
+              onViewDestination={handleViewDestination}
             />
 
             <ActivityPricing
@@ -251,29 +359,33 @@ const ActivityDetailsPage = () => {
             <ActivityScheduleList schedules={activity.schedules || []} />
 
             <ActivityRequirements requirements={activity.requirements || []} />
+
+            <ActivityCategories
+              categories={activity.activities_category || []}
+            />
           </div>
 
           {/* RIGHT COLUMN */}
           <div className="flex flex-col gap-4">
-            <ActivityQuickStats
-              totalSchedules={totalSchedules}
-              totalRequirements={totalRequirements}
-              totalImages={totalImages}
-              durationHours={activity.duration_hours}
-              priceRange={priceRange}
-              seasonName={activity.seasonName}
-              status={activity.status}
+            <CommonQuickStats
+              stats={quickStats}
+              title="Activity Stats"
+              statusBadge={<StatusBadge />}
+              columns={2}
             />
 
-            <ActivityCategories
-              categories={activity.activities_category || []}
+            <CommonMetadata
+              items={metadataItems}
+              title="Timeline & Availability"
+              description="Important dates and availability"
+              showCreatedAt={false}
             />
 
             <CommonGalleryMini
               images={getGalleryImages()}
               onImageClick={handleImageClick}
               onViewAll={openExpandedGallery}
-              title="Gallery"
+              title="Activity Gallery"
               showCount={true}
               maxDisplayCount={4}
             />
