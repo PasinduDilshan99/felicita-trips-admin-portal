@@ -1,9 +1,7 @@
-// app/package-types/view/[typeId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { PackageTypeService } from "@/services/packageTypeService";
 import {
   PackageTypeDetails,
@@ -11,9 +9,7 @@ import {
 } from "@/types/package-type-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useImageGallery } from "@/hooks/useImageGallery";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
 import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
 import { CommonQuickStats } from "@/components/common-components/details-view/CommonQuickStats";
@@ -21,12 +17,8 @@ import { CommonMetadata } from "@/components/common-components/details-view/Comm
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-
-// Import sub-components
 import { PackageTypeOverview } from "@/components/package-types-components/package-type-details-view-components/PackageTypeOverview";
 import { PackageTypePackagesList } from "@/components/package-types-components/package-type-details-view-components/PackageTypePackagesList";
-
-// Icons
 import {
   Package,
   Image,
@@ -37,19 +29,17 @@ import {
   Clock,
   Tag,
 } from "lucide-react";
-
-// Constants for routing
-import { PACKAGE_TYPES_PAGE_URL, PACKAGES_VIEW_PAGE_URL } from "@/utils/urls";
+import {
+  PACKAGE_DETAILS_VIEW_PAGE_URL,
+  PACKAGE_TYPE_TERMINATE_URL,
+  PACKAGE_TYPE_UPDATE_URL,
+  PACKAGES_VIEW_PAGE_URL,
+} from "@/utils/urls";
 import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { PACKAGE_TYPE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { hexToRgba } from "@/utils/functions";
 
 const PackageTypeDetailsViewPage = () => {
   const params = useParams();
@@ -79,9 +69,7 @@ const PackageTypeDetailsViewPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Package Types", href: PACKAGE_TYPES_PAGE_URL },
-    { label: "View", href: PACKAGES_VIEW_PAGE_URL },
+    ...PACKAGE_TYPE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA,
     {
       label: packageType?.typeName || "Details",
       href: `${PACKAGES_VIEW_PAGE_URL}/${typeId}`,
@@ -130,16 +118,16 @@ const PackageTypeDetailsViewPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(PACKAGES_VIEW_PAGE_URL);
+  const handleBack = () => router.back();
 
   const handleEdit = () =>
     router.push(
-      `${PACKAGES_VIEW_PAGE_URL}/${typeId}?name=${packageType?.typeName}`,
+      `${PACKAGE_TYPE_UPDATE_URL}/${typeId}?name=${packageType?.typeName}`,
     );
 
   const handleDelete = () =>
     router.push(
-      `${PACKAGES_VIEW_PAGE_URL}/${typeId}?name=${packageType?.typeName}`,
+      `${PACKAGE_TYPE_TERMINATE_URL}/${typeId}?name=${packageType?.typeName}`,
     );
 
   const handleShare = () => {
@@ -155,8 +143,10 @@ const PackageTypeDetailsViewPage = () => {
     }
   };
 
-  const handleViewPackage = (packageId: number) => {
-    router.push(`${PACKAGES_VIEW_PAGE_URL}/${packageId}`);
+  const handleViewPackage = (packageId: number, packageName: string) => {
+    router.push(
+      `${PACKAGE_DETAILS_VIEW_PAGE_URL}/${packageId}?name=${packageName}`,
+    );
   };
 
   // Status badge component

@@ -1,19 +1,9 @@
-// app/packages/view/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_PACKAGES_PATH,
-} from "@/utils/constant";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
+import FilterPanel from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { PackageService } from "@/services/packageService";
 import {
@@ -27,99 +17,29 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import {
-  PACKAGES_PAGE_URL,
-  PACKAGES_VIEW_PAGE_URL,
-  WEB_MANAGEMENT_URL,
-} from "@/utils/urls";
+import { PACKAGES_VIEW_PAGE_URL } from "@/utils/urls";
 import PackageCard from "@/components/packages-components/view-package-components/PackageCard";
 import PackageListCard from "@/components/packages-components/view-package-components/PackageListCard";
+import {
+  packageViewFiltersToUrlParams,
+  packageViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import { FilterField } from "@/types/filter-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
-// Sort options for packages
-const SORT_OPTIONS = [
-  { value: "packageName", label: "Package Name" },
-  { value: "packageId", label: "Package ID" },
-  { value: "totalPrice", label: "Total Price" },
-  { value: "pricePerPerson", label: "Price Per Person" },
-  { value: "duration", label: "Duration" },
-  { value: "startDate", label: "Start Date" },
-  { value: "endDate", label: "End Date" },
-  { value: "createdAt", label: "Created Date" },
-];
-
-// Utility functions for URL params management
-const filtersToUrlParams = (filters: PackageFilterParams): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.packageType) params.set("packageType", filters.packageType);
-  if (filters.location) params.set("location", filters.location);
-  if (filters.duration) params.set("duration", filters.duration.toString());
-  if (filters.minPrice) params.set("minPrice", filters.minPrice.toString());
-  if (filters.maxPrice) params.set("maxPrice", filters.maxPrice.toString());
-  if (filters.minGroupSize)
-    params.set("minGroupSize", filters.minGroupSize.toString());
-  if (filters.maxGroupSize)
-    params.set("maxGroupSize", filters.maxGroupSize.toString());
-  if (filters.fromDate) params.set("fromDate", filters.fromDate);
-  if (filters.toDate) params.set("toDate", filters.toDate);
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-
-  return params;
-};
-
-const urlParamsToFilters = (params: URLSearchParams): PackageFilterParams => {
-  return {
-    name: params.get("name") || null,
-    minPrice: params.get("minPrice")
-      ? parseFloat(params.get("minPrice")!)
-      : null,
-    maxPrice: params.get("maxPrice")
-      ? parseFloat(params.get("maxPrice")!)
-      : null,
-    duration: params.get("duration")
-      ? parseFloat(params.get("duration")!)
-      : null,
-    packageType: params.get("packageType") || null,
-    location: params.get("location") || null,
-    minGroupSize: params.get("minGroupSize")
-      ? parseInt(params.get("minGroupSize")!)
-      : null,
-    maxGroupSize: params.get("maxGroupSize")
-      ? parseInt(params.get("maxGroupSize")!)
-      : null,
-    fromDate: params.get("fromDate") || null,
-    toDate: params.get("toDate") || null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-  };
-};
-
-// Main component wrapped with Suspense for useSearchParams
 const PackagesViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { categories, loading: categoriesLoading } = useCommon();
   const { theme } = useTheme();
-
-  // State for filter request params
   const [requestParams, setRequestParams] =
     useState<PackageRequestParams | null>(null);
   const [requestParamsLoading, setRequestParamsLoading] = useState(true);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    { label: "Packages", href: PACKAGES_PAGE_URL },
-    { label: "View", href: PACKAGES_VIEW_PAGE_URL },
-  ];
-
   const [filters, setFilters] = useState<PackageFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    packageViewUrlParamsToFilters(searchParams || new URLSearchParams()),
   );
 
   const [packages, setPackages] = useState<TourPackage[]>([]);
@@ -295,11 +215,11 @@ const PackagesViewContent = () => {
   // Update URL with current filters
   const updateURL = useCallback(
     (newFilters: PackageFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = packageViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
-        ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/view?${queryString}`
-        : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_PACKAGES_PATH}/view`;
+        ? `${PACKAGES_VIEW_PAGE_URL}?${queryString}`
+        : PACKAGES_VIEW_PAGE_URL;
 
       router.replace(newURL, { scroll: false });
     },
@@ -333,7 +253,7 @@ const PackagesViewContent = () => {
 
   // Initial load from URL params
   useEffect(() => {
-    const initialFilters = urlParamsToFilters(
+    const initialFilters = packageViewUrlParamsToFilters(
       searchParams || new URLSearchParams(),
     );
     setFilters(initialFilters);
@@ -343,7 +263,7 @@ const PackagesViewContent = () => {
   // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = packageViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -553,7 +473,7 @@ const PackagesViewContent = () => {
           <PageHeader
             title="Packages View"
             description="Explore and manage tour packages and special offers"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_VIEW_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -683,10 +603,7 @@ const PackagesViewContent = () => {
   );
 };
 
-// Wrap with Suspense for useSearchParams
 const PackagesViewPage = () => {
-  const { theme } = useTheme();
-
   return (
     <Suspense
       fallback={

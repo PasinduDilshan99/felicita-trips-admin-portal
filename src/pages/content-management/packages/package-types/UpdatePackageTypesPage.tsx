@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { PackageTypeService } from "@/services/packageTypeService";
 import { OtherService } from "@/services/otherService";
 import {
@@ -10,58 +9,48 @@ import {
   UpdatePackageTypeRequest,
   PackageTypeImageRequest,
   UpdatePackageTypeImageRequest,
-  PackageBasicDetail,
 } from "@/types/package-type-types";
-import { Search, Edit, Save, RefreshCw, Loader2, Palette, Tag, ChevronDown, Star, Package } from "lucide-react";
+import {
+  Search,
+  Edit,
+  Save,
+  RefreshCw,
+  Loader2,
+  Palette,
+  ChevronDown,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCommon } from "@/contexts/CommonContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
-import CommonSearch, { SearchItem } from "@/components/common-components/CommonSearch";
+import CommonSearch, {
+  SearchItem,
+} from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
-import { UpdateConfirmationModal, ChangedField } from "@/components/common-components/UpdateConfirmationModal";
+import {
+  UpdateConfirmationModal,
+  ChangedField,
+} from "@/components/common-components/UpdateConfirmationModal";
 import { hexToRgba } from "@/utils/functions";
-import { motion, AnimatePresence, Variants } from "framer-motion";
-import { PACKAGE_TYPES_PAGE_URL } from "@/utils/urls";
+import { motion, AnimatePresence } from "framer-motion";
+import { PACKAGE_TYPE_DETAILS_VIEW_URL } from "@/utils/urls";
 import { PackageTypeReadOnlyDetails } from "@/components/package-types-components/update-package-types-components/PackageTypeReadOnlyDetails";
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.45, ease: EASE_OUT }
-  },
-};
-
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: { 
-    opacity: 1, 
-    height: "auto", 
-    transition: { duration: 0.32, ease: EASE_OUT }
-  },
-};
-
-const STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "Active", description: "Package type is active", color: "#059669" },
-  { value: "INACTIVE", label: "Inactive", description: "Package type is inactive", color: "#6b7280" },
-  { value: "TERMINATED", label: "Terminated", description: "Package type is terminated", color: "#ef4444" },
-];
-
-const PRESET_COLORS = [
-  "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#8B5CF6",
-  "#EC4899", "#14B8A6", "#F97316", "#06B6D4", "#84CC16",
-];
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_TYPE_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
+import { PACKAGE_TYPE_UPDATE_PRESET_COLORS } from "@/data/colors-data";
+import { PACKAGE_TYPE_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
 
 const UpdatePackageTypePage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
-  const { categories, loading: commonLoading, error: commonError } = useCommon();
+  const {
+    categories,
+    loading: commonLoading,
+    error: commonError,
+  } = useCommon();
 
   const initialTypeName = searchParams?.get("package-type-name") || "";
   const initialTypeId = searchParams?.get("package-type-id") || "";
@@ -69,7 +58,7 @@ const UpdatePackageTypePage = () => {
   // Build package types list from common context
   const packageTypesList = React.useMemo(() => {
     if (categories?.packageCategoryList) {
-      return categories.packageCategoryList.map(type => ({
+      return categories.packageCategoryList.map((type) => ({
         id: type.packageCategoryId,
         name: type.packageCategoryName,
       }));
@@ -77,8 +66,10 @@ const UpdatePackageTypePage = () => {
     return [];
   }, [categories]);
 
-  // State for selected package type
-  const [selectedType, setSelectedType] = useState<{ id: number; name: string } | null>(
+  const [selectedType, setSelectedType] = useState<{
+    id: number;
+    name: string;
+  } | null>(
     initialTypeId && initialTypeName
       ? {
           id: parseInt(initialTypeId),
@@ -86,22 +77,16 @@ const UpdatePackageTypePage = () => {
         }
       : null,
   );
-
-  // State for original type details
-  const [originalType, setOriginalType] = useState<PackageTypeDetails | null>(null);
-
-  // State for edited type
+  const [originalType, setOriginalType] = useState<PackageTypeDetails | null>(
+    null,
+  );
   const [editedType, setEditedType] = useState<PackageTypeDetails | null>(null);
-
-  // State for basic details changes
   const [basicDetailsChanged, setBasicDetailsChanged] = useState(false);
-
-  // State for images changes
   const [removedImageIds, setRemovedImageIds] = useState<number[]>([]);
   const [newImages, setNewImages] = useState<PackageTypeImageRequest[]>([]);
-  const [updatedImages, setUpdatedImages] = useState<UpdatePackageTypeImageRequest[]>([]);
-
-  // UI state
+  const [updatedImages, setUpdatedImages] = useState<
+    UpdatePackageTypeImageRequest[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -109,9 +94,10 @@ const UpdatePackageTypePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["basic", "packages", "images"]));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(["basic", "packages", "images"]),
+  );
 
-  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
@@ -119,17 +105,8 @@ const UpdatePackageTypePage = () => {
     actionLink?: string;
   } | null>(null);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Package Types", href: PACKAGE_TYPES_PAGE_URL },
-    {
-      label: "Update",
-      href: PACKAGE_TYPES_PAGE_URL,
-    },
-  ];
-
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => {
+    setExpandedSections((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(section)) newSet.delete(section);
       else newSet.add(section);
@@ -138,17 +115,20 @@ const UpdatePackageTypePage = () => {
   };
 
   // Update URL when selected type changes
-  const updateUrlWithSelectedType = useCallback((type: { id: number; name: string } | null) => {
-    const url = new URL(window.location.href);
-    if (type) {
-      url.searchParams.set("package-type-id", type.id.toString());
-      url.searchParams.set("package-type-name", type.name);
-    } else {
-      url.searchParams.delete("package-type-id");
-      url.searchParams.delete("package-type-name");
-    }
-    router.replace(url.toString(), { scroll: false });
-  }, [router]);
+  const updateUrlWithSelectedType = useCallback(
+    (type: { id: number; name: string } | null) => {
+      const url = new URL(window.location.href);
+      if (type) {
+        url.searchParams.set("package-type-id", type.id.toString());
+        url.searchParams.set("package-type-name", type.name);
+      } else {
+        url.searchParams.delete("package-type-id");
+        url.searchParams.delete("package-type-name");
+      }
+      router.replace(url.toString(), { scroll: false });
+    },
+    [router],
+  );
 
   // If initialTypeId is provided, fetch details
   useEffect(() => {
@@ -202,7 +182,11 @@ const UpdatePackageTypePage = () => {
     }
   };
 
-  const handleAddNewImage = async (imageFile: File, imageName: string, imageDescription: string) => {
+  const handleAddNewImage = async (
+    imageFile: File,
+    imageName: string,
+    imageDescription: string,
+  ) => {
     setUploadingImages(true);
     try {
       const cloudinaryUrl = await uploadImageToCloudinary(imageFile);
@@ -263,16 +247,22 @@ const UpdatePackageTypePage = () => {
     });
   };
 
-  const handleUpdateImage = (imageId: number, name: string, description: string) => {
+  const handleUpdateImage = (
+    imageId: number,
+    name: string,
+    description: string,
+  ) => {
     const existingUpdate = updatedImages.find((u) => u.imageId === imageId);
     if (existingUpdate) {
       setUpdatedImages((prev) =>
         prev.map((u) =>
-          u.imageId === imageId ? { ...u, name, description } : u
-        )
+          u.imageId === imageId ? { ...u, name, description } : u,
+        ),
       );
     } else {
-      const originalImage = originalType?.images.find((img) => img.imageId === imageId);
+      const originalImage = originalType?.images.find(
+        (img) => img.imageId === imageId,
+      );
       setUpdatedImages((prev) => [
         ...prev,
         {
@@ -289,7 +279,7 @@ const UpdatePackageTypePage = () => {
       return {
         ...prev,
         images: prev.images.map((img) =>
-          img.imageId === imageId ? { ...img, name, description } : img
+          img.imageId === imageId ? { ...img, name, description } : img,
         ),
       };
     });
@@ -303,12 +293,7 @@ const UpdatePackageTypePage = () => {
       newImages.length > 0 ||
       updatedImages.length > 0
     );
-  }, [
-    basicDetailsChanged,
-    removedImageIds,
-    newImages,
-    updatedImages,
-  ]);
+  }, [basicDetailsChanged, removedImageIds, newImages, updatedImages]);
 
   // Prepare update data
   const prepareUpdateData = (): UpdatePackageTypeRequest | null => {
@@ -339,13 +324,15 @@ const UpdatePackageTypePage = () => {
     try {
       const response = await PackageTypeService.updatePackageType(updateData);
 
-      setSuccess(`Package Type "${editedType?.typeName}" updated successfully!`);
+      setSuccess(
+        `Package Type "${editedType?.typeName}" updated successfully!`,
+      );
 
       setToast({
         type: "success",
         title: "Update Successful!",
         message: `${editedType?.typeName} has been updated successfully.`,
-        actionLink: `${PACKAGE_TYPES_PAGE_URL}/view?id=${selectedType?.id}`,
+        actionLink: `${PACKAGE_TYPE_DETAILS_VIEW_URL}/${selectedType?.id}`,
       });
 
       setShowConfirmModal(false);
@@ -360,7 +347,8 @@ const UpdatePackageTypePage = () => {
       setToast({
         type: "error",
         title: "Update Failed",
-        message: err.message || "Failed to update package type. Please try again.",
+        message:
+          err.message || "Failed to update package type. Please try again.",
       });
     } finally {
       setLoadingUpdate(false);
@@ -415,13 +403,25 @@ const UpdatePackageTypePage = () => {
     });
 
     if (originalType.color !== editedType.color) {
-      changes.push({ field: "Color", oldValue: originalType.color, newValue: editedType.color });
+      changes.push({
+        field: "Color",
+        oldValue: originalType.color,
+        newValue: editedType.color,
+      });
     }
     if (originalType.hoverColor !== editedType.hoverColor) {
-      changes.push({ field: "Hover Color", oldValue: originalType.hoverColor, newValue: editedType.hoverColor });
+      changes.push({
+        field: "Hover Color",
+        oldValue: originalType.hoverColor,
+        newValue: editedType.hoverColor,
+      });
     }
 
-    if (removedImageIds.length > 0 || newImages.length > 0 || updatedImages.length > 0) {
+    if (
+      removedImageIds.length > 0 ||
+      newImages.length > 0 ||
+      updatedImages.length > 0
+    ) {
       changes.push({
         field: "Images",
         oldValue: originalType.images.length,
@@ -446,11 +446,19 @@ const UpdatePackageTypePage = () => {
     : null;
 
   const focusHandlers = {
-    onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    onFocus: (
+      e: React.FocusEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
       e.currentTarget.style.borderColor = theme.primary;
       e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}18`;
     },
-    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    onBlur: (
+      e: React.FocusEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
       e.currentTarget.style.borderColor = theme.border;
       e.currentTarget.style.boxShadow = "none";
     },
@@ -519,7 +527,7 @@ const UpdatePackageTypePage = () => {
           <PageHeader
             title="Update Package Type"
             description="Edit and update existing package type information"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_TYPE_UPDATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -547,7 +555,9 @@ const UpdatePackageTypePage = () => {
               items={searchItems}
               loading={loading}
               selectedItem={selectedSearchItem}
-              onSelectItem={(item) => handleSelectType(item.id as number, item.name)}
+              onSelectItem={(item) =>
+                handleSelectType(item.id as number, item.name)
+              }
               onClearSelection={handleClearTypeSelection}
               initialSearchTerm={initialTypeName}
               placeholder="Search package types..."
@@ -605,57 +615,80 @@ const UpdatePackageTypePage = () => {
                 onClick={() => toggleSection("basic")}
                 className="w-full flex items-center justify-between p-4 cursor-pointer transition-colors"
                 style={{
-                  backgroundColor: expandedSections.has("basic") ? `${theme.primary}05` : "transparent",
-                  borderBottom: expandedSections.has("basic") ? `1px solid ${theme.border}` : "none",
+                  backgroundColor: expandedSections.has("basic")
+                    ? `${theme.primary}05`
+                    : "transparent",
+                  borderBottom: expandedSections.has("basic")
+                    ? `1px solid ${theme.border}`
+                    : "none",
                 }}
               >
                 <div className="flex items-center gap-3">
                   <span
                     className="flex items-center justify-center w-8 h-8 rounded-lg"
-                    style={{ backgroundColor: `${theme.primary}18`, color: theme.primary }}
+                    style={{
+                      backgroundColor: `${theme.primary}18`,
+                      color: theme.primary,
+                    }}
                   >
                     <Edit className="w-4 h-4" />
                   </span>
                   <div>
-                    <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+                    <h2
+                      className="text-sm sm:text-base font-semibold"
+                      style={{ color: theme.text }}
+                    >
                       Basic Information
                     </h2>
-                    <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+                    <p
+                      className="text-xs mt-0.5"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Core details about the package type (editable)
                     </p>
                   </div>
                 </div>
                 <ChevronDown
                   className="w-4 h-4 transition-transform duration-200"
-                  style={{ 
-                    transform: expandedSections.has("basic") ? "rotate(180deg)" : "none", 
-                    color: theme.textSecondary 
+                  style={{
+                    transform: expandedSections.has("basic")
+                      ? "rotate(180deg)"
+                      : "none",
+                    color: theme.textSecondary,
                   }}
                 />
               </button>
 
               <AnimatePresence>
                 {expandedSections.has("basic") && (
-                  <motion.div 
-                    variants={sectionVariants} 
-                    initial="hidden" 
-                    animate="visible" 
+                  <motion.div
+                    variants={sectionVariants}
+                    initial="hidden"
+                    animate="visible"
                     exit="hidden"
                     className="p-6 space-y-5"
                   >
                     {/* Type Name */}
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: theme.textSecondary }}>
-                        Package Type Name <span style={{ color: theme.error }}>*</span>
+                      <label
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ color: theme.textSecondary }}
+                      >
+                        Package Type Name{" "}
+                        <span style={{ color: theme.error }}>*</span>
                       </label>
                       <input
                         type="text"
                         value={editedType.typeName}
-                        onChange={(e) => handleBasicFieldChange("typeName", e.target.value)}
+                        onChange={(e) =>
+                          handleBasicFieldChange("typeName", e.target.value)
+                        }
                         className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
                         style={{
                           ...fieldBase,
-                          borderColor: basicDetailsChanged ? theme.primary : theme.border,
+                          borderColor: basicDetailsChanged
+                            ? theme.primary
+                            : theme.border,
                         }}
                         placeholder="e.g., Luxury Package"
                         {...focusHandlers}
@@ -664,12 +697,17 @@ const UpdatePackageTypePage = () => {
 
                     {/* Description */}
                     <div>
-                      <label className="block text-sm font-medium mb-1.5" style={{ color: theme.textSecondary }}>
+                      <label
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ color: theme.textSecondary }}
+                      >
                         Description
                       </label>
                       <textarea
                         value={editedType.description}
-                        onChange={(e) => handleBasicFieldChange("description", e.target.value)}
+                        onChange={(e) =>
+                          handleBasicFieldChange("description", e.target.value)
+                        }
                         rows={3}
                         className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none"
                         style={{ ...fieldBase, borderColor: theme.border }}
@@ -681,21 +719,32 @@ const UpdatePackageTypePage = () => {
                     {/* Colors */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+                        <label
+                          className="block text-sm font-medium mb-2 flex items-center gap-1.5"
+                          style={{ color: theme.textSecondary }}
+                        >
                           <Palette className="w-3.5 h-3.5" />
                           Color
                         </label>
                         <div className="flex flex-wrap gap-2 mb-2">
-                          {PRESET_COLORS.map((color) => (
+                          {PACKAGE_TYPE_UPDATE_PRESET_COLORS.map((color) => (
                             <button
                               key={color}
                               type="button"
-                              onClick={() => handleBasicFieldChange("color", color)}
+                              onClick={() =>
+                                handleBasicFieldChange("color", color)
+                              }
                               className="w-8 h-8 rounded-full border-2 transition-all"
                               style={{
                                 backgroundColor: color,
-                                borderColor: editedType.color === color ? theme.text : "transparent",
-                                boxShadow: editedType.color === color ? `0 0 0 2px ${theme.background}, 0 0 0 4px ${color}` : "none",
+                                borderColor:
+                                  editedType.color === color
+                                    ? theme.text
+                                    : "transparent",
+                                boxShadow:
+                                  editedType.color === color
+                                    ? `0 0 0 2px ${theme.background}, 0 0 0 4px ${color}`
+                                    : "none",
                               }}
                             />
                           ))}
@@ -704,14 +753,18 @@ const UpdatePackageTypePage = () => {
                           <input
                             type="color"
                             value={editedType.color}
-                            onChange={(e) => handleBasicFieldChange("color", e.target.value)}
+                            onChange={(e) =>
+                              handleBasicFieldChange("color", e.target.value)
+                            }
                             className="w-12 h-10 rounded border cursor-pointer"
                             style={{ borderColor: theme.border }}
                           />
                           <input
                             type="text"
                             value={editedType.color}
-                            onChange={(e) => handleBasicFieldChange("color", e.target.value)}
+                            onChange={(e) =>
+                              handleBasicFieldChange("color", e.target.value)
+                            }
                             className="flex-1 px-4 py-2.5 rounded-xl border-2 text-sm"
                             style={{ ...fieldBase, borderColor: theme.border }}
                             placeholder="#000000"
@@ -721,21 +774,32 @@ const UpdatePackageTypePage = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-2 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+                        <label
+                          className="block text-sm font-medium mb-2 flex items-center gap-1.5"
+                          style={{ color: theme.textSecondary }}
+                        >
                           <Palette className="w-3.5 h-3.5" />
                           Hover Color
                         </label>
                         <div className="flex flex-wrap gap-2 mb-2">
-                          {PRESET_COLORS.map((color) => (
+                          {PACKAGE_TYPE_UPDATE_PRESET_COLORS.map((color) => (
                             <button
                               key={color}
                               type="button"
-                              onClick={() => handleBasicFieldChange("hoverColor", color)}
+                              onClick={() =>
+                                handleBasicFieldChange("hoverColor", color)
+                              }
                               className="w-8 h-8 rounded-full border-2 transition-all"
                               style={{
                                 backgroundColor: color,
-                                borderColor: editedType.hoverColor === color ? theme.text : "transparent",
-                                boxShadow: editedType.hoverColor === color ? `0 0 0 2px ${theme.background}, 0 0 0 4px ${color}` : "none",
+                                borderColor:
+                                  editedType.hoverColor === color
+                                    ? theme.text
+                                    : "transparent",
+                                boxShadow:
+                                  editedType.hoverColor === color
+                                    ? `0 0 0 2px ${theme.background}, 0 0 0 4px ${color}`
+                                    : "none",
                               }}
                             />
                           ))}
@@ -744,14 +808,24 @@ const UpdatePackageTypePage = () => {
                           <input
                             type="color"
                             value={editedType.hoverColor}
-                            onChange={(e) => handleBasicFieldChange("hoverColor", e.target.value)}
+                            onChange={(e) =>
+                              handleBasicFieldChange(
+                                "hoverColor",
+                                e.target.value,
+                              )
+                            }
                             className="w-12 h-10 rounded border cursor-pointer"
                             style={{ borderColor: theme.border }}
                           />
                           <input
                             type="text"
                             value={editedType.hoverColor}
-                            onChange={(e) => handleBasicFieldChange("hoverColor", e.target.value)}
+                            onChange={(e) =>
+                              handleBasicFieldChange(
+                                "hoverColor",
+                                e.target.value,
+                              )
+                            }
                             className="flex-1 px-4 py-2.5 rounded-xl border-2 text-sm"
                             style={{ ...fieldBase, borderColor: theme.border }}
                             placeholder="#000000"
@@ -763,21 +837,30 @@ const UpdatePackageTypePage = () => {
 
                     {/* Status */}
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        style={{ color: theme.textSecondary }}
+                      >
                         Status
                       </label>
                       <div className="grid grid-cols-3 gap-3">
-                        {STATUS_OPTIONS.map((opt) => {
+                        {PACKAGE_TYPE_UPDATE_STATUS_OPTIONS.map((opt) => {
                           const isSelected = editedType.status === opt.value;
                           return (
                             <button
                               key={opt.value}
                               type="button"
-                              onClick={() => handleBasicFieldChange("status", opt.value)}
+                              onClick={() =>
+                                handleBasicFieldChange("status", opt.value)
+                              }
                               className="flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 text-left cursor-pointer transition-all"
                               style={{
-                                backgroundColor: isSelected ? `${opt.color}10` : theme.background,
-                                borderColor: isSelected ? opt.color : theme.border,
+                                backgroundColor: isSelected
+                                  ? `${opt.color}10`
+                                  : theme.background,
+                                borderColor: isSelected
+                                  ? opt.color
+                                  : theme.border,
                               }}
                             >
                               <span
@@ -785,16 +868,35 @@ const UpdatePackageTypePage = () => {
                                 style={{ backgroundColor: opt.color }}
                               />
                               <div className="flex-1">
-                                <span className="text-sm font-medium" style={{ color: isSelected ? opt.color : theme.text }}>
+                                <span
+                                  className="text-sm font-medium"
+                                  style={{
+                                    color: isSelected ? opt.color : theme.text,
+                                  }}
+                                >
                                   {opt.label}
                                 </span>
-                                <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+                                <p
+                                  className="text-xs mt-0.5"
+                                  style={{ color: theme.textSecondary }}
+                                >
                                   {opt.description}
                                 </p>
                               </div>
                               {isSelected && (
-                                <svg className="w-4 h-4" style={{ color: opt.color }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                <svg
+                                  className="w-4 h-4"
+                                  style={{ color: opt.color }}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 13l4 4L19 7"
+                                  />
                                 </svg>
                               )}
                             </button>
@@ -842,7 +944,10 @@ const UpdatePackageTypePage = () => {
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = theme.primary;
-                  e.currentTarget.style.backgroundColor = hexToRgba(theme.primary, 0.05);
+                  e.currentTarget.style.backgroundColor = hexToRgba(
+                    theme.primary,
+                    0.05,
+                  );
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = theme.border;
@@ -876,13 +981,20 @@ const UpdatePackageTypePage = () => {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <Loader2 className="w-5 h-5 animate-spin" style={{ color: theme.primary }} />
+                  <Loader2
+                    className="w-5 h-5 animate-spin"
+                    style={{ color: theme.primary }}
+                  />
                   <div>
                     <p className="font-medium" style={{ color: theme.primary }}>
                       Uploading images to Cloudinary...
                     </p>
-                    <p className="text-sm mt-1" style={{ color: theme.textSecondary }}>
-                      Please wait for all images to finish uploading before updating
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Please wait for all images to finish uploading before
+                      updating
                     </p>
                   </div>
                 </div>
@@ -904,7 +1016,10 @@ const UpdatePackageTypePage = () => {
                     <p className="font-medium" style={{ color: theme.primary }}>
                       You have unsaved changes
                     </p>
-                    <p className="text-sm mt-1" style={{ color: theme.textSecondary }}>
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Click "Update Package Type" to save your changes
                     </p>
                   </div>

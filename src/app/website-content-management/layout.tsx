@@ -1,8 +1,7 @@
-// app/travel-management/layout.tsx
 "use client";
 
 import Sidebar from "@/components/common-components/static-components/SideBar";
-import { webPageManagementSideBarData } from "@/data/side-bar-data";
+import { webSiteContentManagementSideBarData } from "@/data/side-bar-data";
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -13,12 +12,11 @@ export default function WebPageManagementLayout({
 }) {
   const { theme, isDarkMode } = useTheme();
 
-  // Determine background color based on theme
   const getBackgroundColor = () => {
     if (isDarkMode) {
       return theme.background;
     }
-    return "#F1F5F9"; // Keep the original light background
+    return "#F1F5F9"; 
   };
 
   return (
@@ -31,7 +29,7 @@ export default function WebPageManagementLayout({
     >
       <div className="flex">
         <Sidebar
-          data={webPageManagementSideBarData}
+          data={webSiteContentManagementSideBarData}
           title="Web Management"
           minWidth={260}
           maxWidth={600}

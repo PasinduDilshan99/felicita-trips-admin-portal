@@ -1,9 +1,7 @@
-// app/packages/update/page.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { PackageService } from "@/services/packageService";
 import { TourService } from "@/services/tourService";
 import { OtherService } from "@/services/otherService";
@@ -11,7 +9,6 @@ import {
   PackageNameId,
   PackageAllDetails,
   UpdatePackageRequest,
-  PackageBasicDetails,
   PackageImageRequest,
   UpdateImageRequest,
   AddFeatureRequest,
@@ -28,19 +25,25 @@ import {
   UpdateTravelTipRequest,
 } from "@/types/package-types";
 import { TourNameId } from "@/types/tour-types";
-import { PackageCategory, SeasonType } from "@/types/common-types";
 import { Search, Edit, Save, RefreshCw, Loader2 } from "lucide-react";
 import { useCommon } from "@/contexts/CommonContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
-import CommonSearch, { SearchItem } from "@/components/common-components/CommonSearch";
+import CommonSearch, {
+  SearchItem,
+} from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
-import { UpdateConfirmationModal, ChangedField } from "@/components/common-components/UpdateConfirmationModal";
+import {
+  UpdateConfirmationModal,
+  ChangedField,
+} from "@/components/common-components/UpdateConfirmationModal";
 import { hexToRgba } from "@/utils/functions";
 import { PACKAGES_PAGE_URL } from "@/utils/urls";
 import PackageDetailsForm from "@/components/packages-components/package-update-components/PackageDetailsForm";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const UpdatePackagePage = () => {
   const searchParams = useSearchParams();
@@ -74,10 +77,13 @@ const UpdatePackagePage = () => {
   );
 
   // State for original package details
-  const [originalPackage, setOriginalPackage] = useState<PackageAllDetails | null>(null);
+  const [originalPackage, setOriginalPackage] =
+    useState<PackageAllDetails | null>(null);
 
   // State for edited package
-  const [editedPackage, setEditedPackage] = useState<PackageAllDetails | null>(null);
+  const [editedPackage, setEditedPackage] = useState<PackageAllDetails | null>(
+    null,
+  );
 
   // State for basic details changes
   const [basicDetailsChanged, setBasicDetailsChanged] = useState(false);
@@ -90,32 +96,50 @@ const UpdatePackagePage = () => {
   // State for features changes
   const [addedFeatures, setAddedFeatures] = useState<AddFeatureRequest[]>([]);
   const [removedFeatures, setRemovedFeatures] = useState<number[]>([]);
-  const [updatedFeatures, setUpdatedFeatures] = useState<UpdateFeatureRequest[]>([]);
+  const [updatedFeatures, setUpdatedFeatures] = useState<
+    UpdateFeatureRequest[]
+  >([]);
 
   // State for day accommodations changes
-  const [addedDayAccommodations, setAddedDayAccommodations] = useState<AddDayAccommodationRequest[]>([]);
-  const [removedDayAccommodations, setRemovedDayAccommodations] = useState<number[]>([]);
-  const [updatedDayAccommodations, setUpdatedDayAccommodations] = useState<UpdateDayAccommodationRequest[]>([]);
+  const [addedDayAccommodations, setAddedDayAccommodations] = useState<
+    AddDayAccommodationRequest[]
+  >([]);
+  const [removedDayAccommodations, setRemovedDayAccommodations] = useState<
+    number[]
+  >([]);
+  const [updatedDayAccommodations, setUpdatedDayAccommodations] = useState<
+    UpdateDayAccommodationRequest[]
+  >([]);
 
   // State for inclusions changes
   const [addedInclusions, setAddedInclusions] = useState<Inclusion[]>([]);
   const [removedInclusions, setRemovedInclusions] = useState<number[]>([]);
-  const [updatedInclusions, setUpdatedInclusions] = useState<UpdateInclusionRequest[]>([]);
+  const [updatedInclusions, setUpdatedInclusions] = useState<
+    UpdateInclusionRequest[]
+  >([]);
 
   // State for exclusions changes
   const [addedExclusions, setAddedExclusions] = useState<Exclusion[]>([]);
   const [removedExclusions, setRemovedExclusions] = useState<number[]>([]);
-  const [updatedExclusions, setUpdatedExclusions] = useState<UpdateExclusionRequest[]>([]);
+  const [updatedExclusions, setUpdatedExclusions] = useState<
+    UpdateExclusionRequest[]
+  >([]);
 
   // State for conditions changes
   const [addedConditions, setAddedConditions] = useState<Condition[]>([]);
   const [removedConditions, setRemovedConditions] = useState<number[]>([]);
-  const [updatedConditions, setUpdatedConditions] = useState<UpdateConditionRequest[]>([]);
+  const [updatedConditions, setUpdatedConditions] = useState<
+    UpdateConditionRequest[]
+  >([]);
 
   // State for travel tips changes
-  const [addedTravelTips, setAddedTravelTips] = useState<TravelTipRequest[]>([]);
+  const [addedTravelTips, setAddedTravelTips] = useState<TravelTipRequest[]>(
+    [],
+  );
   const [removedTravelTips, setRemovedTravelTips] = useState<number[]>([]);
-  const [updatedTravelTips, setUpdatedTravelTips] = useState<UpdateTravelTipRequest[]>([]);
+  const [updatedTravelTips, setUpdatedTravelTips] = useState<
+    UpdateTravelTipRequest[]
+  >([]);
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -133,15 +157,6 @@ const UpdatePackagePage = () => {
     message: string;
     actionLink?: string;
   } | null>(null);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Packages", href: PACKAGES_PAGE_URL },
-    {
-      label: "Update",
-      href: PACKAGES_PAGE_URL,
-    },
-  ];
 
   // Fetch packages list on initial load
   useEffect(() => {
@@ -212,7 +227,7 @@ const UpdatePackagePage = () => {
     imageFile: File,
     imageName: string,
     imageDescription: string,
-    color: string
+    color: string,
   ) => {
     setUploadingImages(true);
     try {
@@ -317,21 +332,32 @@ const UpdatePackagePage = () => {
       if (!prev) return prev;
       return {
         ...prev,
-        packageImages: prev.packageImages.filter((img) => img.imageId !== imageId),
+        packageImages: prev.packageImages.filter(
+          (img) => img.imageId !== imageId,
+        ),
       };
     });
   };
 
-  const handleUpdateImage = (imageId: number, name: string, description: string, color: string) => {
+  const handleUpdateImage = (
+    imageId: number,
+    name: string,
+    description: string,
+    color: string,
+  ) => {
     const existingUpdate = updatedImages.find((u) => u.imageId === imageId);
     if (existingUpdate) {
       setUpdatedImages((prev) =>
         prev.map((u) =>
-          u.imageId === imageId ? { ...u, imageName: name, imageDescription: description, color } : u
-        )
+          u.imageId === imageId
+            ? { ...u, imageName: name, imageDescription: description, color }
+            : u,
+        ),
       );
     } else {
-      const originalImage = originalPackage?.packageImages.find((img) => img.imageId === imageId);
+      const originalImage = originalPackage?.packageImages.find(
+        (img) => img.imageId === imageId,
+      );
       setUpdatedImages((prev) => [
         ...prev,
         {
@@ -349,7 +375,14 @@ const UpdatePackagePage = () => {
       return {
         ...prev,
         packageImages: prev.packageImages.map((img) =>
-          img.imageId === imageId ? { ...img, imageName: name, imageDescription: description, color: color } : img
+          img.imageId === imageId
+            ? {
+                ...img,
+                imageName: name,
+                imageDescription: description,
+                color: color,
+              }
+            : img,
         ),
       };
     });
@@ -366,16 +399,20 @@ const UpdatePackagePage = () => {
       if (!prev) return prev;
       return {
         ...prev,
-        packageFeatures: prev.packageFeatures.filter((f) => f.featureId !== featureId),
+        packageFeatures: prev.packageFeatures.filter(
+          (f) => f.featureId !== featureId,
+        ),
       };
     });
   };
 
   const handleUpdateFeature = (feature: UpdateFeatureRequest) => {
-    const existingUpdate = updatedFeatures.find((u) => u.featureId === feature.featureId);
+    const existingUpdate = updatedFeatures.find(
+      (u) => u.featureId === feature.featureId,
+    );
     if (existingUpdate) {
       setUpdatedFeatures((prev) =>
-        prev.map((u) => (u.featureId === feature.featureId ? feature : u))
+        prev.map((u) => (u.featureId === feature.featureId ? feature : u)),
       );
     } else {
       setUpdatedFeatures((prev) => [...prev, feature]);
@@ -386,15 +423,24 @@ const UpdatePackagePage = () => {
         ...prev,
         packageFeatures: prev.packageFeatures.map((f) =>
           f.featureId === feature.featureId
-            ? { ...f, featureName: feature.featureName, featureValue: feature.featureValue, featureDescription: feature.featureDescription, color: feature.color, specialNote: feature.specialNote }
-            : f
+            ? {
+                ...f,
+                featureName: feature.featureName,
+                featureValue: feature.featureValue,
+                featureDescription: feature.featureDescription,
+                color: feature.color,
+                specialNote: feature.specialNote,
+              }
+            : f,
         ),
       };
     });
   };
 
   // Handle day accommodation changes
-  const handleAddDayAccommodation = (accommodation: AddDayAccommodationRequest) => {
+  const handleAddDayAccommodation = (
+    accommodation: AddDayAccommodationRequest,
+  ) => {
     setAddedDayAccommodations((prev) => [...prev, accommodation]);
   };
 
@@ -402,11 +448,21 @@ const UpdatePackagePage = () => {
     setRemovedDayAccommodations((prev) => [...prev, accommodationId]);
   };
 
-  const handleUpdateDayAccommodation = (accommodation: UpdateDayAccommodationRequest) => {
-    const existingUpdate = updatedDayAccommodations.find((u) => u.packageDayAccommodationId === accommodation.packageDayAccommodationId);
+  const handleUpdateDayAccommodation = (
+    accommodation: UpdateDayAccommodationRequest,
+  ) => {
+    const existingUpdate = updatedDayAccommodations.find(
+      (u) =>
+        u.packageDayAccommodationId === accommodation.packageDayAccommodationId,
+    );
     if (existingUpdate) {
       setUpdatedDayAccommodations((prev) =>
-        prev.map((u) => (u.packageDayAccommodationId === accommodation.packageDayAccommodationId ? accommodation : u))
+        prev.map((u) =>
+          u.packageDayAccommodationId ===
+          accommodation.packageDayAccommodationId
+            ? accommodation
+            : u,
+        ),
       );
     } else {
       setUpdatedDayAccommodations((prev) => [...prev, accommodation]);
@@ -432,18 +488,32 @@ const UpdatePackagePage = () => {
     });
   };
 
-  const handleUpdateInclusion = (inclusionId: number, inclusionText: string, displayOrder: number, status: "ACTIVE" | "INACTIVE") => {
-    const existingUpdate = updatedInclusions.find((u) => u.packageInclusionId === inclusionId);
+  const handleUpdateInclusion = (
+    inclusionId: number,
+    inclusionText: string,
+    displayOrder: number,
+    status: "ACTIVE" | "INACTIVE",
+  ) => {
+    const existingUpdate = updatedInclusions.find(
+      (u) => u.packageInclusionId === inclusionId,
+    );
     if (existingUpdate) {
       setUpdatedInclusions((prev) =>
         prev.map((u) =>
-          u.packageInclusionId === inclusionId ? { ...u, inclusionText, displayOrder, status } : u
-        )
+          u.packageInclusionId === inclusionId
+            ? { ...u, inclusionText, displayOrder, status }
+            : u,
+        ),
       );
     } else {
       setUpdatedInclusions((prev) => [
         ...prev,
-        { packageInclusionId: inclusionId, inclusionText, displayOrder, status },
+        {
+          packageInclusionId: inclusionId,
+          inclusionText,
+          displayOrder,
+          status,
+        },
       ]);
     }
     setEditedPackage((prev) => {
@@ -451,7 +521,9 @@ const UpdatePackagePage = () => {
       return {
         ...prev,
         inclusions: prev.inclusions.map((inc) =>
-          inc.id === inclusionId ? { ...inc, description: inclusionText, displayOrder } : inc
+          inc.id === inclusionId
+            ? { ...inc, description: inclusionText, displayOrder }
+            : inc,
         ),
       };
     });
@@ -476,18 +548,32 @@ const UpdatePackagePage = () => {
     });
   };
 
-  const handleUpdateExclusion = (exclusionId: number, exclusionText: string, displayOrder: number, status: "ACTIVE" | "INACTIVE") => {
-    const existingUpdate = updatedExclusions.find((u) => u.packageExclusionId === exclusionId);
+  const handleUpdateExclusion = (
+    exclusionId: number,
+    exclusionText: string,
+    displayOrder: number,
+    status: "ACTIVE" | "INACTIVE",
+  ) => {
+    const existingUpdate = updatedExclusions.find(
+      (u) => u.packageExclusionId === exclusionId,
+    );
     if (existingUpdate) {
       setUpdatedExclusions((prev) =>
         prev.map((u) =>
-          u.packageExclusionId === exclusionId ? { ...u, exclusionText, displayOrder, status } : u
-        )
+          u.packageExclusionId === exclusionId
+            ? { ...u, exclusionText, displayOrder, status }
+            : u,
+        ),
       );
     } else {
       setUpdatedExclusions((prev) => [
         ...prev,
-        { packageExclusionId: exclusionId, exclusionText, displayOrder, status },
+        {
+          packageExclusionId: exclusionId,
+          exclusionText,
+          displayOrder,
+          status,
+        },
       ]);
     }
     setEditedPackage((prev) => {
@@ -495,7 +581,9 @@ const UpdatePackagePage = () => {
       return {
         ...prev,
         exclusions: prev.exclusions.map((exc) =>
-          exc.id === exclusionId ? { ...exc, description: exclusionText, displayOrder } : exc
+          exc.id === exclusionId
+            ? { ...exc, description: exclusionText, displayOrder }
+            : exc,
         ),
       };
     });
@@ -520,18 +608,32 @@ const UpdatePackagePage = () => {
     });
   };
 
-  const handleUpdateCondition = (conditionId: number, conditionText: string, displayOrder: number, status: "ACTIVE" | "INACTIVE") => {
-    const existingUpdate = updatedConditions.find((u) => u.packageConditionId === conditionId);
+  const handleUpdateCondition = (
+    conditionId: number,
+    conditionText: string,
+    displayOrder: number,
+    status: "ACTIVE" | "INACTIVE",
+  ) => {
+    const existingUpdate = updatedConditions.find(
+      (u) => u.packageConditionId === conditionId,
+    );
     if (existingUpdate) {
       setUpdatedConditions((prev) =>
         prev.map((u) =>
-          u.packageConditionId === conditionId ? { ...u, conditionText, displayOrder, status } : u
-        )
+          u.packageConditionId === conditionId
+            ? { ...u, conditionText, displayOrder, status }
+            : u,
+        ),
       );
     } else {
       setUpdatedConditions((prev) => [
         ...prev,
-        { packageConditionId: conditionId, conditionText, displayOrder, status },
+        {
+          packageConditionId: conditionId,
+          conditionText,
+          displayOrder,
+          status,
+        },
       ]);
     }
     setEditedPackage((prev) => {
@@ -539,17 +641,28 @@ const UpdatePackagePage = () => {
       return {
         ...prev,
         conditions: prev.conditions.map((cond) =>
-          cond.id === conditionId ? { ...cond, description: conditionText, displayOrder } : cond
+          cond.id === conditionId
+            ? { ...cond, description: conditionText, displayOrder }
+            : cond,
         ),
       };
     });
   };
 
   // Handle travel tip changes
-  const handleAddTravelTip = (title: string, description: string, displayOrder: number) => {
+  const handleAddTravelTip = (
+    title: string,
+    description: string,
+    displayOrder: number,
+  ) => {
     setAddedTravelTips((prev) => [
       ...prev,
-      { tipTitle: title, tipDescription: description, displayOrder, status: "ACTIVE" },
+      {
+        tipTitle: title,
+        tipDescription: description,
+        displayOrder,
+        status: "ACTIVE",
+      },
     ]);
   };
 
@@ -564,18 +677,40 @@ const UpdatePackagePage = () => {
     });
   };
 
-  const handleUpdateTravelTip = (tipId: number, title: string, description: string, displayOrder: number, status: "ACTIVE" | "INACTIVE") => {
-    const existingUpdate = updatedTravelTips.find((u) => u.packageTipId === tipId);
+  const handleUpdateTravelTip = (
+    tipId: number,
+    title: string,
+    description: string,
+    displayOrder: number,
+    status: "ACTIVE" | "INACTIVE",
+  ) => {
+    const existingUpdate = updatedTravelTips.find(
+      (u) => u.packageTipId === tipId,
+    );
     if (existingUpdate) {
       setUpdatedTravelTips((prev) =>
         prev.map((u) =>
-          u.packageTipId === tipId ? { ...u, tipTitle: title, tipDescription: description, displayOrder, status } : u
-        )
+          u.packageTipId === tipId
+            ? {
+                ...u,
+                tipTitle: title,
+                tipDescription: description,
+                displayOrder,
+                status,
+              }
+            : u,
+        ),
       );
     } else {
       setUpdatedTravelTips((prev) => [
         ...prev,
-        { packageTipId: tipId, tipTitle: title, tipDescription: description, displayOrder, status },
+        {
+          packageTipId: tipId,
+          tipTitle: title,
+          tipDescription: description,
+          displayOrder,
+          status,
+        },
       ]);
     }
     setEditedPackage((prev) => {
@@ -583,7 +718,7 @@ const UpdatePackagePage = () => {
       return {
         ...prev,
         travelTips: prev.travelTips.map((tip) =>
-          tip.id === tipId ? { ...tip, title, description, displayOrder } : tip
+          tip.id === tipId ? { ...tip, title, description, displayOrder } : tip,
         ),
       };
     });
@@ -646,7 +781,7 @@ const UpdatePackagePage = () => {
 
     // Find package type ID from name
     const packageType = categories?.packageCategoryList?.find(
-      (p) => p.packageCategoryName === editedPackage.packageTypeName
+      (p) => p.packageCategoryName === editedPackage.packageTypeName,
     );
 
     return {
@@ -703,7 +838,9 @@ const UpdatePackagePage = () => {
     try {
       const response = await PackageService.updatePackage(updateData);
 
-      setSuccess(`Package "${editedPackage?.packageName}" updated successfully!`);
+      setSuccess(
+        `Package "${editedPackage?.packageName}" updated successfully!`,
+      );
 
       setToast({
         type: "success",
@@ -808,14 +945,26 @@ const UpdatePackagePage = () => {
 
     // Date changes
     if (originalPackage.startDate !== editedPackage.startDate) {
-      changes.push({ field: "Start Date", oldValue: originalPackage.startDate, newValue: editedPackage.startDate });
+      changes.push({
+        field: "Start Date",
+        oldValue: originalPackage.startDate,
+        newValue: editedPackage.startDate,
+      });
     }
     if (originalPackage.endDate !== editedPackage.endDate) {
-      changes.push({ field: "End Date", oldValue: originalPackage.endDate, newValue: editedPackage.endDate });
+      changes.push({
+        field: "End Date",
+        oldValue: originalPackage.endDate,
+        newValue: editedPackage.endDate,
+      });
     }
 
     // Images
-    if (removedImages.length > 0 || newImages.length > 0 || updatedImages.length > 0) {
+    if (
+      removedImages.length > 0 ||
+      newImages.length > 0 ||
+      updatedImages.length > 0
+    ) {
       changes.push({
         field: "Images",
         oldValue: originalPackage.packageImages.length,
@@ -824,7 +973,11 @@ const UpdatePackagePage = () => {
     }
 
     // Features
-    if (addedFeatures.length > 0 || removedFeatures.length > 0 || updatedFeatures.length > 0) {
+    if (
+      addedFeatures.length > 0 ||
+      removedFeatures.length > 0 ||
+      updatedFeatures.length > 0
+    ) {
       changes.push({
         field: "Features",
         oldValue: originalPackage.packageFeatures.length,
@@ -833,7 +986,11 @@ const UpdatePackagePage = () => {
     }
 
     // Day Accommodations
-    if (addedDayAccommodations.length > 0 || removedDayAccommodations.length > 0 || updatedDayAccommodations.length > 0) {
+    if (
+      addedDayAccommodations.length > 0 ||
+      removedDayAccommodations.length > 0 ||
+      updatedDayAccommodations.length > 0
+    ) {
       changes.push({
         field: "Day Accommodations",
         oldValue: "Modified",
@@ -842,7 +999,11 @@ const UpdatePackagePage = () => {
     }
 
     // Inclusions
-    if (addedInclusions.length > 0 || removedInclusions.length > 0 || updatedInclusions.length > 0) {
+    if (
+      addedInclusions.length > 0 ||
+      removedInclusions.length > 0 ||
+      updatedInclusions.length > 0
+    ) {
       changes.push({
         field: "Inclusions",
         oldValue: originalPackage.inclusions.length,
@@ -851,7 +1012,11 @@ const UpdatePackagePage = () => {
     }
 
     // Exclusions
-    if (addedExclusions.length > 0 || removedExclusions.length > 0 || updatedExclusions.length > 0) {
+    if (
+      addedExclusions.length > 0 ||
+      removedExclusions.length > 0 ||
+      updatedExclusions.length > 0
+    ) {
       changes.push({
         field: "Exclusions",
         oldValue: originalPackage.exclusions.length,
@@ -860,7 +1025,11 @@ const UpdatePackagePage = () => {
     }
 
     // Conditions
-    if (addedConditions.length > 0 || removedConditions.length > 0 || updatedConditions.length > 0) {
+    if (
+      addedConditions.length > 0 ||
+      removedConditions.length > 0 ||
+      updatedConditions.length > 0
+    ) {
       changes.push({
         field: "Conditions",
         oldValue: originalPackage.conditions.length,
@@ -869,7 +1038,11 @@ const UpdatePackagePage = () => {
     }
 
     // Travel Tips
-    if (addedTravelTips.length > 0 || removedTravelTips.length > 0 || updatedTravelTips.length > 0) {
+    if (
+      addedTravelTips.length > 0 ||
+      removedTravelTips.length > 0 ||
+      updatedTravelTips.length > 0
+    ) {
       changes.push({
         field: "Travel Tips",
         oldValue: originalPackage.travelTips.length,
@@ -950,7 +1123,7 @@ const UpdatePackagePage = () => {
           <PageHeader
             title="Update Package"
             description="Edit and update existing package information"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_UPDATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -978,7 +1151,9 @@ const UpdatePackagePage = () => {
               items={searchItems}
               loading={loading}
               selectedItem={selectedSearchItem}
-              onSelectItem={(item) => handleSelectPackage(item.id as number, item.name)}
+              onSelectItem={(item) =>
+                handleSelectPackage(item.id as number, item.name)
+              }
               onClearSelection={handleClearPackageSelection}
               initialSearchTerm={initialPackageName}
               placeholder="Search packages..."
@@ -1092,7 +1267,10 @@ const UpdatePackagePage = () => {
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = theme.primary;
-                  e.currentTarget.style.backgroundColor = hexToRgba(theme.primary, 0.05);
+                  e.currentTarget.style.backgroundColor = hexToRgba(
+                    theme.primary,
+                    0.05,
+                  );
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = theme.border;
@@ -1126,13 +1304,20 @@ const UpdatePackagePage = () => {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <Loader2 className="w-5 h-5 animate-spin" style={{ color: theme.primary }} />
+                  <Loader2
+                    className="w-5 h-5 animate-spin"
+                    style={{ color: theme.primary }}
+                  />
                   <div>
                     <p className="font-medium" style={{ color: theme.primary }}>
                       Uploading images to Cloudinary...
                     </p>
-                    <p className="text-sm mt-1" style={{ color: theme.textSecondary }}>
-                      Please wait for all images to finish uploading before updating
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Please wait for all images to finish uploading before
+                      updating
                     </p>
                   </div>
                 </div>
@@ -1154,7 +1339,10 @@ const UpdatePackagePage = () => {
                     <p className="font-medium" style={{ color: theme.primary }}>
                       You have unsaved changes
                     </p>
-                    <p className="text-sm mt-1" style={{ color: theme.textSecondary }}>
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Click "Update Package" to save your changes
                     </p>
                   </div>

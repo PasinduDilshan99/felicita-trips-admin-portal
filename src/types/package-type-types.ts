@@ -86,7 +86,8 @@ export interface PackageTypeBasicDetails {
   images: PackageTypeImage[];
 }
 
-export type PackageTypeBasicDetailsApiResponse = ApiResponse<PackageTypeBasicDetails>;
+export type PackageTypeBasicDetailsApiResponse =
+  ApiResponse<PackageTypeBasicDetails>;
 
 // Add Package Type Request
 export interface AddPackageTypeRequest {
@@ -122,7 +123,8 @@ export interface UpdatePackageTypeResponse {
   id: number | null;
 }
 
-export type UpdatePackageTypeApiResponse = ApiResponse<UpdatePackageTypeResponse>;
+export type UpdatePackageTypeApiResponse =
+  ApiResponse<UpdatePackageTypeResponse>;
 
 // Terminate Package Type Request
 export interface TerminatePackageTypeRequest {
@@ -133,7 +135,8 @@ export interface TerminatePackageTypeResponse {
   message: string;
 }
 
-export type TerminatePackageTypeApiResponse = ApiResponse<TerminatePackageTypeResponse>;
+export type TerminatePackageTypeApiResponse =
+  ApiResponse<TerminatePackageTypeResponse>;
 
 // Get Package Type Details Request
 export interface GetPackageTypeDetailsRequest {
@@ -143,4 +146,76 @@ export interface GetPackageTypeDetailsRequest {
 // Get Package Type Basic Details Request
 export interface GetPackageTypeBasicDetailsRequest {
   id: number;
+}
+
+export interface PackageTypeFilterParams {
+  name: string | null;
+  status: string | null;
+  pageSize: number;
+  pageNumber: number;
+  sortBy: string;
+  sortDirection: "ASC" | "DESC";
+}
+
+export interface PackageTypeCardProps {
+  packageType: PackageTypeListItem;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface PackageTypeListCardProps {
+  packageType: PackageTypeListItem;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface PackageTypeOverviewProps {
+  name: string;
+  description: string;
+  color: string | null | undefined;
+  hoverColor: string | null | undefined;
+}
+
+export interface PackageTypePackagesListProps {
+  packages: PackageBasicDetail[];
+  packageTypeColor: string;
+  onViewPackage: (packageId: number, packageName: string) => void;
+}
+
+export interface PackageTypeReadOnlyDetailsProps {
+  type: PackageTypeDetails;
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+  onRemoveImage: (imageId: number) => void;
+  onAddNewImage: (
+    file: File,
+    name: string,
+    description: string,
+  ) => Promise<void>;
+  onUpdateImage: (imageId: number, name: string, description: string) => void;
+  uploadingImages: boolean;
+  theme: any;
+}
+
+export interface PackageTypeSearchItem {
+  id: number;
+  name: string;
+}
+
+export interface BasicInfoPanelProps {
+  packageTypeDetails: PackageTypeDetails;
+}
+
+export interface PackagesListProps {
+  packages: PackageBasicDetail[];
+}
+
+export interface PackageTypeStatsProps {
+  packageTypeDetails: PackageTypeDetails;
+}
+
+export interface StatItem {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  color: string;
+  formatter?: (value: number | string) => string | number;
 }

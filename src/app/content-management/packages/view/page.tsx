@@ -1,10 +1,20 @@
-import PackagesViewPage from '@/pages/content-management/packages/PackagesViewPage'
-import React from 'react'
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PackagesViewPage from "@/pages/content-management/packages/PackagesViewPage";
+import { PACKAGE_VIEW_PAGE_TITLE } from "@/utils/pagesHeaderTitles";
+import { PACKAGE_VIEW_PRIVILEGE } from "@/utils/privileges";
+import { Metadata } from "next";
+import React from "react";
+
+export const metadata: Metadata = {
+  title: PACKAGE_VIEW_PAGE_TITLE,
+};
 
 const page = () => {
   return (
-    <div><PackagesViewPage/></div>
-  )
-}
+    <ProtectedRoute requiredPrivileges={[PACKAGE_VIEW_PRIVILEGE]}>
+      <PackagesViewPage />
+    </ProtectedRoute>
+  );
+};
 
-export default page
+export default page;

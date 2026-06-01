@@ -52,3 +52,20 @@ export const TOUR_TYPES_VIEW_SORTING_OPTIONS = [
   { value: "typeId", label: "Type ID" },
   { value: "status", label: "Status" },
 ];
+
+export const PACKAGE_VIEW_SORTING_OPTIONS = [
+  { value: "packageName", label: "Package Name" },
+  { value: "packageId", label: "Package ID" },
+  { value: "totalPrice", label: "Total Price" },
+  { value: "pricePerPerson", label: "Price Per Person" },
+  { value: "duration", label: "Duration" },
+  { value: "startDate", label: "Start Date" },
+  { value: "endDate", label: "End Date" },
+  { value: "createdAt", label: "Created Date" },
+];
+
+export const PACKAGE_TYPE_VIEW_SORTING_OPTIONS = [
+  { value: "typeName", label: "Type Name" },
+  { value: "typeId", label: "Type ID" },
+  { value: "status", label: "Status" },
+];

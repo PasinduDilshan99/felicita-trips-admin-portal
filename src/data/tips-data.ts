@@ -47,3 +47,21 @@ export const CREATE_TOUR_TYPE_TIPS = [
   "You can edit this tour type anytime after creation",
   "Tours will be organized under this type for better filtering",
 ];
+
+export const CREATE_PACKAGE_TIPS = [
+  "Make sure all images are uploaded successfully",
+  "Verify that day accommodations are properly configured",
+  "Check that inclusions and exclusions are accurate",
+  "Ensure pricing and discount percentages are correct",
+  "Review date ranges and participant limits",
+  "You can edit this package anytime after creation",
+];
+
+export const CREATE_PACKAGE_TYPE_TIPS = [
+  "Make sure all images are uploaded successfully",
+  "Check that colors are visually appealing and accessible",
+  "You can edit this package type anytime after creation",
+  "Packages will be organized under this type for better filtering",
+  "Package types help customers find the right package tier",
+  "Use names that clearly indicate the package level/quality",
+];

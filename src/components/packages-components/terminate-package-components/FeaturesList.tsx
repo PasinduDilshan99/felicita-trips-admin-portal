@@ -1,72 +1,18 @@
-// components/packages-components/terminate-package-components/FeaturesList.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { Gift, CheckCircle, Info } from "lucide-react";
-import { Feature } from "@/types/package-types";
 import { useTheme } from "@/contexts/ThemeContext";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.04,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const featureVariants: Variants = {
-  hidden: { opacity: 0, x: -8 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-  hover: {
-    x: 4,
-    transition: { duration: 0.15 },
-  },
-};
-
-const emptyVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-interface FeaturesListProps {
-  features: Feature[];
-}
+import {
+  cardVariants,
+  contentVariants,
+  emptyVariants,
+  featureVariants,
+  headerVariants,
+} from "@/app/animations/variants";
+import { FeaturesListProps } from "@/types/package-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const FeaturesList: React.FC<FeaturesListProps> = ({ features }) => {
   const { theme } = useTheme();
@@ -90,7 +36,9 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ features }) => {
           </h3>
         </div>
         <div className="px-4 py-4 text-center">
-          <p className="text-xs" style={{ color: theme.textSecondary }}>No features added</p>
+          <p className="text-xs" style={{ color: theme.textSecondary }}>
+            No features added
+          </p>
         </div>
       </motion.div>
     );
@@ -166,7 +114,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ features }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span 
+                  <span
                     className="text-sm font-semibold"
                     style={{ color: feature.color || theme.success }}
                   >
@@ -176,7 +124,10 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ features }) => {
                     <span
                       className="text-xs px-1.5 py-0.5 rounded-full"
                       style={{
-                        background: hexToRgba(feature.color || theme.success, 0.15),
+                        background: hexToRgba(
+                          feature.color || theme.success,
+                          0.15,
+                        ),
                         color: feature.color || theme.success,
                       }}
                     >
@@ -185,14 +136,23 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ features }) => {
                   )}
                 </div>
                 {feature.featureDescription && (
-                  <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
+                  <p
+                    className="text-xs mt-1"
+                    style={{ color: theme.textSecondary }}
+                  >
                     {feature.featureDescription}
                   </p>
                 )}
                 {feature.specialNote && (
                   <div className="flex items-start gap-1 mt-1">
-                    <Info size={10} style={{ color: theme.textSecondary, marginTop: 1 }} />
-                    <p className="text-[10px]" style={{ color: theme.textSecondary }}>
+                    <Info
+                      size={10}
+                      style={{ color: theme.textSecondary, marginTop: 1 }}
+                    />
+                    <p
+                      className="text-[10px]"
+                      style={{ color: theme.textSecondary }}
+                    >
                       {feature.specialNote}
                     </p>
                   </div>

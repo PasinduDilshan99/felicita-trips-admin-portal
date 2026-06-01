@@ -712,3 +712,23 @@ export const tourCardVariants: Variants = {
   },
 };
 
+export const featureVariants: Variants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.25, ease: EASE_OUT } },
+  exit: { opacity: 0, x: -10, transition: { duration: 0.2 } },
+};
+
+export const packageCardVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    transition: { duration: 0.2, ease: "easeIn" },
+  },
+};
+

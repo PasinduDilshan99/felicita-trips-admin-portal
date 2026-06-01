@@ -75,16 +75,16 @@ export const TOUR_TYPE_TERMINATE_URL = `${TOUR_TYPES_PAGE_URL}/terminate`;
 // ==================== PACKAGES ====================
 export const PACKAGES_PAGE_URL = `${CONTENT_MANAGEMENT_URL}/packages`;
 export const PACKAGES_VIEW_PAGE_URL = `${PACKAGES_PAGE_URL}/view`;
-export const PACKAGE_DETAILS_VIEW_PAGE_URL = `${PACKAGES_VIEW_PAGE_URL}/details`;
-export const PACKAGE_ADD_PAGE_URL = `${PACKAGES_PAGE_URL}/add`;
+export const PACKAGE_DETAILS_VIEW_PAGE_URL = `${PACKAGES_VIEW_PAGE_URL}`;
+export const PACKAGE_ADD_PAGE_URL = `${PACKAGES_PAGE_URL}/add-new`;
 export const PACKAGE_UPDATE_PAGE_URL = `${PACKAGES_PAGE_URL}/update`;
 export const PACKAGE_TERMINATE_PAGE_URL = `${PACKAGES_PAGE_URL}/terminate`;
 
 // Package Types
 export const PACKAGE_TYPES_PAGE_URL = `${PACKAGES_PAGE_URL}/types`;
 export const PACKAGE_TYPE_VIEW_PAGE_URL = `${PACKAGE_TYPES_PAGE_URL}/view`;
-export const PACKAGE_TYPE_DETAILS_VIEW_URL = `${PACKAGE_TYPE_VIEW_PAGE_URL}/details`;
-export const PACKAGE_TYPE_ADD_URL = `${PACKAGE_TYPES_PAGE_URL}/add`;
+export const PACKAGE_TYPE_DETAILS_VIEW_URL = `${PACKAGE_TYPE_VIEW_PAGE_URL}`;
+export const PACKAGE_TYPE_ADD_URL = `${PACKAGE_TYPES_PAGE_URL}/add-new`;
 export const PACKAGE_TYPE_UPDATE_URL = `${PACKAGE_TYPES_PAGE_URL}/update`;
 export const PACKAGE_TYPE_TERMINATE_URL = `${PACKAGE_TYPES_PAGE_URL}/terminate`;
 

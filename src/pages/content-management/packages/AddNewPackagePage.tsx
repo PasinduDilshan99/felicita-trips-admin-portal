@@ -1,16 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { PackageService } from "@/services/packageService";
 import { TourService } from "@/services/tourService";
 import {
@@ -28,11 +19,9 @@ import {
 import { Tour, TourNameId } from "@/types/tour-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
-  Loader,
   Search,
   ChevronDown,
   Calendar,
-  Users,
   DollarSign,
   MapPin,
   Tag,
@@ -40,13 +29,10 @@ import {
   Clock,
   CheckCircle,
 } from "lucide-react";
-import { FormCard } from "@/components/common-components/create-components/FormCard";
 import { FormActions } from "@/components/common-components/FormActions";
 import { FormSummary } from "@/components/common-components/FormSummary";
 import { InputField } from "@/components/common-components/create-components/InputField";
 import { StatusSelector } from "@/components/common-components/StatusSelector";
-
-// Import package-specific components
 import { PackageTypeSelector } from "@/components/packages-components/package-create-components/PackageTypeSelector";
 import { FeaturesForm } from "@/components/packages-components/package-create-components/FeaturesForm";
 import { DayAccommodationsForm } from "@/components/packages-components/package-create-components/DayAccommodationsForm";
@@ -54,21 +40,13 @@ import { InclusionsExclusionsForm } from "@/components/packages-components/packa
 import { ConditionsTipsForm } from "@/components/packages-components/package-create-components/ConditionsTipsForm";
 import { ImageUploader } from "@/components/common-components/ImageUploader";
 import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-  packageId?: number;
-}
+import { ToastState } from "@/types/common-components-types";
+import { PACKAGES_VIEW_PAGE_URL } from "@/utils/urls";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const AddNewPackagePage = () => {
-  const router = useRouter();
   const { theme } = useTheme();
-
-  // Tour selection state
   const [tours, setTours] = useState<TourNameId[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTour, setSelectedTour] = useState<TourNameId | null>(null);
@@ -80,24 +58,20 @@ const AddNewPackagePage = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  // Add after other state declarations
   const [hotels, setHotels] = useState<HotelNameId[]>([]);
   const [vehicles, setVehicles] = useState<VehicleNumberIdType[]>([]);
   const [loadingParameters, setLoadingParameters] = useState(false);
-
-  // Package form state
   const [formData, setFormData] = useState<AddPackageRequest>({
-    packageType: 1, // Set a default package type (e.g., 1 for Standard)
+    packageType: 1,
     tourId: 0,
     name: "",
     description: "",
     totalPrice: 0,
     discountPercentage: 0,
-    startDate: new Date().toISOString().split("T")[0], // Set today's date as default
+    startDate: new Date().toISOString().split("T")[0],
     endDate: new Date(new Date().setMonth(new Date().getMonth() + 1))
       .toISOString()
-      .split("T")[0], // Set next month as default
+      .split("T")[0],
     color: "#10b981",
     status: "ACTIVE",
     hoverColor: "#059669",
@@ -113,7 +87,6 @@ const AddNewPackagePage = () => {
     travelTips: [],
   });
 
-  // Image state
   const [imagePreviews, setImagePreviews] = useState<
     { url: string; file?: File; uploading?: boolean; uploadError?: string }[]
   >([]);
@@ -128,25 +101,7 @@ const AddNewPackagePage = () => {
     type: "success",
     title: "",
     message: "",
-    packageId: undefined,
   });
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Packages",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/packages`,
-    },
-    {
-      label: "Add New Package",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/packages/add`,
-    },
-  ];
 
   // Fetch tours on mount
   useEffect(() => {
@@ -280,7 +235,6 @@ const AddNewPackagePage = () => {
         type: "error",
         title: "Error",
         message: "Failed to load tour details",
-        packageId: undefined,
       });
     } finally {
       setLoadingTourDetails(false);
@@ -541,10 +495,7 @@ const AddNewPackagePage = () => {
   };
 
   const getPackageLink = (): string => {
-    if (toast.packageId) {
-      return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/packages/${toast.packageId}`;
-    }
-    return `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/packages`;
+    return PACKAGES_VIEW_PAGE_URL;
   };
 
   // Render selected tour details
@@ -1256,7 +1207,7 @@ const AddNewPackagePage = () => {
           <PageHeader
             title="Add New Package"
             description="Create a new tour package"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -1300,7 +1251,6 @@ const AddNewPackagePage = () => {
             title: "Creation Failed",
             message:
               error.message || "Failed to create package. Please try again.",
-            packageId: undefined,
           });
         }}
       />

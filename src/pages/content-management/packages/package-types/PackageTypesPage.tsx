@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   PieChart,
   Pie,
@@ -44,18 +44,18 @@ import {
   PackageTypeStackedTooltip,
 } from "@/components/statistics-components";
 
-/* ─────────────────────────────────────────────
-   Main Page
-───────────────────────────────────────────── */
 const PackageTypesPage = () => {
   const { theme, isDarkMode } = useTheme();
-  const [statistics, setStatistics] = useState<PackageTypeStatisticsData | null>(null);
+  const [statistics, setStatistics] =
+    useState<PackageTypeStatisticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const packagesData = contentManagementSideBarData.find(
-    (item) => item.name === "Packages",
-  );
+  const packageTypesData = contentManagementSideBarData
+    .find(item => item.name === "Packages")
+    ?.subData.find(subItem => subItem.name === "Package Types");
+
+  const packageTypeActions = packageTypesData?.grandSubData || [];
 
   useEffect(() => {
     fetchStatistics();
@@ -69,19 +69,39 @@ const PackageTypesPage = () => {
       const response = await PackageService.getPackageTypeStatistics();
       if (response.data) setStatistics(response.data);
     } catch {
-      setError("We couldn't load the package type statistics. Please try again.");
+      setError(
+        "We couldn't load the package type statistics. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  /* Chart data transformations */
-  const pieChartData = statistics?.typeDistributions || [];
-  const revenueData = statistics?.typeRevenuePerformances || [];
-  const bookingData = statistics?.typeBookingPerformances || [];
-  const ratingData = statistics?.typeRatingOverviews || [];
-  const stackedData = statistics?.typePrimarySecondaryUsages || [];
-  const trendData = statistics?.typeParticipationImpacts || [];
+  /* Chart data transformations with useMemo for performance */
+  const pieChartData = useMemo(
+    () => statistics?.typeDistributions || [],
+    [statistics]
+  );
+  const revenueData = useMemo(
+    () => statistics?.typeRevenuePerformances || [],
+    [statistics]
+  );
+  const bookingData = useMemo(
+    () => statistics?.typeBookingPerformances || [],
+    [statistics]
+  );
+  const ratingData = useMemo(
+    () => statistics?.typeRatingOverviews || [],
+    [statistics]
+  );
+  const stackedData = useMemo(
+    () => statistics?.typePrimarySecondaryUsages || [],
+    [statistics]
+  );
+  const trendData = useMemo(
+    () => statistics?.typeParticipationImpacts || [],
+    [statistics]
+  );
 
   /* Chart Colors */
   const PIE_COLORS = [
@@ -143,8 +163,23 @@ const PackageTypesPage = () => {
           grid-template-columns: repeat(4, 1fr);
           gap: 1rem;
         }
-        @media (max-width: 1100px) { .pt-stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 580px)  { .pt-stats-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1100px) { 
+          .pt-stats-grid { 
+            grid-template-columns: repeat(2, 1fr); 
+          } 
+        }
+        @media (max-width: 580px)  { 
+          .pt-stats-grid { 
+            grid-template-columns: 1fr; 
+          } 
+        }
+
+        .pt-actions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 1rem;
+          margin-top: 1rem;
+        }
 
         .pt-stat-value--text {
           font-size: 1rem;
@@ -159,7 +194,9 @@ const PackageTypesPage = () => {
           gap: 1.25rem;
         }
         @media (max-width: 1024px) {
-          .pt-charts-grid { grid-template-columns: 1fr; }
+          .pt-charts-grid { 
+            grid-template-columns: 1fr; 
+          }
         }
 
         .pt-empty-state {
@@ -180,6 +217,72 @@ const PackageTypesPage = () => {
           margin-top: 6px;
           padding-top: 4px;
           border-top: 1px solid #334155;
+        }
+
+        .pt-pie-legend {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid var(--border);
+        }
+        .pt-pie-legend-item {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.75rem;
+          color: var(--muted);
+        }
+        .pt-pie-legend-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+        }
+        .pt-pie-legend-count {
+          margin-left: 0.25rem;
+          font-weight: 600;
+          color: var(--text);
+        }
+
+        .pt-chart-card {
+          background: var(--surf);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          padding: 1.25rem;
+          transition: all 0.2s ease;
+        }
+        .pt-chart-card:hover {
+          border-color: var(--p);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .pt-chart-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+        }
+        .pt-chart-title {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-weight: 600;
+          color: var(--text);
+        }
+        .pt-chart-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+        .pt-chart-dot--p {
+          background: var(--p);
+        }
+        .pt-chart-dot--acc {
+          background: var(--acc);
+        }
+        .pt-chart-sub {
+          font-size: 0.75rem;
+          color: var(--muted);
         }
       `}</style>
 
@@ -205,43 +308,45 @@ const PackageTypesPage = () => {
 
           <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* ── Quick Actions ── */}
-            <Reveal delay={60}>
-              <section>
-                <SectionHeader
-                  title="Quick Actions"
-                  subtitle="Jump directly to any package management task"
-                  badge={`${packagesData?.subData.length ?? 0} actions`}
-                  prefix="pt"
-                />
-                <div className="pt-actions-grid">
-                  {packagesData?.subData.map((action) => {
-                    const { accent, icon, pillLabel } = getActionConfig(
-                      action.name,
-                    );
-                    return (
-                      <ActionCard
-                        key={action.id}
-                        id={action.id}
-                        name={action.name}
-                        description={action.description}
-                        url={action.url}
-                        accent={accent}
-                        icon={icon}
-                        pillLabel={pillLabel}
-                        ctaText="Open"
-                        theme={theme}
-                        isDarkMode={isDarkMode}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            </Reveal>
+            {packageTypeActions.length > 0 && (
+              <Reveal delay={60}>
+                <section>
+                  <SectionHeader
+                    title="Quick Actions"
+                    subtitle="Manage package type configurations"
+                    badge={`${packageTypeActions.length} actions`}
+                    prefix="pt"
+                  />
+                  <div className="pt-actions-grid">
+                    {packageTypeActions.map((action) => {
+                      const { accent, icon, pillLabel } = getActionConfig(
+                        action.name,
+                      );
+                      return (
+                        <ActionCard
+                          key={action.id}
+                          id={action.id}
+                          name={action.name}
+                          description={action.description}
+                          url={action.url}
+                          accent={accent}
+                          icon={icon}
+                          pillLabel={pillLabel}
+                          ctaText="Open"
+                          theme={theme}
+                          isDarkMode={isDarkMode}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+              </Reveal>
+            )}
 
             {/* ── Error ── */}
             {error && (
               <Reveal delay={0}>
-                <div className="pt-mt-6">
+                <div className="mt-6">
                   <ErrorBanner
                     error={error}
                     onRetry={fetchStatistics}
@@ -254,7 +359,7 @@ const PackageTypesPage = () => {
             {/* ── KPI Summary Cards ── */}
             {!error && (
               <Reveal delay={120}>
-                <section className="pt-mt-8">
+                <section className="mt-8">
                   <SectionHeader
                     title="Type Overview"
                     subtitle="Key metrics and performance indicators"
@@ -284,7 +389,11 @@ const PackageTypesPage = () => {
                               duration={950 + i * 70}
                               decimals={card.title === "Highest Rated" ? 1 : 0}
                             />
-                            {card.suffix && <span className="pt-stat-suffix">{card.suffix}</span>}
+                            {card.suffix && (
+                              <span className="pt-stat-suffix">
+                                {card.suffix}
+                              </span>
+                            )}
                           </div>
                         )}
                         <div className="pt-stat-label">{card.title}</div>
@@ -300,7 +409,7 @@ const PackageTypesPage = () => {
               <>
                 {/* Row 1: Pie Chart (Type Distribution) + Bar Chart (Revenue Performance) */}
                 <Reveal delay={180}>
-                  <section className="pt-mt-8">
+                  <section className="mt-8">
                     <SectionHeader
                       title="Distribution & Revenue"
                       subtitle="Package type distribution and revenue performance"
@@ -314,7 +423,9 @@ const PackageTypesPage = () => {
                             <span className="pt-chart-dot pt-chart-dot--p" />
                             Type Distribution
                           </div>
-                          <span className="pt-chart-sub">{pieChartData.length} types</span>
+                          <span className="pt-chart-sub">
+                            {pieChartData.length} types
+                          </span>
                         </div>
                         {pieChartData.length > 0 ? (
                           <>
@@ -331,8 +442,16 @@ const PackageTypesPage = () => {
                                         x2="1"
                                         y2="1"
                                       >
-                                        <stop offset="0%" stopColor={color} stopOpacity={0.9} />
-                                        <stop offset="100%" stopColor={color} stopOpacity={0.7} />
+                                        <stop
+                                          offset="0%"
+                                          stopColor={color}
+                                          stopOpacity={0.9}
+                                        />
+                                        <stop
+                                          offset="100%"
+                                          stopColor={color}
+                                          stopOpacity={0.7}
+                                        />
                                       </linearGradient>
                                     ))}
                                   </defs>
@@ -366,7 +485,10 @@ const PackageTypesPage = () => {
                                 <div key={i} className="pt-pie-legend-item">
                                   <span
                                     className="pt-pie-legend-dot"
-                                    style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
+                                    style={{
+                                      background:
+                                        PIE_COLORS[i % PIE_COLORS.length],
+                                    }}
                                   />
                                   {item.typeName}
                                   <span className="pt-pie-legend-count">
@@ -378,7 +500,9 @@ const PackageTypesPage = () => {
                           </>
                         ) : (
                           <div className="pt-empty-state">
-                            <p className="pt-empty-text">No distribution data available</p>
+                            <p className="pt-empty-text">
+                              No distribution data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -390,19 +514,40 @@ const PackageTypesPage = () => {
                             <span className="pt-chart-dot pt-chart-dot--acc" />
                             Revenue Performance
                           </div>
-                          <span className="pt-chart-sub">Total revenue by type</span>
+                          <span className="pt-chart-sub">
+                            Total revenue by type
+                          </span>
                         </div>
                         {revenueData.length > 0 ? (
                           <div style={{ height: 320 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart
                                 data={revenueData}
-                                margin={{ top: 4, right: 4, bottom: 60, left: 0 }}
+                                margin={{
+                                  top: 4,
+                                  right: 4,
+                                  bottom: 60,
+                                  left: 0,
+                                }}
                               >
                                 <defs>
-                                  <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.6} />
+                                  <linearGradient
+                                    id="revenueGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.6}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -429,9 +574,13 @@ const PackageTypesPage = () => {
                                   axisLine={false}
                                   tickLine={false}
                                   width={45}
-                                  tickFormatter={(value) => `$${value.toLocaleString()}`}
+                                  tickFormatter={(value) =>
+                                    `$${value.toLocaleString()}`
+                                  }
                                 />
-                                <Tooltip content={<PackageTypeRevenueTooltip />} />
+                                <Tooltip
+                                  content={<PackageTypeRevenueTooltip />}
+                                />
                                 <Bar
                                   dataKey="totalRevenue"
                                   fill="url(#revenueGrad)"
@@ -445,7 +594,9 @@ const PackageTypesPage = () => {
                           </div>
                         ) : (
                           <div className="pt-empty-state">
-                            <p className="pt-empty-text">No revenue data available</p>
+                            <p className="pt-empty-text">
+                              No revenue data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -455,7 +606,7 @@ const PackageTypesPage = () => {
 
                 {/* Row 2: Bar Chart (Booking Performance) + Combo Chart (Rating Overview) */}
                 <Reveal delay={240}>
-                  <section className="pt-mt-7">
+                  <section className="mt-7">
                     <SectionHeader
                       title="Booking & Quality"
                       subtitle="Booking performance and rating overview"
@@ -469,7 +620,9 @@ const PackageTypesPage = () => {
                             <span className="pt-chart-dot pt-chart-dot--p" />
                             Booking Performance
                           </div>
-                          <span className="pt-chart-sub">Total participants by type</span>
+                          <span className="pt-chart-sub">
+                            Total participants by type
+                          </span>
                         </div>
                         {bookingData.length > 0 ? (
                           <div style={{ height: 320 }}>
@@ -477,13 +630,32 @@ const PackageTypesPage = () => {
                               <BarChart
                                 data={bookingData}
                                 layout="vertical"
-                                margin={{ top: 4, right: 30, bottom: 4, left: 120 }}
+                                margin={{
+                                  top: 4,
+                                  right: 30,
+                                  bottom: 4,
+                                  left: 120,
+                                }}
                                 barSize={28}
                               >
                                 <defs>
-                                  <linearGradient id="bookingGrad" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.6} />
+                                  <linearGradient
+                                    id="bookingGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="1"
+                                    y2="0"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.6}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -496,7 +668,9 @@ const PackageTypesPage = () => {
                                   tick={{ fontSize: 11, fill: textSecondary }}
                                   axisLine={false}
                                   tickLine={false}
-                                  tickFormatter={(value) => value.toLocaleString()}
+                                  tickFormatter={(value) =>
+                                    value.toLocaleString()
+                                  }
                                 />
                                 <YAxis
                                   type="category"
@@ -510,7 +684,9 @@ const PackageTypesPage = () => {
                                   tickLine={false}
                                   width={115}
                                 />
-                                <Tooltip content={<PackageTypeBookingTooltip />} />
+                                <Tooltip
+                                  content={<PackageTypeBookingTooltip />}
+                                />
                                 <Bar
                                   dataKey="totalParticipants"
                                   fill="url(#bookingGrad)"
@@ -524,7 +700,9 @@ const PackageTypesPage = () => {
                           </div>
                         ) : (
                           <div className="pt-empty-state">
-                            <p className="pt-empty-text">No booking data available</p>
+                            <p className="pt-empty-text">
+                              No booking data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -536,19 +714,40 @@ const PackageTypesPage = () => {
                             <span className="pt-chart-dot pt-chart-dot--acc" />
                             Rating Overview
                           </div>
-                          <span className="pt-chart-sub">Average rating & review count</span>
+                          <span className="pt-chart-sub">
+                            Average rating & review count
+                          </span>
                         </div>
                         {ratingData.length > 0 ? (
                           <div style={{ height: 320 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <ComposedChart
                                 data={ratingData}
-                                margin={{ top: 20, right: 30, bottom: 60, left: 0 }}
+                                margin={{
+                                  top: 20,
+                                  right: 30,
+                                  bottom: 60,
+                                  left: 0,
+                                }}
                               >
                                 <defs>
-                                  <linearGradient id="ratingGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.4} />
+                                  <linearGradient
+                                    id="ratingGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.4}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -579,7 +778,10 @@ const PackageTypesPage = () => {
                                     value: "Rating",
                                     angle: -90,
                                     position: "insideLeft",
-                                    style: { fill: textSecondary, fontSize: 11 }
+                                    style: {
+                                      fill: textSecondary,
+                                      fontSize: 11,
+                                    },
                                   }}
                                 />
                                 <YAxis
@@ -592,10 +794,15 @@ const PackageTypesPage = () => {
                                     value: "Reviews",
                                     angle: 90,
                                     position: "insideRight",
-                                    style: { fill: textSecondary, fontSize: 11 }
+                                    style: {
+                                      fill: textSecondary,
+                                      fontSize: 11,
+                                    },
                                   }}
                                 />
-                                <Tooltip content={<PackageTypeRatingTooltip />} />
+                                <Tooltip
+                                  content={<PackageTypeRatingTooltip />}
+                                />
                                 <Legend verticalAlign="top" height={36} />
                                 <Bar
                                   yAxisId="left"
@@ -623,7 +830,9 @@ const PackageTypesPage = () => {
                           </div>
                         ) : (
                           <div className="pt-empty-state">
-                            <p className="pt-empty-text">No rating data available</p>
+                            <p className="pt-empty-text">
+                              No rating data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -633,7 +842,7 @@ const PackageTypesPage = () => {
 
                 {/* Row 3: Line Chart (Participation Trend) + Stacked Bar (Primary vs Secondary Usage) */}
                 <Reveal delay={300}>
-                  <section className="pt-mt-7">
+                  <section className="mt-7">
                     <SectionHeader
                       title="Trend & Usage Analysis"
                       subtitle="Participation trends and usage patterns"
@@ -654,12 +863,31 @@ const PackageTypesPage = () => {
                             <ResponsiveContainer width="100%" height="100%">
                               <LineChart
                                 data={trendData}
-                                margin={{ top: 20, right: 30, bottom: 20, left: 10 }}
+                                margin={{
+                                  top: 20,
+                                  right: 30,
+                                  bottom: 20,
+                                  left: 10,
+                                }}
                               >
                                 <defs>
-                                  <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.3} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.01} />
+                                  <linearGradient
+                                    id="trendGradient"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.3}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.01}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -681,7 +909,9 @@ const PackageTypesPage = () => {
                                   axisLine={false}
                                   tickLine={false}
                                   width={40}
-                                  tickFormatter={(value) => value.toLocaleString()}
+                                  tickFormatter={(value) =>
+                                    value.toLocaleString()
+                                  }
                                 />
                                 <Tooltip content={<PackageTypeLineTooltip />} />
                                 <Legend verticalAlign="top" height={36} />
@@ -700,7 +930,12 @@ const PackageTypesPage = () => {
                                   dataKey="totalParticipants"
                                   stroke={p}
                                   strokeWidth={2.5}
-                                  dot={{ fill: p, r: 4, strokeWidth: 2, stroke: surf }}
+                                  dot={{
+                                    fill: p,
+                                    r: 4,
+                                    strokeWidth: 2,
+                                    stroke: surf,
+                                  }}
                                   activeDot={{ r: 6, fill: p }}
                                   name="Participants"
                                   animationBegin={300}
@@ -711,7 +946,9 @@ const PackageTypesPage = () => {
                           </div>
                         ) : (
                           <div className="pt-empty-state">
-                            <p className="pt-empty-text">No trend data available</p>
+                            <p className="pt-empty-text">
+                              No trend data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -731,17 +968,50 @@ const PackageTypesPage = () => {
                               <BarChart
                                 data={stackedData}
                                 layout="vertical"
-                                margin={{ top: 4, right: 30, bottom: 4, left: 100 }}
+                                margin={{
+                                  top: 4,
+                                  right: 30,
+                                  bottom: 4,
+                                  left: 100,
+                                }}
                                 barSize={28}
                               >
                                 <defs>
-                                  <linearGradient id="primaryGrad" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.7} />
+                                  <linearGradient
+                                    id="primaryGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="1"
+                                    y2="0"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.7}
+                                    />
                                   </linearGradient>
-                                  <linearGradient id="secondaryGrad" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor={successColor} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={successColor} stopOpacity={0.7} />
+                                  <linearGradient
+                                    id="secondaryGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="1"
+                                    y2="0"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={successColor}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={successColor}
+                                      stopOpacity={0.7}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -767,13 +1037,20 @@ const PackageTypesPage = () => {
                                   tickLine={false}
                                   width={95}
                                 />
-                                <Tooltip content={<PackageTypeStackedTooltip />} />
+                                <Tooltip
+                                  content={<PackageTypeStackedTooltip />}
+                                />
                                 <Legend
                                   verticalAlign="top"
                                   height={36}
                                   iconType="circle"
                                   formatter={(value) => (
-                                    <span style={{ color: textSecondary, fontSize: 12 }}>
+                                    <span
+                                      style={{
+                                        color: textSecondary,
+                                        fontSize: 12,
+                                      }}
+                                    >
                                       {value}
                                     </span>
                                   )}
@@ -801,7 +1078,9 @@ const PackageTypesPage = () => {
                           </div>
                         ) : (
                           <div className="pt-empty-state">
-                            <p className="pt-empty-text">No usage data available</p>
+                            <p className="pt-empty-text">
+                              No usage data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -813,7 +1092,7 @@ const PackageTypesPage = () => {
 
             {/* ── Info banner ── */}
             <Reveal delay={360}>
-              <section className="pt-mt-7">
+              <section className="mt-7">
                 <InfoBanner
                   title="Package Type Management"
                   description="Manage package types and analyze their performance. Track type distribution, revenue performance, booking metrics, ratings, and usage patterns. Types help categorize packages by travel style, duration, and interests. Use the quick actions above to add, edit, or remove package types. The line chart shows participation trends over time, while the stacked bar shows primary vs secondary usage patterns."

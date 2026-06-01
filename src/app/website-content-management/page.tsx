@@ -1,7 +1,7 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
 import WebPageManagementPage from "@/pages/web-page-management/WebPageManagementPage";
 import { WEB_PAGE_MANAGEMENT_PAGE_TITLE } from "@/utils/pagesHeaderTitles";
-import { WEB_PAGE_MANAGEMENT_PRIVILEGE } from "@/utils/privileges";
+import { WEBSITE_CONTENT_MANAGEMENT_PRIVILEGE } from "@/utils/privileges";
 import { Metadata } from "next";
 import React from "react";
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 const page = () => {
   return (
-    <ProtectedRoute requiredPrivileges={[WEB_PAGE_MANAGEMENT_PRIVILEGE]}>
+    <ProtectedRoute requiredPrivileges={[WEBSITE_CONTENT_MANAGEMENT_PRIVILEGE]}>
       <WebPageManagementPage />
     </ProtectedRoute>
   );

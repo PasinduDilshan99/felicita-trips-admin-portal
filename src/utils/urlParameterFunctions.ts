@@ -2,6 +2,8 @@ import { ActivityCategoryFilterParams } from "@/types/activity-category-types";
 import { ActivityFilterParams } from "@/types/activity-types";
 import { CategoryFilterParams } from "@/types/destination-category-types";
 import { DestinationFilterParams } from "@/types/destination-types";
+import { PackageTypeFilterParams } from "@/types/package-type-types";
+import { PackageFilterParams } from "@/types/package-types";
 import { TourCategoryFilterParams } from "@/types/tour-category-types";
 import { TourTypeFilterParams } from "@/types/tour-type-types";
 import { TourFilterParams } from "@/types/tour-types";
@@ -255,6 +257,95 @@ export const tourTypeViewFiltersToUrlParams = (
 export const tourTypeViewUrlParamsToFilters = (
   params: URLSearchParams,
 ): TourTypeFilterParams => {
+  const sortDirection = params.get("sortDirection");
+  return {
+    name: params.get("name") || null,
+    status: params.get("status") || null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") || "typeName",
+    sortDirection: (sortDirection === "DESC" ? "DESC" : "ASC") as
+      | "ASC"
+      | "DESC",
+  };
+};
+
+export const packageViewFiltersToUrlParams = (
+  filters: PackageFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.packageType) params.set("packageType", filters.packageType);
+  if (filters.location) params.set("location", filters.location);
+  if (filters.duration) params.set("duration", filters.duration.toString());
+  if (filters.minPrice) params.set("minPrice", filters.minPrice.toString());
+  if (filters.maxPrice) params.set("maxPrice", filters.maxPrice.toString());
+  if (filters.minGroupSize)
+    params.set("minGroupSize", filters.minGroupSize.toString());
+  if (filters.maxGroupSize)
+    params.set("maxGroupSize", filters.maxGroupSize.toString());
+  if (filters.fromDate) params.set("fromDate", filters.fromDate);
+  if (filters.toDate) params.set("toDate", filters.toDate);
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+
+  return params;
+};
+
+export const packageViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): PackageFilterParams => {
+  return {
+    name: params.get("name") || null,
+    minPrice: params.get("minPrice")
+      ? parseFloat(params.get("minPrice")!)
+      : null,
+    maxPrice: params.get("maxPrice")
+      ? parseFloat(params.get("maxPrice")!)
+      : null,
+    duration: params.get("duration")
+      ? parseFloat(params.get("duration")!)
+      : null,
+    packageType: params.get("packageType") || null,
+    location: params.get("location") || null,
+    minGroupSize: params.get("minGroupSize")
+      ? parseInt(params.get("minGroupSize")!)
+      : null,
+    maxGroupSize: params.get("maxGroupSize")
+      ? parseInt(params.get("maxGroupSize")!)
+      : null,
+    fromDate: params.get("fromDate") || null,
+    toDate: params.get("toDate") || null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+  };
+};
+
+export const packageTypeViewFiltersToUrlParams = (
+  filters: PackageTypeFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
+
+  return params;
+};
+
+export const packageTypeViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): PackageTypeFilterParams => {
   const sortDirection = params.get("sortDirection");
   return {
     name: params.get("name") || null,

@@ -1,43 +1,41 @@
-// app/web-management/package-types/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-} from "@/utils/constant";
 import { PackageTypeService } from "@/services/packageTypeService";
-import { PackageTypeDetails } from "@/types/package-type-types";
-import { AlertTriangle, Search, Calendar, User, Clock, Palette, Info, Package, Star } from "lucide-react";
+import {
+  PackageTypeDetails,
+  PackageTypeSearchItem,
+} from "@/types/package-type-types";
+import {
+  AlertTriangle,
+  Search,
+  Palette,
+  Info,
+  Package,
+  Star,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
 import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
-import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
+import {
+  TerminationItem,
+  TerminationModal,
+} from "@/components/common-components/terminate-components/TerminationModal";
 import { useCommon } from "@/contexts/CommonContext";
 import { PackageTypeStats } from "@/components/package-types-components/terminate-package-type-components/PackageTypeStats";
 import { BasicInfoPanel } from "@/components/package-types-components/terminate-package-type-components/BasicInfoPanel";
 import { PackagesList } from "@/components/package-types-components/terminate-package-type-components/PackagesList";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface PackageTypeSearchItem {
-  id: number;
-  name: string;
-}
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_TYPE_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { hexToRgba } from "@/utils/functions";
 
 const TerminatePackageTypePage = () => {
   const { theme } = useTheme();
@@ -48,7 +46,10 @@ const TerminatePackageTypePage = () => {
   const initialPackageTypeName = searchParams?.get("package-type-name") || "";
   const initialPackageTypeId = searchParams?.get("package-type-id") || "";
 
-  const [selectedPackageType, setSelectedPackageType] = useState<{ typeId: number; typeName: string } | null>(
+  const [selectedPackageType, setSelectedPackageType] = useState<{
+    typeId: number;
+    typeName: string;
+  } | null>(
     initialPackageTypeId && initialPackageTypeName
       ? {
           typeId: parseInt(initialPackageTypeId),
@@ -56,7 +57,8 @@ const TerminatePackageTypePage = () => {
         }
       : null,
   );
-  const [packageTypeDetails, setPackageTypeDetails] = useState<PackageTypeDetails | null>(null);
+  const [packageTypeDetails, setPackageTypeDetails] =
+    useState<PackageTypeDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingTerminate, setLoadingTerminate] = useState(false);
@@ -72,26 +74,11 @@ const TerminatePackageTypePage = () => {
     actionLink?: string;
   } | null>(null);
 
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Package Types",
-      href: `${WEB_MANAGEMENT_PATH}/package-types`,
-    },
-    {
-      label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}/package-types/terminate`,
-    },
-  ];
-
-  // Get package types from common context
   const packageTypes = categories?.packageCategoryList || [];
-  
+
   const searchItems: PackageTypeSearchItem[] = packageTypes.map((type) => ({
     id: type.packageCategoryId,
     name: type.packageCategoryName,
@@ -172,7 +159,8 @@ const TerminatePackageTypePage = () => {
       setToast({
         type: "error",
         title: "Termination Failed",
-        message: err.message || "Failed to terminate package type. Please try again.",
+        message:
+          err.message || "Failed to terminate package type. Please try again.",
       });
     } finally {
       setLoadingTerminate(false);
@@ -214,11 +202,17 @@ const TerminatePackageTypePage = () => {
 
   useEffect(() => {
     if (initialPackageTypeId && !packageTypeDetails) {
-      handleSelectPackageType(parseInt(initialPackageTypeId), initialPackageTypeName);
+      handleSelectPackageType(
+        parseInt(initialPackageTypeId),
+        initialPackageTypeName,
+      );
     }
   }, [initialPackageTypeId, initialPackageTypeName]);
 
-  if ((commonLoading && packageTypes.length === 0) || (loading && !selectedPackageType)) {
+  if (
+    (commonLoading && packageTypes.length === 0) ||
+    (loading && !selectedPackageType)
+  ) {
     return (
       <CommonLoading
         message="Loading package types..."
@@ -258,7 +252,7 @@ const TerminatePackageTypePage = () => {
           <PageHeader
             title="Terminate Package Type"
             description="Permanently remove a package type from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_TYPE_TERMINATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -298,7 +292,8 @@ const TerminatePackageTypePage = () => {
                   className="text-xs mt-0.5"
                   style={{ color: theme.textSecondary }}
                 >
-                  Search and select a package type to review its data before termination
+                  Search and select a package type to review its data before
+                  termination
                 </p>
               </div>
             </div>
@@ -308,7 +303,9 @@ const TerminatePackageTypePage = () => {
                 items={searchItems}
                 loading={commonLoading}
                 selectedItem={selectedSearchItem}
-                onSelectItem={(item) => handleSelectPackageType(item.id, item.name)}
+                onSelectItem={(item) =>
+                  handleSelectPackageType(item.id, item.name)
+                }
                 onClearSelection={handleClearPackageTypeSelection}
                 initialSearchTerm={initialPackageTypeName}
                 placeholder="Search package types..."
@@ -367,11 +364,15 @@ const TerminatePackageTypePage = () => {
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold" style={{ color: theme.error }}>
+                <h2
+                  className="text-base font-bold"
+                  style={{ color: theme.error }}
+                >
                   Package Type Termination Review
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: theme.error }}>
-                  Review all data carefully. This action is permanent and cannot be undone.
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
                 </p>
               </div>
               <div
@@ -384,7 +385,10 @@ const TerminatePackageTypePage = () => {
                 <span className="text-xs" style={{ color: theme.error }}>
                   ID
                 </span>
-                <span className="text-sm font-bold" style={{ color: theme.error }}>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: theme.error }}
+                >
                   #{selectedPackageType.typeId}
                 </span>
               </div>
@@ -429,7 +433,7 @@ const TerminatePackageTypePage = () => {
 
                   {/* Right Column */}
                   <div className="space-y-5">
-                    <PackagesList 
+                    <PackagesList
                       packages={packageTypeDetails.packageBasicDetails}
                     />
 
@@ -529,7 +533,8 @@ const TerminatePackageTypePage = () => {
                 showRetryButton={true}
                 onBack={handleClearPackageTypeSelection}
                 onRetry={() =>
-                  selectedPackageType && fetchPackageTypeDetails(selectedPackageType.typeId)
+                  selectedPackageType &&
+                  fetchPackageTypeDetails(selectedPackageType.typeId)
                 }
                 backButtonText="Change Selection"
                 retryButtonText="Try Again"

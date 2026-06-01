@@ -1,4 +1,3 @@
-// components/package-types-components/package-type-details-view-components/PackageTypePackagesList.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -9,35 +8,19 @@ import {
   Star,
   ChevronDown,
   ChevronUp,
-  Clock,
-  DollarSign,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { PackageBasicDetail } from "@/types/package-type-types";
+import { PackageTypePackagesListProps } from "@/types/package-type-types";
+import { hexToRgba } from "@/utils/functions";
 
-interface PackageTypePackagesListProps {
-  packages: PackageBasicDetail[];
-  packageTypeColor: string;
-  onViewPackage: (packageId: number) => void;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-export const PackageTypePackagesList: React.FC<PackageTypePackagesListProps> = ({
-  packages,
-  packageTypeColor,
-  onViewPackage,
-}) => {
+export const PackageTypePackagesList: React.FC<
+  PackageTypePackagesListProps
+> = ({ packages, packageTypeColor, onViewPackage }) => {
   const { theme } = useTheme();
   const [showAllPackages, setShowAllPackages] = useState(false);
-  const [expandedPackageId, setExpandedPackageId] = useState<number | null>(null);
+  const [expandedPackageId, setExpandedPackageId] = useState<number | null>(
+    null,
+  );
 
   const visiblePackages = showAllPackages ? packages : packages.slice(0, 5);
   const hasMorePackages = packages.length > 5;
@@ -86,14 +69,23 @@ export const PackageTypePackagesList: React.FC<PackageTypePackagesListProps> = (
           style={{ borderBottom: `1px solid ${theme.border}` }}
         >
           <div className="flex items-center gap-2">
-            <Package className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: packageTypeColor }} />
-            <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+            <Package
+              className="w-4 h-4 sm:w-5 sm:h-5"
+              style={{ color: packageTypeColor }}
+            />
+            <h2
+              className="text-base sm:text-lg font-semibold"
+              style={{ color: theme.text }}
+            >
               Associated Packages
             </h2>
           </div>
         </div>
         <div className="px-4 sm:px-6 py-6 sm:py-8 text-center">
-          <Package className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: theme.textSecondary }} />
+          <Package
+            className="w-12 h-12 mx-auto mb-3 opacity-30"
+            style={{ color: theme.textSecondary }}
+          />
           <p className="text-sm" style={{ color: theme.textSecondary }}>
             No packages associated with this type.
           </p>
@@ -116,8 +108,14 @@ export const PackageTypePackagesList: React.FC<PackageTypePackagesListProps> = (
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
         <div className="flex items-center gap-2">
-          <Package className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: packageTypeColor }} />
-          <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+          <Package
+            className="w-4 h-4 sm:w-5 sm:h-5"
+            style={{ color: packageTypeColor }}
+          />
+          <h2
+            className="text-base sm:text-lg font-semibold"
+            style={{ color: theme.text }}
+          >
             Associated Packages
           </h2>
           <span
@@ -146,7 +144,7 @@ export const PackageTypePackagesList: React.FC<PackageTypePackagesListProps> = (
                 backgroundColor: hexToRgba(pkgColor, 0.03),
                 border: `1px solid ${hexToRgba(pkgColor, 0.15)}`,
               }}
-              onClick={() => onViewPackage(pkg.packageId)}
+              onClick={() => onViewPackage(pkg.packageId, pkg.packageName)}
             >
               {/* Package Header */}
               <div className="p-3 sm:p-4">
@@ -172,19 +170,30 @@ export const PackageTypePackagesList: React.FC<PackageTypePackagesListProps> = (
                         {pkg.status}
                       </span>
                     </div>
-                    <h3 className="font-semibold text-sm sm:text-base mt-1 hover:underline" style={{ color: theme.text }}>
+                    <h3
+                      className="font-semibold text-sm sm:text-base mt-1 hover:underline"
+                      style={{ color: theme.text }}
+                    >
                       {pkg.packageName}
                     </h3>
                   </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: pkgColor }} />
+                  <ChevronRight
+                    className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: pkgColor }}
+                  />
                 </div>
 
                 {/* Basic Info */}
-                <div className="flex flex-wrap gap-3 mt-2 text-xs" style={{ color: theme.textSecondary }}>
+                <div
+                  className="flex flex-wrap gap-3 mt-2 text-xs"
+                  style={{ color: theme.textSecondary }}
+                >
                   {pkg.startDate && (
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      <span>{formatDate(pkg.startDate)} → {formatDate(pkg.endDate)}</span>
+                      <span>
+                        {formatDate(pkg.startDate)} → {formatDate(pkg.endDate)}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -196,7 +205,10 @@ export const PackageTypePackagesList: React.FC<PackageTypePackagesListProps> = (
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: pkg.color }}
                     />
-                    <span className="text-[10px] font-mono" style={{ color: theme.textSecondary }}>
+                    <span
+                      className="text-[10px] font-mono"
+                      style={{ color: theme.textSecondary }}
+                    >
                       {pkg.color}
                     </span>
                   </div>
@@ -232,7 +244,9 @@ export const PackageTypePackagesList: React.FC<PackageTypePackagesListProps> = (
                       borderLeft: `2px solid ${pkgColor}`,
                     }}
                   >
-                    <p style={{ color: theme.textSecondary }}>{pkg.description}</p>
+                    <p style={{ color: theme.textSecondary }}>
+                      {pkg.description}
+                    </p>
                   </div>
                 )}
               </div>

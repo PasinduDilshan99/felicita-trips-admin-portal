@@ -1,16 +1,12 @@
-// app/packages/view/[packageId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { PackageService } from "@/services/packageService";
 import { PackageAllDetails, PackageImageResponse } from "@/types/package-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useImageGallery } from "@/hooks/useImageGallery";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
 import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
 import { CommonQuickStats } from "@/components/common-components/details-view/CommonQuickStats";
@@ -18,8 +14,6 @@ import { CommonMetadata } from "@/components/common-components/details-view/Comm
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-
-// Import sub-components
 import { PackageOverview } from "@/components/packages-components/package-details-view-components/PackageOverview";
 import { PackagePricing } from "@/components/packages-components/package-details-view-components/PackagePricing";
 import { PackageFeatures } from "@/components/packages-components/package-details-view-components/PackageFeatures";
@@ -27,37 +21,26 @@ import { PackageInclusionsExclusions } from "@/components/packages-components/pa
 import { PackageConditionsTips } from "@/components/packages-components/package-details-view-components/PackageConditionsTips";
 import { PackageDayAccommodations } from "@/components/packages-components/package-details-view-components/PackageDayAccommodations";
 import { PackageTourInfo } from "@/components/packages-components/package-details-view-components/PackageTourInfo";
-
-// Icons
 import {
   Package,
   Image,
   CheckCircle,
-  AlertCircle,
-  User,
-  Clock,
   Calendar,
   Tag,
   DollarSign,
   Users,
 } from "lucide-react";
-
-// Constants for routing
 import {
-  PACKAGES_PAGE_URL,
+  PACKAGE_TERMINATE_PAGE_URL,
+  PACKAGE_UPDATE_PAGE_URL,
   PACKAGES_VIEW_PAGE_URL,
-  TOURS_VIEW_PAGE_URL,
+  TOUR_CATEGORY_DETAILS_VIEW_URL,
 } from "@/utils/urls";
 import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { PACKAGE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { hexToRgba } from "@/utils/functions";
 
 const PackageDetailsViewPage = () => {
   const params = useParams();
@@ -87,9 +70,7 @@ const PackageDetailsViewPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Packages", href: PACKAGES_PAGE_URL },
-    { label: "View", href: PACKAGES_VIEW_PAGE_URL },
+    ...PACKAGE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA,
     {
       label: packageData?.packageName || "Details",
       href: `${PACKAGES_VIEW_PAGE_URL}/${packageId}`,
@@ -138,16 +119,16 @@ const PackageDetailsViewPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(PACKAGES_VIEW_PAGE_URL);
+  const handleBack = () => router.back();
 
   const handleEdit = () =>
     router.push(
-      `${PACKAGES_PAGE_URL}/${packageId}?name=${packageData?.packageName}`,
+      `${PACKAGE_UPDATE_PAGE_URL}/${packageId}?name=${packageData?.packageName}`,
     );
 
   const handleDelete = () =>
     router.push(
-      `${PACKAGES_PAGE_URL}/${packageId}?name=${packageData?.packageName}`,
+      `${PACKAGE_TERMINATE_PAGE_URL}/${packageId}?name=${packageData?.packageName}`,
     );
 
   const handleShare = () => {
@@ -165,7 +146,9 @@ const PackageDetailsViewPage = () => {
 
   const handleViewTour = () => {
     if (packageData?.tourId) {
-      router.push(`${TOURS_VIEW_PAGE_URL}/${packageData.tourId}`);
+      router.push(
+        `${TOUR_CATEGORY_DETAILS_VIEW_URL}/${packageData.tourId}?name=${packageData.tourName}`,
+      );
     }
   };
 

@@ -1,115 +1,53 @@
-// app/package-types/view/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  Suspense,
-} from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
+import FilterPanel from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { PackageTypeService } from "@/services/packageTypeService";
 import {
   PackageTypeListItem,
   PackageTypeImage,
+  PackageTypeFilterParams,
 } from "@/types/package-type-types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import { PACKAGE_TYPES_PAGE_URL, WEB_MANAGEMENT_URL } from "@/utils/urls";
+import { PACKAGES_VIEW_PAGE_URL } from "@/utils/urls";
 import PackageTypeCard from "@/components/package-types-components/view-package-type-components/PackageTypeCard";
 import PackageTypeListCard from "@/components/package-types-components/view-package-type-components/PackageTypeListCard";
+import {
+  packageTypeViewFiltersToUrlParams,
+  packageTypeViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import { FilterField } from "@/types/filter-types";
+import { PACKAGE_TYPE_VIEW_SORTING_OPTIONS } from "@/data/sorting-options";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_TYPE_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
-// Sort options for package types
-const SORT_OPTIONS = [
-  { value: "typeName", label: "Type Name" },
-  { value: "typeId", label: "Type ID" },
-  { value: "status", label: "Status" },
-];
-
-// Filter params interface
-interface PackageTypeFilterParams {
-  name: string | null;
-  status: string | null;
-  pageSize: number;
-  pageNumber: number;
-  sortBy: string;
-  sortDirection: "ASC" | "DESC";
-}
-
-// Utility functions for URL params management
-const filtersToUrlParams = (
-  filters: PackageTypeFilterParams,
-): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.status) params.set("status", filters.status);
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
-
-  return params;
-};
-
-const urlParamsToFilters = (
-  params: URLSearchParams,
-): PackageTypeFilterParams => {
-  const sortDirection = params.get("sortDirection");
-  return {
-    name: params.get("name") || null,
-    status: params.get("status") || null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-    sortBy: params.get("sortBy") || "typeName",
-    sortDirection: (sortDirection === "DESC" ? "DESC" : "ASC") as "ASC" | "DESC",
-  };
-};
-
-// Main component wrapped with Suspense for useSearchParams
 const PackageTypesViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    { label: "Package Types", href: PACKAGE_TYPES_PAGE_URL },
-    { label: "View", href: PACKAGE_TYPES_PAGE_URL },
-  ];
-
   const [filters, setFilters] = useState<PackageTypeFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    packageTypeViewUrlParamsToFilters(searchParams || new URLSearchParams()),
   );
 
   const [allTypes, setAllTypes] = useState<PackageTypeListItem[]>([]);
   const [filteredTypes, setFilteredTypes] = useState<PackageTypeListItem[]>([]);
-  const [displayedTypes, setDisplayedTypes] = useState<PackageTypeListItem[]>([]);
+  const [displayedTypes, setDisplayedTypes] = useState<PackageTypeListItem[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  // Filter options state (derived from data)
   const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
-
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [modalImages, setModalImages] = useState<ImageModalImage[]>([]);
@@ -123,10 +61,7 @@ const PackageTypesViewContent = () => {
       if (response.code === 200 && response.data) {
         setAllTypes(response.data);
 
-        // Extract unique statuses for filter options
-        const statuses = [
-          ...new Set(response.data.map((type) => type.status)),
-        ];
+        const statuses = [...new Set(response.data.map((type) => type.status))];
         setAvailableStatuses(statuses);
 
         return response.data;
@@ -145,10 +80,7 @@ const PackageTypesViewContent = () => {
 
   // Filter and sort types based on filters
   const filterAndSortTypes = useCallback(
-    (
-      types: PackageTypeListItem[],
-      currentFilters: PackageTypeFilterParams,
-    ) => {
+    (types: PackageTypeListItem[], currentFilters: PackageTypeFilterParams) => {
       let result = [...types];
 
       // Apply name filter
@@ -161,9 +93,7 @@ const PackageTypesViewContent = () => {
 
       // Apply status filter
       if (currentFilters.status) {
-        result = result.filter(
-          (type) => type.status === currentFilters.status,
-        );
+        result = result.filter((type) => type.status === currentFilters.status);
       }
 
       // Apply sorting
@@ -228,7 +158,7 @@ const PackageTypesViewContent = () => {
   // Apply URL filters after data is loaded and when searchParams change
   useEffect(() => {
     if (!isInitialLoad && allTypes.length > 0) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = packageTypeViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -237,11 +167,11 @@ const PackageTypesViewContent = () => {
 
   const updateURL = useCallback(
     (newFilters: PackageTypeFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = packageTypeViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
-        ? `${WEB_MANAGEMENT_PATH}${PACKAGE_TYPES_PAGE_URL}/view?${queryString}`
-        : `${WEB_MANAGEMENT_PATH}${PACKAGE_TYPES_PAGE_URL}/view`;
+        ? `${PACKAGES_VIEW_PAGE_URL}?${queryString}`
+        : PACKAGES_VIEW_PAGE_URL;
 
       router.replace(newURL, { scroll: false });
     },
@@ -257,19 +187,19 @@ const PackageTypesViewContent = () => {
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
-    const updatedFilters: PackageTypeFilterParams = { 
-      ...filters, 
-      pageSize: newPageSize, 
-      pageNumber: 1 
+    const updatedFilters: PackageTypeFilterParams = {
+      ...filters,
+      pageSize: newPageSize,
+      pageNumber: 1,
     };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
   };
 
   const handlePageChange = (page: number) => {
-    const updatedFilters: PackageTypeFilterParams = { 
-      ...filters, 
-      pageNumber: page 
+    const updatedFilters: PackageTypeFilterParams = {
+      ...filters,
+      pageNumber: page,
     };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
@@ -289,10 +219,10 @@ const PackageTypesViewContent = () => {
   };
 
   const handleRemoveFilter = (key: string) => {
-    const updatedFilters: PackageTypeFilterParams = { 
-      ...filters, 
-      [key]: null, 
-      pageNumber: 1 
+    const updatedFilters: PackageTypeFilterParams = {
+      ...filters,
+      [key]: null,
+      pageNumber: 1,
     };
     setFilters(updatedFilters);
     updateURL(updatedFilters);
@@ -375,7 +305,9 @@ const PackageTypesViewContent = () => {
 
   // Get sort label
   const getSortLabel = (sortBy: string): string => {
-    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
+    const option = PACKAGE_TYPE_VIEW_SORTING_OPTIONS.find(
+      (opt) => opt.value === sortBy,
+    );
     return option ? option.label : sortBy;
   };
 
@@ -459,7 +391,7 @@ const PackageTypesViewContent = () => {
           <PageHeader
             title="Package Types View"
             description="Explore and manage package types for different travel packages"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_TYPE_VIEW_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -479,7 +411,7 @@ const PackageTypesViewContent = () => {
             pageSizeOptions={[6, 9, 12, 24, 48]}
             showPageSize={true}
             showSorting={true}
-            sortOptions={SORT_OPTIONS}
+            sortOptions={PACKAGE_TYPE_VIEW_SORTING_OPTIONS}
             sortBy={filters.sortBy}
             sortDirection={filters.sortDirection}
             title="Filter Package Types"

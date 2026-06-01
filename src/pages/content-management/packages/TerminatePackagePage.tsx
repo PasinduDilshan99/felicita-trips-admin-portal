@@ -1,45 +1,43 @@
-// app/web-management/packages/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-} from "@/utils/constant";
 import { PackageService } from "@/services/packageService";
-import { TourPackage, PackageNameId } from "@/types/package-types";
-import { AlertTriangle, Search, MapPin, Calendar, Clock, DollarSign, Users, Percent, Gift } from "lucide-react";
+import {
+  TourPackage,
+  PackageNameId,
+  PackageSearchItem,
+} from "@/types/package-types";
+import {
+  AlertTriangle,
+  Search,
+  Calendar,
+  DollarSign,
+  Users,
+  Gift,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
 import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
-import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
+import {
+  TerminationItem,
+  TerminationModal,
+} from "@/components/common-components/terminate-components/TerminationModal";
 import { PackageStats } from "@/components/packages-components/terminate-package-components/PackageStats";
 import { BasicInfoPanel } from "@/components/packages-components/terminate-package-components/BasicInfoPanel";
 import { TourInfoPanel } from "@/components/packages-components/terminate-package-components/TourInfoPanel";
 import { FeaturesList } from "@/components/packages-components/terminate-package-components/FeaturesList";
 import { SchedulesList } from "@/components/packages-components/terminate-package-components/SchedulesList";
-
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface PackageSearchItem {
-  id: number;
-  name: string;
-}
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { hexToRgba } from "@/utils/functions";
 
 const TerminatePackagePage = () => {
   const { theme } = useTheme();
@@ -58,38 +56,23 @@ const TerminatePackagePage = () => {
         }
       : null,
   );
-  const [packageDetails, setPackageDetails] = useState<TourPackage | null>(null);
+  const [packageDetails, setPackageDetails] = useState<TourPackage | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingTerminate, setLoadingTerminate] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-
-  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
     message: string;
     actionLink?: string;
   } | null>(null);
-
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Packages",
-      href: `${WEB_MANAGEMENT_PATH}/packages`,
-    },
-    {
-      label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}/packages/terminate`,
-    },
-  ];
 
   const fetchPackages = async () => {
     setLoading(true);
@@ -185,7 +168,8 @@ const TerminatePackagePage = () => {
       setToast({
         type: "error",
         title: "Termination Failed",
-        message: err.message || "Failed to terminate package. Please try again.",
+        message:
+          err.message || "Failed to terminate package. Please try again.",
       });
     } finally {
       setLoadingTerminate(false);
@@ -283,7 +267,7 @@ const TerminatePackagePage = () => {
           <PageHeader
             title="Terminate Package"
             description="Permanently remove a tour package from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_TERMINATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -323,7 +307,8 @@ const TerminatePackagePage = () => {
                   className="text-xs mt-0.5"
                   style={{ color: theme.textSecondary }}
                 >
-                  Search and select a package to review its data before termination
+                  Search and select a package to review its data before
+                  termination
                 </p>
               </div>
             </div>
@@ -392,11 +377,15 @@ const TerminatePackagePage = () => {
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold" style={{ color: theme.error }}>
+                <h2
+                  className="text-base font-bold"
+                  style={{ color: theme.error }}
+                >
                   Package Termination Review
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: theme.error }}>
-                  Review all data carefully. This action is permanent and cannot be undone.
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
                 </p>
               </div>
               <div
@@ -409,7 +398,10 @@ const TerminatePackagePage = () => {
                 <span className="text-xs" style={{ color: theme.error }}>
                   ID
                 </span>
-                <span className="text-sm font-bold" style={{ color: theme.error }}>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: theme.error }}
+                >
                   #{selectedPackage.packageId}
                 </span>
               </div>
@@ -554,7 +546,8 @@ const TerminatePackagePage = () => {
                 showRetryButton={true}
                 onBack={handleClearPackageSelection}
                 onRetry={() =>
-                  selectedPackage && fetchPackageDetails(selectedPackage.packageId)
+                  selectedPackage &&
+                  fetchPackageDetails(selectedPackage.packageId)
                 }
                 backButtonText="Change Selection"
                 retryButtonText="Try Again"

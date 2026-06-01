@@ -1,38 +1,10 @@
-// components/packages-components/package-details-view-components/PackageConditionsTips.tsx
 "use client";
 
 import React, { useState } from "react";
 import { AlertCircle, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface ConditionTipItem {
-  id: number;
-  description: string;
-  displayOrder: number;
-  status: "ACTIVE" | "INACTIVE";
-}
-
-interface TravelTipItem {
-  id: number;
-  title: string;
-  description: string;
-  displayOrder: number;
-  status: "ACTIVE" | "INACTIVE";
-}
-
-interface PackageConditionsTipsProps {
-  conditions: ConditionTipItem[];
-  travelTips: TravelTipItem[];
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { PackageConditionsTipsProps } from "@/types/package-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const PackageConditionsTips: React.FC<PackageConditionsTipsProps> = ({
   conditions,

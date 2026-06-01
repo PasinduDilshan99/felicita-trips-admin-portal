@@ -1,8 +1,7 @@
-// components/package-components/PackageListCard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   MapPin,
   Clock,
@@ -21,101 +20,36 @@ import { useRouter } from "next/navigation";
 import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
-import { TourPackage, PackageImage, Feature } from "@/types/package-types";
+import ImageModal from "@/components/common-components/ImageModal";
+import {
+  PackageImage,
+  Feature,
+  PackageListCardProps,
+} from "@/types/package-types";
 import { hexToRgba } from "@/utils/functions";
 import { PACKAGE_TYPES_PAGE_URL } from "@/utils/urls";
+import {
+  formatDate,
+  formatPrice,
+  getSafeString,
+} from "@/utils/commonFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import {
+  buttonVariants,
+  cardVariants,
+  contentVariants,
+  imageVariants,
+  itemVariants,
+  overlayVariants,
+  quickViewVariants,
+  shineVariants,
+  thumbnailVariants,
+} from "@/app/animations/variants";
 
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
-  hover: { y: -4, transition: { duration: 0.2, ease: "easeOut" } },
-};
-
-const imageVariants: Variants = {
-  rest: { scale: 1 },
-  hover: { scale: 1.05, transition: { duration: 0.4 } },
-};
-
-const overlayVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.3 } },
-};
-
-const quickViewVariants: Variants = {
-  hidden: { opacity: 0, y: -10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.1 } },
-};
-
-const thumbnailVariants: Variants = {
-  rest: { scale: 1, opacity: 0.7 },
-  active: { scale: 1.05, opacity: 1 },
-  hover: { scale: 1.02, transition: { duration: 0.15 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: EASE_OUT } },
-};
-
-const buttonVariants: Variants = {
-  rest: { scale: 1, y: 0 },
-  hover: {
-    scale: 1.02,
-    y: -2,
-    boxShadow: "0 8px 25px -4px rgba(0,0,0,0.2)",
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  tap: { scale: 0.98, y: 0, transition: { duration: 0.1 } },
-};
-
-const shineVariants: Variants = {
-  rest: { x: "-100%" },
-  hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
-};
-
-const getSafeString = (value: any, fallback: string = ""): string => {
-  if (!value) return fallback;
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return value.toString();
-  return fallback;
-};
-
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-};
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return "N/A";
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch {
-    return dateString;
-  }
-};
-
-interface PackageListCardProps {
-  packageData: TourPackage;
-  onImageClick?: (imageIndex: number) => void;
-}
-
-const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageClick }) => {
+const PackageListCard: React.FC<PackageListCardProps> = ({
+  packageData,
+  onImageClick,
+}) => {
   const router = useRouter();
   const { theme } = useTheme();
 
@@ -129,9 +63,18 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
   const images = packageData?.images || [];
   const features = packageData?.features || [];
   const packageId = packageData?.packageId;
-  const packageName = getSafeString(packageData?.packageName, "Unnamed Package");
-  const description = getSafeString(packageData?.packageDescription, "No description available");
-  const packageTypeName = getSafeString(packageData?.packageTypeName, "Uncategorized");
+  const packageName = getSafeString(
+    packageData?.packageName,
+    "Unnamed Package",
+  );
+  const description = getSafeString(
+    packageData?.packageDescription,
+    "No description available",
+  );
+  const packageTypeName = getSafeString(
+    packageData?.packageTypeName,
+    "Uncategorized",
+  );
   const packageStatus = packageData?.packageStatus || "INACTIVE";
   const totalPrice = packageData?.totalPrice || 0;
   const pricePerPerson = packageData?.pricePerPerson || 0;
@@ -148,7 +91,9 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
 
   const handleTypeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`${PACKAGE_TYPES_PAGE_URL}?name=${encodeURIComponent(packageTypeName)}`);
+    router.push(
+      `${PACKAGE_TYPES_PAGE_URL}?name=${encodeURIComponent(packageTypeName)}`,
+    );
   };
 
   const getModalImages = (): ImageModalImage[] => {
@@ -172,7 +117,7 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1,
     );
     setIsAutoRotating(false);
   };
@@ -202,12 +147,17 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
   };
 
   const handleViewDetails = () => {
-    router.push(`${PACKAGE_TYPES_PAGE_URL}/${packageId}?name=${encodeURIComponent(packageName)}`);
+    router.push(
+      `${PACKAGE_TYPES_PAGE_URL}/${packageId}?name=${encodeURIComponent(packageName)}`,
+    );
   };
 
-  const currentImage = images[currentImageIndex]?.imageUrl || PLACE_HOLDER_IMAGE;
+  const currentImage =
+    images[currentImageIndex]?.imageUrl || PLACE_HOLDER_IMAGE;
   const hasDiscount = discountPercentage > 0;
-  const discountedPrice = hasDiscount ? totalPrice * (1 - discountPercentage / 100) : totalPrice;
+  const discountedPrice = hasDiscount
+    ? totalPrice * (1 - discountPercentage / 100)
+    : totalPrice;
 
   if (!packageData || !packageData.packageId) return null;
 
@@ -221,7 +171,10 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
         className="group rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
-        style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}` }}
+        style={{
+          backgroundColor: theme.surface,
+          border: `1px solid ${theme.border}`,
+        }}
       >
         <div className="flex flex-col lg:flex-row">
           {/* Image Gallery Section */}
@@ -235,7 +188,9 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
                 initial="rest"
                 animate={isHovered ? "hover" : "rest"}
                 onClick={() => handleImageClick(currentImageIndex)}
-                onError={(e) => { (e.target as HTMLImageElement).src = PLACE_HOLDER_IMAGE; }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = PLACE_HOLDER_IMAGE;
+                }}
               />
 
               <motion.div
@@ -252,11 +207,13 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
                 transition={{ delay: 0.1 }}
                 className="absolute top-4 left-4"
               >
-                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${
-                  packageStatus === "ACTIVE"
-                    ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                    : "bg-gradient-to-r from-red-500 to-rose-600 text-white"
-                }`}>
+                <span
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${
+                    packageStatus === "ACTIVE"
+                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                      : "bg-gradient-to-r from-red-500 to-rose-600 text-white"
+                  }`}
+                >
                   {packageStatus === "ACTIVE" ? (
                     <>
                       <motion.div
@@ -266,7 +223,9 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
                       />
                       Active
                     </>
-                  ) : ("Inactive")}
+                  ) : (
+                    "Inactive"
+                  )}
                 </span>
               </motion.div>
 
@@ -291,7 +250,11 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
                 animate={isHovered ? "visible" : "hidden"}
                 onClick={handleViewDetails}
                 className="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-                whileHover={{ scale: 1.05, backgroundColor: "white", color: "#1f2937" }}
+                whileHover={{
+                  scale: 1.05,
+                  backgroundColor: "white",
+                  color: "#1f2937",
+                }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Eye className="w-3.5 h-3.5" />
@@ -301,8 +264,16 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
               {/* Navigation Arrows */}
               {images.length > 1 && (
                 <>
-                  <NavigationButton direction="left" onClick={handlePrevImage} size="sm" />
-                  <NavigationButton direction="right" onClick={handleNextImage} size="sm" />
+                  <NavigationButton
+                    direction="left"
+                    onClick={handlePrevImage}
+                    size="sm"
+                  />
+                  <NavigationButton
+                    direction="right"
+                    onClick={handleNextImage}
+                    size="sm"
+                  />
                 </>
               )}
 
@@ -342,9 +313,14 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
                         src={image?.imageUrl || PLACE_HOLDER_IMAGE}
                         alt={image?.imageName || `Thumbnail ${index + 1}`}
                         className={`w-12 h-12 rounded-lg object-cover border-2 cursor-pointer transition-all duration-200 ${
-                          currentImageIndex === index ? "border-white scale-110" : "border-transparent"
+                          currentImageIndex === index
+                            ? "border-white scale-110"
+                            : "border-transparent"
                         }`}
-                        onError={(e) => { (e.target as HTMLImageElement).src = PLACE_HOLDER_IMAGE; }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            PLACE_HOLDER_IMAGE;
+                        }}
                       />
                       <motion.button
                         onClick={(e) => handleSelectPrimary(index, e)}
@@ -353,7 +329,11 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
                             ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
                             : "bg-gray-800/80 backdrop-blur-sm text-gray-300 opacity-0 group-hover/thumb:opacity-100"
                         }`}
-                        title={primaryImageIndex === index ? "Primary Image" : "Set as Primary"}
+                        title={
+                          primaryImageIndex === index
+                            ? "Primary Image"
+                            : "Set as Primary"
+                        }
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                       >
@@ -371,7 +351,12 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
           </div>
 
           {/* Content Section */}
-          <motion.div variants={contentVariants} initial="hidden" animate="visible" className="lg:w-3/5 xl:w-2/3 p-5 sm:p-6">
+          <motion.div
+            variants={contentVariants}
+            initial="hidden"
+            animate="visible"
+            className="lg:w-3/5 xl:w-2/3 p-5 sm:p-6"
+          >
             {/* Header */}
             <motion.div variants={itemVariants} className="mb-4">
               <div className="flex items-start justify-between flex-wrap gap-2">
@@ -385,15 +370,27 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
                 </motion.h3>
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4" style={{ color: theme.success }} />
-                  <span className="text-sm font-medium cursor-pointer" style={{ color: theme.success }} onClick={handleTypeClick}>
+                  <span
+                    className="text-sm font-medium cursor-pointer"
+                    style={{ color: theme.success }}
+                    onClick={handleTypeClick}
+                  >
                     {packageTypeName}
                   </span>
                 </div>
               </div>
               {tourName && (
                 <div className="flex items-center gap-2 mt-2">
-                  <Gift className="w-4 h-4" style={{ color: theme.textSecondary }} />
-                  <span className="text-sm" style={{ color: theme.textSecondary }}>Tour: {tourName}</span>
+                  <Gift
+                    className="w-4 h-4"
+                    style={{ color: theme.textSecondary }}
+                  />
+                  <span
+                    className="text-sm"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Tour: {tourName}
+                  </span>
                 </div>
               )}
             </motion.div>
@@ -415,42 +412,101 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
             <motion.div
               variants={itemVariants}
               className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-5 mb-6"
-              style={{ borderTop: `1px solid ${theme.border}`, borderBottom: `1px solid ${theme.border}` }}
+              style={{
+                borderTop: `1px solid ${theme.border}`,
+                borderBottom: `1px solid ${theme.border}`,
+              }}
             >
               <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ background: hexToRgba(theme.accent, 0.1) }}>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                  style={{ background: hexToRgba(theme.accent, 0.1) }}
+                >
                   <Clock className="w-5 h-5" style={{ color: theme.accent }} />
                 </div>
                 <div>
-                  <div className="text-xs" style={{ color: theme.textSecondary }}>Duration</div>
-                  <div className="text-sm font-semibold" style={{ color: theme.text }}>{duration} days</div>
+                  <div
+                    className="text-xs"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Duration
+                  </div>
+                  <div
+                    className="text-sm font-semibold"
+                    style={{ color: theme.text }}
+                  >
+                    {duration} days
+                  </div>
                 </div>
               </div>
               <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ background: hexToRgba(theme.primary, 0.1) }}>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                  style={{ background: hexToRgba(theme.primary, 0.1) }}
+                >
                   <Users className="w-5 h-5" style={{ color: theme.primary }} />
                 </div>
                 <div>
-                  <div className="text-xs" style={{ color: theme.textSecondary }}>Group Size</div>
-                  <div className="text-sm font-semibold" style={{ color: theme.text }}>{minPersonCount}-{maxPersonCount}</div>
+                  <div
+                    className="text-xs"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Group Size
+                  </div>
+                  <div
+                    className="text-sm font-semibold"
+                    style={{ color: theme.text }}
+                  >
+                    {minPersonCount}-{maxPersonCount}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ background: hexToRgba(theme.success, 0.1) }}>
-                  <CreditCard className="w-5 h-5" style={{ color: theme.success }} />
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                  style={{ background: hexToRgba(theme.success, 0.1) }}
+                >
+                  <CreditCard
+                    className="w-5 h-5"
+                    style={{ color: theme.success }}
+                  />
                 </div>
                 <div>
-                  <div className="text-xs" style={{ color: theme.textSecondary }}>Per Person</div>
-                  <div className="text-sm font-semibold" style={{ color: theme.success }}>{formatPrice(pricePerPerson)}</div>
+                  <div
+                    className="text-xs"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Per Person
+                  </div>
+                  <div
+                    className="text-sm font-semibold"
+                    style={{ color: theme.success }}
+                  >
+                    {formatPrice(pricePerPerson)}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ background: hexToRgba(theme.warning, 0.1) }}>
-                  <Calendar className="w-5 h-5" style={{ color: theme.warning }} />
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                  style={{ background: hexToRgba(theme.warning, 0.1) }}
+                >
+                  <Calendar
+                    className="w-5 h-5"
+                    style={{ color: theme.warning }}
+                  />
                 </div>
                 <div>
-                  <div className="text-xs" style={{ color: theme.textSecondary }}>Valid</div>
-                  <div className="text-sm font-semibold" style={{ color: theme.text }}>
+                  <div
+                    className="text-xs"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Valid
+                  </div>
+                  <div
+                    className="text-sm font-semibold"
+                    style={{ color: theme.text }}
+                  >
                     {startDate && endDate ? `${formatDate(startDate)}` : "N/A"}
                   </div>
                 </div>
@@ -460,7 +516,10 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
             {/* Location */}
             <motion.div variants={itemVariants} className="mb-4">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" style={{ color: theme.textSecondary }} />
+                <MapPin
+                  className="w-4 h-4"
+                  style={{ color: theme.textSecondary }}
+                />
                 <span className="text-sm" style={{ color: theme.text }}>
                   {startLocation} → {endLocation}
                 </span>
@@ -476,7 +535,10 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
                       key={feature.featureId}
                       className="px-2 py-1 rounded-lg text-xs"
                       style={{
-                        background: hexToRgba(feature.color || theme.primary, 0.1),
+                        background: hexToRgba(
+                          feature.color || theme.primary,
+                          0.1,
+                        ),
                         color: feature.color || theme.primary,
                         border: `1px solid ${hexToRgba(feature.color || theme.primary, 0.2)}`,
                       }}
@@ -485,7 +547,10 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
                     </span>
                   ))}
                   {features.length > 4 && (
-                    <span className="px-2 py-1 rounded-lg text-xs" style={{ color: theme.textSecondary }}>
+                    <span
+                      className="px-2 py-1 rounded-lg text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
                       +{features.length - 4} more
                     </span>
                   )}
@@ -499,18 +564,29 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
               className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4"
             >
               <div>
-                <div className="text-xs" style={{ color: theme.textSecondary }}>Total Package Price</div>
+                <div className="text-xs" style={{ color: theme.textSecondary }}>
+                  Total Package Price
+                </div>
                 {hasDiscount ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xl line-through" style={{ color: theme.textSecondary }}>
+                    <span
+                      className="text-xl line-through"
+                      style={{ color: theme.textSecondary }}
+                    >
                       {formatPrice(totalPrice)}
                     </span>
-                    <span className="text-2xl font-bold" style={{ color: theme.success }}>
+                    <span
+                      className="text-2xl font-bold"
+                      style={{ color: theme.success }}
+                    >
                       {formatPrice(discountedPrice)}
                     </span>
                   </div>
                 ) : (
-                  <div className="text-2xl font-bold" style={{ color: theme.success }}>
+                  <div
+                    className="text-2xl font-bold"
+                    style={{ color: theme.success }}
+                  >
                     {formatPrice(totalPrice)}
                   </div>
                 )}
@@ -534,11 +610,19 @@ const PackageListCard: React.FC<PackageListCardProps> = ({ packageData, onImageC
                   initial="rest"
                   animate={isHovered ? "hover" : "rest"}
                   className="absolute inset-0"
-                  style={{ background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)" }}
+                  style={{
+                    background:
+                      "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
+                  }}
                 />
-                <span className="absolute inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.35)" }} />
+                <span
+                  className="absolute inset-x-0 top-0 h-px"
+                  style={{ background: "rgba(255,255,255,0.35)" }}
+                />
                 <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:scale-110" />
-                <span className="relative tracking-wide text-sm">View Details</span>
+                <span className="relative tracking-wide text-sm">
+                  View Details
+                </span>
                 <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1.5" />
               </motion.button>
             </motion.div>

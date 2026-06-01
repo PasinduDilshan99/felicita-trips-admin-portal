@@ -1,4 +1,5 @@
-import { ApiResponse } from "./common-types";
+import { ApiResponse, PackageCategory } from "./common-types";
+import { TourNameId } from "./tour-types";
 
 // types/package-types.ts
 export interface PackageSchedule {
@@ -45,7 +46,7 @@ export interface TourPackage {
   minPersonCount: number;
   maxPersonCount: number;
   pricePerPerson: number;
-  packageStatus: 'ACTIVE' | 'INACTIVE' | string;
+  packageStatus: "ACTIVE" | "INACTIVE" | string;
   createdAt: string;
   createdBy: number;
   packageTypeName: string;
@@ -109,7 +110,6 @@ export interface SinglePackageApiResponse {
   timestamp: string;
 }
 
-
 export interface PackageForTerminate {
   packageId: number;
   packageName: string;
@@ -158,7 +158,6 @@ export interface TravelTip {
   tipTitle: string;
   tipDescription: string;
 }
-
 
 // Add Package Request Types
 export interface PackageImageRequest {
@@ -287,21 +286,21 @@ export interface PackageInclusionResponse {
   id: number;
   description: string;
   displayOrder: number;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface PackageExclusionResponse {
   id: number;
   description: string;
   displayOrder: number;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface PackageConditionResponse {
   id: number;
   description: string;
   displayOrder: number;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface PackageTravelTipResponse {
@@ -309,7 +308,7 @@ export interface PackageTravelTipResponse {
   title: string;
   description: string;
   displayOrder: number;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface DayAccommodationResponse {
@@ -370,7 +369,7 @@ export interface PackageAllDetails {
   minPersonCount: number;
   maxPersonCount: number;
   pricePerPerson: number;
-  packageStatus: 'ACTIVE' | 'INACTIVE';
+  packageStatus: "ACTIVE" | "INACTIVE";
   packageTypeName: string;
   tourId: number;
   tourName: string;
@@ -403,7 +402,7 @@ export interface PackageBasicDetails {
   endDate: string;
   color: string;
   hoverColor: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
   minPersonCount: number;
   maxPersonCount: number;
   pricePerPerson: number;
@@ -413,7 +412,7 @@ export interface UpdateImageRequest {
   imageId: number;
   imageName: string;
   imageDescription: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
   imageUrl: string;
   color: string;
 }
@@ -422,7 +421,7 @@ export interface AddFeatureRequest {
   featureName: string;
   featureValue: string;
   featureDescription: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
   color: string;
   hoverColor: string;
   specialNote: string;
@@ -433,7 +432,7 @@ export interface UpdateFeatureRequest {
   featureName: string;
   featureValue: string;
   featureDescription: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
   color: string;
   hoverColor: string;
   specialNote: string;
@@ -457,7 +456,7 @@ export interface UpdateDayAccommodationRequest {
   hotelId: number;
   transportId: number;
   otherNotes: string | null;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface AddDayAccommodationRequest {
@@ -483,21 +482,21 @@ export interface UpdateInclusionRequest {
   packageInclusionId: number;
   inclusionText: string;
   displayOrder: number;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface UpdateExclusionRequest {
   packageExclusionId: number;
   exclusionText: string;
   displayOrder: number;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface UpdateConditionRequest {
   packageConditionId: number;
   conditionText: string;
   displayOrder: number;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface UpdateTravelTipRequest {
@@ -505,7 +504,7 @@ export interface UpdateTravelTipRequest {
   tipTitle: string;
   tipDescription: string;
   displayOrder: number;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface UpdatePackageRequest {
@@ -654,7 +653,8 @@ export interface PackageScheduleStatisticsData {
   scheduleRatingOverviews: ScheduleRatingOverview[];
 }
 
-export type PackageScheduleStatisticsApiResponse = ApiResponse<PackageScheduleStatisticsData>;
+export type PackageScheduleStatisticsApiResponse =
+  ApiResponse<PackageScheduleStatisticsData>;
 
 // Package Type Statistics Types
 export interface PackageTypeStatisticsSummary {
@@ -714,7 +714,8 @@ export interface PackageTypeStatisticsData {
   typeRatingOverviews: TypeRatingOverview[];
 }
 
-export type PackageTypeStatisticsApiResponse = ApiResponse<PackageTypeStatisticsData>;
+export type PackageTypeStatisticsApiResponse =
+  ApiResponse<PackageTypeStatisticsData>;
 
 // Add these to your existing types/package-types.ts file
 
@@ -768,3 +769,164 @@ export interface PackageRequestParams {
 }
 
 export type PackageRequestParamsApiResponse = ApiResponse<PackageRequestParams>;
+
+export interface PackageCardProps {
+  packageData: TourPackage;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface PackageListCardProps {
+  packageData: TourPackage;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface ConditionTipItem {
+  id: number;
+  description: string;
+  displayOrder: number;
+  status: "ACTIVE" | "INACTIVE";
+}
+
+export interface TravelTipItem {
+  id: number;
+  title: string;
+  description: string;
+  displayOrder: number;
+  status: "ACTIVE" | "INACTIVE";
+}
+
+export interface PackageConditionsTipsProps {
+  conditions: ConditionTipItem[];
+  travelTips: TravelTipItem[];
+}
+
+export interface PackageDayAccommodationsProps {
+  accommodations: DayAccommodationResponse[];
+  packageColor: string;
+}
+
+export interface PackageFeaturesProps {
+  features: PackageFeatureResponse[];
+}
+
+export interface InclusionExclusionItem {
+  id: number;
+  description: string;
+  displayOrder: number;
+  status: "ACTIVE" | "INACTIVE";
+}
+
+export interface PackageInclusionsExclusionsProps {
+  inclusions: InclusionExclusionItem[];
+  exclusions: InclusionExclusionItem[];
+}
+
+export interface PackageOverviewProps {
+  name: string;
+  description: string;
+  color: string;
+  hoverColor: string;
+  startDate: string;
+  endDate: string;
+  packageTypeName: string;
+}
+
+export interface PackagePricingProps {
+  totalPrice: number;
+  discountPercentage: number;
+  pricePerPerson: number;
+  minPersonCount: number;
+  maxPersonCount: number;
+  color: string;
+}
+
+export interface PackageTourInfoProps {
+  tourId: number;
+  tourName: string;
+  onViewTour: () => void;
+}
+
+export interface PackageTypeSelectorProps {
+  value: number;
+  onChange: (value: number) => void;
+  error?: string;
+}
+
+export interface FeaturesFormProps {
+  features: AddFeatureRequest[];
+  onFeaturesChange: (features: AddFeatureRequest[]) => void;
+  error?: string;
+}
+
+export interface DayAccommodationsFormProps {
+  accommodations: DayAccommodation[];
+  onAccommodationsChange: (accommodations: DayAccommodation[]) => void;
+  hotels: HotelNameId[];
+  vehicles: VehicleNumberIdType[];
+  error?: string;
+}
+
+export interface InclusionsExclusionsFormProps {
+  inclusions: Inclusion[];
+  exclusions: Exclusion[];
+  onInclusionsChange: (inclusions: Inclusion[]) => void;
+  onExclusionsChange: (exclusions: Exclusion[]) => void;
+}
+
+export interface ConditionsTipsFormProps {
+  conditions: Condition[];
+  travelTips: TravelTipRequest[];
+  onConditionsChange: (conditions: Condition[]) => void;
+  onTravelTipsChange: (travelTips: TravelTipRequest[]) => void;
+}
+
+export interface HotelSelectorProps {
+  value: number;
+  onChange: (hotelId: number) => void;
+  hotels: HotelNameId[];
+  error?: string;
+  required?: boolean;
+  placeholder?: string;
+}
+
+export interface VehicleSelectorProps {
+  value: number;
+  onChange: (vehicleId: number) => void;
+  vehicles: VehicleNumberIdType[];
+  error?: string;
+  required?: boolean;
+  placeholder?: string;
+}
+
+export interface BasicInfoFormProps {
+  packageData: PackageAllDetails;
+  hasChanged: (field: string) => boolean;
+  onFieldChange: (field: string, value: any) => void;
+  availablePackageTypes: PackageCategory[];
+  availableTours: TourNameId[];
+}
+
+export interface PackageSearchItem {
+  id: number;
+  name: string;
+}
+
+export interface BasicInfoPanelProps {
+  packageDetails: TourPackage;
+}
+
+export interface FeaturesListProps {
+  features: Feature[];
+}
+
+export interface PackageStatsProps {
+  packageDetails: TourPackage;
+}
+
+export interface SchedulesListProps {
+  schedules: PackageSchedule[];
+}
+
+export interface TourInfoPanelProps {
+  packageDetails: TourPackage;
+}

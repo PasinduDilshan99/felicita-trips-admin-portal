@@ -1,4 +1,3 @@
-// components/packages-components/update-package-components/PackageDetailsForm.tsx
 "use client";
 
 import React from "react";

@@ -177,10 +177,75 @@ export const PACKAGE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
 ];
 
+export const PACKAGE_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+  { label: "View", href: URLS.PACKAGES_VIEW_PAGE_URL },
+];
+
+export const PACKAGE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+  { label: "View", href: URLS.PACKAGES_VIEW_PAGE_URL },
+];
+
+export const PACKAGE_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+  { label: "Create", href: URLS.PACKAGE_ADD_PAGE_URL },
+];
+
+export const PACKAGE_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+  { label: "Update", href: URLS.PACKAGE_UPDATE_PAGE_URL },
+];
+
+export const PACKAGE_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+  { label: "Terminate", href: URLS.PACKAGE_TERMINATE_PAGE_URL },
+];
+
 export const PACKAGE_TYPE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
   { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
   { label: "Types", href: URLS.PACKAGE_TYPES_PAGE_URL },
+];
+
+export const PACKAGE_TYPE_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+  { label: "Types", href: URLS.PACKAGE_TYPES_PAGE_URL },
+  { label: "View", href: URLS.PACKAGE_TYPE_VIEW_PAGE_URL },
+];
+
+export const PACKAGE_TYPE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+  { label: "Types", href: URLS.PACKAGE_TYPES_PAGE_URL },
+  { label: "View", href: URLS.PACKAGE_TYPE_VIEW_PAGE_URL },
+];
+
+export const PACKAGE_TYPE_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+  { label: "Types", href: URLS.PACKAGE_TYPES_PAGE_URL },
+  { label: "Create", href: URLS.PACKAGE_TYPE_ADD_URL },
+];
+
+export const PACKAGE_TYPE_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+  { label: "Types", href: URLS.PACKAGE_TYPES_PAGE_URL },
+  { label: "Update", href: URLS.PACKAGE_TYPE_UPDATE_URL },
+];
+
+export const PACKAGE_TYPE_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+  { label: "Types", href: URLS.PACKAGE_TYPES_PAGE_URL },
+  { label: "Terminate", href: URLS.PACKAGE_TYPE_TERMINATE_URL },
 ];
 
 export const TOUR_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [

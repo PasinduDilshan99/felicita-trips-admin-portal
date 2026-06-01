@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCommon } from "@/contexts/CommonContext";
+import { PackageTypeSelectorProps } from "@/types/package-types";
 
-// Fallback icons for different package types
 const getPackageIcon = (index: number) => {
   const icons = [
     <Package className="w-5 h-5" />,
@@ -27,12 +27,6 @@ const getPackageIcon = (index: number) => {
   return icons[index % icons.length];
 };
 
-interface PackageTypeSelectorProps {
-  value: number;
-  onChange: (value: number) => void;
-  error?: string;
-}
-
 export const PackageTypeSelector: React.FC<PackageTypeSelectorProps> = ({
   value,
   onChange,
@@ -41,7 +35,6 @@ export const PackageTypeSelector: React.FC<PackageTypeSelectorProps> = ({
   const { theme } = useTheme();
   const { categories, loading: categoriesLoading } = useCommon();
 
-  // Get package categories from CommonContext
   const packageCategories = categories?.packageCategoryList || [];
 
   if (categoriesLoading) {

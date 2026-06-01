@@ -1,69 +1,16 @@
-// components/packages-components/terminate-package-components/TourInfoPanel.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { MapPin, Navigation, Clock, Info, Compass } from "lucide-react";
-import { TourPackage } from "@/types/package-types";
 import { useTheme } from "@/contexts/ThemeContext";
+import { TourInfoPanelProps } from "@/types/package-types";
+import { cardVariants, contentVariants, headerVariants, infoRowVariants, valueVariants } from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const infoRowVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-};
-
-interface TourInfoPanelProps {
-  packageDetails: TourPackage;
-}
-
-export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ packageDetails }) => {
+export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({
+  packageDetails,
+}) => {
   const { theme } = useTheme();
 
   return (
@@ -100,7 +47,10 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ packageDetails }) 
       >
         {/* Tour Name */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Tour Name
           </p>
           <motion.div
@@ -114,7 +64,10 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ packageDetails }) 
 
         {/* Tour Description */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1 flex items-center gap-1"
+            style={{ color: theme.textSecondary }}
+          >
             <Info size={11} />
             Tour Description
           </p>
@@ -129,7 +82,10 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ packageDetails }) 
 
         {/* Duration */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1 flex items-center gap-1"
+            style={{ color: theme.textSecondary }}
+          >
             <Clock size={11} />
             Duration
           </p>
@@ -143,9 +99,15 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ packageDetails }) 
         </motion.div>
 
         {/* Locations */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <MapPin size={11} />
               Start Location
             </p>
@@ -158,7 +120,10 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ packageDetails }) 
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Navigation size={11} />
               End Location
             </p>
@@ -174,7 +139,10 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ packageDetails }) 
 
         {/* Coordinates */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Coordinates
           </p>
           <motion.div
@@ -182,13 +150,17 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ packageDetails }) 
             className="text-xs font-mono"
             style={{ color: theme.text }}
           >
-            {packageDetails.latitude?.toFixed(6)}°, {packageDetails.longitude?.toFixed(6)}°
+            {packageDetails.latitude?.toFixed(6)}°,{" "}
+            {packageDetails.longitude?.toFixed(6)}°
           </motion.div>
         </motion.div>
 
         {/* Tour Status */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Tour Status
           </p>
           <motion.div
@@ -196,10 +168,15 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ packageDetails }) 
             className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs"
             style={{
               background: hexToRgba(
-                packageDetails.tourStatus === "ACTIVE" ? theme.success : theme.error,
-                0.1
+                packageDetails.tourStatus === "ACTIVE"
+                  ? theme.success
+                  : theme.error,
+                0.1,
               ),
-              color: packageDetails.tourStatus === "ACTIVE" ? theme.success : theme.error,
+              color:
+                packageDetails.tourStatus === "ACTIVE"
+                  ? theme.success
+                  : theme.error,
               border: `1px solid ${
                 packageDetails.tourStatus === "ACTIVE"
                   ? hexToRgba(theme.success, 0.3)

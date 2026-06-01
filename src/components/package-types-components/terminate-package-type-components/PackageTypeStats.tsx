@@ -1,86 +1,23 @@
-// components/package-types-components/terminate-package-type-components/PackageTypeStats.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { Package, Image as ImageIcon, Calendar, User, AlertCircle, Palette, Hash, Star } from "lucide-react";
-import { PackageTypeDetails } from "@/types/package-type-types";
+import { motion } from "framer-motion";
+import {
+  Package,
+  Image as ImageIcon,
+  Calendar,
+  User,
+  AlertCircle,
+  Star,
+} from "lucide-react";
+import { PackageTypeStatsProps, StatItem } from "@/types/package-type-types";
 import { useTheme } from "@/contexts/ThemeContext";
+import { containerVariants, statCardVariants, valueVariants } from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const statCardVariants: Variants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.38,
-      ease: EASE_OUT,
-    },
-  },
-  hover: {
-    y: -4,
-    scale: 1.02,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut",
-    },
-  },
-  tap: {
-    scale: 0.98,
-    transition: {
-      duration: 0.1,
-    },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.3,
-      ease: EASE_OUT,
-      delay: 0.1,
-    },
-  },
-};
-
-interface PackageTypeStatsProps {
-  packageTypeDetails: PackageTypeDetails;
-}
-
-interface StatItem {
-  label: string;
-  value: number | string;
-  icon: React.ReactNode;
-  color: string;
-  formatter?: (value: number | string) => string | number;
-}
-
-export const PackageTypeStats: React.FC<PackageTypeStatsProps> = ({ packageTypeDetails }) => {
+export const PackageTypeStats: React.FC<PackageTypeStatsProps> = ({
+  packageTypeDetails,
+}) => {
   const { theme } = useTheme();
 
   const getStatusColor = (status: string): string => {
@@ -104,7 +41,9 @@ export const PackageTypeStats: React.FC<PackageTypeStatsProps> = ({ packageTypeD
   // Safely get counts with fallbacks
   const totalPackages = packageTypeDetails?.totalPackages ?? 0;
   const imagesCount = packageTypeDetails?.images?.length ?? 0;
-  const primaryPackagesCount = packageTypeDetails?.packageBasicDetails?.filter(pkg => pkg.primaryType).length ?? 0;
+  const primaryPackagesCount =
+    packageTypeDetails?.packageBasicDetails?.filter((pkg) => pkg.primaryType)
+      .length ?? 0;
   const status = packageTypeDetails?.status ?? "Unknown";
   const createdByName = packageTypeDetails?.createdByName ?? "Unknown";
   const createdAt = packageTypeDetails?.createdAt ?? "";
@@ -156,7 +95,10 @@ export const PackageTypeStats: React.FC<PackageTypeStatsProps> = ({ packageTypeD
 
   // Generate a unique key for each stat item
   const getItemKey = (item: StatItem, index: number): string => {
-    const valueStr = typeof item.value === 'number' ? item.value.toString() : String(item.value);
+    const valueStr =
+      typeof item.value === "number"
+        ? item.value.toString()
+        : String(item.value);
     return `${item.label}-${valueStr}-${index}`;
   };
 
@@ -174,9 +116,14 @@ export const PackageTypeStats: React.FC<PackageTypeStatsProps> = ({ packageTypeD
         }}
       >
         {statItems.map((item, i) => {
-          const displayValue = item.formatter ? item.formatter(item.value) : item.value;
-          const valueKey = typeof displayValue === 'number' ? displayValue : String(displayValue);
-          
+          const displayValue = item.formatter
+            ? item.formatter(item.value)
+            : item.value;
+          const valueKey =
+            typeof displayValue === "number"
+              ? displayValue
+              : String(displayValue);
+
           return (
             <motion.div
               key={`${item.label}-${i}`}
@@ -192,9 +139,14 @@ export const PackageTypeStats: React.FC<PackageTypeStatsProps> = ({ packageTypeD
                 backdropFilter: "blur(0px)",
               }}
             >
-              <div className="flex items-center gap-1.5" style={{ color: item.color, opacity: 0.85 }}>
+              <div
+                className="flex items-center gap-1.5"
+                style={{ color: item.color, opacity: 0.85 }}
+              >
                 <span className="flex-shrink-0">{item.icon}</span>
-                <span className="text-xs font-medium tracking-wide">{item.label}</span>
+                <span className="text-xs font-medium tracking-wide">
+                  {item.label}
+                </span>
               </div>
 
               <motion.p

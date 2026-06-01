@@ -1,57 +1,28 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Tag, Palette, FileText, Image as ImageIcon, Package } from "lucide-react";
+import { Palette, Package } from "lucide-react";
 import { FormActions } from "@/components/common-components/FormActions";
 import { FormSummary } from "@/components/common-components/FormSummary";
 import { InputField } from "@/components/common-components/create-components/InputField";
 import { StatusSelector } from "@/components/common-components/StatusSelector";
 import { ImageUploader } from "@/components/common-components/ImageUploader";
-import { AddPackageTypeRequest, PackageTypeImageRequest } from "@/types/package-type-types";
+import {
+  AddPackageTypeRequest,
+  PackageTypeImageRequest,
+} from "@/types/package-type-types";
 import { PackageTypeService } from "@/services/packageTypeService";
 import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-}
+import { ToastState } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_TYPE_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { CREATE_PACKAGE_TYPE_TIPS } from "@/data/tips-data";
 
 const AddNewPackageTypePage = () => {
-  const router = useRouter();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Package Types",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/package-types`,
-    },
-    {
-      label: "Add New Package Type",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/package-types/add`,
-    },
-  ];
-
-  // Form state
   const [formData, setFormData] = useState<AddPackageTypeRequest>({
     typeName: "",
     description: "",
@@ -60,13 +31,9 @@ const AddNewPackageTypePage = () => {
     status: "ACTIVE",
     images: [],
   });
-
-  // Image state
   const [imagePreviews, setImagePreviews] = useState<
     { url: string; file?: File; uploading?: boolean; uploadError?: string }[]
   >([]);
-
-  // UI state
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -80,7 +47,9 @@ const AddNewPackageTypePage = () => {
 
   // Handle input changes
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -135,7 +104,9 @@ const AddNewPackageTypePage = () => {
       newErrors.hoverColor = "Hover color is required";
     }
 
-    const hasUploadingImages = imagePreviews.some((preview) => preview.uploading);
+    const hasUploadingImages = imagePreviews.some(
+      (preview) => preview.uploading,
+    );
     if (hasUploadingImages) {
       newErrors.images = "Please wait for all images to finish uploading";
     }
@@ -237,7 +208,7 @@ const AddNewPackageTypePage = () => {
           <PageHeader
             title="Add New Package Type"
             description="Create a new type to categorize your packages"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_TYPE_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -377,7 +348,9 @@ const AddNewPackageTypePage = () => {
                           <input
                             type="color"
                             value={formData.color}
-                            onChange={(e) => handleColorChange(e.target.value, "color")}
+                            onChange={(e) =>
+                              handleColorChange(e.target.value, "color")
+                            }
                             className="w-12 h-12 rounded-xl border-2 cursor-pointer"
                             style={{ borderColor: theme.border }}
                           />
@@ -385,27 +358,40 @@ const AddNewPackageTypePage = () => {
                         <input
                           type="text"
                           value={formData.color}
-                          onChange={(e) => handleColorChange(e.target.value, "color")}
+                          onChange={(e) =>
+                            handleColorChange(e.target.value, "color")
+                          }
                           className="flex-1 px-4 py-2.5 rounded-xl border-2 text-sm font-mono"
                           style={{
                             backgroundColor: theme.background,
-                            borderColor: errors.color ? theme.error : theme.border,
+                            borderColor: errors.color
+                              ? theme.error
+                              : theme.border,
                             color: theme.text,
                           }}
                           placeholder="#000000"
                         />
                       </div>
                       {errors.color && (
-                        <p className="mt-1.5 text-xs" style={{ color: theme.error }}>
+                        <p
+                          className="mt-1.5 text-xs"
+                          style={{ color: theme.error }}
+                        >
                           {errors.color}
                         </p>
                       )}
                       <div className="mt-3 flex items-center gap-2">
                         <div
                           className="w-8 h-8 rounded-full border-2 transition-all duration-200"
-                          style={{ backgroundColor: formData.color, borderColor: theme.border }}
+                          style={{
+                            backgroundColor: formData.color,
+                            borderColor: theme.border,
+                          }}
                         />
-                        <span className="text-xs" style={{ color: theme.textSecondary }}>
+                        <span
+                          className="text-xs"
+                          style={{ color: theme.textSecondary }}
+                        >
                           Preview color
                         </span>
                       </div>
@@ -425,7 +411,9 @@ const AddNewPackageTypePage = () => {
                           <input
                             type="color"
                             value={formData.hoverColor}
-                            onChange={(e) => handleColorChange(e.target.value, "hoverColor")}
+                            onChange={(e) =>
+                              handleColorChange(e.target.value, "hoverColor")
+                            }
                             className="w-12 h-12 rounded-xl border-2 cursor-pointer"
                             style={{ borderColor: theme.border }}
                           />
@@ -433,27 +421,40 @@ const AddNewPackageTypePage = () => {
                         <input
                           type="text"
                           value={formData.hoverColor}
-                          onChange={(e) => handleColorChange(e.target.value, "hoverColor")}
+                          onChange={(e) =>
+                            handleColorChange(e.target.value, "hoverColor")
+                          }
                           className="flex-1 px-4 py-2.5 rounded-xl border-2 text-sm font-mono"
                           style={{
                             backgroundColor: theme.background,
-                            borderColor: errors.hoverColor ? theme.error : theme.border,
+                            borderColor: errors.hoverColor
+                              ? theme.error
+                              : theme.border,
                             color: theme.text,
                           }}
                           placeholder="#000000"
                         />
                       </div>
                       {errors.hoverColor && (
-                        <p className="mt-1.5 text-xs" style={{ color: theme.error }}>
+                        <p
+                          className="mt-1.5 text-xs"
+                          style={{ color: theme.error }}
+                        >
                           {errors.hoverColor}
                         </p>
                       )}
                       <div className="mt-3 flex items-center gap-2">
                         <div
                           className="w-8 h-8 rounded-full border-2 transition-all duration-200 hover:scale-110"
-                          style={{ backgroundColor: formData.hoverColor, borderColor: theme.border }}
+                          style={{
+                            backgroundColor: formData.hoverColor,
+                            borderColor: theme.border,
+                          }}
                         />
-                        <span className="text-xs" style={{ color: theme.textSecondary }}>
+                        <span
+                          className="text-xs"
+                          style={{ color: theme.textSecondary }}
+                        >
                           Preview on hover
                         </span>
                       </div>
@@ -526,7 +527,10 @@ const AddNewPackageTypePage = () => {
                   label: "Status",
                   value: formData.status || "Not set",
                   icon: "eye",
-                  color: formData.status === "ACTIVE" ? theme.success : theme.textSecondary,
+                  color:
+                    formData.status === "ACTIVE"
+                      ? theme.success
+                      : theme.textSecondary,
                 },
                 {
                   label: "Images",
@@ -562,14 +566,7 @@ const AddNewPackageTypePage = () => {
           itemName: formData.typeName || "Untitled Package Type",
           type: "create",
           estimatedTime: "~2-3 seconds",
-          tips: [
-            "Make sure all images are uploaded successfully",
-            "Check that colors are visually appealing and accessible",
-            "You can edit this package type anytime after creation",
-            "Packages will be organized under this type for better filtering",
-            "Package types help customers find the right package tier",
-            "Use names that clearly indicate the package level/quality",
-          ],
+          tips: CREATE_PACKAGE_TYPE_TIPS,
         }}
         confirmText="Create Package Type"
         cancelText="Cancel"
@@ -586,7 +583,9 @@ const AddNewPackageTypePage = () => {
             show: true,
             type: "error",
             title: "Creation Failed",
-            message: error.message || "Failed to create package type. Please try again.",
+            message:
+              error.message ||
+              "Failed to create package type. Please try again.",
           });
         }}
       />

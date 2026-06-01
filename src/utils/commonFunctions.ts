@@ -15,7 +15,6 @@ export const formatTime = (timeString: string): string => {
   return timeString;
 };
 
-
 export const truncateDescription = (
   description: string,
   maxLength: number = 120,
@@ -58,4 +57,13 @@ export const getSafeArray = (value: any, fallback: any[] = []): any[] => {
     return value.split(",").map((s) => s.trim());
   }
   return fallback;
+};
+
+export const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
 };

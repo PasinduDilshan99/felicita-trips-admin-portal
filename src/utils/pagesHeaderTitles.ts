@@ -13,10 +13,14 @@ export const DESTINATION_TERMINATE_PAGE_TITLE = "Terminate Destination";
 
 export const DESTINATION_CATEGORIES_PAGE_TITLE = "Destination Categories";
 export const DESTINATION_CATEGORIES_VIEW_PAGE_TITLE = "Destination Categories";
-export const DESTINATION_CATEGORY_VIEW_DETAILS_PAGE_TITLE ="Destination Category Details";
-export const DESTINATION_CATEGORY_CREATE_PAGE_TITLE ="Add New Destination Category";
-export const DESTINATION_CATEGORY_UPDATE_PAGE_TITLE ="Update Destination Category";
-export const DESTINATION_CATEGORY_TERMINATE_PAGE_TITLE ="Terminate Destination Category";
+export const DESTINATION_CATEGORY_VIEW_DETAILS_PAGE_TITLE =
+  "Destination Category Details";
+export const DESTINATION_CATEGORY_CREATE_PAGE_TITLE =
+  "Add New Destination Category";
+export const DESTINATION_CATEGORY_UPDATE_PAGE_TITLE =
+  "Update Destination Category";
+export const DESTINATION_CATEGORY_TERMINATE_PAGE_TITLE =
+  "Terminate Destination Category";
 
 export const ACTIVITY_PAGE_TITLE = "Activities";
 export const ACTIVITY_VIEW_PAGE_TITLE = "View Activities";
@@ -53,10 +57,24 @@ export const TOUR_TYPE_CREATE_PAGE_TITLE = "Tour Categories";
 export const TOUR_TYPE_UPDATE_PAGE_TITLE = "Tour Categories";
 export const TOUR_TYPE_TERMINATE_PAGE_TITLE = "Tour Categories";
 
+export const PACKAGE_PAGE_TITLE = "Tours";
+export const PACKAGE_VIEW_PAGE_TITLE = "View Tours";
+export const PACKAGE_DETAILS_VIEW_PAGE_TITLE = "View Tour Details";
+export const PACKAGE_CREATE_PAGE_TITLE = "Add New Tour";
+export const PACKAGE_UPDATE_PAGE_TITLE = "Update Tour";
+export const PACKAGE_TERMINATE_PAGE_TITLE = "Terminate Tour";
+
+export const PACKAGE_TYPES_PAGE_TITLE = "Tour Categories";
+export const PACKAGE_TYPES_VIEW_PAGE_TITLE = "Tour Categories";
+export const PACKAGE_TYPE_VIEW_DETAILS_PAGE_TITLE = "Tour Categories";
+export const PACKAGE_TYPE_CREATE_PAGE_TITLE = "Tour Categories";
+export const PACKAGE_TYPE_UPDATE_PAGE_TITLE = "Tour Categories";
+export const PACKAGE_TYPE_TERMINATE_PAGE_TITLE = "Tour Categories";
 
 export const WEB_PAGE_MANAGEMENT_PAGE_TITLE = "Web Page Management";
 export const HOME_PAGE_MANAGEMENT_PAGE_TITLE = "Home Page Management";
-export const HOME_PAGE_TRENDING_DESTINATION_MANAGEMENT_PAGE_TITLE = "Trending Destination Management";
+export const HOME_PAGE_TRENDING_DESTINATION_MANAGEMENT_PAGE_TITLE =
+  "Trending Destination Management";
 
 export const EMPLOYEE_MANAGEMENT_PAGE_TITLE = "Web Page Management";
 
