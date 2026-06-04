@@ -1,4 +1,3 @@
-// components/tour-schedules-components/tour-schedule-details-view-components/TourScheduleOverview.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -11,25 +10,9 @@ import {
   FileText,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface TourScheduleOverviewProps {
-  name: string;
-  description: string;
-  assumeStartDate: string;
-  assumeEndDate: string;
-  durationStart: number;
-  durationEnd: number;
-  specialNote: string;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { TourScheduleOverviewProps } from "@/types/tour-schedule-types";
+import { hexToRgba } from "@/utils/functions";
+import { formatDate } from "@/utils/commonFunctions";
 
 export const TourScheduleOverview: React.FC<TourScheduleOverviewProps> = ({
   name,
@@ -42,19 +25,6 @@ export const TourScheduleOverview: React.FC<TourScheduleOverviewProps> = ({
 }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return "Not specified";
-    try {
-      return new Date(dateStr).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
 
   const truncatedDescription =
     description?.length > 400 && !isExpanded

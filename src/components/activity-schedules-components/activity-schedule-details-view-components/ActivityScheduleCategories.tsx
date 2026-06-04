@@ -1,27 +1,14 @@
-// components/activity-schedules-components/activity-schedule-details-view-components/ActivityScheduleCategories.tsx
 "use client";
 
 import React from "react";
 import { Tag, Star } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { ActivityCategoryDto } from "@/types/activity-schedule-types";
+import { ActivityScheduleCategoriesProps } from "@/types/activity-schedule-types";
+import { hexToRgba } from "@/utils/functions";
 
-interface ActivityScheduleCategoriesProps {
-  categories: ActivityCategoryDto[];
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-export const ActivityScheduleCategories: React.FC<ActivityScheduleCategoriesProps> = ({
-  categories,
-}) => {
+export const ActivityScheduleCategories: React.FC<
+  ActivityScheduleCategoriesProps
+> = ({ categories }) => {
   const { theme } = useTheme();
 
   if (!categories.length) {
@@ -42,8 +29,14 @@ export const ActivityScheduleCategories: React.FC<ActivityScheduleCategoriesProp
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
         <div className="flex items-center gap-2">
-          <Tag className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: theme.primary }} />
-          <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+          <Tag
+            className="w-4 h-4 sm:w-5 sm:h-5"
+            style={{ color: theme.primary }}
+          />
+          <h2
+            className="text-base sm:text-lg font-semibold"
+            style={{ color: theme.text }}
+          >
             Activity Categories
           </h2>
           <span
@@ -80,7 +73,10 @@ export const ActivityScheduleCategories: React.FC<ActivityScheduleCategoriesProp
 
         {/* Primary category note */}
         {categories.some((c) => c.is_primary) && (
-          <p className="text-xs mt-3 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs mt-3 flex items-center gap-1"
+            style={{ color: theme.textSecondary }}
+          >
             <Star className="w-3 h-3" style={{ color: theme.warning }} />
             Primary category is highlighted
           </p>

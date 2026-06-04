@@ -69,3 +69,36 @@ export const PACKAGE_TYPE_VIEW_SORTING_OPTIONS = [
   { value: "typeId", label: "Type ID" },
   { value: "status", label: "Status" },
 ];
+
+export const ACTIVITY_SCHEDULE_VIEW_SORTING_OPTIONS = [
+  { value: "activityName", label: "Activity Name" },
+  { value: "activityScheduleName", label: "Schedule Name" },
+  { value: "durationHours", label: "Duration" },
+  { value: "priceLocal", label: "Local Price" },
+  { value: "priceForeigners", label: "Foreigner Price" },
+  { value: "scheduleAssumeStartDate", label: "Start Date" },
+  { value: "scheduleAssumeEndDate", label: "End Date" },
+  { value: "createdAt", label: "Created Date" },
+  { value: "updatedAt", label: "Updated Date" },
+];
+
+export const TOUR_SCHEDULE_VIEW_SORTING_OPTIONS = [
+  { value: "tourScheduleName", label: "Schedule Name" },
+  { value: "tourName", label: "Tour Name" },
+  { value: "assumeStartDate", label: "Start Date" },
+  { value: "assumeEndDate", label: "End Date" },
+  { value: "durationStart", label: "Duration Start" },
+  { value: "durationEnd", label: "Duration End" },
+  { value: "createdAt", label: "Created Date" },
+  { value: "updatedAt", label: "Updated Date" },
+];
+
+export const PACKAGE_SCHEDULE_VIEW_SORTING_OPTIONS = [
+  { value: "packageScheduleName", label: "Schedule Name" },
+  { value: "packageName", label: "Package Name" },
+  { value: "startDate", label: "Start Date" },
+  { value: "endDate", label: "End Date" },
+  { value: "durationStart", label: "Duration Start" },
+  { value: "durationEnd", label: "Duration End" },
+  { value: "tourScheduleName", label: "Tour Schedule Name" },
+];

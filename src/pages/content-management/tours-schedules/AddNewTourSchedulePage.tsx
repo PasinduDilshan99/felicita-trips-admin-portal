@@ -1,17 +1,7 @@
-// app/add-new-tour-schedule/page.tsx
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Calendar, Clock } from "lucide-react";
 import { FormCard } from "@/components/common-components/create-components/FormCard";
@@ -23,35 +13,13 @@ import { Tour } from "@/types/tour-types";
 import { CreateTourScheduleRequest } from "@/types/tour-schedule-types";
 import { TourScheduleService } from "@/services/tourScheduleService";
 import { TourSelector } from "@/components/tour-schedules-components/tour-schedule-create-components/TourSelector";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-}
+import { ToastState } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { TOUR_SCHEDULE_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { CREATE_TOUR_SCHEDULE_TIPS } from "@/data/tips-data";
 
 const AddNewTourSchedulePage = () => {
-  const router = useRouter();
   const { theme } = useTheme();
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Tour Schedules",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/tour-schedules`,
-    },
-    {
-      label: "Add New Schedule",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/tour-schedules/add`,
-    },
-  ];
 
   // Form state
   const [formData, setFormData] = useState<CreateTourScheduleRequest>({
@@ -70,7 +38,9 @@ const AddNewTourSchedulePage = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [selectedTourDetails, setSelectedTourDetails] = useState<Tour | null>(null);
+  const [selectedTourDetails, setSelectedTourDetails] = useState<Tour | null>(
+    null,
+  );
   const [toast, setToast] = useState<ToastState>({
     show: false,
     type: "success",
@@ -79,19 +49,20 @@ const AddNewTourSchedulePage = () => {
   });
 
   const handleTourSelect = (tourId: number, tourDetails?: Tour) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       tourId,
-      tourScheduleName: tourDetails?.tourName ? `${tourDetails.tourName} Schedule` : prev.tourScheduleName,
+      tourScheduleName: tourDetails?.tourName
+        ? `${tourDetails.tourName} Schedule`
+        : prev.tourScheduleName,
     }));
     if (tourDetails) {
       setSelectedTourDetails(tourDetails);
-      // Auto-fill duration based on tour duration
       if (tourDetails.duration) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           durationHoursStart: 1,
-          durationHoursEnd: tourDetails.duration * 24, // Convert days to hours
+          durationHoursEnd: tourDetails.duration * 24,
         }));
       }
     }
@@ -101,7 +72,7 @@ const AddNewTourSchedulePage = () => {
   };
 
   const handleTourClear = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       tourId: 0,
       tourScheduleName: "",
@@ -112,7 +83,9 @@ const AddNewTourSchedulePage = () => {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     let processedValue: any = value;
@@ -149,8 +122,11 @@ const AddNewTourSchedulePage = () => {
       newErrors.assumeEndDate = "End date is required";
     }
 
-    if (formData.assumeStartDate && formData.assumeEndDate && 
-        new Date(formData.assumeStartDate) > new Date(formData.assumeEndDate)) {
+    if (
+      formData.assumeStartDate &&
+      formData.assumeEndDate &&
+      new Date(formData.assumeStartDate) > new Date(formData.assumeEndDate)
+    ) {
       newErrors.assumeEndDate = "End date must be after start date";
     }
 
@@ -158,8 +134,12 @@ const AddNewTourSchedulePage = () => {
       newErrors.durationHoursStart = "Valid start duration is required";
     }
 
-    if (!formData.durationHoursEnd || formData.durationHoursEnd < formData.durationHoursStart) {
-      newErrors.durationHoursEnd = "End duration must be greater than start duration";
+    if (
+      !formData.durationHoursEnd ||
+      formData.durationHoursEnd < formData.durationHoursStart
+    ) {
+      newErrors.durationHoursEnd =
+        "End duration must be greater than start duration";
     }
 
     if (!formData.description.trim()) {
@@ -261,7 +241,7 @@ const AddNewTourSchedulePage = () => {
           <PageHeader
             title="Add New Tour Schedule"
             description="Create a new schedule for your tour"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={TOUR_SCHEDULE_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -287,8 +267,14 @@ const AddNewTourSchedulePage = () => {
               <FormCard>
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <Calendar className="w-5 h-5" style={{ color: theme.primary }} />
-                    <h2 className="text-lg font-semibold" style={{ color: theme.text }}>
+                    <Calendar
+                      className="w-5 h-5"
+                      style={{ color: theme.primary }}
+                    />
+                    <h2
+                      className="text-lg font-semibold"
+                      style={{ color: theme.text }}
+                    >
                       Schedule Information
                     </h2>
                   </div>
@@ -422,38 +408,87 @@ const AddNewTourSchedulePage = () => {
                 </div>
                 <div className="px-6 py-4 space-y-3">
                   <div>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>Tour Name</p>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Tour Name
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {selectedTourDetails.tourName}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>Duration</p>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Duration
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {selectedTourDetails.duration} days
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>Route</p>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
-                      {selectedTourDetails.startLocation} → {selectedTourDetails.endLocation}
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Route
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
+                      {selectedTourDetails.startLocation} →{" "}
+                      {selectedTourDetails.endLocation}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>Type</p>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Type
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {selectedTourDetails.tourTypeName}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>Category</p>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Category
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {selectedTourDetails.tourCategoryName}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>Season</p>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Season
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {selectedTourDetails.seasonName}
                     </p>
                   </div>
@@ -475,14 +510,7 @@ const AddNewTourSchedulePage = () => {
           itemName: formData.tourScheduleName || "Untitled Schedule",
           type: "create",
           estimatedTime: "~2-3 seconds",
-          tips: [
-            "Verify that the date range is correct",
-            "Ensure duration values are accurate",
-            "Check that all required fields are filled",
-            "You can edit this schedule anytime after creation",
-            "The schedule will be available for booking based on dates",
-            "Make sure the tour is active for this schedule",
-          ],
+          tips: CREATE_TOUR_SCHEDULE_TIPS,
         }}
         confirmText="Create Schedule"
         cancelText="Cancel"
@@ -495,7 +523,9 @@ const AddNewTourSchedulePage = () => {
             show: true,
             type: "error",
             title: "Creation Failed",
-            message: error.message || "Failed to create tour schedule. Please try again.",
+            message:
+              error.message ||
+              "Failed to create tour schedule. Please try again.",
           });
         }}
       />

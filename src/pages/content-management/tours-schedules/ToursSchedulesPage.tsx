@@ -40,17 +40,15 @@ import {
   TourScheduleParticipationTooltip,
 } from "@/components/statistics-components";
 
-/* ─────────────────────────────────────────────
-   Main Page
-───────────────────────────────────────────── */
 const ToursSchedulesPage = () => {
   const { theme, isDarkMode } = useTheme();
-  const [statistics, setStatistics] = useState<TourScheduleStatisticsData | null>(null);
+  const [statistics, setStatistics] =
+    useState<TourScheduleStatisticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const toursData = contentManagementSideBarData.find(
-    (item) => item.name === "Tours",
+    (item) => item.name === "Tour Schedules",
   );
 
   useEffect(() => {
@@ -65,7 +63,9 @@ const ToursSchedulesPage = () => {
       const response = await TourService.getTourScheduleStatistics();
       if (response.data) setStatistics(response.data);
     } catch {
-      setError("We couldn't load the tour schedule statistics. Please try again.");
+      setError(
+        "We couldn't load the tour schedule statistics. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -256,7 +256,9 @@ const ToursSchedulesPage = () => {
                                 duration={950 + i * 70}
                                 decimals={1}
                               />
-                              <span className="ts-stat-suffix">{card.suffix}</span>
+                              <span className="ts-stat-suffix">
+                                {card.suffix}
+                              </span>
                             </>
                           ) : card.title === "Utilization Rate" ? (
                             <>
@@ -265,7 +267,9 @@ const ToursSchedulesPage = () => {
                                 duration={950 + i * 70}
                                 decimals={0}
                               />
-                              <span className="ts-stat-suffix">{card.suffix}</span>
+                              <span className="ts-stat-suffix">
+                                {card.suffix}
+                              </span>
                             </>
                           ) : (
                             <AnimatedCount
@@ -308,12 +312,31 @@ const ToursSchedulesPage = () => {
                             <ResponsiveContainer width="100%" height="100%">
                               <LineChart
                                 data={lineChartData}
-                                margin={{ top: 20, right: 30, bottom: 20, left: 10 }}
+                                margin={{
+                                  top: 20,
+                                  right: 30,
+                                  bottom: 20,
+                                  left: 10,
+                                }}
                               >
                                 <defs>
-                                  <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.3} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.01} />
+                                  <linearGradient
+                                    id="lineGradient"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.3}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.01}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -340,7 +363,9 @@ const ToursSchedulesPage = () => {
                                   tickLine={false}
                                   width={40}
                                 />
-                                <Tooltip content={<TourScheduleLineTooltip />} />
+                                <Tooltip
+                                  content={<TourScheduleLineTooltip />}
+                                />
                                 <Area
                                   type="monotone"
                                   dataKey="totalSchedules"
@@ -356,7 +381,12 @@ const ToursSchedulesPage = () => {
                                   dataKey="totalSchedules"
                                   stroke={p}
                                   strokeWidth={2.5}
-                                  dot={{ fill: p, r: 4, strokeWidth: 2, stroke: surf }}
+                                  dot={{
+                                    fill: p,
+                                    r: 4,
+                                    strokeWidth: 2,
+                                    stroke: surf,
+                                  }}
                                   activeDot={{ r: 6, fill: p }}
                                   name="Schedules"
                                   animationBegin={300}
@@ -367,7 +397,9 @@ const ToursSchedulesPage = () => {
                           </div>
                         ) : (
                           <div className="ts-empty-state">
-                            <p className="ts-empty-text">No timeline data available</p>
+                            <p className="ts-empty-text">
+                              No timeline data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -379,19 +411,40 @@ const ToursSchedulesPage = () => {
                             <span className="ts-chart-dot ts-chart-dot--acc" />
                             Duration Distribution
                           </div>
-                          <span className="ts-chart-sub">Schedule duration ranges</span>
+                          <span className="ts-chart-sub">
+                            Schedule duration ranges
+                          </span>
                         </div>
                         {columnChartData.length > 0 ? (
                           <div style={{ height: 320 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart
                                 data={columnChartData}
-                                margin={{ top: 4, right: 4, bottom: 40, left: 0 }}
+                                margin={{
+                                  top: 4,
+                                  right: 4,
+                                  bottom: 40,
+                                  left: 0,
+                                }}
                               >
                                 <defs>
-                                  <linearGradient id="durationGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.6} />
+                                  <linearGradient
+                                    id="durationGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.6}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -423,7 +476,9 @@ const ToursSchedulesPage = () => {
                                   tickLine={false}
                                   width={35}
                                 />
-                                <Tooltip content={<TourScheduleDurationTooltip />} />
+                                <Tooltip
+                                  content={<TourScheduleDurationTooltip />}
+                                />
                                 <Bar
                                   dataKey="totalSchedules"
                                   fill="url(#durationGrad)"
@@ -437,7 +492,9 @@ const ToursSchedulesPage = () => {
                           </div>
                         ) : (
                           <div className="ts-empty-state">
-                            <p className="ts-empty-text">No duration data available</p>
+                            <p className="ts-empty-text">
+                              No duration data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -461,7 +518,9 @@ const ToursSchedulesPage = () => {
                             <span className="ts-chart-dot ts-chart-dot--p" />
                             Execution Performance
                           </div>
-                          <span className="ts-chart-sub">Completed instances by schedule</span>
+                          <span className="ts-chart-sub">
+                            Completed instances by schedule
+                          </span>
                         </div>
                         {barChartData.length > 0 ? (
                           <div style={{ height: 320 }}>
@@ -469,13 +528,32 @@ const ToursSchedulesPage = () => {
                               <BarChart
                                 data={barChartData}
                                 layout="vertical"
-                                margin={{ top: 4, right: 30, bottom: 4, left: 120 }}
+                                margin={{
+                                  top: 4,
+                                  right: 30,
+                                  bottom: 4,
+                                  left: 120,
+                                }}
                                 barSize={28}
                               >
                                 <defs>
-                                  <linearGradient id="executionGrad" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.6} />
+                                  <linearGradient
+                                    id="executionGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="1"
+                                    y2="0"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.6}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -501,7 +579,9 @@ const ToursSchedulesPage = () => {
                                   tickLine={false}
                                   width={115}
                                 />
-                                <Tooltip content={<TourScheduleExecutionTooltip />} />
+                                <Tooltip
+                                  content={<TourScheduleExecutionTooltip />}
+                                />
                                 <Bar
                                   dataKey="completedInstances"
                                   fill="url(#executionGrad)"
@@ -515,7 +595,9 @@ const ToursSchedulesPage = () => {
                           </div>
                         ) : (
                           <div className="ts-empty-state">
-                            <p className="ts-empty-text">No execution data available</p>
+                            <p className="ts-empty-text">
+                              No execution data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -527,19 +609,40 @@ const ToursSchedulesPage = () => {
                             <span className="ts-chart-dot ts-chart-dot--acc" />
                             Rating Overview
                           </div>
-                          <span className="ts-chart-sub">Average rating & review count</span>
+                          <span className="ts-chart-sub">
+                            Average rating & review count
+                          </span>
                         </div>
                         {comboData.length > 0 ? (
                           <div style={{ height: 320 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <ComposedChart
                                 data={comboData}
-                                margin={{ top: 20, right: 30, bottom: 60, left: 0 }}
+                                margin={{
+                                  top: 20,
+                                  right: 30,
+                                  bottom: 60,
+                                  left: 0,
+                                }}
                               >
                                 <defs>
-                                  <linearGradient id="ratingGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor={p} stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor={p} stopOpacity={0.4} />
+                                  <linearGradient
+                                    id="ratingGrad"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                  >
+                                    <stop
+                                      offset="0%"
+                                      stopColor={p}
+                                      stopOpacity={0.9}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor={p}
+                                      stopOpacity={0.4}
+                                    />
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -570,7 +673,10 @@ const ToursSchedulesPage = () => {
                                     value: "Rating",
                                     angle: -90,
                                     position: "insideLeft",
-                                    style: { fill: textSecondary, fontSize: 11 },
+                                    style: {
+                                      fill: textSecondary,
+                                      fontSize: 11,
+                                    },
                                   }}
                                 />
                                 <YAxis
@@ -583,10 +689,15 @@ const ToursSchedulesPage = () => {
                                     value: "Reviews",
                                     angle: 90,
                                     position: "insideRight",
-                                    style: { fill: textSecondary, fontSize: 11 },
+                                    style: {
+                                      fill: textSecondary,
+                                      fontSize: 11,
+                                    },
                                   }}
                                 />
-                                <Tooltip content={<TourScheduleRatingTooltip />} />
+                                <Tooltip
+                                  content={<TourScheduleRatingTooltip />}
+                                />
                                 <Legend verticalAlign="top" height={36} />
                                 <Bar
                                   yAxisId="left"
@@ -614,7 +725,9 @@ const ToursSchedulesPage = () => {
                           </div>
                         ) : (
                           <div className="ts-empty-state">
-                            <p className="ts-empty-text">No rating data available</p>
+                            <p className="ts-empty-text">
+                              No rating data available
+                            </p>
                           </div>
                         )}
                       </div>
@@ -636,19 +749,40 @@ const ToursSchedulesPage = () => {
                           <span className="ts-chart-dot ts-chart-dot--p" />
                           Participation Analysis
                         </div>
-                        <span className="ts-chart-sub">{participationData.length} schedules</span>
+                        <span className="ts-chart-sub">
+                          {participationData.length} schedules
+                        </span>
                       </div>
                       {participationData.length > 0 ? (
                         <div style={{ height: 400 }}>
                           <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart
                               data={participationData}
-                              margin={{ top: 20, right: 30, bottom: 60, left: 20 }}
+                              margin={{
+                                top: 20,
+                                right: 30,
+                                bottom: 60,
+                                left: 20,
+                              }}
                             >
                               <defs>
-                                <linearGradient id="participationGrad" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="0%" stopColor={p} stopOpacity={0.3} />
-                                  <stop offset="100%" stopColor={p} stopOpacity={0.02} />
+                                <linearGradient
+                                  id="participationGrad"
+                                  x1="0"
+                                  y1="0"
+                                  x2="0"
+                                  y2="1"
+                                >
+                                  <stop
+                                    offset="0%"
+                                    stopColor={p}
+                                    stopOpacity={0.3}
+                                  />
+                                  <stop
+                                    offset="100%"
+                                    stopColor={p}
+                                    stopOpacity={0.02}
+                                  />
                                 </linearGradient>
                               </defs>
                               <CartesianGrid
@@ -674,7 +808,9 @@ const ToursSchedulesPage = () => {
                                 axisLine={false}
                                 tickLine={false}
                                 width={45}
-                                tickFormatter={(value) => value.toLocaleString()}
+                                tickFormatter={(value) =>
+                                  value.toLocaleString()
+                                }
                                 label={{
                                   value: "Participants",
                                   angle: -90,
@@ -682,7 +818,9 @@ const ToursSchedulesPage = () => {
                                   style: { fill: textSecondary, fontSize: 11 },
                                 }}
                               />
-                              <Tooltip content={<TourScheduleParticipationTooltip />} />
+                              <Tooltip
+                                content={<TourScheduleParticipationTooltip />}
+                              />
                               <Legend verticalAlign="top" height={36} />
                               <Area
                                 type="monotone"
@@ -709,7 +847,9 @@ const ToursSchedulesPage = () => {
                         </div>
                       ) : (
                         <div className="ts-empty-state">
-                          <p className="ts-empty-text">No participation data available</p>
+                          <p className="ts-empty-text">
+                            No participation data available
+                          </p>
                         </div>
                       )}
                     </div>

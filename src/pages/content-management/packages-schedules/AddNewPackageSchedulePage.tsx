@@ -1,17 +1,7 @@
-// app/add-new-package-schedule/page.tsx (or your page file)
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Calendar } from "lucide-react";
 import { FormCard } from "@/components/common-components/create-components/FormCard";
@@ -22,37 +12,14 @@ import { PackageSelector } from "@/components/common-components/PackageSelector"
 import { CreatePackageScheduleRequest } from "@/types/package-schedule-types";
 import { PackageScheduleService } from "@/services/packageScheduleService";
 import { CreateConfirmationDialog } from "@/components/common-components/create-components/CreateConfirmationDialog";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-}
+import { ToastState } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_SCHEDULE_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { CREATE_PACKAGE_SCHEDULE_TIPS } from "@/data/tips-data";
 
 const AddNewPackageSchedulePage = () => {
-  const router = useRouter();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Package Schedules",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/package-schedules`,
-    },
-    {
-      label: "Add New Schedule",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/package-schedules/add`,
-    },
-  ];
-
-  // Form state
   const [formData, setFormData] = useState<CreatePackageScheduleRequest>({
     packageScheduleName: "",
     packageId: 0,
@@ -66,7 +33,6 @@ const AddNewPackageSchedulePage = () => {
     tourScheduleId: 0,
   });
 
-  // UI state
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -262,7 +228,7 @@ const AddNewPackageSchedulePage = () => {
           <PageHeader
             title="Add New Package Schedule"
             description="Create a new schedule for your package"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_SCHEDULE_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -420,13 +386,7 @@ const AddNewPackageSchedulePage = () => {
           itemName: formData.packageScheduleName || "Untitled Schedule",
           type: "create",
           estimatedTime: "~2-3 seconds",
-          tips: [
-            "Verify that the date range is correct",
-            "Ensure duration values are accurate",
-            "Check that all required fields are filled",
-            "You can edit this schedule anytime after creation",
-            "The schedule will be available for booking based on dates",
-          ],
+          tips: CREATE_PACKAGE_SCHEDULE_TIPS,
         }}
         confirmText="Create Schedule"
         cancelText="Cancel"

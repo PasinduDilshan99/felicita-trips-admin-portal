@@ -1,4 +1,3 @@
-// components/tour-schedules-components/tour-schedule-details-view-components/TourScheduleAccommodations.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -15,20 +14,8 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { TourScheduleAccommodation } from "@/types/tour-schedule-types";
-
-interface TourScheduleAccommodationsProps {
-  accommodations: TourScheduleAccommodation[];
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { TourScheduleAccommodationsProps } from "@/types/tour-schedule-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const TourScheduleAccommodations: React.FC<
   TourScheduleAccommodationsProps

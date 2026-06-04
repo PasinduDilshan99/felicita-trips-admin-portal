@@ -1,73 +1,18 @@
-// components/tour-schedules-components/terminate-tour-schedule-components/TypesList.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { Hash, Star } from "lucide-react";
-import { TourScheduleType } from "@/types/tour-schedule-types";
 import { useTheme } from "@/contexts/ThemeContext";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const typeVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  hover: {
-    y: -2,
-    scale: 1.02,
-    transition: { duration: 0.15 },
-  },
-};
-
-const emptyVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-interface TypesListProps {
-  types: TourScheduleType[];
-}
+import { TypesListProps } from "@/types/tour-schedule-types";
+import {
+  cardVariants,
+  contentVariants,
+  emptyVariants,
+  headerVariants,
+  typeVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
 export const TypesList: React.FC<TypesListProps> = ({ types }) => {
   const { theme } = useTheme();
@@ -91,7 +36,9 @@ export const TypesList: React.FC<TypesListProps> = ({ types }) => {
           </h3>
         </div>
         <div className="px-4 py-4 text-center">
-          <p className="text-xs" style={{ color: theme.textSecondary }}>No types assigned</p>
+          <p className="text-xs" style={{ color: theme.textSecondary }}>
+            No types assigned
+          </p>
         </div>
       </motion.div>
     );
@@ -117,7 +64,10 @@ export const TypesList: React.FC<TypesListProps> = ({ types }) => {
         style={{ borderBottom: `1px solid ${hexToRgba(theme.border, 0.8)}` }}
       >
         <div className="flex items-center gap-2">
-          <Hash className="w-4 h-4" style={{ color: theme.warning || "#f59e0b" }} />
+          <Hash
+            className="w-4 h-4"
+            style={{ color: theme.warning || "#f59e0b" }}
+          />
           <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
             Tour Types ({types.length})
           </h3>
@@ -155,17 +105,19 @@ export const TypesList: React.FC<TypesListProps> = ({ types }) => {
               <div
                 className="px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200"
                 style={{
-                  background: type.primaryType 
+                  background: type.primaryType
                     ? `linear-gradient(135deg, ${theme.primary}, ${hexToRgba(theme.primary, 0.7)})`
                     : hexToRgba(theme.warning || "#f59e0b", 0.12),
-                  color: type.primaryType ? "#fff" : (theme.warning || "#f59e0b"),
-                  border: type.primaryType 
+                  color: type.primaryType ? "#fff" : theme.warning || "#f59e0b",
+                  border: type.primaryType
                     ? "none"
                     : `1px solid ${hexToRgba(theme.warning || "#f59e0b", 0.3)}`,
                 }}
               >
                 <div className="flex items-center gap-1.5">
-                  {type.primaryType && <Star size={12} className="text-yellow-300" />}
+                  {type.primaryType && (
+                    <Star size={12} className="text-yellow-300" />
+                  )}
                   <span>{type.typeName}</span>
                 </div>
               </div>

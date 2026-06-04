@@ -1,17 +1,17 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AddNewActivitySchedulePage from "@/pages/content-management/activities-schedules/AddNewActivitySchedulePage";
-import { VIEW_DESTINATION_DETAILS_PAGE_TITLE } from "@/utils/pagesHeaderTitles";
-import { DESTINATION_VIEW_PRIVILEGE } from "@/utils/privileges";
+import { ACTIVITY_SCHEDULE_CREATE_PAGE_TITLE } from "@/utils/pagesHeaderTitles";
+import { ACTIVITY_SCHEDULE_CREATE_PRIVILEGE } from "@/utils/privileges";
 import { Metadata } from "next";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: VIEW_DESTINATION_DETAILS_PAGE_TITLE,
+  title: ACTIVITY_SCHEDULE_CREATE_PAGE_TITLE,
 };
 
 const page = () => {
   return (
-    <ProtectedRoute requiredPrivileges={[DESTINATION_VIEW_PRIVILEGE]}>
+    <ProtectedRoute requiredPrivileges={[ACTIVITY_SCHEDULE_CREATE_PRIVILEGE]}>
       <AddNewActivitySchedulePage />
     </ProtectedRoute>
   );

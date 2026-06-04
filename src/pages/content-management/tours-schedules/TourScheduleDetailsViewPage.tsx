@@ -1,9 +1,7 @@
-// app/tour-schedules/view/[scheduleId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { TourScheduleService } from "@/services/tourScheduleService";
 import {
   TourScheduleDetails,
@@ -11,9 +9,7 @@ import {
 } from "@/types/tour-schedule-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useImageGallery } from "@/hooks/useImageGallery";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
 import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
 import { CommonQuickStats } from "@/components/common-components/details-view/CommonQuickStats";
@@ -21,45 +17,23 @@ import { CommonMetadata } from "@/components/common-components/details-view/Comm
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-
-// Import sub-components
 import { TourScheduleAccommodations } from "@/components/tour-schedules-components/tour-schedule-details-view-components/TourScheduleAccommodations";
 import { TourScheduleCategoriesTypes } from "@/components/tour-schedules-components/tour-schedule-details-view-components/TourScheduleCategoriesTypes";
 import { TourScheduleTourInfo } from "@/components/tour-schedules-components/tour-schedule-details-view-components/TourScheduleTourInfo";
-
-// Icons
+import { Calendar, Clock, Tag, Image, Hotel } from "lucide-react";
 import {
-  Calendar,
-  Clock,
-  Tag,
-  Image,
-  CheckCircle,
-  AlertCircle,
-  User,
-  Users,
-  Building,
-  Utensils,
-  Coffee,
-  Sun,
-  Moon,
-  Hotel,
-  Bus,
-  FileText,
-} from "lucide-react";
-
-// Constants for routing
-import { TOURS_VIEW_PAGE_URL } from "@/utils/urls";
+  TOUR_DETAILS_VIEW_PAGE_URL,
+  TOUR_SCHEDULE_TERMINATE_PAGE_URL,
+  TOUR_SCHEDULE_UPDATE_PAGE_URL,
+  TOUR_SCHEDULE_VIEW_PAGE_URL,
+  TOURS_VIEW_PAGE_URL,
+} from "@/utils/urls";
 import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
 import { TourScheduleOverview } from "@/components/tour-schedules-components/tour-schedule-details-view-components/TourScheduleOverview";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { TOUR_SCHEDULE_DETAILS_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { hexToRgba } from "@/utils/functions";
 
 const TourScheduleDetailsViewPage = () => {
   const params = useParams();
@@ -89,9 +63,7 @@ const TourScheduleDetailsViewPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Tour Schedules", href: TOURS_VIEW_PAGE_URL },
-    { label: "View", href: TOURS_VIEW_PAGE_URL },
+    ...TOUR_SCHEDULE_DETAILS_VIEW_PAGE_BREADCRUMB_DATA,
     {
       label: tourSchedule?.tourScheduleName || "Details",
       href: `${TOURS_VIEW_PAGE_URL}/${scheduleId}`,
@@ -142,16 +114,21 @@ const TourScheduleDetailsViewPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(TOURS_VIEW_PAGE_URL);
-
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(TOUR_SCHEDULE_VIEW_PAGE_URL);
+    }
+  };
   const handleEdit = () =>
     router.push(
-      `${TOURS_VIEW_PAGE_URL}/${scheduleId}?name=${tourSchedule?.tourScheduleName}`,
+      `${TOUR_SCHEDULE_UPDATE_PAGE_URL}/${scheduleId}?name=${tourSchedule?.tourScheduleName}`,
     );
 
   const handleDelete = () =>
     router.push(
-      `${TOURS_VIEW_PAGE_URL}/${scheduleId}?name=${tourSchedule?.tourScheduleName}`,
+      `${TOUR_SCHEDULE_TERMINATE_PAGE_URL}/${scheduleId}?name=${tourSchedule?.tourScheduleName}`,
     );
 
   const handleShare = () => {
@@ -169,7 +146,9 @@ const TourScheduleDetailsViewPage = () => {
 
   const handleViewTour = () => {
     if (tourSchedule?.tourId) {
-      router.push(`${TOURS_VIEW_PAGE_URL}/${tourSchedule.tourId}`);
+      router.push(
+        `${TOUR_DETAILS_VIEW_PAGE_URL}/${tourSchedule.tourId}?name=${tourSchedule.tourName}`,
+      );
     }
   };
 

@@ -1,4 +1,3 @@
-// components/package-schedules-components/package-schedule-details-view-components/PackageScheduleAccommodations.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -18,21 +17,8 @@ import {
   Receipt,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { PackageScheduleAccommodation } from "@/types/package-schedule-types";
-
-interface PackageScheduleAccommodationsProps {
-  accommodations: PackageScheduleAccommodation[];
-  packageColor: string;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { PackageScheduleAccommodationsProps } from "@/types/package-schedule-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const PackageScheduleAccommodations: React.FC<
   PackageScheduleAccommodationsProps

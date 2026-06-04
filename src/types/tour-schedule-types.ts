@@ -1,6 +1,7 @@
 // types/tour-schedule-types.ts
 
 import { ApiResponse } from "./common-types";
+import { Tour } from "./tour-types";
 
 // Basic Types
 export interface TourScheduleCategory {
@@ -182,7 +183,8 @@ export interface CreateTourScheduleResponse {
   message: string;
 }
 
-export type CreateTourScheduleApiResponse = ApiResponse<CreateTourScheduleResponse>;
+export type CreateTourScheduleApiResponse =
+  ApiResponse<CreateTourScheduleResponse>;
 
 // Update Tour Schedule Request
 export interface UpdateTourScheduleRequest {
@@ -203,7 +205,8 @@ export interface UpdateTourScheduleResponse {
   id: number | null;
 }
 
-export type UpdateTourScheduleApiResponse = ApiResponse<UpdateTourScheduleResponse>;
+export type UpdateTourScheduleApiResponse =
+  ApiResponse<UpdateTourScheduleResponse>;
 
 // Terminate Tour Schedule Request
 export interface TerminateTourScheduleRequest {
@@ -214,7 +217,8 @@ export interface TerminateTourScheduleResponse {
   message: string;
 }
 
-export type TerminateTourScheduleApiResponse = ApiResponse<TerminateTourScheduleResponse>;
+export type TerminateTourScheduleApiResponse =
+  ApiResponse<TerminateTourScheduleResponse>;
 
 // Get Tour Schedule Details Request
 export interface GetTourScheduleDetailsRequest {
@@ -229,4 +233,130 @@ export interface TourScheduleIdAndName {
   tourScheduleName: string;
 }
 
-export type TourScheduleIdAndNamesApiResponse = ApiResponse<TourScheduleIdAndName[]>;
+export type TourScheduleIdAndNamesApiResponse = ApiResponse<
+  TourScheduleIdAndName[]
+>;
+
+export interface TourScheduleCardProps {
+  schedule: TourScheduleListItem;
+}
+
+export interface TourScheduleListCardProps {
+  schedule: TourScheduleListItem;
+}
+
+export interface TourScheduleAccommodationsProps {
+  accommodations: TourScheduleAccommodation[];
+}
+
+export interface TourScheduleCategoriesTypesProps {
+  categories: TourScheduleCategory[];
+  types: TourScheduleType[];
+}
+
+export interface TourScheduleOverviewProps {
+  name: string;
+  description: string;
+  assumeStartDate: string;
+  assumeEndDate: string;
+  durationStart: number;
+  durationEnd: number;
+  specialNote: string;
+}
+
+export interface TourScheduleTourInfoProps {
+  tourId: number;
+  tourName: string;
+  tourDescription: string;
+  tourDuration: number;
+  startLocation: string;
+  endLocation: string;
+  latitude: number;
+  longitude: number;
+  season: string | null;
+  tourStatus: string;
+  assignMessage: string;
+  onViewTour: () => void;
+}
+
+export interface TourSelectorProps {
+  selectedTourId?: number;
+  onTourSelect: (tourId: number, tourDetails?: Tour) => void;
+  onTourClear?: () => void;
+  error?: string;
+  required?: boolean;
+  label?: string;
+  placeholder?: string;
+  showDetails?: boolean;
+  fetchDetails?: boolean;
+}
+
+export interface TourListItem {
+  tourId: number;
+  tourName: string;
+}
+
+export interface DayByDayAccommodationsProps {
+  accommodations: TourScheduleAccommodation[];
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+}
+
+export interface TourCategoriesProps {
+  categories: TourScheduleCategory[];
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+}
+
+export interface TourImagesProps {
+  images: TourScheduleImage[];
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+}
+
+export interface TourInformationProps {
+  schedule: TourScheduleDetails;
+}
+
+export interface TourTypesProps {
+  types: TourScheduleType[];
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+}
+
+export interface TourScheduleSearchItem {
+  id: number;
+  name: string;
+}
+
+export interface AccommodationsListProps {
+  accommodations: TourScheduleAccommodation[];
+}
+
+export interface BasicInfoPanelProps {
+  scheduleDetails: TourScheduleDetails;
+}
+
+export interface CategoriesListProps {
+  categories: TourScheduleCategory[];
+}
+
+export interface TourInfoPanelProps {
+  scheduleDetails: TourScheduleDetails;
+}
+
+export interface TourScheduleStatsProps {
+  scheduleDetails: TourScheduleDetails;
+}
+
+export interface StatItem {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  color: string;
+  formatter?: (value: number | string) => string | number;
+}
+
+export interface TypesListProps {
+  types: TourScheduleType[];
+}

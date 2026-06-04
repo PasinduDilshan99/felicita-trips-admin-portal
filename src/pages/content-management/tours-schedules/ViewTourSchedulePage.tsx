@@ -1,12 +1,7 @@
-// app/tour-schedules/view/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
+import FilterPanel from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { TourScheduleService } from "@/services/tourScheduleService";
@@ -21,77 +16,19 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import { WEB_MANAGEMENT_URL } from "@/utils/urls";
 import TourScheduleCard from "@/components/tour-schedules-components/view-tour-schedule-components/TourScheduleCard";
 import TourScheduleListCard from "@/components/tour-schedules-components/view-tour-schedule-components/TourScheduleListCard";
+import {
+  tourScheduleViewFiltersToUrlParams,
+  tourScheduleViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { TOUR_SCHEDULE_VIEW_SORTING_OPTIONS } from "@/data/sorting-options";
+import { FilterField } from "@/types/filter-types";
+import { TOUR_SCHEDULE_VIEW_STATUS_OPTIONS } from "@/data/status-options-data";
+import { TOUR_SCHEDULE_VIEW_PAGE_URL } from "@/utils/urls";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { TOUR_SCHEDULE_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
-// Sort options for tour schedules (from API params)
-const DEFAULT_SORT_OPTIONS = [
-  { value: "tourScheduleName", label: "Schedule Name" },
-  { value: "tourName", label: "Tour Name" },
-  { value: "assumeStartDate", label: "Start Date" },
-  { value: "assumeEndDate", label: "End Date" },
-  { value: "durationStart", label: "Duration Start" },
-  { value: "durationEnd", label: "Duration End" },
-  { value: "createdAt", label: "Created Date" },
-  { value: "updatedAt", label: "Updated Date" },
-];
-
-// Utility functions for URL params management
-const filtersToUrlParams = (
-  filters: TourScheduleFilterParams,
-): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.duration) params.set("duration", filters.duration.toString());
-  if (filters.tourId) params.set("tourId", filters.tourId.toString());
-  if (filters.tourTypeId)
-    params.set("tourTypeId", filters.tourTypeId.toString());
-  if (filters.tourCategoryId)
-    params.set("tourCategoryId", filters.tourCategoryId.toString());
-  if (filters.fromDate) params.set("fromDate", filters.fromDate);
-  if (filters.toDate) params.set("toDate", filters.toDate);
-  if (filters.seasonId) params.set("seasonId", filters.seasonId.toString());
-  if (filters.status) params.set("status", filters.status);
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
-
-  return params;
-};
-
-const urlParamsToFilters = (
-  params: URLSearchParams,
-): TourScheduleFilterParams => {
-  return {
-    name: params.get("name") || null,
-    duration: params.get("duration")
-      ? parseFloat(params.get("duration")!)
-      : null,
-    tourId: params.get("tourId") ? parseInt(params.get("tourId")!) : null,
-    tourTypeId: params.get("tourTypeId")
-      ? parseInt(params.get("tourTypeId")!)
-      : null,
-    tourCategoryId: params.get("tourCategoryId")
-      ? parseInt(params.get("tourCategoryId")!)
-      : null,
-    fromDate: params.get("fromDate") || null,
-    toDate: params.get("toDate") || null,
-    seasonId: params.get("seasonId") ? parseInt(params.get("seasonId")!) : null,
-    status: params.get("status") || null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-    sortBy: params.get("sortBy") || "",
-    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
-  };
-};
-
-// Main component wrapped with Suspense for useSearchParams
 const TourSchedulesViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -103,15 +40,8 @@ const TourSchedulesViewContent = () => {
     useState<TourScheduleParamsData | null>(null);
   const [requestParamsLoading, setRequestParamsLoading] = useState(true);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    { label: "Tour Schedules", href: WEB_MANAGEMENT_URL },
-    { label: "View", href: WEB_MANAGEMENT_URL },
-  ];
-
   const [filters, setFilters] = useState<TourScheduleFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    tourScheduleViewUrlParamsToFilters(searchParams || new URLSearchParams()),
   );
 
   const [schedules, setSchedules] = useState<TourScheduleListItem[]>([]);
@@ -203,12 +133,6 @@ const TourSchedulesViewContent = () => {
     return [];
   }, [requestParams]);
 
-  // Get status options
-  const getStatusOptions = () => [
-    { value: "ACTIVE", label: "Active" },
-    { value: "INACTIVE", label: "Inactive" },
-  ];
-
   // Get dynamic sort options from request params
   const getSortOptions = useCallback((): { value: string; label: string }[] => {
     if (
@@ -220,7 +144,7 @@ const TourSchedulesViewContent = () => {
         label: sort.sortByDisplayName,
       }));
     }
-    return DEFAULT_SORT_OPTIONS;
+    return TOUR_SCHEDULE_VIEW_SORTING_OPTIONS;
   }, [requestParams]);
 
   // Get sort label
@@ -278,7 +202,7 @@ const TourSchedulesViewContent = () => {
       key: "status",
       label: "Status",
       type: "select",
-      options: getStatusOptions(),
+      options: TOUR_SCHEDULE_VIEW_STATUS_OPTIONS,
       width: "third",
     },
     {
@@ -300,11 +224,11 @@ const TourSchedulesViewContent = () => {
   // Update URL with current filters
   const updateURL = useCallback(
     (newFilters: TourScheduleFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = tourScheduleViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
-        ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_URL}/view?${queryString}`
-        : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_URL}/view`;
+        ? `${TOUR_SCHEDULE_VIEW_PAGE_URL}?${queryString}`
+        : TOUR_SCHEDULE_VIEW_PAGE_URL;
 
       router.replace(newURL, { scroll: false });
     },
@@ -337,19 +261,17 @@ const TourSchedulesViewContent = () => {
     [],
   );
 
-  // Initial load from URL params
   useEffect(() => {
-    const initialFilters = urlParamsToFilters(
+    const initialFilters = tourScheduleViewUrlParamsToFilters(
       searchParams || new URLSearchParams(),
     );
     setFilters(initialFilters);
     fetchSchedules(initialFilters);
   }, []);
 
-  // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = tourScheduleViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -578,7 +500,7 @@ const TourSchedulesViewContent = () => {
           <PageHeader
             title="Tour Schedules View"
             description="Manage and monitor tour schedules, availability, and itineraries"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={TOUR_SCHEDULE_VIEW_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -696,10 +618,7 @@ const TourSchedulesViewContent = () => {
   );
 };
 
-// Wrap with Suspense for useSearchParams
 const ViewTourSchedulePage = () => {
-  const { theme } = useTheme();
-
   return (
     <Suspense
       fallback={

@@ -1,19 +1,10 @@
-// app/add-new-activity-schedule/page.tsx
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
+import {} from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { FormCard } from "@/components/common-components/create-components/FormCard";
 import { FormActions } from "@/components/common-components/FormActions";
 import { InputField } from "@/components/common-components/create-components/InputField";
@@ -23,37 +14,14 @@ import { Activity as ActivityType } from "@/types/activity-types";
 import { CreateActivityScheduleRequest } from "@/types/activity-schedule-types";
 import { ActivityScheduleService } from "@/services/activityScheduleService";
 import { ActivitySelector } from "@/components/activity-schedules-components/activity-schedule-create-components/ActivitySelector";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-}
+import { ToastState } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITY_SCHEDULE_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { CREATE_ACTIVITY_SCHEDULE_TIPS } from "@/data/tips-data";
 
 const AddNewActivitySchedulePage = () => {
-  const router = useRouter();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Destinations",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}`,
-    },
-    {
-      label: "Activity Schedules",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activity-schedules`,
-    },
-    {
-      label: "Add New Schedule",
-      href: `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_DESTINATION_PATH}/activity-schedules/add`,
-    },
-  ];
-
-  // Form state
   const [formData, setFormData] = useState<CreateActivityScheduleRequest>({
     activityScheduleName: "",
     activityId: 0,
@@ -78,19 +46,25 @@ const AddNewActivitySchedulePage = () => {
     title: "",
     message: "",
   });
-  const [selectedActivityDetails, setSelectedActivityDetails] = useState<ActivityType | null>(null);
+  const [selectedActivityDetails, setSelectedActivityDetails] =
+    useState<ActivityType | null>(null);
 
-  const handleActivitySelect = (activityId: number, activityDetails?: ActivityType) => {
-    setFormData(prev => ({
+  const handleActivitySelect = (
+    activityId: number,
+    activityDetails?: ActivityType,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       activityId,
-      activityScheduleName: activityDetails?.name ? `${activityDetails.name} Schedule` : prev.activityScheduleName,
+      activityScheduleName: activityDetails?.name
+        ? `${activityDetails.name} Schedule`
+        : prev.activityScheduleName,
     }));
     if (activityDetails) {
       setSelectedActivityDetails(activityDetails);
       // Auto-fill duration based on activity duration
       if (activityDetails.duration_hours) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           durationHoursStart: 1,
           durationHoursEnd: activityDetails.duration_hours,
@@ -103,7 +77,7 @@ const AddNewActivitySchedulePage = () => {
   };
 
   const handleActivityClear = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       activityId: 0,
       activityScheduleName: "",
@@ -114,13 +88,19 @@ const AddNewActivitySchedulePage = () => {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     let processedValue: any = value;
 
-    if (name === "durationHoursStart" || name === "durationHoursEnd" || 
-        name === "packageScheduleId" || name === "tourScheduleId") {
+    if (
+      name === "durationHoursStart" ||
+      name === "durationHoursEnd" ||
+      name === "packageScheduleId" ||
+      name === "tourScheduleId"
+    ) {
       processedValue = value === "" ? 0 : parseInt(value);
     }
 
@@ -152,8 +132,11 @@ const AddNewActivitySchedulePage = () => {
       newErrors.assumeEndDate = "End date is required";
     }
 
-    if (formData.assumeStartDate && formData.assumeEndDate && 
-        new Date(formData.assumeStartDate) > new Date(formData.assumeEndDate)) {
+    if (
+      formData.assumeStartDate &&
+      formData.assumeEndDate &&
+      new Date(formData.assumeStartDate) > new Date(formData.assumeEndDate)
+    ) {
       newErrors.assumeEndDate = "End date must be after start date";
     }
 
@@ -161,8 +144,12 @@ const AddNewActivitySchedulePage = () => {
       newErrors.durationHoursStart = "Valid start duration is required";
     }
 
-    if (!formData.durationHoursEnd || formData.durationHoursEnd < formData.durationHoursStart) {
-      newErrors.durationHoursEnd = "End duration must be greater than start duration";
+    if (
+      !formData.durationHoursEnd ||
+      formData.durationHoursEnd < formData.durationHoursStart
+    ) {
+      newErrors.durationHoursEnd =
+        "End duration must be greater than start duration";
     }
 
     if (!formData.description.trim()) {
@@ -177,7 +164,8 @@ const AddNewActivitySchedulePage = () => {
   const submitActivitySchedule = async () => {
     setLoading(true);
     try {
-      const response = await ActivityScheduleService.createActivitySchedule(formData);
+      const response =
+        await ActivityScheduleService.createActivitySchedule(formData);
       if (response.code === 200) {
         setToast({
           show: true,
@@ -266,7 +254,7 @@ const AddNewActivitySchedulePage = () => {
           <PageHeader
             title="Add New Activity Schedule"
             description="Create a new schedule for your activity"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITY_SCHEDULE_CREATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -292,8 +280,14 @@ const AddNewActivitySchedulePage = () => {
               <FormCard>
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <Calendar className="w-5 h-5" style={{ color: theme.primary }} />
-                    <h2 className="text-lg font-semibold" style={{ color: theme.text }}>
+                    <Calendar
+                      className="w-5 h-5"
+                      style={{ color: theme.primary }}
+                    />
+                    <h2
+                      className="text-lg font-semibold"
+                      style={{ color: theme.text }}
+                    >
                       Schedule Information
                     </h2>
                   </div>
@@ -454,27 +448,60 @@ const AddNewActivitySchedulePage = () => {
                 </div>
                 <div className="px-6 py-4 space-y-2">
                   <div>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>Activity Name</p>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Activity Name
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {selectedActivityDetails.name}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>Destination</p>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Destination
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {selectedActivityDetails.destinationName}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>Duration</p>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Duration
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {selectedActivityDetails.duration_hours} hours
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>Price Range</p>
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
-                      ${selectedActivityDetails.price_local} (Local) / ${selectedActivityDetails.price_foreigners} (Foreign)
+                    <p
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Price Range
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
+                      ${selectedActivityDetails.price_local} (Local) / $
+                      {selectedActivityDetails.price_foreigners} (Foreign)
                     </p>
                   </div>
                 </div>
@@ -495,14 +522,7 @@ const AddNewActivitySchedulePage = () => {
           itemName: formData.activityScheduleName || "Untitled Schedule",
           type: "create",
           estimatedTime: "~2-3 seconds",
-          tips: [
-            "Verify that the date range is correct",
-            "Ensure duration values are accurate",
-            "Check that all required fields are filled",
-            "You can edit this schedule anytime after creation",
-            "The schedule will be available for booking based on dates",
-            "Make sure the activity is active for this schedule",
-          ],
+          tips: CREATE_ACTIVITY_SCHEDULE_TIPS,
         }}
         confirmText="Create Schedule"
         cancelText="Cancel"
@@ -515,7 +535,9 @@ const AddNewActivitySchedulePage = () => {
             show: true,
             type: "error",
             title: "Creation Failed",
-            message: error.message || "Failed to create activity schedule. Please try again.",
+            message:
+              error.message ||
+              "Failed to create activity schedule. Please try again.",
           });
         }}
       />

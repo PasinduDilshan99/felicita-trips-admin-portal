@@ -6,9 +6,6 @@ import {
   Line,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -47,9 +44,6 @@ import {
   ActivityScheduleRadarTooltip,
 } from "@/components/statistics-components";
 
-/* ─────────────────────────────────────────────
-   Main Page
-───────────────────────────────────────────── */
 const ActivitiesSchedulePage = () => {
   const { theme, isDarkMode } = useTheme();
   const [statistics, setStatistics] =
@@ -58,7 +52,7 @@ const ActivitiesSchedulePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const activitiesData = contentManagementSideBarData.find(
-    (item) => item.name === "Activities",
+    (item) => item.name === "Activity Schedules",
   );
 
   useEffect(() => {
@@ -456,7 +450,9 @@ const ActivitiesSchedulePage = () => {
                                   tickLine={false}
                                   width={40}
                                 />
-                                <Tooltip content={<ActivityScheduleLineTooltip />} />
+                                <Tooltip
+                                  content={<ActivityScheduleLineTooltip />}
+                                />
                                 <Area
                                   type="monotone"
                                   dataKey="totalParticipants"
@@ -563,7 +559,9 @@ const ActivitiesSchedulePage = () => {
                                   tickLine={false}
                                   width={95}
                                 />
-                                <Tooltip content={<ActivityScheduleBarTooltip />} />
+                                <Tooltip
+                                  content={<ActivityScheduleBarTooltip />}
+                                />
                                 <Bar
                                   dataKey="totalParticipants"
                                   fill="url(#barGradient)"
@@ -667,7 +665,9 @@ const ActivitiesSchedulePage = () => {
                                   animationBegin={300}
                                   animationDuration={900}
                                 />
-                                <Tooltip content={<ActivityScheduleRadarTooltip />} />
+                                <Tooltip
+                                  content={<ActivityScheduleRadarTooltip />}
+                                />
                                 <Legend
                                   verticalAlign="bottom"
                                   height={36}

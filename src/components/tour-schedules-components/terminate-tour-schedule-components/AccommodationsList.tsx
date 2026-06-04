@@ -1,110 +1,44 @@
-// components/tour-schedules-components/terminate-tour-schedule-components/AccommodationsList.tsx
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { Hotel, Utensils, Coffee, Sun, Moon, ChevronDown, Car, Bed, Calendar, Clock } from "lucide-react";
-import { TourScheduleAccommodation } from "@/types/tour-schedule-types";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Hotel,
+  Utensils,
+  Coffee,
+  Sun,
+  Moon,
+  ChevronDown,
+  Car,
+  Bed,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { AccommodationsListProps } from "@/types/tour-schedule-types";
+import {
+  accommodationCardVariants,
+  cardVariants,
+  chevronVariants,
+  contentVariants,
+  detailVariants,
+  EASE_OUT,
+  emptyVariants,
+  headerVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.04,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const accommodationCardVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    y: -10,
-    transition: { duration: 0.2, ease: "easeIn" },
-  },
-};
-
-const chevronVariants: Variants = {
-  closed: { rotate: 0 },
-  open: { rotate: 180 },
-};
-
-const detailVariants: Variants = {
-  hidden: { opacity: 0, height: 0, marginTop: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    marginTop: 12,
-    transition: {
-      duration: 0.25,
-      ease: EASE_OUT,
-    },
-  },
-  exit: {
-    opacity: 0,
-    height: 0,
-    marginTop: 0,
-    transition: {
-      duration: 0.2,
-      ease: "easeIn",
-    },
-  },
-};
-
-const emptyVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-interface AccommodationsListProps {
-  accommodations: TourScheduleAccommodation[];
-}
-
-export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommodations }) => {
+export const AccommodationsList: React.FC<AccommodationsListProps> = ({
+  accommodations,
+}) => {
   const { theme } = useTheme();
-  const [expandedAccommodations, setExpandedAccommodations] = useState<number[]>([]);
+  const [expandedAccommodations, setExpandedAccommodations] = useState<
+    number[]
+  >([]);
 
   const toggleAccommodation = (accommodationId: number) => {
     setExpandedAccommodations((prev) =>
       prev.includes(accommodationId)
         ? prev.filter((id) => id !== accommodationId)
-        : [...prev, accommodationId]
+        : [...prev, accommodationId],
     );
   };
 
@@ -132,14 +66,17 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
           </h3>
         </div>
         <div className="px-4 py-4 text-center">
-          <p className="text-xs" style={{ color: theme.textSecondary }}>No accommodations configured</p>
+          <p className="text-xs" style={{ color: theme.textSecondary }}>
+            No accommodations configured
+          </p>
         </div>
       </motion.div>
     );
   }
 
-  // Sort accommodations by day
-  const sortedAccommodations = [...accommodations].sort((a, b) => a.day - b.day);
+  const sortedAccommodations = [...accommodations].sort(
+    (a, b) => a.day - b.day,
+  );
 
   return (
     <motion.div
@@ -186,7 +123,9 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
         className="px-4 py-4 space-y-3"
       >
         {sortedAccommodations.map((accommodation) => {
-          const isExpanded = expandedAccommodations.includes(accommodation.accommodationId);
+          const isExpanded = expandedAccommodations.includes(
+            accommodation.accommodationId,
+          );
 
           return (
             <motion.div
@@ -201,7 +140,9 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
             >
               {/* Header - Clickable */}
               <motion.button
-                onClick={() => toggleAccommodation(accommodation.accommodationId)}
+                onClick={() =>
+                  toggleAccommodation(accommodation.accommodationId)
+                }
                 className="w-full px-3 py-2.5 flex items-center justify-between text-left cursor-pointer"
                 whileHover={{ backgroundColor: hexToRgba(theme.primary, 0.05) }}
                 transition={{ duration: 0.15 }}
@@ -217,21 +158,33 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
                     >
                       {accommodation.day}
                     </span>
-                    <p className="text-sm font-medium truncate" style={{ color: theme.text }}>
+                    <p
+                      className="text-sm font-medium truncate"
+                      style={{ color: theme.text }}
+                    >
                       Day {accommodation.day} Accommodation
                     </p>
                   </div>
                   <div className="flex items-center gap-2 mt-1 ml-8">
                     {accommodation.hotelName && (
-                      <span className="text-xs flex items-center gap-1" style={{ color: theme.textSecondary }}>
+                      <span
+                        className="text-xs flex items-center gap-1"
+                        style={{ color: theme.textSecondary }}
+                      >
                         <Hotel size={10} />
                         {accommodation.hotelName}
                       </span>
                     )}
                     {accommodation.transportName && (
                       <>
-                        <span className="w-1 h-1 rounded-full" style={{ backgroundColor: theme.border }} />
-                        <span className="text-xs flex items-center gap-1" style={{ color: theme.textSecondary }}>
+                        <span
+                          className="w-1 h-1 rounded-full"
+                          style={{ backgroundColor: theme.border }}
+                        />
+                        <span
+                          className="text-xs flex items-center gap-1"
+                          style={{ color: theme.textSecondary }}
+                        >
                           <Car size={10} />
                           {accommodation.transportName}
                         </span>
@@ -258,17 +211,27 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
                     animate="visible"
                     exit="exit"
                     className="px-3 pb-3"
-                    style={{ borderTop: `1px solid ${hexToRgba(theme.primary, 0.15)}` }}
+                    style={{
+                      borderTop: `1px solid ${hexToRgba(theme.primary, 0.15)}`,
+                    }}
                   >
                     <div className="grid gap-3 mt-2">
                       {/* Meals */}
                       <div className="grid grid-cols-2 gap-2">
                         {accommodation.breakfast && (
                           <div className="flex items-center gap-1.5 text-xs">
-                            <Sun size={12} style={{ color: theme.warning || "#f59e0b" }} />
-                            <span style={{ color: theme.textSecondary }}>Breakfast</span>
+                            <Sun
+                              size={12}
+                              style={{ color: theme.warning || "#f59e0b" }}
+                            />
+                            <span style={{ color: theme.textSecondary }}>
+                              Breakfast
+                            </span>
                             {accommodation.breakfastDescription && (
-                              <span className="text-[10px]" style={{ color: theme.textSecondary }}>
+                              <span
+                                className="text-[10px]"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 ({accommodation.breakfastDescription})
                               </span>
                             )}
@@ -276,10 +239,18 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
                         )}
                         {accommodation.lunch && (
                           <div className="flex items-center gap-1.5 text-xs">
-                            <Utensils size={12} style={{ color: theme.success }} />
-                            <span style={{ color: theme.textSecondary }}>Lunch</span>
+                            <Utensils
+                              size={12}
+                              style={{ color: theme.success }}
+                            />
+                            <span style={{ color: theme.textSecondary }}>
+                              Lunch
+                            </span>
                             {accommodation.lunchDescription && (
-                              <span className="text-[10px]" style={{ color: theme.textSecondary }}>
+                              <span
+                                className="text-[10px]"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 ({accommodation.lunchDescription})
                               </span>
                             )}
@@ -288,9 +259,14 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
                         {accommodation.dinner && (
                           <div className="flex items-center gap-1.5 text-xs">
                             <Moon size={12} style={{ color: theme.primary }} />
-                            <span style={{ color: theme.textSecondary }}>Dinner</span>
+                            <span style={{ color: theme.textSecondary }}>
+                              Dinner
+                            </span>
                             {accommodation.dinnerDescription && (
-                              <span className="text-[10px]" style={{ color: theme.textSecondary }}>
+                              <span
+                                className="text-[10px]"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 ({accommodation.dinnerDescription})
                               </span>
                             )}
@@ -299,9 +275,14 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
                         {accommodation.morningTea && (
                           <div className="flex items-center gap-1.5 text-xs">
                             <Coffee size={12} style={{ color: theme.accent }} />
-                            <span style={{ color: theme.textSecondary }}>Morning Tea</span>
+                            <span style={{ color: theme.textSecondary }}>
+                              Morning Tea
+                            </span>
                             {accommodation.morningTeaDescription && (
-                              <span className="text-[10px]" style={{ color: theme.textSecondary }}>
+                              <span
+                                className="text-[10px]"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 ({accommodation.morningTeaDescription})
                               </span>
                             )}
@@ -310,9 +291,14 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
                         {accommodation.eveningTea && (
                           <div className="flex items-center gap-1.5 text-xs">
                             <Coffee size={12} style={{ color: theme.accent }} />
-                            <span style={{ color: theme.textSecondary }}>Evening Tea</span>
+                            <span style={{ color: theme.textSecondary }}>
+                              Evening Tea
+                            </span>
                             {accommodation.eveningTeaDescription && (
-                              <span className="text-[10px]" style={{ color: theme.textSecondary }}>
+                              <span
+                                className="text-[10px]"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 ({accommodation.eveningTeaDescription})
                               </span>
                             )}
@@ -320,10 +306,18 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
                         )}
                         {accommodation.snacks && (
                           <div className="flex items-center gap-1.5 text-xs">
-                            <Utensils size={12} style={{ color: theme.warning || "#f59e0b" }} />
-                            <span style={{ color: theme.textSecondary }}>Snacks</span>
+                            <Utensils
+                              size={12}
+                              style={{ color: theme.warning || "#f59e0b" }}
+                            />
+                            <span style={{ color: theme.textSecondary }}>
+                              Snacks
+                            </span>
                             {accommodation.snackNote && (
-                              <span className="text-[10px]" style={{ color: theme.textSecondary }}>
+                              <span
+                                className="text-[10px]"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 ({accommodation.snackNote})
                               </span>
                             )}
@@ -334,22 +328,51 @@ export const AccommodationsList: React.FC<AccommodationsListProps> = ({ accommod
                       {/* Other Notes */}
                       {accommodation.otherNotes && (
                         <div className="flex items-start gap-1.5">
-                          <Bed size={12} style={{ color: theme.textSecondary, marginTop: 1 }} />
-                          <p className="text-xs" style={{ color: theme.textSecondary }}>
+                          <Bed
+                            size={12}
+                            style={{ color: theme.textSecondary, marginTop: 1 }}
+                          />
+                          <p
+                            className="text-xs"
+                            style={{ color: theme.textSecondary }}
+                          >
                             {accommodation.otherNotes}
                           </p>
                         </div>
                       )}
 
                       {/* Timestamps */}
-                      <div className="grid grid-cols-2 gap-2 pt-1 border-t" style={{ borderColor: hexToRgba(theme.border, 0.5) }}>
+                      <div
+                        className="grid grid-cols-2 gap-2 pt-1 border-t"
+                        style={{ borderColor: hexToRgba(theme.border, 0.5) }}
+                      >
                         <div>
-                          <p className="text-[10px]" style={{ color: theme.textSecondary }}>Created</p>
-                          <p className="text-[10px]" style={{ color: theme.textSecondary }}>{formatDate(accommodation.createdAt)}</p>
+                          <p
+                            className="text-[10px]"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            Created
+                          </p>
+                          <p
+                            className="text-[10px]"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            {formatDate(accommodation.createdAt)}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-[10px]" style={{ color: theme.textSecondary }}>Updated</p>
-                          <p className="text-[10px]" style={{ color: theme.textSecondary }}>{formatDate(accommodation.updatedAt)}</p>
+                          <p
+                            className="text-[10px]"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            Updated
+                          </p>
+                          <p
+                            className="text-[10px]"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            {formatDate(accommodation.updatedAt)}
+                          </p>
                         </div>
                       </div>
                     </div>

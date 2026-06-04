@@ -732,3 +732,30 @@ export const packageCardVariants: Variants = {
   },
 };
 
+export const accommodationCardVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: EASE_OUT },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    transition: { duration: 0.2, ease: "easeIn" },
+  },
+};
+export const typeVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.2, ease: EASE_OUT },
+  },
+  hover: {
+    y: -2,
+    scale: 1.02,
+    transition: { duration: 0.15 },
+  },
+};
+

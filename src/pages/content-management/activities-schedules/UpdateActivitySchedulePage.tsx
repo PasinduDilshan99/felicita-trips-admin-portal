@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { ActivityScheduleService } from "@/services/activityScheduleService";
 import {
   ActivityScheduleIdAndName,
@@ -31,46 +30,15 @@ import {
   ChangedField,
 } from "@/components/common-components/UpdateConfirmationModal";
 import { hexToRgba } from "@/utils/functions";
-import { motion, AnimatePresence, Variants } from "framer-motion";
-import { ACTIVITIES_PAGE_URL } from "@/utils/urls";
+import { motion, AnimatePresence } from "framer-motion";
+import { ACTIVITY_SCHEDULE_DETAILS_VIEW_URL } from "@/utils/urls";
 import { ActivityInformation } from "@/components/activity-schedules-components/update-activity-schedule-components/ActivityInformation";
 import { ActivityCategories } from "@/components/activity-schedules-components/update-activity-schedule-components/ActivityCategories";
 import { ActivityImages } from "@/components/activity-schedules-components/update-activity-schedule-components/ActivityImages";
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-};
-
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    transition: { duration: 0.32, ease: EASE_OUT },
-  },
-};
-
-const STATUS_OPTIONS = [
-  {
-    value: "ACTIVE",
-    label: "Active",
-    description: "Schedule is active",
-    color: "#059669",
-  },
-  {
-    value: "INACTIVE",
-    label: "Inactive",
-    description: "Schedule is inactive",
-    color: "#6b7280",
-  },
-];
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITY_SCHEDULE_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
+import { ACTIVITY_SCHEDULE_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
 
 const UpdateActivitySchedulePage = () => {
   const searchParams = useSearchParams();
@@ -81,10 +49,8 @@ const UpdateActivitySchedulePage = () => {
   const initialScheduleName = searchParams?.get("activity-schedule-name") || "";
   const initialScheduleId = searchParams?.get("activity-schedule-id") || "";
 
-  // State for schedules list
   const [schedules, setSchedules] = useState<ActivityScheduleIdAndName[]>([]);
 
-  // State for selected schedule
   const [selectedSchedule, setSelectedSchedule] =
     useState<ActivityScheduleIdAndName | null>(
       initialScheduleId && initialScheduleName
@@ -95,18 +61,11 @@ const UpdateActivitySchedulePage = () => {
         : null,
     );
 
-  // State for original schedule details
   const [originalSchedule, setOriginalSchedule] =
     useState<ActivityScheduleDetails | null>(null);
-
-  // State for edited schedule
   const [editedSchedule, setEditedSchedule] =
     useState<ActivityScheduleDetails | null>(null);
-
-  // State for basic details changes
   const [basicDetailsChanged, setBasicDetailsChanged] = useState(false);
-
-  // UI state
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -117,22 +76,12 @@ const UpdateActivitySchedulePage = () => {
     new Set(["basic"]),
   );
 
-  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
     message: string;
     actionLink?: string;
   } | null>(null);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Activity Schedules", href: ACTIVITIES_PAGE_URL },
-    {
-      label: "Update",
-      href: ACTIVITIES_PAGE_URL,
-    },
-  ];
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => {
@@ -294,7 +243,7 @@ const UpdateActivitySchedulePage = () => {
         type: "success",
         title: "Update Successful!",
         message: `${editedSchedule?.activityScheduleName} has been updated successfully.`,
-        actionLink: `${ACTIVITIES_PAGE_URL}/view?id=${selectedSchedule?.activityScheduleId}`,
+        actionLink: `${ACTIVITY_SCHEDULE_DETAILS_VIEW_URL}/${selectedSchedule?.activityScheduleId}?name=${selectedSchedule?.activityScheduleName}`,
       });
 
       setShowConfirmModal(false);
@@ -474,7 +423,7 @@ const UpdateActivitySchedulePage = () => {
           <PageHeader
             title="Update Activity Schedule"
             description="Edit and update existing activity schedule information"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITY_SCHEDULE_UPDATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -806,7 +755,7 @@ const UpdateActivitySchedulePage = () => {
                         Status
                       </label>
                       <div className="grid grid-cols-2 gap-3">
-                        {STATUS_OPTIONS.map((opt) => {
+                        {ACTIVITY_SCHEDULE_UPDATE_STATUS_OPTIONS.map((opt) => {
                           const isSelected =
                             editedSchedule.scheduleStatus === opt.value;
                           return (

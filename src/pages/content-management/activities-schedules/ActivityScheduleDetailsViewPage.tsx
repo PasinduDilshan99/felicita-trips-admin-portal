@@ -1,9 +1,7 @@
-// app/activity-schedules/view/[scheduleId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { ActivityScheduleService } from "@/services/activityScheduleService";
 import {
   ActivityScheduleDetails,
@@ -11,9 +9,7 @@ import {
 } from "@/types/activity-schedule-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useImageGallery } from "@/hooks/useImageGallery";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import { CommonHeroImage } from "@/components/common-components/details-view/CommonHeroImage";
 import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
 import { CommonQuickStats } from "@/components/common-components/details-view/CommonQuickStats";
@@ -21,43 +17,35 @@ import { CommonMetadata } from "@/components/common-components/details-view/Comm
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-
-// Import sub-components
 import { ActivityScheduleOverview } from "@/components/activity-schedules-components/activity-schedule-details-view-components/ActivityScheduleOverview";
 import { ActivityScheduleRelatedInfo } from "@/components/activity-schedules-components/activity-schedule-details-view-components/ActivityScheduleRelatedInfo";
-
-// Icons
 import {
   Calendar,
   Clock,
   Activity,
   Tag,
   Image,
-  CheckCircle,
-  AlertCircle,
-  User,
   DollarSign,
   Users,
 } from "lucide-react";
-
-// Constants for routing
 import {
-  ACTIVITIES_VIEW_PAGE_URL,
-  DESTINATIONS_VIEW_PAGE_URL,
-  TOURS_VIEW_PAGE_URL,
-  PACKAGES_VIEW_PAGE_URL,
+  ACTIVITY_SCHEDULE_DETAILS_VIEW_URL,
+  ACTIVITY_SCHEDULE_UPDATE_PAGE_URL,
+  ACTIVITY_SCHEDULE_TERMINATE_PAGE_URL,
+  ACTIVITY_SCHEDULE_VIEW_PAGE_URL,
+  ACTIVITY_DETAILS_VIEW_PAGE_URL,
+  DESTINATION_DETAILS_VIEW_PAGE_URL,
+  TOUR_DETAILS_VIEW_PAGE_URL,
+  TOUR_SCHEDULE_DETAILS_VIEW_URL,
+  PACKAGE_SCHEDULE_DETAILS_VIEW_URL,
+  PACKAGE_DETAILS_VIEW_PAGE_URL,
 } from "@/utils/urls";
 import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
 import { ActivityScheduleCategories } from "@/components/activity-schedules-components/activity-schedule-details-view-components/ActivityScheduleCategories";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { ACTIVITY_SCHEDULE_DETAILS_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { hexToRgba } from "@/utils/functions";
 
 const ActivityScheduleDetailsViewPage = () => {
   const params = useParams();
@@ -86,12 +74,10 @@ const ActivityScheduleDetailsViewPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Activity Schedules", href: ACTIVITIES_VIEW_PAGE_URL },
-    { label: "View", href: ACTIVITIES_VIEW_PAGE_URL },
+    ...ACTIVITY_SCHEDULE_DETAILS_VIEW_PAGE_BREADCRUMB_DATA,
     {
       label: activitySchedule?.activityScheduleName || "Details",
-      href: `${ACTIVITIES_VIEW_PAGE_URL}/${scheduleId}`,
+      href: `${ACTIVITY_SCHEDULE_DETAILS_VIEW_URL}/${scheduleId}`,
     },
   ];
 
@@ -139,16 +125,22 @@ const ActivityScheduleDetailsViewPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(ACTIVITIES_VIEW_PAGE_URL);
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(ACTIVITY_SCHEDULE_VIEW_PAGE_URL);
+    }
+  };
 
   const handleEdit = () =>
     router.push(
-      `${ACTIVITIES_VIEW_PAGE_URL}/${scheduleId}?name=${activitySchedule?.activityScheduleName}`,
+      `${ACTIVITY_SCHEDULE_UPDATE_PAGE_URL}/${scheduleId}?name=${activitySchedule?.activityScheduleName}`,
     );
 
   const handleDelete = () =>
     router.push(
-      `${ACTIVITIES_VIEW_PAGE_URL}/${scheduleId}?name=${activitySchedule?.activityScheduleName}`,
+      `${ACTIVITY_SCHEDULE_TERMINATE_PAGE_URL}/${scheduleId}?name=${activitySchedule?.activityScheduleName}`,
     );
 
   const handleShare = () => {
@@ -166,42 +158,48 @@ const ActivityScheduleDetailsViewPage = () => {
 
   const handleViewActivity = () => {
     if (activitySchedule?.activityId) {
-      router.push(`${ACTIVITIES_VIEW_PAGE_URL}/${activitySchedule.activityId}`);
+      router.push(
+        `${ACTIVITY_DETAILS_VIEW_PAGE_URL}/${activitySchedule.activityId}?name=${activitySchedule.activityName}`,
+      );
     }
   };
 
   const handleViewDestination = () => {
     if (activitySchedule?.destinationId) {
       router.push(
-        `${DESTINATIONS_VIEW_PAGE_URL}/${activitySchedule.destinationId}`,
+        `${DESTINATION_DETAILS_VIEW_PAGE_URL}/${activitySchedule.destinationId}?name=${activitySchedule.destinationName}`,
       );
     }
   };
 
   const handleViewTour = () => {
     if (activitySchedule?.tourId) {
-      router.push(`${TOURS_VIEW_PAGE_URL}/${activitySchedule.tourId}`);
+      router.push(
+        `${TOUR_DETAILS_VIEW_PAGE_URL}/${activitySchedule.tourId}?name=${activitySchedule.tourName}`,
+      );
     }
   };
 
   const handleViewTourSchedule = () => {
     if (activitySchedule?.tourScheduleId) {
       router.push(
-        `${ACTIVITIES_VIEW_PAGE_URL}/${activitySchedule.tourScheduleId}`,
+        `${TOUR_SCHEDULE_DETAILS_VIEW_URL}/${activitySchedule.tourScheduleId}?name=${activitySchedule.tourScheduleName}`,
       );
     }
   };
 
   const handleViewPackage = () => {
     if (activitySchedule?.packageId) {
-      router.push(`${PACKAGES_VIEW_PAGE_URL}/${activitySchedule.packageId}`);
+      router.push(
+        `${PACKAGE_DETAILS_VIEW_PAGE_URL}/${activitySchedule.packageId}?name${activitySchedule.packageName}`,
+      );
     }
   };
 
   const handleViewPackageSchedule = () => {
     if (activitySchedule?.packageScheduleId) {
       router.push(
-        `${ACTIVITIES_VIEW_PAGE_URL}/${activitySchedule.packageScheduleId}`,
+        `${PACKAGE_SCHEDULE_DETAILS_VIEW_URL}/${activitySchedule.packageScheduleId}?name${activitySchedule.packageScheduleName}`,
       );
     }
   };

@@ -1,12 +1,7 @@
-// app/package-schedules/view/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
+import FilterPanel from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { PackageScheduleService } from "@/services/packageScheduleService";
@@ -20,88 +15,32 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import { WEB_MANAGEMENT_URL } from "@/utils/urls";
 import PackageScheduleCard from "@/components/package-schedules-components/view-package-schedule-components/PackageScheduleCard";
 import PackageScheduleListCard from "@/components/package-schedules-components/view-package-schedule-components/PackageScheduleListCard";
+import {
+  packageScheduleViewFiltersToUrlParams,
+  packageScheduleViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { FilterField } from "@/types/filter-types";
+import { PACKAGE_SCHEDULE_VIEW_SORTING_OPTIONS } from "@/data/sorting-options";
+import { PACKAGE_SCHEDULE_VIEW_STATUS_OPTIONS } from "@/data/status-options-data";
+import { PACKAGE_SCHEDULE_VIEW_PAGE_URL } from "@/utils/urls";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_SCHEDULE_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
-// Default sort options
-const DEFAULT_SORT_OPTIONS = [
-  { value: "packageScheduleName", label: "Schedule Name" },
-  { value: "packageName", label: "Package Name" },
-  { value: "startDate", label: "Start Date" },
-  { value: "endDate", label: "End Date" },
-  { value: "durationStart", label: "Duration Start" },
-  { value: "durationEnd", label: "Duration End" },
-  { value: "tourScheduleName", label: "Tour Schedule Name" },
-];
-
-// Utility functions for URL params management
-const filtersToUrlParams = (
-  filters: PackageScheduleFilterParams,
-): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.packageId) params.set("packageId", filters.packageId.toString());
-  if (filters.tourScheduleId)
-    params.set("tourScheduleId", filters.tourScheduleId.toString());
-  if (filters.tourId) params.set("tourId", filters.tourId.toString());
-  if (filters.startDate) params.set("startDate", filters.startDate);
-  if (filters.endDate) params.set("endDate", filters.endDate);
-  if (filters.status) params.set("status", filters.status);
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
-
-  return params;
-};
-
-const urlParamsToFilters = (
-  params: URLSearchParams,
-): PackageScheduleFilterParams => {
-  return {
-    name: params.get("name") || null,
-    packageId: params.get("packageId")
-      ? parseInt(params.get("packageId")!)
-      : null,
-    tourScheduleId: params.get("tourScheduleId")
-      ? parseInt(params.get("tourScheduleId")!)
-      : null,
-    tourId: params.get("tourId") ? parseInt(params.get("tourId")!) : null,
-    startDate: params.get("startDate") || null,
-    endDate: params.get("endDate") || null,
-    status: params.get("status") || null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-    sortBy: params.get("sortBy") || "",
-    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
-  };
-};
-
-// Main component wrapped with Suspense for useSearchParams
 const PackageSchedulesViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { theme } = useTheme();
 
-  // State for filter request params
   const [requestParams, setRequestParams] =
     useState<PackageScheduleParamsData | null>(null);
   const [requestParamsLoading, setRequestParamsLoading] = useState(true);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    { label: "Package Schedules", href: WEB_MANAGEMENT_URL },
-    { label: "View", href: WEB_MANAGEMENT_URL },
-  ];
-
   const [filters, setFilters] = useState<PackageScheduleFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    packageScheduleViewUrlParamsToFilters(
+      searchParams || new URLSearchParams(),
+    ),
   );
 
   const [schedules, setSchedules] = useState<PackageScheduleListItem[]>([]);
@@ -169,12 +108,6 @@ const PackageSchedulesViewContent = () => {
     return [];
   }, [requestParams]);
 
-  // Get status options
-  const getStatusOptions = () => [
-    { value: "ACTIVE", label: "Active" },
-    { value: "INACTIVE", label: "Inactive" },
-  ];
-
   // Get dynamic sort options from request params
   const getSortOptions = useCallback((): { value: string; label: string }[] => {
     if (
@@ -186,7 +119,7 @@ const PackageSchedulesViewContent = () => {
         label: sort.sortByDisplayName,
       }));
     }
-    return DEFAULT_SORT_OPTIONS;
+    return PACKAGE_SCHEDULE_VIEW_SORTING_OPTIONS;
   }, [requestParams]);
 
   // Get sort label
@@ -230,7 +163,7 @@ const PackageSchedulesViewContent = () => {
       key: "status",
       label: "Status",
       type: "select",
-      options: getStatusOptions(),
+      options: PACKAGE_SCHEDULE_VIEW_STATUS_OPTIONS,
       width: "third",
     },
     {
@@ -252,11 +185,11 @@ const PackageSchedulesViewContent = () => {
   // Update URL with current filters
   const updateURL = useCallback(
     (newFilters: PackageScheduleFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = packageScheduleViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
-        ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_URL}/view?${queryString}`
-        : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_URL}/view`;
+        ? `${PACKAGE_SCHEDULE_VIEW_PAGE_URL}?${queryString}`
+        : PACKAGE_SCHEDULE_VIEW_PAGE_URL;
 
       router.replace(newURL, { scroll: false });
     },
@@ -291,7 +224,7 @@ const PackageSchedulesViewContent = () => {
 
   // Initial load from URL params
   useEffect(() => {
-    const initialFilters = urlParamsToFilters(
+    const initialFilters = packageScheduleViewUrlParamsToFilters(
       searchParams || new URLSearchParams(),
     );
     setFilters(initialFilters);
@@ -301,7 +234,7 @@ const PackageSchedulesViewContent = () => {
   // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = packageScheduleViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -512,7 +445,7 @@ const PackageSchedulesViewContent = () => {
           <PageHeader
             title="Package Schedules View"
             description="Manage and monitor package schedules, availability, and itineraries"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_SCHEDULE_VIEW_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -630,10 +563,7 @@ const PackageSchedulesViewContent = () => {
   );
 };
 
-// Wrap with Suspense for useSearchParams
 const ViewPackageSchedulePage = () => {
-  const { theme } = useTheme();
-
   return (
     <Suspense
       fallback={

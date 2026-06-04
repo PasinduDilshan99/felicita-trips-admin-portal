@@ -72,7 +72,8 @@ export interface PackageScheduleResponse {
   packageScheduleResponses: PackageScheduleListItem[];
 }
 
-export type PackageScheduleListApiResponse = ApiResponse<PackageScheduleResponse>;
+export type PackageScheduleListApiResponse =
+  ApiResponse<PackageScheduleResponse>;
 
 // Filter Parameters
 export interface PackageScheduleFilterParams {
@@ -117,7 +118,8 @@ export interface PackageScheduleParamsData {
   sortByResponses: SortByOption[];
 }
 
-export type PackageScheduleParamsApiResponse = ApiResponse<PackageScheduleParamsData>;
+export type PackageScheduleParamsApiResponse =
+  ApiResponse<PackageScheduleParamsData>;
 
 // Package Schedule Details
 export interface PackageScheduleDetails {
@@ -162,7 +164,8 @@ export interface PackageScheduleDetails {
   accommodations: PackageScheduleAccommodation[];
 }
 
-export type PackageScheduleDetailsApiResponse = ApiResponse<PackageScheduleDetails>;
+export type PackageScheduleDetailsApiResponse =
+  ApiResponse<PackageScheduleDetails>;
 
 // Create Package Schedule Request
 export interface CreatePackageScheduleRequest {
@@ -182,7 +185,8 @@ export interface CreatePackageScheduleResponse {
   message: string | null;
 }
 
-export type CreatePackageScheduleApiResponse = ApiResponse<CreatePackageScheduleResponse>;
+export type CreatePackageScheduleApiResponse =
+  ApiResponse<CreatePackageScheduleResponse>;
 
 // Update Package Schedule Request
 export interface UpdatePackageScheduleRequest {
@@ -204,7 +208,8 @@ export interface UpdatePackageScheduleResponse {
   id: number | null;
 }
 
-export type UpdatePackageScheduleApiResponse = ApiResponse<UpdatePackageScheduleResponse>;
+export type UpdatePackageScheduleApiResponse =
+  ApiResponse<UpdatePackageScheduleResponse>;
 
 // Terminate Package Schedule Request
 export interface TerminatePackageScheduleRequest {
@@ -215,7 +220,8 @@ export interface TerminatePackageScheduleResponse {
   message: string;
 }
 
-export type TerminatePackageScheduleApiResponse = ApiResponse<TerminatePackageScheduleResponse>;
+export type TerminatePackageScheduleApiResponse =
+  ApiResponse<TerminatePackageScheduleResponse>;
 
 // Get Package Schedule Details Request
 export interface GetPackageScheduleDetailsRequest {
@@ -230,4 +236,101 @@ export interface PackageScheduleIdAndName {
   packageScheduleName: string;
 }
 
-export type PackageScheduleIdAndNamesApiResponse = ApiResponse<PackageScheduleIdAndName[]>;
+export type PackageScheduleIdAndNamesApiResponse = ApiResponse<
+  PackageScheduleIdAndName[]
+>;
+
+export interface PackageScheduleCardProps {
+  schedule: PackageScheduleListItem;
+}
+
+export interface PackageScheduleListCardProps {
+  schedule: PackageScheduleListItem;
+}
+
+export interface PackageScheduleAccommodationsProps {
+  accommodations: PackageScheduleAccommodation[];
+  packageColor: string;
+}
+
+export interface PackageScheduleFeaturesProps {
+  features: PackageScheduleFeature[];
+}
+
+export interface PackageScheduleOverviewProps {
+  name: string;
+  description: string;
+  assumeStartDate: string;
+  assumeEndDate: string;
+  durationStart: number;
+  durationEnd: number;
+  specialNote: string;
+  color: string | null;
+}
+
+export interface PackageScheduleRelatedInfoProps {
+  packageId: number;
+  packageName: string;
+  packageDescription: string | null;
+  packageStatus: string;
+  packageTypeName: string;
+  packageTypeDescription: string;
+  minPersonCount: number;
+  maxPersonCount: number;
+  tourId: number;
+  tourName: string;
+  tourDescription: string;
+  tourDuration: number;
+  startLocation: string;
+  endLocation: string;
+  season: string;
+  tourStatus: string;
+  tourScheduleId: number;
+  tourScheduleName: string | null;
+  onViewPackage: () => void;
+  onViewTour: () => void;
+  onViewTourSchedule: () => void;
+}
+
+export interface PackageScheduleReadOnlyDetailsProps {
+  schedule: PackageScheduleDetails;
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+}
+
+export interface PackageScheduleSearchItem {
+  id: number;
+  name: string;
+}
+
+export interface AccommodationsListProps {
+  accommodations: PackageScheduleAccommodation[];
+}
+
+export interface BasicInfoPanelProps {
+  scheduleDetails: PackageScheduleDetails;
+}
+
+export interface FeaturesListProps {
+  features: PackageScheduleFeature[];
+}
+
+export interface PackageInfoPanelProps {
+  scheduleDetails: PackageScheduleDetails;
+}
+
+export interface PackageScheduleStatsProps {
+  scheduleDetails: PackageScheduleDetails;
+}
+
+export interface StatItem {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  color: string;
+  formatter?: (value: number | string) => string | number;
+}
+
+export interface TourInfoPanelProps {
+  scheduleDetails: PackageScheduleDetails;
+}

@@ -1,16 +1,9 @@
-// app/activity-schedules/view/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
+import FilterPanel from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { ActivityScheduleService } from "@/services/activityScheduleService";
 import {
@@ -25,118 +18,39 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import { EmptyState } from "@/components/common-components/EmptyState";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import { WEB_MANAGEMENT_URL } from "@/utils/urls";
 import ActivityScheduleCard from "@/components/activity-schedules-components/view-activity-schedule-components/ActivityScheduleCard";
 import ActivityScheduleListCard from "@/components/activity-schedules-components/view-activity-schedule-components/ActivityScheduleListCard";
+import {
+  activityScheduleViewFiltersToUrlParams,
+  activityScheduleViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import { ACTIVITY_SCHEDULE_VIEW_SORTING_OPTIONS } from "@/data/sorting-options";
+import { FilterField } from "@/types/filter-types";
+import { ACTIVITY_SCHEDULE_VIEW_PAGE_URL } from "@/utils/urls";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITY_SCHEDULE_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
-// Sort options for activity schedules (from API params)
-const SORT_OPTIONS = [
-  { value: "activityName", label: "Activity Name" },
-  { value: "activityScheduleName", label: "Schedule Name" },
-  { value: "durationHours", label: "Duration" },
-  { value: "priceLocal", label: "Local Price" },
-  { value: "priceForeigners", label: "Foreigner Price" },
-  { value: "scheduleAssumeStartDate", label: "Start Date" },
-  { value: "scheduleAssumeEndDate", label: "End Date" },
-  { value: "createdAt", label: "Created Date" },
-  { value: "updatedAt", label: "Updated Date" },
-];
-
-// Utility functions for URL params management
-const filtersToUrlParams = (
-  filters: ActivityScheduleFilterParams,
-): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.duration) params.set("duration", filters.duration.toString());
-  if (filters.activityId)
-    params.set("activityId", filters.activityId.toString());
-  if (filters.destinationId)
-    params.set("destinationId", filters.destinationId.toString());
-  if (filters.packageScheduleId)
-    params.set("packageScheduleId", filters.packageScheduleId.toString());
-  if (filters.tourScheduleId)
-    params.set("tourScheduleId", filters.tourScheduleId.toString());
-  if (filters.activityCategory)
-    params.set("activityCategory", filters.activityCategory);
-  if (filters.fromDate) params.set("fromDate", filters.fromDate);
-  if (filters.toDate) params.set("toDate", filters.toDate);
-  if (filters.season) params.set("season", filters.season);
-  if (filters.status) params.set("status", filters.status);
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
-
-  return params;
-};
-
-const urlParamsToFilters = (
-  params: URLSearchParams,
-): ActivityScheduleFilterParams => {
-  return {
-    name: params.get("name") || null,
-    duration: params.get("duration")
-      ? parseFloat(params.get("duration")!)
-      : null,
-    activityId: params.get("activityId")
-      ? parseInt(params.get("activityId")!)
-      : null,
-    destinationId: params.get("destinationId")
-      ? parseInt(params.get("destinationId")!)
-      : null,
-    packageScheduleId: params.get("packageScheduleId")
-      ? parseInt(params.get("packageScheduleId")!)
-      : null,
-    tourScheduleId: params.get("tourScheduleId")
-      ? parseInt(params.get("tourScheduleId")!)
-      : null,
-    activityCategory: params.get("activityCategory") || null,
-    fromDate: params.get("fromDate") || null,
-    toDate: params.get("toDate") || null,
-    season: params.get("season") || null,
-    status: params.get("status") || null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-    sortBy: params.get("sortBy") || null,
-    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
-  };
-};
-
-// Main component wrapped with Suspense for useSearchParams
 const ActivitySchedulesViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { categories, loading: categoriesLoading } = useCommon();
   const { theme } = useTheme();
 
-  // State for filter request params
   const [requestParams, setRequestParams] =
     useState<ActivityScheduleParamsData | null>(null);
   const [requestParamsLoading, setRequestParamsLoading] = useState(true);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    { label: "Activity Schedules", href: WEB_MANAGEMENT_URL },
-    { label: "View", href: WEB_MANAGEMENT_URL },
-  ];
-
   const [filters, setFilters] = useState<ActivityScheduleFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    activityScheduleViewUrlParamsToFilters(
+      searchParams || new URLSearchParams(),
+    ),
   );
-
   const [schedules, setSchedules] = useState<ActivityScheduleListItem[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [modalImages, setModalImages] = useState<ImageModalImage[]>([]);
@@ -278,7 +192,7 @@ const ActivitySchedulesViewContent = () => {
         label: sort.sortByDisplayName,
       }));
     }
-    return SORT_OPTIONS;
+    return ACTIVITY_SCHEDULE_VIEW_SORTING_OPTIONS;
   }, [requestParams]);
 
   // Get sort label
@@ -372,11 +286,11 @@ const ActivitySchedulesViewContent = () => {
   // Update URL with current filters
   const updateURL = useCallback(
     (newFilters: ActivityScheduleFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = activityScheduleViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
-        ? `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_URL}/view?${queryString}`
-        : `${WEB_MANAGEMENT_PATH}${WEB_MANAGEMENT_URL}/view`;
+        ? `${ACTIVITY_SCHEDULE_VIEW_PAGE_URL}?${queryString}`
+        : ACTIVITY_SCHEDULE_VIEW_PAGE_URL;
 
       router.replace(newURL, { scroll: false });
     },
@@ -411,7 +325,7 @@ const ActivitySchedulesViewContent = () => {
 
   // Initial load from URL params
   useEffect(() => {
-    const initialFilters = urlParamsToFilters(
+    const initialFilters = activityScheduleViewUrlParamsToFilters(
       searchParams || new URLSearchParams(),
     );
     setFilters(initialFilters);
@@ -421,7 +335,7 @@ const ActivitySchedulesViewContent = () => {
   // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = activityScheduleViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -693,7 +607,7 @@ const ActivitySchedulesViewContent = () => {
           <PageHeader
             title="Activity Schedules View"
             description="Manage and monitor activity schedules, availability, and pricing"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITY_SCHEDULE_VIEW_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -829,10 +743,7 @@ const ActivitySchedulesViewContent = () => {
   );
 };
 
-// Wrap with Suspense for useSearchParams
 const ViewActivitySchedulePage = () => {
-  const { theme } = useTheme();
-
   return (
     <Suspense
       fallback={

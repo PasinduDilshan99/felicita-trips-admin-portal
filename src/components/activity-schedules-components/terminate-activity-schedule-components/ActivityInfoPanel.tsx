@@ -1,70 +1,23 @@
-// components/activity-schedules-components/terminate-activity-schedule-components/ActivityInfoPanel.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { Activity, Calendar, Clock, DollarSign, Users, MapPin, AlertCircle } from "lucide-react";
-import { ActivityScheduleDetails } from "@/types/activity-schedule-types";
+import { motion } from "framer-motion";
+import { Activity, Clock, DollarSign, Users, MapPin } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { ActivityInfoPanelProps } from "@/types/activity-schedule-types";
+import {
+  cardVariants,
+  contentVariants,
+  headerVariants,
+  infoRowVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const infoRowVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-};
-
-interface ActivityInfoPanelProps {
-  scheduleDetails: ActivityScheduleDetails;
-}
-
-export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDetails }) => {
+export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({
+  scheduleDetails,
+}) => {
   const { theme } = useTheme();
   const { formatPrice } = useCurrency();
 
@@ -107,7 +60,10 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
       >
         {/* Activity Name */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Activity Name
           </p>
           <motion.div
@@ -121,7 +77,10 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
 
         {/* Activity Description */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Description
           </p>
           <motion.div
@@ -135,7 +94,10 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
 
         {/* Destination */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1 flex items-center gap-1"
+            style={{ color: theme.textSecondary }}
+          >
             <MapPin size={11} />
             Destination
           </p>
@@ -150,7 +112,10 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
 
         {/* Season */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Season
           </p>
           <motion.div
@@ -163,9 +128,15 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
         </motion.div>
 
         {/* Activity Duration & Available Hours */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Clock size={11} />
               Duration
             </p>
@@ -178,7 +149,10 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Clock size={11} />
               Available Hours
             </p>
@@ -187,15 +161,22 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
               className="text-sm"
               style={{ color: theme.text }}
             >
-              {formatTime(scheduleDetails.availableFrom)} – {formatTime(scheduleDetails.availableTo)}
+              {formatTime(scheduleDetails.availableFrom)} –{" "}
+              {formatTime(scheduleDetails.availableTo)}
             </motion.div>
           </div>
         </motion.div>
 
         {/* Pricing */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <DollarSign size={11} />
               Local Price
             </p>
@@ -208,7 +189,10 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <DollarSign size={11} />
               Foreign Price
             </p>
@@ -224,7 +208,10 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
 
         {/* Group Size */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1 flex items-center gap-1"
+            style={{ color: theme.textSecondary }}
+          >
             <Users size={11} />
             Group Size
           </p>
@@ -233,13 +220,17 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
             className="text-sm"
             style={{ color: theme.text }}
           >
-            {scheduleDetails.minParticipate}–{scheduleDetails.maxParticipate} people
+            {scheduleDetails.minParticipate}–{scheduleDetails.maxParticipate}{" "}
+            people
           </motion.div>
         </motion.div>
 
         {/* Activity Status */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Activity Status
           </p>
           <motion.div
@@ -247,18 +238,25 @@ export const ActivityInfoPanel: React.FC<ActivityInfoPanelProps> = ({ scheduleDe
             className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium"
             style={{
               background: hexToRgba(
-                scheduleDetails.activityStatus === "ACTIVE" ? theme.success :
-                scheduleDetails.activityStatus === "INACTIVE" ? theme.warning || "#f59e0b" :
-                theme.error,
-                0.1
+                scheduleDetails.activityStatus === "ACTIVE"
+                  ? theme.success
+                  : scheduleDetails.activityStatus === "INACTIVE"
+                    ? theme.warning || "#f59e0b"
+                    : theme.error,
+                0.1,
               ),
-              color: scheduleDetails.activityStatus === "ACTIVE" ? theme.success :
-                     scheduleDetails.activityStatus === "INACTIVE" ? theme.warning || "#f59e0b" :
-                     theme.error,
+              color:
+                scheduleDetails.activityStatus === "ACTIVE"
+                  ? theme.success
+                  : scheduleDetails.activityStatus === "INACTIVE"
+                    ? theme.warning || "#f59e0b"
+                    : theme.error,
               border: `1px solid ${
-                scheduleDetails.activityStatus === "ACTIVE" ? hexToRgba(theme.success, 0.3) :
-                scheduleDetails.activityStatus === "INACTIVE" ? hexToRgba(theme.warning || "#f59e0b", 0.3) :
-                hexToRgba(theme.error, 0.3)
+                scheduleDetails.activityStatus === "ACTIVE"
+                  ? hexToRgba(theme.success, 0.3)
+                  : scheduleDetails.activityStatus === "INACTIVE"
+                    ? hexToRgba(theme.warning || "#f59e0b", 0.3)
+                    : hexToRgba(theme.error, 0.3)
               }`,
             }}
           >

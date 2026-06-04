@@ -36,6 +36,22 @@ export const ACTIVITY_CATEGORY_CREATE_PAGE_TITLE = "Activity Categories";
 export const ACTIVITY_CATEGORY_UPDATE_PAGE_TITLE = "Activity Categories";
 export const ACTIVITY_CATEGORY_TERMINATE_PAGE_TITLE = "Activity Categories";
 
+export const ACTIVITY_SCHEDULE_PAGE_TITLE = "Activity Categories";
+export const ACTIVITY_SCHEDULE_VIEW_PAGE_TITLE = "Activity Categories";
+export const ACTIVITY_SCHEDULE_VIEW_DETAILS_PAGE_TITLE = "Activity Categories";
+export const ACTIVITY_SCHEDULE_CREATE_PAGE_TITLE = "Activity Categories";
+export const ACTIVITY_SCHEDULE_UPDATE_PAGE_TITLE = "Activity Categories";
+export const ACTIVITY_SCHEDULE_TERMINATE_PAGE_TITLE = "Activity Categories";
+
+export const TOUR_SCHEDULE_PAGE_TITLE = "Activity Categories";
+export const TOUR_SCHEDULE_VIEW_PAGE_TITLE = "Activity Categories";
+export const TOUR_SCHEDULE_VIEW_DETAILS_PAGE_TITLE = "Activity Categories";
+export const TOUR_SCHEDULE_CREATE_PAGE_TITLE = "Activity Categories";
+export const TOUR_SCHEDULE_UPDATE_PAGE_TITLE = "Activity Categories";
+export const TOUR_SCHEDULE_TERMINATE_PAGE_TITLE = "Activity Categories";
+
+
+
 export const TOUR_PAGE_TITLE = "Tours";
 export const TOUR_VIEW_PAGE_TITLE = "View Tours";
 export const TOUR_DETAILS_VIEW_PAGE_TITLE = "View Tour Details";
@@ -70,6 +86,13 @@ export const PACKAGE_TYPE_VIEW_DETAILS_PAGE_TITLE = "Tour Categories";
 export const PACKAGE_TYPE_CREATE_PAGE_TITLE = "Tour Categories";
 export const PACKAGE_TYPE_UPDATE_PAGE_TITLE = "Tour Categories";
 export const PACKAGE_TYPE_TERMINATE_PAGE_TITLE = "Tour Categories";
+
+export const PACKAGE_SCHEDULE_PAGE_TITLE = "Activity Categories";
+export const PACKAGE_SCHEDULE_VIEW_PAGE_TITLE = "Activity Categories";
+export const PACKAGE_SCHEDULE_VIEW_DETAILS_PAGE_TITLE = "Activity Categories";
+export const PACKAGE_SCHEDULE_CREATE_PAGE_TITLE = "Activity Categories";
+export const PACKAGE_SCHEDULE_UPDATE_PAGE_TITLE = "Activity Categories";
+export const PACKAGE_SCHEDULE_TERMINATE_PAGE_TITLE = "Activity Categories";
 
 export const WEB_PAGE_MANAGEMENT_PAGE_TITLE = "Web Page Management";
 export const HOME_PAGE_MANAGEMENT_PAGE_TITLE = "Home Page Management";

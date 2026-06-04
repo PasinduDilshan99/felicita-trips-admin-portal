@@ -1,37 +1,25 @@
-// app/web-management/tour-schedules/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
 import { TourScheduleService } from "@/services/tourScheduleService";
 import {
   TourScheduleDetails,
   TourScheduleIdAndName,
+  TourScheduleSearchItem,
 } from "@/types/tour-schedule-types";
 import {
   AlertTriangle,
   Search,
   Calendar,
-  Clock,
   MapPin,
-  Navigation,
   Hotel,
-  Utensils,
-  Coffee,
-  Sun,
-  Moon,
-  Car,
   AlertCircle,
   Tag,
-  Hash,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
@@ -42,27 +30,16 @@ import {
   TerminationItem,
   TerminationModal,
 } from "@/components/common-components/terminate-components/TerminationModal";
-
 import { TourScheduleStats } from "@/components/tour-schedules-components/terminate-tour-schedule-components/TourScheduleStats";
 import { BasicInfoPanel } from "@/components/tour-schedules-components/terminate-tour-schedule-components/BasicInfoPanel";
 import { TourInfoPanel } from "@/components/tour-schedules-components/terminate-tour-schedule-components/TourInfoPanel";
 import { CategoriesList } from "@/components/tour-schedules-components/terminate-tour-schedule-components/CategoriesList";
 import { TypesList } from "@/components/tour-schedules-components/terminate-tour-schedule-components/TypesList";
 import { AccommodationsList } from "@/components/tour-schedules-components/terminate-tour-schedule-components/AccommodationsList";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface TourScheduleSearchItem {
-  id: number;
-  name: string;
-}
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { TOUR_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { hexToRgba } from "@/utils/functions";
 
 const TerminateTourSchedulePage = () => {
   const { theme } = useTheme();
@@ -99,22 +76,8 @@ const TerminateTourSchedulePage = () => {
     actionLink?: string;
   } | null>(null);
 
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Tour Schedules",
-      href: `${WEB_MANAGEMENT_PATH}/tour-schedules`,
-    },
-    {
-      label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}/tour-schedules/terminate`,
-    },
-  ];
 
   const fetchSchedules = async () => {
     setLoading(true);
@@ -311,7 +274,7 @@ const TerminateTourSchedulePage = () => {
           <PageHeader
             title="Terminate Tour Schedule"
             description="Permanently remove a tour schedule from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={TOUR_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>

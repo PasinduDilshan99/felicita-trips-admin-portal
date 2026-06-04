@@ -65,3 +65,29 @@ export const CREATE_PACKAGE_TYPE_TIPS = [
   "Package types help customers find the right package tier",
   "Use names that clearly indicate the package level/quality",
 ];
+
+export const CREATE_ACTIVITY_SCHEDULE_TIPS = [
+  "Verify that the date range is correct",
+  "Ensure duration values are accurate",
+  "Check that all required fields are filled",
+  "You can edit this schedule anytime after creation",
+  "The schedule will be available for booking based on dates",
+  "Make sure the activity is active for this schedule",
+];
+
+export const CREATE_TOUR_SCHEDULE_TIPS = [
+  "Verify that the date range is correct",
+  "Ensure duration values are accurate",
+  "Check that all required fields are filled",
+  "You can edit this schedule anytime after creation",
+  "The schedule will be available for booking based on dates",
+  "Make sure the tour is active for this schedule",
+];
+
+export const CREATE_PACKAGE_SCHEDULE_TIPS = [
+  "Verify that the date range is correct",
+  "Ensure duration values are accurate",
+  "Check that all required fields are filled",
+  "You can edit this schedule anytime after creation",
+  "The schedule will be available for booking based on dates",
+];

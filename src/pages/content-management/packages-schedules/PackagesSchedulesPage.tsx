@@ -50,7 +50,7 @@ const PackagesSchedulesPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const packagesData = contentManagementSideBarData.find(
-    (item) => item.name === "Packages",
+    (item) => item.name === "Package Schedules",
   );
 
   useEffect(() => {

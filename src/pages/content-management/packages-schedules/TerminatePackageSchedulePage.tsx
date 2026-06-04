@@ -1,15 +1,22 @@
-// app/web-management/package-schedules/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-} from "@/utils/constant";
 import { PackageScheduleService } from "@/services/packageScheduleService";
-import { PackageScheduleDetails, PackageScheduleIdAndName } from "@/types/package-schedule-types";
-import { AlertTriangle, Search, Calendar, Clock, MapPin, Hotel, Package, DollarSign, Users, Gift, AlertCircle, Tag, Hash, Percent, Car, Utensils, Coffee, Sun, Moon, Bed } from "lucide-react";
+import {
+  PackageScheduleDetails,
+  PackageScheduleIdAndName,
+  PackageScheduleSearchItem,
+} from "@/types/package-schedule-types";
+import {
+  AlertTriangle,
+  Search,
+  Calendar,
+  Hotel,
+  Package,
+  Gift,
+  AlertCircle,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import CommonSearch from "@/components/common-components/CommonSearch";
@@ -17,28 +24,19 @@ import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
-import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
-
+import {
+  TerminationItem,
+  TerminationModal,
+} from "@/components/common-components/terminate-components/TerminationModal";
 import { PackageScheduleStats } from "@/components/package-schedules-components/terminate-package-schedule-components/PackageScheduleStats";
 import { BasicInfoPanel } from "@/components/package-schedules-components/terminate-package-schedule-components/BasicInfoPanel";
 import { PackageInfoPanel } from "@/components/package-schedules-components/terminate-package-schedule-components/PackageInfoPanel";
 import { TourInfoPanel } from "@/components/package-schedules-components/terminate-package-schedule-components/TourInfoPanel";
 import { FeaturesList } from "@/components/package-schedules-components/terminate-package-schedule-components/FeaturesList";
 import { AccommodationsList } from "@/components/package-schedules-components/terminate-package-schedule-components/AccommodationsList";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface PackageScheduleSearchItem {
-  id: number;
-  name: string;
-}
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { hexToRgba } from "@/utils/functions";
 
 const TerminatePackageSchedulePage = () => {
   const { theme } = useTheme();
@@ -49,15 +47,17 @@ const TerminatePackageSchedulePage = () => {
   const initialScheduleId = searchParams?.get("schedule-id") || "";
 
   const [schedules, setSchedules] = useState<PackageScheduleIdAndName[]>([]);
-  const [selectedSchedule, setSelectedSchedule] = useState<PackageScheduleIdAndName | null>(
-    initialScheduleId && initialScheduleName
-      ? {
-          packageScheduleId: parseInt(initialScheduleId),
-          packageScheduleName: initialScheduleName,
-        }
-      : null,
-  );
-  const [scheduleDetails, setScheduleDetails] = useState<PackageScheduleDetails | null>(null);
+  const [selectedSchedule, setSelectedSchedule] =
+    useState<PackageScheduleIdAndName | null>(
+      initialScheduleId && initialScheduleName
+        ? {
+            packageScheduleId: parseInt(initialScheduleId),
+            packageScheduleName: initialScheduleName,
+          }
+        : null,
+    );
+  const [scheduleDetails, setScheduleDetails] =
+    useState<PackageScheduleDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingTerminate, setLoadingTerminate] = useState(false);
@@ -73,24 +73,12 @@ const TerminatePackageSchedulePage = () => {
     actionLink?: string;
   } | null>(null);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Package Schedules",
-      href: `${WEB_MANAGEMENT_PATH}/package-schedules`,
-    },
-    {
-      label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}/package-schedules/terminate`,
-    },
-  ];
-
   const fetchSchedules = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await PackageScheduleService.getPackageScheduleIdAndNames();
+      const response =
+        await PackageScheduleService.getPackageScheduleIdAndNames();
       setSchedules(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load package schedules");
@@ -109,7 +97,8 @@ const TerminatePackageSchedulePage = () => {
     setError(null);
     setScheduleDetails(null);
     try {
-      const response = await PackageScheduleService.getPackageScheduleDetails(id);
+      const response =
+        await PackageScheduleService.getPackageScheduleDetails(id);
       setScheduleDetails(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load schedule details");
@@ -160,7 +149,9 @@ const TerminatePackageSchedulePage = () => {
     setSuccess(null);
 
     try {
-      await PackageScheduleService.terminatePackageSchedule(selectedSchedule.packageScheduleId);
+      await PackageScheduleService.terminatePackageSchedule(
+        selectedSchedule.packageScheduleId,
+      );
 
       setSuccess("Package schedule terminated successfully!");
       setToast({
@@ -180,7 +171,8 @@ const TerminatePackageSchedulePage = () => {
       setToast({
         type: "error",
         title: "Termination Failed",
-        message: err.message || "Failed to terminate schedule. Please try again.",
+        message:
+          err.message || "Failed to terminate schedule. Please try again.",
       });
     } finally {
       setLoadingTerminate(false);
@@ -188,10 +180,12 @@ const TerminatePackageSchedulePage = () => {
   };
 
   // Convert schedules to search items format
-  const searchItems: PackageScheduleSearchItem[] = schedules.map((schedule) => ({
-    id: schedule.packageScheduleId,
-    name: schedule.packageScheduleName,
-  }));
+  const searchItems: PackageScheduleSearchItem[] = schedules.map(
+    (schedule) => ({
+      id: schedule.packageScheduleId,
+      name: schedule.packageScheduleName,
+    }),
+  );
 
   const selectedSearchItem: PackageScheduleSearchItem | null = selectedSchedule
     ? {
@@ -262,7 +256,7 @@ const TerminatePackageSchedulePage = () => {
           <PageHeader
             title="Terminate Package Schedule"
             description="Permanently remove a package schedule from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -302,7 +296,8 @@ const TerminatePackageSchedulePage = () => {
                   className="text-xs mt-0.5"
                   style={{ color: theme.textSecondary }}
                 >
-                  Search and select a schedule to review its data before termination
+                  Search and select a schedule to review its data before
+                  termination
                 </p>
               </div>
             </div>
@@ -312,7 +307,9 @@ const TerminatePackageSchedulePage = () => {
                 items={searchItems}
                 loading={loading}
                 selectedItem={selectedSearchItem}
-                onSelectItem={(item) => handleSelectSchedule(item.id, item.name)}
+                onSelectItem={(item) =>
+                  handleSelectSchedule(item.id, item.name)
+                }
                 onClearSelection={handleClearScheduleSelection}
                 initialSearchTerm={initialScheduleName}
                 placeholder="Search package schedules..."
@@ -371,11 +368,15 @@ const TerminatePackageSchedulePage = () => {
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold" style={{ color: theme.error }}>
+                <h2
+                  className="text-base font-bold"
+                  style={{ color: theme.error }}
+                >
                   Package Schedule Termination Review
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: theme.error }}>
-                  Review all data carefully. This action is permanent and cannot be undone.
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
                 </p>
               </div>
               <div
@@ -388,7 +389,10 @@ const TerminatePackageSchedulePage = () => {
                 <span className="text-xs" style={{ color: theme.error }}>
                   ID
                 </span>
-                <span className="text-sm font-bold" style={{ color: theme.error }}>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: theme.error }}
+                >
                   #{selectedSchedule.packageScheduleId}
                 </span>
               </div>
@@ -424,7 +428,9 @@ const TerminatePackageSchedulePage = () => {
                   {/* Right Column */}
                   <div className="space-y-5">
                     <FeaturesList features={scheduleDetails.features} />
-                    <AccommodationsList accommodations={scheduleDetails.accommodations} />
+                    <AccommodationsList
+                      accommodations={scheduleDetails.accommodations}
+                    />
 
                     {/* Custom Impact Warning for Package Schedules */}
                     <ImpactWarning
@@ -522,7 +528,8 @@ const TerminatePackageSchedulePage = () => {
                 showRetryButton={true}
                 onBack={handleClearScheduleSelection}
                 onRetry={() =>
-                  selectedSchedule && fetchScheduleDetails(selectedSchedule.packageScheduleId)
+                  selectedSchedule &&
+                  fetchScheduleDetails(selectedSchedule.packageScheduleId)
                 }
                 backButtonText="Change Selection"
                 retryButtonText="Try Again"

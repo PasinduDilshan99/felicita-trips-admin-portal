@@ -1,8 +1,7 @@
-// components/tour-schedule-components/TourScheduleCard.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Calendar,
   Clock,
@@ -14,105 +13,30 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
-import { TourScheduleListItem, TourScheduleCategory, TourScheduleType } from "@/types/tour-schedule-types";
 import { hexToRgba } from "@/utils/functions";
-import { TOUR_CATEGORIES_PAGE_URL } from "@/utils/urls";
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-  hover: {
-    y: -4,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const buttonVariants: Variants = {
-  rest: { scale: 1, y: 0 },
-  hover: {
-    scale: 1.02,
-    y: -2,
-    boxShadow: "0 8px 25px -4px rgba(0,0,0,0.2)",
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  tap: {
-    scale: 0.98,
-    y: 0,
-    transition: { duration: 0.1 },
-  },
-};
-
-const shineVariants: Variants = {
-  rest: { x: "-100%" },
-  hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
-};
-
-// Helper functions
-const getSafeString = (value: any, fallback: string = ""): string => {
-  if (!value) return fallback;
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return value.toString();
-  return fallback;
-};
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return "N/A";
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch {
-    return dateString;
-  }
-};
-
-const truncateDescription = (description: string, maxLength: number = 100): string => {
-  if (!description) return "";
-  if (description.length <= maxLength) return description;
-  let truncated = description.substring(0, maxLength);
-  const lastSpaceIndex = truncated.lastIndexOf(" ");
-  if (lastSpaceIndex > 0 && lastSpaceIndex > maxLength - 20) {
-    truncated = truncated.substring(0, lastSpaceIndex);
-  }
-  return truncated + "...";
-};
-
-interface TourScheduleCardProps {
-  schedule: TourScheduleListItem;
-}
+import { TOUR_SCHEDULE_DETAILS_VIEW_URL } from "@/utils/urls";
+import { TourScheduleCardProps } from "@/types/tour-schedule-types";
+import {
+  formatDate,
+  getSafeString,
+  truncateDescription,
+} from "@/utils/commonFunctions";
+import {
+  buttonVariants,
+  cardVariants,
+  contentVariants,
+  itemVariants,
+  shineVariants,
+} from "@/app/animations/variants";
 
 const TourScheduleCard: React.FC<TourScheduleCardProps> = ({ schedule }) => {
   const router = useRouter();
   const { theme } = useTheme();
 
-  const scheduleName = getSafeString(schedule?.tourScheduleName, "Unnamed Schedule");
+  const scheduleName = getSafeString(
+    schedule?.tourScheduleName,
+    "Unnamed Schedule",
+  );
   const tourName = getSafeString(schedule?.tourName, "");
   const description = getSafeString(schedule?.description, "");
   const truncatedDesc = truncateDescription(description, 100);
@@ -131,7 +55,9 @@ const TourScheduleCard: React.FC<TourScheduleCardProps> = ({ schedule }) => {
   const specialNote = getSafeString(schedule?.specialNote, "");
 
   const handleViewDetails = () => {
-    router.push(`${TOUR_CATEGORIES_PAGE_URL}/${schedule.tourScheduleId}`);
+    router.push(
+      `${TOUR_SCHEDULE_DETAILS_VIEW_URL}/${schedule.tourScheduleId}?name=${schedule.tourScheduleName}`,
+    );
   };
 
   const isActive = scheduleStatus === "ACTIVE";
@@ -191,23 +117,34 @@ const TourScheduleCard: React.FC<TourScheduleCardProps> = ({ schedule }) => {
 
         <div className="flex items-center gap-2">
           <Tag className="w-4 h-4" style={{ color: theme.success }} />
-          <span className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+          <span
+            className="text-sm font-medium"
+            style={{ color: theme.textSecondary }}
+          >
             {tourName}
           </span>
         </div>
       </div>
 
       {/* Content Section */}
-      <motion.div variants={contentVariants} initial="hidden" animate="visible" className="p-5 flex-grow flex flex-col">
+      <motion.div
+        variants={contentVariants}
+        initial="hidden"
+        animate="visible"
+        className="p-5 flex-grow flex flex-col"
+      >
         {/* Categories and Types */}
         <motion.div variants={itemVariants} className="mb-4">
           {primaryCategory && (
             <div className="flex items-center gap-2 mb-2">
               <Tag className="w-3.5 h-3.5" style={{ color: theme.primary }} />
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{
-                background: hexToRgba(theme.primary, 0.1),
-                color: theme.primary,
-              }}>
+              <span
+                className="text-xs font-medium px-2 py-0.5 rounded-full"
+                style={{
+                  background: hexToRgba(theme.primary, 0.1),
+                  color: theme.primary,
+                }}
+              >
                 {primaryCategory.categoryName}
               </span>
             </div>
@@ -215,10 +152,13 @@ const TourScheduleCard: React.FC<TourScheduleCardProps> = ({ schedule }) => {
           {primaryType && (
             <div className="flex items-center gap-2">
               <Tag className="w-3.5 h-3.5" style={{ color: theme.accent }} />
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{
-                background: hexToRgba(theme.accent, 0.1),
-                color: theme.accent,
-              }}>
+              <span
+                className="text-xs font-medium px-2 py-0.5 rounded-full"
+                style={{
+                  background: hexToRgba(theme.accent, 0.1),
+                  color: theme.accent,
+                }}
+              >
                 {primaryType.typeName}
               </span>
             </div>
@@ -248,38 +188,71 @@ const TourScheduleCard: React.FC<TourScheduleCardProps> = ({ schedule }) => {
         >
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: hexToRgba(theme.accent, 0.1) }}>
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: hexToRgba(theme.accent, 0.1) }}
+              >
                 <Clock className="w-4 h-4" style={{ color: theme.accent }} />
               </div>
             </div>
-            <div className="text-xs mb-1" style={{ color: theme.textSecondary }}>Duration</div>
-            <div className="text-sm font-bold" style={{ color: theme.text }}>{durationStart}-{durationEnd} days</div>
+            <div
+              className="text-xs mb-1"
+              style={{ color: theme.textSecondary }}
+            >
+              Duration
+            </div>
+            <div className="text-sm font-bold" style={{ color: theme.text }}>
+              {durationStart}-{durationEnd} days
+            </div>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: hexToRgba(theme.primary, 0.1) }}>
-                <Calendar className="w-4 h-4" style={{ color: theme.primary }} />
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: hexToRgba(theme.primary, 0.1) }}
+              >
+                <Calendar
+                  className="w-4 h-4"
+                  style={{ color: theme.primary }}
+                />
               </div>
             </div>
-            <div className="text-xs mb-1" style={{ color: theme.textSecondary }}>Season</div>
-            <div className="text-sm font-bold" style={{ color: theme.text }}>{season}</div>
+            <div
+              className="text-xs mb-1"
+              style={{ color: theme.textSecondary }}
+            >
+              Season
+            </div>
+            <div className="text-sm font-bold" style={{ color: theme.text }}>
+              {season}
+            </div>
           </div>
         </motion.div>
 
         {/* Location */}
         <motion.div variants={itemVariants} className="mb-3">
-          <div className="flex items-center gap-2 text-xs" style={{ color: theme.textSecondary }}>
+          <div
+            className="flex items-center gap-2 text-xs"
+            style={{ color: theme.textSecondary }}
+          >
             <MapPin className="w-3.5 h-3.5" />
-            <span className="truncate">{startLocation} → {endLocation}</span>
+            <span className="truncate">
+              {startLocation} → {endLocation}
+            </span>
           </div>
         </motion.div>
 
         {/* Date Range */}
         {startDate && endDate && (
           <motion.div variants={itemVariants} className="mb-3">
-            <div className="flex items-center gap-2 text-xs" style={{ color: theme.textSecondary }}>
+            <div
+              className="flex items-center gap-2 text-xs"
+              style={{ color: theme.textSecondary }}
+            >
               <Calendar className="w-3.5 h-3.5" />
-              <span>{formatDate(startDate)} - {formatDate(endDate)}</span>
+              <span>
+                {formatDate(startDate)} - {formatDate(endDate)}
+              </span>
             </div>
           </motion.div>
         )}
@@ -287,9 +260,17 @@ const TourScheduleCard: React.FC<TourScheduleCardProps> = ({ schedule }) => {
         {/* Special Note */}
         {specialNote && (
           <motion.div variants={itemVariants} className="mb-4">
-            <div className="flex items-start gap-2 p-2 rounded-lg" style={{ background: hexToRgba(theme.warning, 0.08) }}>
-              <AlertCircle className="w-3.5 h-3.5 mt-0.5" style={{ color: theme.warning }} />
-              <span className="text-xs" style={{ color: theme.warning }}>{specialNote}</span>
+            <div
+              className="flex items-start gap-2 p-2 rounded-lg"
+              style={{ background: hexToRgba(theme.warning, 0.08) }}
+            >
+              <AlertCircle
+                className="w-3.5 h-3.5 mt-0.5"
+                style={{ color: theme.warning }}
+              />
+              <span className="text-xs" style={{ color: theme.warning }}>
+                {specialNote}
+              </span>
             </div>
           </motion.div>
         )}
@@ -314,10 +295,14 @@ const TourScheduleCard: React.FC<TourScheduleCardProps> = ({ schedule }) => {
             animate="hover"
             className="absolute inset-0"
             style={{
-              background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
+              background:
+                "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
             }}
           />
-          <span className="absolute inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.35)" }} />
+          <span
+            className="absolute inset-x-0 top-0 h-px"
+            style={{ background: "rgba(255,255,255,0.35)" }}
+          />
           <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
           <span className="relative tracking-wide text-sm">View Details</span>
           <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />

@@ -1,4 +1,3 @@
-import { TOUR_CATEGORY_CREATE_PAGE_TITLE } from "./../utils/pagesHeaderTitles";
 import * as URLS from "@/utils/urls";
 
 interface breadcrumbType {
@@ -220,12 +219,13 @@ export const PACKAGE_TYPE_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "View", href: URLS.PACKAGE_TYPE_VIEW_PAGE_URL },
 ];
 
-export const PACKAGE_TYPE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
-  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
-  { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
-  { label: "Types", href: URLS.PACKAGE_TYPES_PAGE_URL },
-  { label: "View", href: URLS.PACKAGE_TYPE_VIEW_PAGE_URL },
-];
+export const PACKAGE_TYPE_VIEW_DETAILS_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Packages", href: URLS.PACKAGES_PAGE_URL },
+    { label: "Types", href: URLS.PACKAGE_TYPES_PAGE_URL },
+    { label: "View", href: URLS.PACKAGE_TYPE_VIEW_PAGE_URL },
+  ];
 
 export const PACKAGE_TYPE_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
@@ -368,15 +368,110 @@ export const TOUR_CATEGORY_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
 
 export const ACTIVITY_SCHEDULE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
-  { label: "Packages", href: URLS.ACTIVITY_SCHEDULE_PAGE_URL },
+  { label: "Activity Schedule", href: URLS.ACTIVITY_SCHEDULE_PAGE_URL },
+];
+
+export const ACTIVITY_SCHEDULE_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Activity Schedule", href: URLS.ACTIVITY_SCHEDULE_PAGE_URL },
+  { label: "View", href: URLS.ACTIVITY_SCHEDULE_VIEW_PAGE_URL },
+];
+
+export const ACTIVITY_SCHEDULE_DETAILS_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Activity Schedule", href: URLS.ACTIVITY_SCHEDULE_PAGE_URL },
+    { label: "View", href: URLS.ACTIVITY_SCHEDULE_VIEW_PAGE_URL },
+  ];
+
+export const ACTIVITY_SCHEDULE_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Activity Schedule", href: URLS.ACTIVITY_SCHEDULE_PAGE_URL },
+  { label: "Create", href: URLS.ACTIVITY_SCHEDULE_ADD_URL },
+];
+
+export const ACTIVITY_SCHEDULE_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Activity Schedule", href: URLS.ACTIVITY_SCHEDULE_PAGE_URL },
+  { label: "Create", href: URLS.ACTIVITY_SCHEDULE_UPDATE_PAGE_URL },
+];
+
+export const ACTIVITY_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Activity Schedule", href: URLS.ACTIVITY_SCHEDULE_PAGE_URL },
+    { label: "Terminate", href: URLS.ACTIVITY_SCHEDULE_TERMINATE_PAGE_URL },
+  ];
+
+export const TOUR_SCHEDULE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tour Schedules", href: URLS.TOUR_SCHEDULE_PAGE_URL },
+];
+
+export const TOUR_SCHEDULE_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tour Schedules", href: URLS.TOUR_SCHEDULE_PAGE_URL },
+  { label: "View", href: URLS.TOUR_SCHEDULE_VIEW_PAGE_URL },
+];
+
+export const TOUR_SCHEDULE_DETAILS_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Tour Schedules", href: URLS.TOUR_SCHEDULE_PAGE_URL },
+    { label: "View", href: URLS.TOUR_SCHEDULE_VIEW_PAGE_URL },
+  ];
+
+export const TOUR_SCHEDULE_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tour Schedules", href: URLS.TOUR_SCHEDULE_PAGE_URL },
+  { label: "Create", href: URLS.TOUR_SCHEDULE_ADD_PAGE_URL },
+];
+
+export const TOUR_SCHEDULE_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tour Schedules", href: URLS.TOUR_SCHEDULE_PAGE_URL },
+  { label: "Update", href: URLS.TOUR_SCHEDULE_UPDATE_PAGE_URL },
+];
+
+export const TOUR_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Tour Schedules", href: URLS.TOUR_SCHEDULE_PAGE_URL },
+  { label: "Terminate", href: URLS.TOUR_SCHEDULE_TERMINATE_PAGE_URL },
 ];
 
 export const PACKAGE_SCHEDULE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
-  { label: "Packages", href: URLS.PACKAGE_SCHEDULE_PAGE_URL },
+  { label: "Package Schedule", href: URLS.PACKAGE_SCHEDULE_PAGE_URL },
 ];
 
-export const TOUR_SCHEDULE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+export const PACKAGE_SCHEDULE_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
   { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
-  { label: "Packages", href: URLS.TOUR_SCHEDULE_PAGE_URL },
+  { label: "Package Schedule", href: URLS.PACKAGE_SCHEDULE_PAGE_URL },
+  { label: "View", href: URLS.PACKAGE_SCHEDULE_VIEW_PAGE_URL },
 ];
+
+export const PACKAGE_SCHEDULE_DETAILS_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Package Schedule", href: URLS.PACKAGE_SCHEDULE_PAGE_URL },
+    { label: "View", href: URLS.PACKAGE_SCHEDULE_VIEW_PAGE_URL },
+  ];
+
+export const PACKAGE_SCHEDULE_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Package Schedule", href: URLS.PACKAGE_SCHEDULE_PAGE_URL },
+  { label: "Create", href: URLS.PACKAGE_SCHEDULE_ADD_URL },
+];
+
+export const PACKAGE_SCHEDULE_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Package Schedule", href: URLS.PACKAGE_SCHEDULE_PAGE_URL },
+  { label: "Update", href: URLS.PACKAGE_SCHEDULE_UPDATE_URL },
+];
+
+export const PACKAGE_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+    { label: "Package Schedule", href: URLS.PACKAGE_SCHEDULE_PAGE_URL },
+    { label: "Terminate", href: URLS.PACKAGE_SCHEDULE_TERMINATE_URL },
+  ];

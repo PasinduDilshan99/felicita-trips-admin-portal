@@ -1,75 +1,22 @@
-// components/activity-schedules-components/terminate-activity-schedule-components/CategoriesList.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { Tag, Star } from "lucide-react";
-import { ActivityCategoryDto } from "@/types/activity-schedule-types";
+import { CategoriesListProps } from "@/types/activity-schedule-types";
 import { useTheme } from "@/contexts/ThemeContext";
+import {
+  cardVariants,
+  categoryVariants,
+  contentVariants,
+  emptyVariants,
+  headerVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const categoryVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  hover: {
-    y: -2,
-    scale: 1.02,
-    transition: { duration: 0.15 },
-  },
-};
-
-const emptyVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-interface CategoriesListProps {
-  categories: ActivityCategoryDto[];
-}
-
-export const CategoriesList: React.FC<CategoriesListProps> = ({ categories }) => {
+export const CategoriesList: React.FC<CategoriesListProps> = ({
+  categories,
+}) => {
   const { theme } = useTheme();
 
   if (categories.length === 0) {
@@ -91,7 +38,9 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({ categories }) =>
           </h3>
         </div>
         <div className="px-4 py-4 text-center">
-          <p className="text-xs" style={{ color: theme.textSecondary }}>No categories assigned</p>
+          <p className="text-xs" style={{ color: theme.textSecondary }}>
+            No categories assigned
+          </p>
         </div>
       </motion.div>
     );
@@ -155,17 +104,19 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({ categories }) =>
               <div
                 className="px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200"
                 style={{
-                  background: category.is_primary 
+                  background: category.is_primary
                     ? `linear-gradient(135deg, ${theme.primary}, ${hexToRgba(theme.primary, 0.7)})`
                     : hexToRgba(theme.accent, 0.12),
                   color: category.is_primary ? "#fff" : theme.accent,
-                  border: category.is_primary 
+                  border: category.is_primary
                     ? "none"
                     : `1px solid ${hexToRgba(theme.accent, 0.3)}`,
                 }}
               >
                 <div className="flex items-center gap-1.5">
-                  {category.is_primary && <Star size={12} className="text-yellow-300" />}
+                  {category.is_primary && (
+                    <Star size={12} className="text-yellow-300" />
+                  )}
                   <span>{category.name}</span>
                 </div>
               </div>

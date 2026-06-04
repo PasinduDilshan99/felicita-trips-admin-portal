@@ -1,53 +1,39 @@
-// app/package-schedules/view/[scheduleId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { PackageScheduleService } from "@/services/packageScheduleService";
 import { PackageScheduleDetails } from "@/types/package-schedule-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useImageGallery } from "@/hooks/useImageGallery";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
 import { CommonMetadata } from "@/components/common-components/details-view/CommonMetadata";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-
-// Icons
 import {
   Calendar,
   Clock,
-  Package,
   Tag,
-  Image,
   CheckCircle,
-  AlertCircle,
-  User,
   Hotel,
-  Bus,
   DollarSign,
 } from "lucide-react";
-
-// Constants for routing
-import { PACKAGES_VIEW_PAGE_URL, TOURS_VIEW_PAGE_URL } from "@/utils/urls";
-import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
+import {
+  PACKAGE_DETAILS_VIEW_PAGE_URL,
+  PACKAGE_SCHEDULE_TERMINATE_URL,
+  PACKAGE_SCHEDULE_UPDATE_URL,
+  PACKAGE_SCHEDULE_VIEW_PAGE_URL,
+  PACKAGES_VIEW_PAGE_URL,
+  TOUR_DETAILS_VIEW_PAGE_URL,
+  TOUR_SCHEDULE_DETAILS_VIEW_URL,
+} from "@/utils/urls";
 import { PackageScheduleOverview } from "@/components/package-schedules-components/package-schedule-details-view-components/PackageScheduleOverview";
 import { CommonQuickStats } from "@/components/common-components/details-view/CommonQuickStats";
 import { PackageScheduleFeatures } from "@/components/package-schedules-components/package-schedule-details-view-components/PackageScheduleFeatures";
 import { PackageScheduleAccommodations } from "@/components/package-schedules-components/package-schedule-details-view-components/PackageScheduleAccommodations";
 import { PackageScheduleRelatedInfo } from "@/components/package-schedules-components/package-schedule-details-view-components/PackageScheduleRelatedInfo";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { PACKAGE_SCHEDULE_DETAILS_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
 
 const PackageScheduleDetailsViewPage = () => {
   const params = useParams();
@@ -76,9 +62,7 @@ const PackageScheduleDetailsViewPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Package Schedules", href: PACKAGES_VIEW_PAGE_URL },
-    { label: "View", href: PACKAGES_VIEW_PAGE_URL },
+    ...PACKAGE_SCHEDULE_DETAILS_VIEW_PAGE_BREADCRUMB_DATA,
     {
       label: packageSchedule?.packageScheduleName || "Details",
       href: `${PACKAGES_VIEW_PAGE_URL}/${scheduleId}`,
@@ -107,16 +91,21 @@ const PackageScheduleDetailsViewPage = () => {
     }
   };
 
-  const handleBack = () => router.push(PACKAGES_VIEW_PAGE_URL);
-
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(PACKAGE_SCHEDULE_VIEW_PAGE_URL);
+    }
+  };
   const handleEdit = () =>
     router.push(
-      `${PACKAGES_VIEW_PAGE_URL}/${scheduleId}?name=${packageSchedule?.packageScheduleName}`,
+      `${PACKAGE_SCHEDULE_UPDATE_URL}/${scheduleId}?name=${packageSchedule?.packageScheduleName}`,
     );
 
   const handleDelete = () =>
     router.push(
-      `${PACKAGES_VIEW_PAGE_URL}/${scheduleId}?name=${packageSchedule?.packageScheduleName}`,
+      `${PACKAGE_SCHEDULE_TERMINATE_URL}/${scheduleId}?name=${packageSchedule?.packageScheduleName}`,
     );
 
   const handleShare = () => {
@@ -134,19 +123,25 @@ const PackageScheduleDetailsViewPage = () => {
 
   const handleViewPackage = () => {
     if (packageSchedule?.packageId) {
-      router.push(`${PACKAGES_VIEW_PAGE_URL}/${packageSchedule.packageId}`);
+      router.push(
+        `${PACKAGE_DETAILS_VIEW_PAGE_URL}/${packageSchedule.packageId}?name${packageSchedule.packageName}`,
+      );
     }
   };
 
   const handleViewTour = () => {
     if (packageSchedule?.tourId) {
-      router.push(`${TOURS_VIEW_PAGE_URL}/${packageSchedule.tourId}`);
+      router.push(
+        `${TOUR_DETAILS_VIEW_PAGE_URL}/${packageSchedule.tourId}?name${packageSchedule.tourName}`,
+      );
     }
   };
 
   const handleViewTourSchedule = () => {
     if (packageSchedule?.tourScheduleId) {
-      router.push(`${TOURS_VIEW_PAGE_URL}/${packageSchedule.tourScheduleId}`);
+      router.push(
+        `${TOUR_SCHEDULE_DETAILS_VIEW_URL}/${packageSchedule.tourScheduleId}?name${packageSchedule.tourScheduleName}`,
+      );
     }
   };
 

@@ -1,46 +1,44 @@
-// app/web-management/activity-schedules/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-} from "@/utils/constant";
 import { ActivityScheduleService } from "@/services/activityScheduleService";
-import { ActivityScheduleDetails, ActivityScheduleIdAndName } from "@/types/activity-schedule-types";
-import { AlertTriangle, Search, Calendar, Clock, DollarSign, Users, MapPin, Package, Activity, AlertCircle } from "lucide-react";
+import {
+  ActivityScheduleDetails,
+  ActivityScheduleIdAndName,
+  ActivityScheduleSearchItem,
+} from "@/types/activity-schedule-types";
+import {
+  AlertTriangle,
+  Search,
+  Calendar,
+  Clock,
+  Activity,
+  AlertCircle,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import { ImagesPanel } from "@/components/common-components/terminate-components/ImagesPanel";
 import { ImpactWarning } from "@/components/common-components/terminate-components/ImpactWarning";
-import { TerminationItem, TerminationModal } from "@/components/common-components/terminate-components/TerminationModal";
-
+import {
+  TerminationItem,
+  TerminationModal,
+} from "@/components/common-components/terminate-components/TerminationModal";
 import { BasicInfoPanel } from "@/components/activity-schedules-components/terminate-activity-schedule-components/BasicInfoPanel";
 import { ActivityInfoPanel } from "@/components/activity-schedules-components/terminate-activity-schedule-components/ActivityInfoPanel";
 import { TourInfoPanel } from "@/components/activity-schedules-components/terminate-activity-schedule-components/TourInfoPanel";
 import { PackageInfoPanel } from "@/components/activity-schedules-components/terminate-activity-schedule-components/PackageInfoPanel";
 import { CategoriesList } from "@/components/activity-schedules-components/terminate-activity-schedule-components/CategoriesList";
 import { ActivityScheduleStats } from "@/components/activity-schedules-components/terminate-activity-schedule-components/ActivityScheduleStats";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface ActivityScheduleSearchItem {
-  id: number;
-  name: string;
-}
+import { ImageModalImage } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ACTIVITY_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { hexToRgba } from "@/utils/functions";
 
 const TerminateActivitySchedulePage = () => {
   const { theme } = useTheme();
@@ -51,15 +49,17 @@ const TerminateActivitySchedulePage = () => {
   const initialScheduleId = searchParams?.get("schedule-id") || "";
 
   const [schedules, setSchedules] = useState<ActivityScheduleIdAndName[]>([]);
-  const [selectedSchedule, setSelectedSchedule] = useState<ActivityScheduleIdAndName | null>(
-    initialScheduleId && initialScheduleName
-      ? {
-          activityScheduleId: parseInt(initialScheduleId),
-          activityScheduleName: initialScheduleName,
-        }
-      : null,
-  );
-  const [scheduleDetails, setScheduleDetails] = useState<ActivityScheduleDetails | null>(null);
+  const [selectedSchedule, setSelectedSchedule] =
+    useState<ActivityScheduleIdAndName | null>(
+      initialScheduleId && initialScheduleName
+        ? {
+            activityScheduleId: parseInt(initialScheduleId),
+            activityScheduleName: initialScheduleName,
+          }
+        : null,
+    );
+  const [scheduleDetails, setScheduleDetails] =
+    useState<ActivityScheduleDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingTerminate, setLoadingTerminate] = useState(false);
@@ -75,28 +75,15 @@ const TerminateActivitySchedulePage = () => {
     actionLink?: string;
   } | null>(null);
 
-  // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_PATH },
-    {
-      label: "Activity Schedules",
-      href: `${WEB_MANAGEMENT_PATH}/activity-schedules`,
-    },
-    {
-      label: "Terminate",
-      href: `${WEB_MANAGEMENT_PATH}/activity-schedules/terminate`,
-    },
-  ];
 
   const fetchSchedules = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await ActivityScheduleService.getActivityScheduleIdAndNames();
+      const response =
+        await ActivityScheduleService.getActivityScheduleIdAndNames();
       setSchedules(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load activity schedules");
@@ -115,7 +102,8 @@ const TerminateActivitySchedulePage = () => {
     setError(null);
     setScheduleDetails(null);
     try {
-      const response = await ActivityScheduleService.getActivityScheduleDetails(id);
+      const response =
+        await ActivityScheduleService.getActivityScheduleDetails(id);
       setScheduleDetails(response.data);
     } catch (err: any) {
       setError(err.message || "Failed to load schedule details");
@@ -166,7 +154,9 @@ const TerminateActivitySchedulePage = () => {
     setSuccess(null);
 
     try {
-      await ActivityScheduleService.terminateActivitySchedule(selectedSchedule.activityScheduleId);
+      await ActivityScheduleService.terminateActivitySchedule(
+        selectedSchedule.activityScheduleId,
+      );
 
       setSuccess("Activity schedule terminated successfully!");
       setToast({
@@ -186,7 +176,8 @@ const TerminateActivitySchedulePage = () => {
       setToast({
         type: "error",
         title: "Termination Failed",
-        message: err.message || "Failed to terminate schedule. Please try again.",
+        message:
+          err.message || "Failed to terminate schedule. Please try again.",
       });
     } finally {
       setLoadingTerminate(false);
@@ -210,10 +201,12 @@ const TerminateActivitySchedulePage = () => {
   };
 
   // Convert schedules to search items format
-  const searchItems: ActivityScheduleSearchItem[] = schedules.map((schedule) => ({
-    id: schedule.activityScheduleId,
-    name: schedule.activityScheduleName,
-  }));
+  const searchItems: ActivityScheduleSearchItem[] = schedules.map(
+    (schedule) => ({
+      id: schedule.activityScheduleId,
+      name: schedule.activityScheduleName,
+    }),
+  );
 
   const selectedSearchItem: ActivityScheduleSearchItem | null = selectedSchedule
     ? {
@@ -284,7 +277,7 @@ const TerminateActivitySchedulePage = () => {
           <PageHeader
             title="Terminate Activity Schedule"
             description="Permanently remove an activity schedule from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ACTIVITY_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -324,7 +317,8 @@ const TerminateActivitySchedulePage = () => {
                   className="text-xs mt-0.5"
                   style={{ color: theme.textSecondary }}
                 >
-                  Search and select a schedule to review its data before termination
+                  Search and select a schedule to review its data before
+                  termination
                 </p>
               </div>
             </div>
@@ -334,7 +328,9 @@ const TerminateActivitySchedulePage = () => {
                 items={searchItems}
                 loading={loading}
                 selectedItem={selectedSearchItem}
-                onSelectItem={(item) => handleSelectSchedule(item.id, item.name)}
+                onSelectItem={(item) =>
+                  handleSelectSchedule(item.id, item.name)
+                }
                 onClearSelection={handleClearScheduleSelection}
                 initialSearchTerm={initialScheduleName}
                 placeholder="Search activity schedules..."
@@ -393,11 +389,15 @@ const TerminateActivitySchedulePage = () => {
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold" style={{ color: theme.error }}>
+                <h2
+                  className="text-base font-bold"
+                  style={{ color: theme.error }}
+                >
                   Activity Schedule Termination Review
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: theme.error }}>
-                  Review all data carefully. This action is permanent and cannot be undone.
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
                 </p>
               </div>
               <div
@@ -410,7 +410,10 @@ const TerminateActivitySchedulePage = () => {
                 <span className="text-xs" style={{ color: theme.error }}>
                   ID
                 </span>
-                <span className="text-sm font-bold" style={{ color: theme.error }}>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: theme.error }}
+                >
                   #{selectedSchedule.activityScheduleId}
                 </span>
               </div>
@@ -456,12 +459,14 @@ const TerminateActivitySchedulePage = () => {
 
                   {/* Right Column */}
                   <div className="space-y-5">
-                    <CategoriesList categories={scheduleDetails.activityCategoryDtos} />
-                    
+                    <CategoriesList
+                      categories={scheduleDetails.activityCategoryDtos}
+                    />
+
                     {scheduleDetails.tourId > 0 && (
                       <TourInfoPanel scheduleDetails={scheduleDetails} />
                     )}
-                    
+
                     {scheduleDetails.packageId > 0 && (
                       <PackageInfoPanel scheduleDetails={scheduleDetails} />
                     )}
@@ -558,7 +563,8 @@ const TerminateActivitySchedulePage = () => {
                 showRetryButton={true}
                 onBack={handleClearScheduleSelection}
                 onRetry={() =>
-                  selectedSchedule && fetchScheduleDetails(selectedSchedule.activityScheduleId)
+                  selectedSchedule &&
+                  fetchScheduleDetails(selectedSchedule.activityScheduleId)
                 }
                 backButtonText="Change Selection"
                 retryButtonText="Try Again"

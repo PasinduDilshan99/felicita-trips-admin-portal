@@ -1,10 +1,13 @@
 import { ActivityCategoryFilterParams } from "@/types/activity-category-types";
+import { ActivityScheduleFilterParams } from "@/types/activity-schedule-types";
 import { ActivityFilterParams } from "@/types/activity-types";
 import { CategoryFilterParams } from "@/types/destination-category-types";
 import { DestinationFilterParams } from "@/types/destination-types";
+import { PackageScheduleFilterParams } from "@/types/package-schedule-types";
 import { PackageTypeFilterParams } from "@/types/package-type-types";
 import { PackageFilterParams } from "@/types/package-types";
 import { TourCategoryFilterParams } from "@/types/tour-category-types";
+import { TourScheduleFilterParams } from "@/types/tour-schedule-types";
 import { TourTypeFilterParams } from "@/types/tour-type-types";
 import { TourFilterParams } from "@/types/tour-types";
 
@@ -358,5 +361,168 @@ export const packageTypeViewUrlParamsToFilters = (
     sortDirection: (sortDirection === "DESC" ? "DESC" : "ASC") as
       | "ASC"
       | "DESC",
+  };
+};
+
+export const activityScheduleViewFiltersToUrlParams = (
+  filters: ActivityScheduleFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.duration) params.set("duration", filters.duration.toString());
+  if (filters.activityId)
+    params.set("activityId", filters.activityId.toString());
+  if (filters.destinationId)
+    params.set("destinationId", filters.destinationId.toString());
+  if (filters.packageScheduleId)
+    params.set("packageScheduleId", filters.packageScheduleId.toString());
+  if (filters.tourScheduleId)
+    params.set("tourScheduleId", filters.tourScheduleId.toString());
+  if (filters.activityCategory)
+    params.set("activityCategory", filters.activityCategory);
+  if (filters.fromDate) params.set("fromDate", filters.fromDate);
+  if (filters.toDate) params.set("toDate", filters.toDate);
+  if (filters.season) params.set("season", filters.season);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
+
+  return params;
+};
+
+export const activityScheduleViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): ActivityScheduleFilterParams => {
+  return {
+    name: params.get("name") || null,
+    duration: params.get("duration")
+      ? parseFloat(params.get("duration")!)
+      : null,
+    activityId: params.get("activityId")
+      ? parseInt(params.get("activityId")!)
+      : null,
+    destinationId: params.get("destinationId")
+      ? parseInt(params.get("destinationId")!)
+      : null,
+    packageScheduleId: params.get("packageScheduleId")
+      ? parseInt(params.get("packageScheduleId")!)
+      : null,
+    tourScheduleId: params.get("tourScheduleId")
+      ? parseInt(params.get("tourScheduleId")!)
+      : null,
+    activityCategory: params.get("activityCategory") || null,
+    fromDate: params.get("fromDate") || null,
+    toDate: params.get("toDate") || null,
+    season: params.get("season") || null,
+    status: params.get("status") || null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") || null,
+    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
+  };
+};
+
+export const tourScheduleViewFiltersToUrlParams = (
+  filters: TourScheduleFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.duration) params.set("duration", filters.duration.toString());
+  if (filters.tourId) params.set("tourId", filters.tourId.toString());
+  if (filters.tourTypeId)
+    params.set("tourTypeId", filters.tourTypeId.toString());
+  if (filters.tourCategoryId)
+    params.set("tourCategoryId", filters.tourCategoryId.toString());
+  if (filters.fromDate) params.set("fromDate", filters.fromDate);
+  if (filters.toDate) params.set("toDate", filters.toDate);
+  if (filters.seasonId) params.set("seasonId", filters.seasonId.toString());
+  if (filters.status) params.set("status", filters.status);
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
+
+  return params;
+};
+
+export const tourScheduleViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): TourScheduleFilterParams => {
+  return {
+    name: params.get("name") || null,
+    duration: params.get("duration")
+      ? parseFloat(params.get("duration")!)
+      : null,
+    tourId: params.get("tourId") ? parseInt(params.get("tourId")!) : null,
+    tourTypeId: params.get("tourTypeId")
+      ? parseInt(params.get("tourTypeId")!)
+      : null,
+    tourCategoryId: params.get("tourCategoryId")
+      ? parseInt(params.get("tourCategoryId")!)
+      : null,
+    fromDate: params.get("fromDate") || null,
+    toDate: params.get("toDate") || null,
+    seasonId: params.get("seasonId") ? parseInt(params.get("seasonId")!) : null,
+    status: params.get("status") || null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") || "",
+    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
+  };
+};
+
+export const packageScheduleViewFiltersToUrlParams = (
+  filters: PackageScheduleFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.packageId) params.set("packageId", filters.packageId.toString());
+  if (filters.tourScheduleId)
+    params.set("tourScheduleId", filters.tourScheduleId.toString());
+  if (filters.tourId) params.set("tourId", filters.tourId.toString());
+  if (filters.startDate) params.set("startDate", filters.startDate);
+  if (filters.endDate) params.set("endDate", filters.endDate);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
+
+  return params;
+};
+
+export const packageScheduleViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): PackageScheduleFilterParams => {
+  return {
+    name: params.get("name") || null,
+    packageId: params.get("packageId")
+      ? parseInt(params.get("packageId")!)
+      : null,
+    tourScheduleId: params.get("tourScheduleId")
+      ? parseInt(params.get("tourScheduleId")!)
+      : null,
+    tourId: params.get("tourId") ? parseInt(params.get("tourId")!) : null,
+    startDate: params.get("startDate") || null,
+    endDate: params.get("endDate") || null,
+    status: params.get("status") || null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") || "",
+    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
   };
 };

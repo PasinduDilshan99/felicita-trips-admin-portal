@@ -1,10 +1,7 @@
-// app/package-schedules/update/page.tsx (updated)
-
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { PackageScheduleService } from "@/services/packageScheduleService";
 import {
   PackageScheduleIdAndName,
@@ -21,10 +18,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useCurrency } from "@/contexts/CurrencyContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import CommonErrorState from "@/components/common-components/CommonErrorState";
 import CommonSearch, {
   SearchItem,
 } from "@/components/common-components/CommonSearch";
@@ -34,46 +29,18 @@ import {
   ChangedField,
 } from "@/components/common-components/UpdateConfirmationModal";
 import { hexToRgba } from "@/utils/functions";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { PACKAGES_VIEW_PAGE_URL } from "@/utils/urls";
+import { motion, AnimatePresence } from "framer-motion";
+import { PACKAGE_SCHEDULE_DETAILS_VIEW_URL } from "@/utils/urls";
 import { PackageScheduleReadOnlyDetails } from "@/components/package-schedules-components/update-package-schedule-components/PackageScheduleReadOnlyDetails";
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
-};
-
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    transition: { duration: 0.32, ease: EASE_OUT },
-  },
-};
-
-const STATUS_OPTIONS = [
-  {
-    value: "ACTIVE",
-    label: "Active",
-    description: "Schedule is active",
-    color: "#059669",
-  },
-  {
-    value: "INACTIVE",
-    label: "Inactive",
-    description: "Schedule is inactive",
-    color: "#6b7280",
-  },
-];
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PACKAGE_SCHEDULE_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
+import { PACKAGE_SCHEDULE_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
 
 const UpdatePackageSchedulePage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
-  const { formatPrice } = useCurrency();
 
   const initialScheduleName = searchParams?.get("package-schedule-name") || "";
   const initialScheduleId = searchParams?.get("package-schedule-id") || "";
@@ -121,15 +88,6 @@ const UpdatePackageSchedulePage = () => {
     message: string;
     actionLink?: string;
   } | null>(null);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Package Schedules", href: PACKAGES_VIEW_PAGE_URL },
-    {
-      label: "Update",
-      href: PACKAGES_VIEW_PAGE_URL,
-    },
-  ];
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => {
@@ -291,7 +249,7 @@ const UpdatePackageSchedulePage = () => {
         type: "success",
         title: "Update Successful!",
         message: `${editedSchedule?.packageScheduleName} has been updated successfully.`,
-        actionLink: `${PACKAGES_VIEW_PAGE_URL}/view?id=${selectedSchedule?.packageScheduleId}`,
+        actionLink: `${PACKAGE_SCHEDULE_DETAILS_VIEW_URL}/${selectedSchedule?.packageScheduleId}?name${selectedSchedule?.packageScheduleName}`,
       });
 
       setShowConfirmModal(false);
@@ -464,7 +422,7 @@ const UpdatePackageSchedulePage = () => {
           <PageHeader
             title="Update Package Schedule"
             description="Edit and update existing package schedule information"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PACKAGE_SCHEDULE_UPDATE_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -790,7 +748,7 @@ const UpdatePackageSchedulePage = () => {
                         Status
                       </label>
                       <div className="grid grid-cols-2 gap-3">
-                        {STATUS_OPTIONS.map((opt) => {
+                        {PACKAGE_SCHEDULE_UPDATE_STATUS_OPTIONS.map((opt) => {
                           const isSelected =
                             editedSchedule.scheduleStatus === opt.value;
                           return (
