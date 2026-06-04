@@ -1,4 +1,3 @@
-// components/packages-components/package-details-view-components/PackageOverview.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -11,25 +10,9 @@ import {
   Palette,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface PackageOverviewProps {
-  name: string;
-  description: string;
-  color: string;
-  hoverColor: string;
-  startDate: string;
-  endDate: string;
-  packageTypeName: string;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { PackageOverviewProps } from "@/types/package-types";
+import { hexToRgba } from "@/utils/functions";
+import { formatDate } from "@/utils/commonFunctions";
 
 export const PackageOverview: React.FC<PackageOverviewProps> = ({
   name,
@@ -45,19 +28,6 @@ export const PackageOverview: React.FC<PackageOverviewProps> = ({
 
   const displayColor = color || theme.primary;
   const displayHoverColor = hoverColor || color || theme.primary;
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return "Not specified";
-    try {
-      return new Date(dateStr).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
 
   const truncatedDescription =
     description?.length > 400 && !isExpanded

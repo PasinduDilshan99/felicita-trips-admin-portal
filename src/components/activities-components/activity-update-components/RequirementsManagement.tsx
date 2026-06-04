@@ -1,11 +1,9 @@
-// components/activities-components/update-activity-components/RequirementsManagement.tsx
 "use client";
 
 import React, { useState } from "react";
 import {
   ClipboardList,
   Plus,
-  X,
   ChevronDown,
   AlertCircle,
   Edit2,
@@ -13,7 +11,7 @@ import {
   Palette,
   Trash2,
 } from "lucide-react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Requirement } from "@/types/activity-types";
 import {
   ActivityRequirementRequest,
@@ -21,6 +19,13 @@ import {
 } from "@/types/activity-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
+import {
+  cardVariants,
+  formVariants,
+  itemVariants,
+} from "@/app/animations/variants";
+import { ACTIVITY_UPDATE_PRESET_COLORS } from "@/data/colors-data";
+import { ACTIVITY_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
 
 interface RequirementsManagementProps {
   requirements: Requirement[];
@@ -31,41 +36,6 @@ interface RequirementsManagementProps {
   onUpdateRequirement: (requirement: UpdateRequirementRequest) => void;
   error?: string;
 }
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.25, ease: EASE_OUT } },
-  exit: { opacity: 0, x: -10, transition: { duration: 0.2 } },
-};
-
-const formVariants: Variants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE_OUT } },
-  exit: { opacity: 0, y: -20, transition: { duration: 0.24 } },
-};
-
-const STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "Active", color: "#059669" },
-  { value: "INACTIVE", label: "Inactive", color: "#6b7280" },
-];
-
-const PRESET_COLORS = [
-  "#EF4444", // Red
-  "#F59E0B", // Amber
-  "#10B981", // Emerald
-  "#3B82F6", // Blue
-  "#8B5CF6", // Violet
-  "#EC4899", // Pink
-  "#14B8A6", // Teal
-  "#F97316", // Orange
-];
 
 export const RequirementsManagement: React.FC<RequirementsManagementProps> = ({
   requirements,
@@ -344,7 +314,7 @@ export const RequirementsManagement: React.FC<RequirementsManagementProps> = ({
                       Color
                     </label>
                     <div className="flex flex-wrap gap-2 mb-2">
-                      {PRESET_COLORS.map((color) => (
+                      {ACTIVITY_UPDATE_PRESET_COLORS.map((color) => (
                         <button
                           key={color}
                           onClick={() =>
@@ -405,7 +375,7 @@ export const RequirementsManagement: React.FC<RequirementsManagementProps> = ({
                       Status
                     </label>
                     <div className="flex gap-3">
-                      {STATUS_OPTIONS.map((opt) => (
+                      {ACTIVITY_UPDATE_STATUS_OPTIONS.map((opt) => (
                         <button
                           key={opt.value}
                           onClick={() =>
@@ -594,7 +564,7 @@ export const RequirementsManagement: React.FC<RequirementsManagementProps> = ({
                         Status
                       </label>
                       <div className="flex gap-3">
-                        {STATUS_OPTIONS.map((opt) => (
+                        {ACTIVITY_UPDATE_STATUS_OPTIONS.map((opt) => (
                           <button
                             key={opt.value}
                             onClick={() =>

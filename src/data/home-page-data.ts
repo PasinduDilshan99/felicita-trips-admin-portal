@@ -1,73 +1,75 @@
 import { HomeCardType } from "@/types/home-page-data-types";
 import {
-  ERP_SYSTEM_PRIVILEGE,
+  CONTENT_MANAGEMENT_PRIVILEGE,
+  BOOKING_MANAGEMENT_PRIVILEGE,
+  WEBSITE_CONTENT_MANAGEMENT_PRIVILEGE,
+  EMPLOYEE_MANAGEMENT_PRIVILEGE,
   HOTEL_MANAGEMENT_PRIVILEGE,
-  TRAVEL_MANAGEMENT_PRIVILEGE,
   VEHICLE_MANAGEMENT_PRIVILEGE,
-  WEB_MANAGEMENT_PRIVILEGE,
-  WEB_PAGE_MANAGEMENT_PRIVILEGE,
+  ERP_SYSTEM_PRIVILEGE,
 } from "@/utils/privileges";
 import {
-  ERP_SYSTEM_URL,
+  CONTENT_MANAGEMENT_URL,
+  BOOKING_MANAGEMENT_URL,
+  WEBSITE_CONTENT_MANAGEMENT_URL,
+  EMPLOYEE_MANAGEMENT_URL,
   HOTEL_MANAGEMENT_URL,
-  TRAVEL_MANAGEMENT_URL,
   VEHICLE_MANAGEMENT_URL,
-  WEB_MANAGEMENT_URL,
-  WEB_PAGE_MANAGEMENT_URL,
+  ERP_SYSTEM_URL,
 } from "@/utils/urls";
 
 export const homeCardData: HomeCardType[] = [
   {
     id: 1,
-    name: "Web Management",
-    label: "web",
+    name: "Content Management",
+    label: "Content",
     description:
-      "Control website content, pages, destinations, and public-facing travel information.",
-    color: "#6366F1", // indigo — distinct from Travel blue
+      "Manage destinations, tours, activities, packages, schedules, and seasonal content.",
+    color: "#6366F1",
     hoverColor: "#4F46E5",
     bgColor: "bg-indigo-50",
-    linkTo: WEB_MANAGEMENT_URL,
+    linkTo: CONTENT_MANAGEMENT_URL,
     iconUrl: "https://cdn-icons-png.flaticon.com/512/1006/1006363.png",
-    privilege: WEB_MANAGEMENT_PRIVILEGE,
+    privilege: CONTENT_MANAGEMENT_PRIVILEGE,
   },
   {
     id: 2,
-    name: "Travel Management",
-    label: "Travel",
+    name: "Booking Management",
+    label: "Bookings",
     description:
-      "Manage itineraries, bookings, tour packages, and client travel experiences.",
-    color: "#3B82F6", // blue
+      "Manage tour bookings, reservations, and customer travel bookings.",
+    color: "#3B82F6",
     hoverColor: "#2563EB",
     bgColor: "bg-blue-50",
-    linkTo: TRAVEL_MANAGEMENT_URL,
+    linkTo: BOOKING_MANAGEMENT_URL,
     iconUrl: "https://cdn-icons-png.flaticon.com/512/870/870175.png",
-    privilege: TRAVEL_MANAGEMENT_PRIVILEGE,
+    privilege: BOOKING_MANAGEMENT_PRIVILEGE,
   },
   {
     id: 3,
-    name: "Web Page Management",
+    name: "Website Content Management",
     label: "Web Pages",
     description:
       "Manage website pages, banners, layouts, SEO content, and page configurations.",
-    color: "#EC4899", // pink
+    color: "#EC4899",
     hoverColor: "#DB2777",
     bgColor: "bg-pink-50",
-    linkTo: WEB_PAGE_MANAGEMENT_URL,
+    linkTo: WEBSITE_CONTENT_MANAGEMENT_URL,
     iconUrl: "https://cdn-icons-png.flaticon.com/512/1055/1055687.png",
-    privilege: WEB_PAGE_MANAGEMENT_PRIVILEGE,
+    privilege: WEBSITE_CONTENT_MANAGEMENT_PRIVILEGE,
   },
   {
     id: 4,
     name: "Employee Management",
     label: "Employees",
     description:
-      "Handle employee records, attendance, performance reviews, and HR operations.",
-    color: "#10B981", // emerald
+      "Handle employee records, roles, privileges, attendance, and HR operations.",
+    color: "#10B981",
     hoverColor: "#059669",
     bgColor: "bg-green-50",
-    linkTo: "/employee-management",
+    linkTo: EMPLOYEE_MANAGEMENT_URL,
     iconUrl: "https://cdn-icons-png.flaticon.com/512/1077/1077063.png",
-    privilege: "EMPLOYEE_MANAGEMENT",
+    privilege: EMPLOYEE_MANAGEMENT_PRIVILEGE,
   },
   {
     id: 5,
@@ -75,7 +77,7 @@ export const homeCardData: HomeCardType[] = [
     label: "Hotels",
     description:
       "Manage hotel bookings, room allocations, guest services, and hospitality operations.",
-    color: "#F59E0B", // amber
+    color: "#F59E0B",
     hoverColor: "#D97706",
     bgColor: "bg-yellow-50",
     linkTo: HOTEL_MANAGEMENT_URL,
@@ -88,7 +90,7 @@ export const homeCardData: HomeCardType[] = [
     label: "Vehicles",
     description:
       "Track fleet, maintenance schedules, fuel consumption, and driver assignments.",
-    color: "#EF4444", // red
+    color: "#EF4444",
     hoverColor: "#DC2626",
     bgColor: "bg-red-50",
     linkTo: VEHICLE_MANAGEMENT_URL,
@@ -101,7 +103,7 @@ export const homeCardData: HomeCardType[] = [
     label: "ERP",
     description:
       "Integrated management of core business processes and enterprise resources.",
-    color: "#8B5CF6", // violet
+    color: "#8B5CF6",
     hoverColor: "#7C3AED",
     bgColor: "bg-purple-50",
     linkTo: ERP_SYSTEM_URL,

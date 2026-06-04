@@ -1,9 +1,9 @@
-// components/tours-components/tour-details-view-components/TourInclusionsExclusions.tsx
 "use client";
 
 import React, { useState } from "react";
 import { CheckCircle, XCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { hexToRgba } from "@/utils/functions";
 
 interface InclusionExclusionItem {
   id: number;
@@ -16,15 +16,6 @@ interface TourInclusionsExclusionsProps {
   inclusions: InclusionExclusionItem[];
   exclusions: InclusionExclusionItem[];
 }
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
 
 export const TourInclusionsExclusions: React.FC<
   TourInclusionsExclusionsProps

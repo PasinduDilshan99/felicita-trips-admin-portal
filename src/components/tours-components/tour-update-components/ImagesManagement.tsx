@@ -1,7 +1,6 @@
-// components/tours-components/update-tour-components/ImagesManagement.tsx
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   ImageIcon,
   Plus,
@@ -13,11 +12,16 @@ import {
   AlertCircle,
   Edit2,
 } from "lucide-react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { TourImage } from "@/types/tour-types";
 import { TourImageInput, UpdateImageInput } from "@/types/tour-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import ImageModal from "@/components/common-components/ImageModal";
+import {
+  cardVariants,
+  formVariants,
+  imageCardVariants,
+} from "@/app/animations/variants";
 
 interface ImagesManagementProps {
   images: TourImage[];
@@ -26,30 +30,14 @@ interface ImagesManagementProps {
   updatedImages: UpdateImageInput[];
   uploadingImages: boolean;
   onRemoveImage: (imageId: number) => void;
-  onAddNewImage: (file: File, name: string, description: string) => Promise<void>;
+  onAddNewImage: (
+    file: File,
+    name: string,
+    description: string,
+  ) => Promise<void>;
   onUpdateImage: (imageId: number, name: string, description: string) => void;
   error?: string;
 }
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
-};
-
-const imageCardVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.92 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.28, ease: EASE_OUT } },
-  exit: { opacity: 0, scale: 0.92, transition: { duration: 0.2 } },
-  hover: { y: -4, transition: { duration: 0.2 } },
-};
-
-const formVariants: Variants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE_OUT } },
-  exit: { opacity: 0, y: -20, transition: { duration: 0.24 } },
-};
 
 export const ImagesManagement: React.FC<ImagesManagementProps> = ({
   images,
@@ -88,15 +76,20 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
   };
 
   const isImageUpdated = (imageId: number): boolean => {
-    return updatedImages.some(u => u.imageId === imageId);
+    return updatedImages.some((u) => u.imageId === imageId);
   };
 
   const getUpdatedImage = (imageId: number): UpdateImageInput | undefined => {
-    return updatedImages.find(u => u.imageId === imageId);
+    return updatedImages.find((u) => u.imageId === imageId);
   };
 
   const getAllImagesForModal = () => {
-    const allImages: Array<{ url: string; name?: string; description?: string; id?: string | number }> = [];
+    const allImages: Array<{
+      url: string;
+      name?: string;
+      description?: string;
+      id?: string | number;
+    }> = [];
 
     images.forEach((image) => {
       if (!isImageRemoved(image.imageId)) {
@@ -154,7 +147,11 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
 
     setUploadingLocalImage(true);
     try {
-      await onAddNewImage(newImageData.file, newImageData.name, newImageData.description);
+      await onAddNewImage(
+        newImageData.file,
+        newImageData.name,
+        newImageData.description,
+      );
       setNewImageData({ name: "", description: "", file: null });
       setShowNewImageForm(false);
       if (fileInputRef.current) {
@@ -175,7 +172,11 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
       return;
     }
 
-    onUpdateImage(editingImage.imageId, editImageData.name, editImageData.description);
+    onUpdateImage(
+      editingImage.imageId,
+      editImageData.name,
+      editImageData.description,
+    );
     setEditingImage(null);
     setEditImageData({ name: "", description: "" });
   };
@@ -187,7 +188,9 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
     }, 100);
   };
 
-  const existingImagesCount = images.filter((img) => !isImageRemoved(img.imageId)).length;
+  const existingImagesCount = images.filter(
+    (img) => !isImageRemoved(img.imageId),
+  ).length;
   const totalImagesCount = existingImagesCount + newImages.length;
 
   const focusHandlers = {
@@ -217,7 +220,9 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
         style={{
           backgroundColor: theme.surface,
           border: `1px solid ${error ? theme.error : theme.border}`,
-          boxShadow: error ? `0 0 0 3px ${theme.error}18` : "0 2px 16px rgba(0,0,0,0.07)",
+          boxShadow: error
+            ? `0 0 0 3px ${theme.error}18`
+            : "0 2px 16px rgba(0,0,0,0.07)",
         }}
       >
         {/* Header */}
@@ -229,16 +234,26 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
           <div className="flex items-center gap-3">
             <span
               className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0"
-              style={{ backgroundColor: `${theme.error}18`, color: theme.error }}
+              style={{
+                backgroundColor: `${theme.error}18`,
+                color: theme.error,
+              }}
             >
               <ImageIcon className="w-4 h-4" />
             </span>
             <div>
-              <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+              <h2
+                className="text-sm sm:text-base font-semibold"
+                style={{ color: theme.text }}
+              >
                 Images Management
               </h2>
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-                {totalImagesCount} total images ({existingImagesCount} existing, {newImages.length} new)
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
+                {totalImagesCount} total images ({existingImagesCount} existing,{" "}
+                {newImages.length} new)
               </p>
             </div>
           </div>
@@ -262,7 +277,10 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
             </button>
             <ChevronDown
               className="w-4 h-4 transition-transform"
-              style={{ transform: isExpanded ? "rotate(180deg)" : "none", color: theme.textSecondary }}
+              style={{
+                transform: isExpanded ? "rotate(180deg)" : "none",
+                color: theme.textSecondary,
+              }}
             />
           </div>
         </div>
@@ -286,31 +304,50 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                     style={{ backgroundColor: theme.surface }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <h3 className="text-lg font-semibold mb-4" style={{ color: theme.text }}>
+                    <h3
+                      className="text-lg font-semibold mb-4"
+                      style={{ color: theme.text }}
+                    >
                       Edit Image
                     </h3>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
+                        <label
+                          className="block text-sm font-medium mb-1"
+                          style={{ color: theme.textSecondary }}
+                        >
                           Image Name
                         </label>
                         <input
                           type="text"
                           value={editImageData.name}
-                          onChange={(e) => setEditImageData({ ...editImageData, name: e.target.value })}
+                          onChange={(e) =>
+                            setEditImageData({
+                              ...editImageData,
+                              name: e.target.value,
+                            })
+                          }
                           className="w-full px-3 py-2 rounded-lg border-2"
                           style={{ ...fieldBase, borderColor: theme.border }}
                           {...focusHandlers}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
+                        <label
+                          className="block text-sm font-medium mb-1"
+                          style={{ color: theme.textSecondary }}
+                        >
                           Description
                         </label>
                         <input
                           type="text"
                           value={editImageData.description}
-                          onChange={(e) => setEditImageData({ ...editImageData, description: e.target.value })}
+                          onChange={(e) =>
+                            setEditImageData({
+                              ...editImageData,
+                              description: e.target.value,
+                            })
+                          }
                           className="w-full px-3 py-2 rounded-lg border-2"
                           style={{ ...fieldBase, borderColor: theme.border }}
                           {...focusHandlers}
@@ -358,13 +395,20 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                   }}
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-semibold" style={{ color: theme.text }}>
+                    <h4
+                      className="text-sm font-semibold"
+                      style={{ color: theme.text }}
+                    >
                       Add New Image
                     </h4>
                     <button
                       onClick={() => {
                         setShowNewImageForm(false);
-                        setNewImageData({ name: "", description: "", file: null });
+                        setNewImageData({
+                          name: "",
+                          description: "",
+                          file: null,
+                        });
                       }}
                       className="p-1 rounded hover:bg-black/10"
                     >
@@ -374,7 +418,10 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
 
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+                      <label
+                        className="block text-xs font-medium mb-1"
+                        style={{ color: theme.textSecondary }}
+                      >
                         Image File <span style={{ color: theme.error }}>*</span>
                       </label>
                       <div
@@ -389,9 +436,17 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                           onChange={handleFileSelect}
                           className="hidden"
                         />
-                        <Upload className="w-6 h-6 mx-auto mb-2" style={{ color: theme.textSecondary }} />
-                        <p className="text-sm" style={{ color: theme.textSecondary }}>
-                          {newImageData.file ? newImageData.file.name : "Click to select image"}
+                        <Upload
+                          className="w-6 h-6 mx-auto mb-2"
+                          style={{ color: theme.textSecondary }}
+                        />
+                        <p
+                          className="text-sm"
+                          style={{ color: theme.textSecondary }}
+                        >
+                          {newImageData.file
+                            ? newImageData.file.name
+                            : "Click to select image"}
                         </p>
                       </div>
                     </div>
@@ -407,13 +462,21 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                     )}
 
                     <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+                      <label
+                        className="block text-xs font-medium mb-1"
+                        style={{ color: theme.textSecondary }}
+                      >
                         Image Name <span style={{ color: theme.error }}>*</span>
                       </label>
                       <input
                         type="text"
                         value={newImageData.name}
-                        onChange={(e) => setNewImageData({ ...newImageData, name: e.target.value })}
+                        onChange={(e) =>
+                          setNewImageData({
+                            ...newImageData,
+                            name: e.target.value,
+                          })
+                        }
                         className="w-full px-3 py-2 rounded-lg border-2 text-sm"
                         style={{ ...fieldBase, borderColor: theme.border }}
                         placeholder="e.g., Tour Main Image"
@@ -422,13 +485,21 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+                      <label
+                        className="block text-xs font-medium mb-1"
+                        style={{ color: theme.textSecondary }}
+                      >
                         Description
                       </label>
                       <input
                         type="text"
                         value={newImageData.description}
-                        onChange={(e) => setNewImageData({ ...newImageData, description: e.target.value })}
+                        onChange={(e) =>
+                          setNewImageData({
+                            ...newImageData,
+                            description: e.target.value,
+                          })
+                        }
                         className="w-full px-3 py-2 rounded-lg border-2 text-sm"
                         style={{ ...fieldBase, borderColor: theme.border }}
                         placeholder="Optional description"
@@ -440,7 +511,11 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                       <button
                         onClick={() => {
                           setShowNewImageForm(false);
-                          setNewImageData({ name: "", description: "", file: null });
+                          setNewImageData({
+                            name: "",
+                            description: "",
+                            file: null,
+                          });
                         }}
                         className="flex-1 px-3 py-2 rounded-lg text-sm"
                         style={{
@@ -479,13 +554,22 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
             {existingImagesCount === 0 && newImages.length === 0 ? (
               <div
                 className="text-center py-12 rounded-xl"
-                style={{ backgroundColor: `${theme.border}20`, border: `1px dashed ${theme.border}` }}
+                style={{
+                  backgroundColor: `${theme.border}20`,
+                  border: `1px dashed ${theme.border}`,
+                }}
               >
-                <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: theme.textSecondary }} />
+                <ImageIcon
+                  className="w-12 h-12 mx-auto mb-3 opacity-30"
+                  style={{ color: theme.textSecondary }}
+                />
                 <p className="text-sm" style={{ color: theme.textSecondary }}>
                   No images added yet
                 </p>
-                <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
+                <p
+                  className="text-xs mt-1"
+                  style={{ color: theme.textSecondary }}
+                >
                   Click "Add Image" to upload
                 </p>
               </div>
@@ -504,24 +588,39 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                           exit="exit"
                           whileHover="hover"
                           className="relative group rounded-xl overflow-hidden cursor-pointer"
-                          style={{ border: `1px solid ${theme.border}`, backgroundColor: theme.background }}
+                          style={{
+                            border: `1px solid ${theme.border}`,
+                            backgroundColor: theme.background,
+                          }}
                           onClick={() => {
                             const allImages = getAllImagesForModal();
-                            const index = allImages.findIndex((img) => img.id === image.imageId);
+                            const index = allImages.findIndex(
+                              (img) => img.id === image.imageId,
+                            );
                             openImageModal(index);
                           }}
                         >
-                          <img src={image.imageUrl} alt={image.imageName} className="w-full h-40 object-cover" />
-                          <div
-                            className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
+                          <img
+                            src={image.imageUrl}
+                            alt={image.imageName}
+                            className="w-full h-40 object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="absolute bottom-0 left-0 right-0 p-3">
                               <p className="text-white text-sm font-medium truncate">
-                                {isImageUpdated(image.imageId) ? getUpdatedImage(image.imageId)?.name : image.imageName}
+                                {isImageUpdated(image.imageId)
+                                  ? getUpdatedImage(image.imageId)?.name
+                                  : image.imageName}
                               </p>
-                              {(isImageUpdated(image.imageId) ? getUpdatedImage(image.imageId)?.imageDescription : image.imageDescription) && (
+                              {(isImageUpdated(image.imageId)
+                                ? getUpdatedImage(image.imageId)
+                                    ?.imageDescription
+                                : image.imageDescription) && (
                                 <p className="text-white/70 text-xs truncate">
-                                  {isImageUpdated(image.imageId) ? getUpdatedImage(image.imageId)?.imageDescription : image.imageDescription}
+                                  {isImageUpdated(image.imageId)
+                                    ? getUpdatedImage(image.imageId)
+                                        ?.imageDescription
+                                    : image.imageDescription}
                                 </p>
                               )}
                             </div>
@@ -536,9 +635,17 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setEditingImage(image);
-                                setEditImageData({ 
-                                  name: isImageUpdated(image.imageId) ? getUpdatedImage(image.imageId)?.name || image.imageName : image.imageName, 
-                                  description: isImageUpdated(image.imageId) ? getUpdatedImage(image.imageId)?.imageDescription || image.imageDescription || "" : image.imageDescription || ""
+                                setEditImageData({
+                                  name: isImageUpdated(image.imageId)
+                                    ? getUpdatedImage(image.imageId)?.name ||
+                                      image.imageName
+                                    : image.imageName,
+                                  description: isImageUpdated(image.imageId)
+                                    ? getUpdatedImage(image.imageId)
+                                        ?.imageDescription ||
+                                      image.imageDescription ||
+                                      ""
+                                    : image.imageDescription || "",
                                 });
                               }}
                               className="p-1.5 rounded-full bg-blue-500 text-white shadow-lg hover:scale-110 transition-transform"
@@ -564,28 +671,46 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
 
                 {/* New Images Preview */}
                 {newImages.map((image, index) => {
-                  const existingCount = images.filter((img) => !isImageRemoved(img.imageId)).length;
+                  const existingCount = images.filter(
+                    (img) => !isImageRemoved(img.imageId),
+                  ).length;
                   return (
                     <motion.div
                       key={`new-${index}`}
                       variants={imageCardVariants}
                       whileHover="hover"
                       className="relative rounded-xl overflow-hidden cursor-pointer"
-                      style={{ border: `2px solid ${theme.success}`, backgroundColor: `${theme.success}05` }}
+                      style={{
+                        border: `2px solid ${theme.success}`,
+                        backgroundColor: `${theme.success}05`,
+                      }}
                       onClick={() => openImageModal(existingCount + index)}
                     >
-                      <img src={image.imageUrl} alt={image.name} className="w-full h-40 object-cover" />
+                      <img
+                        src={image.imageUrl}
+                        alt={image.name}
+                        className="w-full h-40 object-cover"
+                      />
                       <div className="p-2">
-                        <p className="text-sm font-medium truncate" style={{ color: theme.text }}>
+                        <p
+                          className="text-sm font-medium truncate"
+                          style={{ color: theme.text }}
+                        >
                           {image.name}
                         </p>
                         {image.description && (
-                          <p className="text-xs truncate mt-0.5" style={{ color: theme.textSecondary }}>
+                          <p
+                            className="text-xs truncate mt-0.5"
+                            style={{ color: theme.textSecondary }}
+                          >
                             {image.description}
                           </p>
                         )}
                       </div>
-                      <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs font-medium text-white" style={{ backgroundColor: theme.success }}>
+                      <div
+                        className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs font-medium text-white"
+                        style={{ backgroundColor: theme.success }}
+                      >
                         New
                       </div>
                     </motion.div>
@@ -596,10 +721,18 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
 
             {/* Uploading Indicator */}
             {(uploadingImages || uploadingLocalImage) && (
-              <div className="mt-4 p-3 rounded-lg flex items-center gap-2" style={{ backgroundColor: `${theme.primary}10` }}>
-                <Loader2 className="w-4 h-4 animate-spin" style={{ color: theme.primary }} />
+              <div
+                className="mt-4 p-3 rounded-lg flex items-center gap-2"
+                style={{ backgroundColor: `${theme.primary}10` }}
+              >
+                <Loader2
+                  className="w-4 h-4 animate-spin"
+                  style={{ color: theme.primary }}
+                />
                 <span className="text-sm" style={{ color: theme.primary }}>
-                  {uploadingLocalImage ? "Uploading image to Cloudinary..." : "Processing images..."}
+                  {uploadingLocalImage
+                    ? "Uploading image to Cloudinary..."
+                    : "Processing images..."}
                 </span>
               </div>
             )}
@@ -608,7 +741,14 @@ export const ImagesManagement: React.FC<ImagesManagementProps> = ({
 
         {/* Error Banner */}
         {error && (
-          <div className="px-4 sm:px-6 py-3 flex items-center gap-2 text-sm" style={{ borderTop: `1px solid ${theme.error}30`, backgroundColor: `${theme.error}08`, color: theme.error }}>
+          <div
+            className="px-4 sm:px-6 py-3 flex items-center gap-2 text-sm"
+            style={{
+              borderTop: `1px solid ${theme.error}30`,
+              backgroundColor: `${theme.error}08`,
+              color: theme.error,
+            }}
+          >
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             {error}
           </div>

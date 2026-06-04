@@ -3,28 +3,20 @@
 import React, { useState } from "react";
 import {
   Hotel,
-  Bus,
   Utensils,
   Coffee,
-  Sun,
   Moon,
   Apple,
   ChevronDown,
   AlertCircle,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { DayAccommodation } from "@/types/package-types";
+import {
+  DayAccommodation,
+  DayAccommodationsFormProps,
+} from "@/types/package-types";
 import { HotelSelector } from "./HotelSelector";
 import { VehicleSelector } from "./VehicleSelector";
-import { HotelNameId, VehicleNumberIdType } from "@/types/package-types";
-
-interface DayAccommodationsFormProps {
-  accommodations: DayAccommodation[];
-  onAccommodationsChange: (accommodations: DayAccommodation[]) => void;
-  hotels: HotelNameId[];
-  vehicles: VehicleNumberIdType[];
-  error?: string;
-}
 
 export const DayAccommodationsForm: React.FC<DayAccommodationsFormProps> = ({
   accommodations,

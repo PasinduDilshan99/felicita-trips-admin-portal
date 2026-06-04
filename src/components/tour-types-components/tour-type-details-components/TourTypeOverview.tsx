@@ -1,25 +1,10 @@
-// components/tour-types-components/tour-type-details-view-components/TourTypeOverview.tsx
 "use client";
 
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp, FileText, Palette } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface TourTypeOverviewProps {
-  name: string;
-  description: string;
-  color: string | null;
-  hoverColor: string | null;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { TourTypeOverviewProps } from "@/types/tour-type-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const TourTypeOverview: React.FC<TourTypeOverviewProps> = ({
   name,
@@ -51,7 +36,10 @@ export const TourTypeOverview: React.FC<TourTypeOverviewProps> = ({
         className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between"
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
-        <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+        <h2
+          className="text-base sm:text-lg font-semibold"
+          style={{ color: theme.text }}
+        >
           Type Overview
         </h2>
         <div
@@ -61,8 +49,14 @@ export const TourTypeOverview: React.FC<TourTypeOverviewProps> = ({
             border: `1px solid ${hexToRgba(displayColor, 0.2)}`,
           }}
         >
-          <Palette className="w-3 h-3 sm:w-3.5 sm:h-3.5" style={{ color: displayColor }} />
-          <span className="text-[10px] sm:text-xs font-medium" style={{ color: displayColor }}>
+          <Palette
+            className="w-3 h-3 sm:w-3.5 sm:h-3.5"
+            style={{ color: displayColor }}
+          />
+          <span
+            className="text-[10px] sm:text-xs font-medium"
+            style={{ color: displayColor }}
+          >
             {displayColor}
           </span>
         </div>
@@ -71,17 +65,26 @@ export const TourTypeOverview: React.FC<TourTypeOverviewProps> = ({
       <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4">
         {/* Type Name */}
         <div>
-          <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Type Name
           </p>
-          <h3 className="text-xl sm:text-2xl font-bold" style={{ color: theme.text }}>
+          <h3
+            className="text-xl sm:text-2xl font-bold"
+            style={{ color: theme.text }}
+          >
             {name}
           </h3>
         </div>
 
         {/* Color Scheme Preview */}
         <div>
-          <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2"
+            style={{ color: theme.textSecondary }}
+          >
             Color Scheme
           </p>
           <div className="flex items-center gap-3 sm:gap-4">
@@ -91,8 +94,16 @@ export const TourTypeOverview: React.FC<TourTypeOverviewProps> = ({
                 style={{ backgroundColor: displayColor }}
               />
               <div>
-                <p className="text-[10px] sm:text-xs" style={{ color: theme.textSecondary }}>Primary</p>
-                <p className="text-[10px] sm:text-xs font-mono" style={{ color: displayColor }}>
+                <p
+                  className="text-[10px] sm:text-xs"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Primary
+                </p>
+                <p
+                  className="text-[10px] sm:text-xs font-mono"
+                  style={{ color: displayColor }}
+                >
                   {displayColor}
                 </p>
               </div>
@@ -106,8 +117,16 @@ export const TourTypeOverview: React.FC<TourTypeOverviewProps> = ({
                     style={{ backgroundColor: displayHoverColor }}
                   />
                   <div>
-                    <p className="text-[10px] sm:text-xs" style={{ color: theme.textSecondary }}>Hover</p>
-                    <p className="text-[10px] sm:text-xs font-mono" style={{ color: displayHoverColor }}>
+                    <p
+                      className="text-[10px] sm:text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Hover
+                    </p>
+                    <p
+                      className="text-[10px] sm:text-xs font-mono"
+                      style={{ color: displayHoverColor }}
+                    >
                       {displayHoverColor}
                     </p>
                   </div>
@@ -120,7 +139,10 @@ export const TourTypeOverview: React.FC<TourTypeOverviewProps> = ({
         {/* Description */}
         {description && (
           <div>
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2"
+              style={{ color: theme.textSecondary }}
+            >
               Description
             </p>
             <div
@@ -131,9 +153,14 @@ export const TourTypeOverview: React.FC<TourTypeOverviewProps> = ({
               }}
             >
               <div className="flex gap-2">
-                <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" style={{ color: displayColor }} />
+                <FileText
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5"
+                  style={{ color: displayColor }}
+                />
                 <div className="flex-1">
-                  <p style={{ color: theme.textSecondary }}>{truncatedDescription}</p>
+                  <p style={{ color: theme.textSecondary }}>
+                    {truncatedDescription}
+                  </p>
                   {description.length > 500 && (
                     <button
                       onClick={() => setIsExpanded(!isExpanded)}

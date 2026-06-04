@@ -1,70 +1,23 @@
-// components/activity-schedules-components/terminate-activity-schedule-components/PackageInfoPanel.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { Package, Calendar, DollarSign, Users, AlertCircle } from "lucide-react";
-import { ActivityScheduleDetails } from "@/types/activity-schedule-types";
+import { motion } from "framer-motion";
+import { Package, Calendar, DollarSign, Users } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { PackageInfoPanelProps } from "@/types/activity-schedule-types";
+import {
+  cardVariants,
+  contentVariants,
+  headerVariants,
+  infoRowVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const infoRowVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-};
-
-interface PackageInfoPanelProps {
-  scheduleDetails: ActivityScheduleDetails;
-}
-
-export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDetails }) => {
+export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({
+  scheduleDetails,
+}) => {
   const { theme } = useTheme();
   const { formatPrice } = useCurrency();
 
@@ -77,12 +30,18 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
     return null;
   }
 
-  const calculateDiscountedPrice = (price: number | null, discount: number | null): number | null => {
+  const calculateDiscountedPrice = (
+    price: number | null,
+    discount: number | null,
+  ): number | null => {
     if (!price || !discount) return price;
-    return price - (price * discount / 100);
+    return price - (price * discount) / 100;
   };
 
-  const discountedPrice = calculateDiscountedPrice(scheduleDetails.totalPrice, scheduleDetails.discountPercentage);
+  const discountedPrice = calculateDiscountedPrice(
+    scheduleDetails.totalPrice,
+    scheduleDetails.discountPercentage,
+  );
 
   return (
     <motion.div
@@ -118,7 +77,10 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
       >
         {/* Package Name */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Package Name
           </p>
           <motion.div
@@ -133,7 +95,10 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
         {/* Package Description */}
         {scheduleDetails.packageDescription && (
           <motion.div variants={infoRowVariants}>
-            <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1"
+              style={{ color: theme.textSecondary }}
+            >
               Description
             </p>
             <motion.div
@@ -147,9 +112,15 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
         )}
 
         {/* Pricing */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <DollarSign size={11} />
               Total Price
             </p>
@@ -158,11 +129,16 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
               className="text-sm font-semibold"
               style={{ color: theme.text }}
             >
-              {scheduleDetails.totalPrice ? formatPrice(scheduleDetails.totalPrice) : "N/A"}
+              {scheduleDetails.totalPrice
+                ? formatPrice(scheduleDetails.totalPrice)
+                : "N/A"}
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <DollarSign size={11} />
               Discount
             </p>
@@ -171,15 +147,23 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
               className="text-sm font-semibold"
               style={{ color: theme.warning || "#f59e0b" }}
             >
-              {scheduleDetails.discountPercentage ? `${scheduleDetails.discountPercentage}%` : "0%"}
+              {scheduleDetails.discountPercentage
+                ? `${scheduleDetails.discountPercentage}%`
+                : "0%"}
             </motion.div>
           </div>
         </motion.div>
 
         {/* Discounted Price & Price Per Person */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <DollarSign size={11} />
               Discounted Price
             </p>
@@ -192,7 +176,10 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Users size={11} />
               Price Per Person
             </p>
@@ -201,15 +188,23 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
               className="text-sm"
               style={{ color: theme.text }}
             >
-              {scheduleDetails.pricePerPerson ? formatPrice(scheduleDetails.pricePerPerson) : "N/A"}
+              {scheduleDetails.pricePerPerson
+                ? formatPrice(scheduleDetails.pricePerPerson)
+                : "N/A"}
             </motion.div>
           </div>
         </motion.div>
 
         {/* Group Size & Date Range */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Users size={11} />
               Group Size
             </p>
@@ -218,11 +213,15 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
               className="text-sm"
               style={{ color: theme.text }}
             >
-              {scheduleDetails.minPersonCount}–{scheduleDetails.maxPersonCount} people
+              {scheduleDetails.minPersonCount}–{scheduleDetails.maxPersonCount}{" "}
+              people
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Calendar size={11} />
               Date Range
             </p>
@@ -231,7 +230,8 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
               className="text-sm"
               style={{ color: theme.text }}
             >
-              {scheduleDetails.packageScheduleStartDate && scheduleDetails.packageScheduleEndDate 
+              {scheduleDetails.packageScheduleStartDate &&
+              scheduleDetails.packageScheduleEndDate
                 ? `${formatDate(scheduleDetails.packageScheduleStartDate)} – ${formatDate(scheduleDetails.packageScheduleEndDate)}`
                 : "Not specified"}
             </motion.div>
@@ -239,29 +239,53 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
         </motion.div>
 
         {/* Package Schedule Info */}
-        {scheduleDetails.packageScheduleId > 0 && scheduleDetails.packageScheduleName && (
-          <motion.div variants={infoRowVariants} className="pt-2 border-t" style={{ borderColor: hexToRgba(theme.border, 0.5) }}>
-            <p className="text-xs font-semibold mb-2" style={{ color: theme.textSecondary }}>
-              Package Schedule Reference
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <p className="text-[10px]" style={{ color: theme.textSecondary }}>Schedule Name</p>
-                <p className="text-xs" style={{ color: theme.text }}>{scheduleDetails.packageScheduleName}</p>
+        {scheduleDetails.packageScheduleId > 0 &&
+          scheduleDetails.packageScheduleName && (
+            <motion.div
+              variants={infoRowVariants}
+              className="pt-2 border-t"
+              style={{ borderColor: hexToRgba(theme.border, 0.5) }}
+            >
+              <p
+                className="text-xs font-semibold mb-2"
+                style={{ color: theme.textSecondary }}
+              >
+                Package Schedule Reference
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p
+                    className="text-[10px]"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Schedule Name
+                  </p>
+                  <p className="text-xs" style={{ color: theme.text }}>
+                    {scheduleDetails.packageScheduleName}
+                  </p>
+                </div>
+                <div>
+                  <p
+                    className="text-[10px]"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Duration Range
+                  </p>
+                  <p className="text-xs" style={{ color: theme.text }}>
+                    {scheduleDetails.packageScheduleDurationStart}h –{" "}
+                    {scheduleDetails.packageScheduleDurationEnd}h
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-[10px]" style={{ color: theme.textSecondary }}>Duration Range</p>
-                <p className="text-xs" style={{ color: theme.text }}>
-                  {scheduleDetails.packageScheduleDurationStart}h – {scheduleDetails.packageScheduleDurationEnd}h
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
 
         {/* Package Status */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Package Status
           </p>
           <motion.div
@@ -269,10 +293,15 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
             className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium"
             style={{
               background: hexToRgba(
-                scheduleDetails.packageStatus === "ACTIVE" ? theme.success : theme.error,
-                0.1
+                scheduleDetails.packageStatus === "ACTIVE"
+                  ? theme.success
+                  : theme.error,
+                0.1,
               ),
-              color: scheduleDetails.packageStatus === "ACTIVE" ? theme.success : theme.error,
+              color:
+                scheduleDetails.packageStatus === "ACTIVE"
+                  ? theme.success
+                  : theme.error,
             }}
           >
             {scheduleDetails.packageStatus || "Unknown"}

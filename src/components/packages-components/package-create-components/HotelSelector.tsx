@@ -3,16 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Hotel, Star, ChevronDown, Search, AlertCircle } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { HotelNameId } from "@/types/package-types";
-
-interface HotelSelectorProps {
-  value: number;
-  onChange: (hotelId: number) => void;
-  hotels: HotelNameId[];
-  error?: string;
-  required?: boolean;
-  placeholder?: string;
-}
+import { HotelSelectorProps } from "@/types/package-types";
 
 export const HotelSelector: React.FC<HotelSelectorProps> = ({
   value,
@@ -30,7 +21,10 @@ export const HotelSelector: React.FC<HotelSelectorProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -41,18 +35,25 @@ export const HotelSelector: React.FC<HotelSelectorProps> = ({
   const selectedHotel = hotels.find((h) => h.hotelId === value);
 
   const filteredHotels = hotels.filter((hotel) =>
-    hotel.hotelName.toLowerCase().includes(searchQuery.toLowerCase())
+    hotel.hotelName.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const renderStars = (rating: number) => {
     return Array.from({ length: rating }, (_, i) => (
-      <Star key={i} className="w-3 h-3 fill-current" style={{ color: theme.warning }} />
+      <Star
+        key={i}
+        className="w-3 h-3 fill-current"
+        style={{ color: theme.warning }}
+      />
     ));
   };
 
   return (
     <div className="relative" ref={wrapperRef}>
-      <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+      <label
+        className="block text-xs font-medium mb-1"
+        style={{ color: theme.textSecondary }}
+      >
         Hotel {required && <span style={{ color: theme.error }}>*</span>}
       </label>
 
@@ -63,12 +64,19 @@ export const HotelSelector: React.FC<HotelSelectorProps> = ({
         className="w-full px-3 py-2 rounded-lg border focus:outline-none text-left flex items-center justify-between transition-all duration-200 text-sm"
         style={{
           backgroundColor: theme.background,
-          borderColor: error ? theme.error : isOpen ? theme.primary : theme.border,
+          borderColor: error
+            ? theme.error
+            : isOpen
+              ? theme.primary
+              : theme.border,
           color: theme.text,
         }}
       >
         <div className="flex items-center gap-2">
-          <Hotel className="w-3.5 h-3.5" style={{ color: theme.textSecondary }} />
+          <Hotel
+            className="w-3.5 h-3.5"
+            style={{ color: theme.textSecondary }}
+          />
           <span className="text-xs">
             {selectedHotel
               ? `${selectedHotel.hotelName} (${selectedHotel.starRating}★)`
@@ -94,7 +102,10 @@ export const HotelSelector: React.FC<HotelSelectorProps> = ({
         >
           <div className="p-2 border-b" style={{ borderColor: theme.border }}>
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: theme.textSecondary }} />
+              <Search
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none"
+                style={{ color: theme.textSecondary }}
+              />
               <input
                 type="text"
                 placeholder="Search hotels..."
@@ -112,7 +123,10 @@ export const HotelSelector: React.FC<HotelSelectorProps> = ({
 
           <div className="max-h-48 overflow-y-auto">
             {filteredHotels.length === 0 ? (
-              <div className="p-3 text-center text-xs" style={{ color: theme.textSecondary }}>
+              <div
+                className="p-3 text-center text-xs"
+                style={{ color: theme.textSecondary }}
+              >
                 No hotels found
               </div>
             ) : (
@@ -127,12 +141,18 @@ export const HotelSelector: React.FC<HotelSelectorProps> = ({
                   }}
                   className="w-full px-3 py-2 text-left hover:bg-opacity-10 transition-colors"
                   style={{
-                    backgroundColor: value === hotel.hotelId ? `${theme.primary}10` : "transparent",
+                    backgroundColor:
+                      value === hotel.hotelId
+                        ? `${theme.primary}10`
+                        : "transparent",
                   }}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium" style={{ color: theme.text }}>
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: theme.text }}
+                      >
                         {hotel.hotelName}
                       </p>
                       <div className="flex items-center gap-0.5 mt-0.5">
@@ -140,7 +160,10 @@ export const HotelSelector: React.FC<HotelSelectorProps> = ({
                       </div>
                     </div>
                     {value === hotel.hotelId && (
-                      <Check className="w-3.5 h-3.5" style={{ color: theme.primary }} />
+                      <Check
+                        className="w-3.5 h-3.5"
+                        style={{ color: theme.primary }}
+                      />
                     )}
                   </div>
                 </button>
@@ -151,7 +174,10 @@ export const HotelSelector: React.FC<HotelSelectorProps> = ({
       )}
 
       {error && (
-        <p className="mt-1 text-xs flex items-center gap-1" style={{ color: theme.error }}>
+        <p
+          className="mt-1 text-xs flex items-center gap-1"
+          style={{ color: theme.error }}
+        >
           <AlertCircle className="w-3 h-3" />
           {error}
         </p>

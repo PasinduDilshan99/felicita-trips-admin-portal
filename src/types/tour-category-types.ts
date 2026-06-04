@@ -1,6 +1,7 @@
 // types/tour-category-types.ts
 
 import { ApiResponse } from "./common-types";
+import { TourNameId } from "./tour-types";
 
 // Image Types
 export interface TourCategoryImage {
@@ -127,7 +128,8 @@ export interface UpdateTourCategoryResponse {
   id: number | null;
 }
 
-export type UpdateTourCategoryApiResponse = ApiResponse<UpdateTourCategoryResponse>;
+export type UpdateTourCategoryApiResponse =
+  ApiResponse<UpdateTourCategoryResponse>;
 
 // Terminate Tour Category Request
 export interface TerminateTourCategoryRequest {
@@ -138,7 +140,8 @@ export interface TerminateTourCategoryResponse {
   message: string;
 }
 
-export type TerminateTourCategoryApiResponse = ApiResponse<TerminateTourCategoryResponse>;
+export type TerminateTourCategoryApiResponse =
+  ApiResponse<TerminateTourCategoryResponse>;
 
 // Get Tour Category Details Request
 export interface GetTourCategoryDetailsRequest {
@@ -148,4 +151,69 @@ export interface GetTourCategoryDetailsRequest {
 // Get Tour Category Basic Details Request
 export interface GetTourCategoryBasicDetailsRequest {
   id: number;
+}
+
+export interface TourCategoryFilterParams {
+  name: string | null;
+  status: string | null;
+  pageSize: number;
+  pageNumber: number;
+  sortBy: string;
+  sortDirection: "ASC" | "DESC";
+}
+
+export interface TourCategoryCardProps {
+  category: TourCategoryListItem;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface TourCategoryListCardProps {
+  category: TourCategoryListItem;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface TourCategoryReadOnlyDetailsProps {
+  category: TourCategoryDetails;
+  allTours: TourNameId[];
+  loadingTours: boolean;
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+  onAddTour: (tourId: number) => void;
+  onRemoveTour: (tourId: number) => void;
+  onSetPrimaryTour: (tourId: number) => void;
+  onRemoveImage: (imageId: number) => void;
+  onAddNewImage: (
+    file: File,
+    name: string,
+    description: string,
+  ) => Promise<void>;
+  onUpdateImage: (imageId: number, name: string, description: string) => void;
+  uploadingImages: boolean;
+  theme: any;
+}
+
+export interface TourCategorySearchItem {
+  id: number;
+  name: string;
+}
+
+export interface BasicInfoPanelProps {
+  categoryDetails: TourCategoryDetails;
+}
+
+export interface TourCategoryStatsProps {
+  categoryDetails: TourCategoryDetails;
+}
+
+export interface StatItem {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  color: string;
+  formatter?: (value: number | string) => string | number;
+}
+
+export interface ToursListProps {
+  tours: TourCategoryTourReference[];
+  primaryCategory?: boolean;
 }

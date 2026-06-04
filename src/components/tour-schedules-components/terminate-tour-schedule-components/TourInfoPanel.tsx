@@ -1,75 +1,30 @@
-// components/tour-schedules-components/terminate-tour-schedule-components/TourInfoPanel.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { MapPin, Navigation, Clock, Calendar, Info, AlertCircle, Compass } from "lucide-react";
-import { TourScheduleDetails } from "@/types/tour-schedule-types";
+import { motion } from "framer-motion";
+import {
+  MapPin,
+  Navigation,
+  Clock,
+  Calendar,
+  Info,
+  Compass,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { TourInfoPanelProps } from "@/types/tour-schedule-types";
+import {
+  cardVariants,
+  contentVariants,
+  headerVariants,
+  infoRowVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const infoRowVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-};
-
-interface TourInfoPanelProps {
-  scheduleDetails: TourScheduleDetails;
-}
-
-export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ scheduleDetails }) => {
+export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({
+  scheduleDetails,
+}) => {
   const { theme } = useTheme();
-
-  const formatDate = (date: string): string => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString();
-  };
 
   return (
     <motion.div
@@ -105,7 +60,10 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ scheduleDetails })
       >
         {/* Tour Name */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Tour Name
           </p>
           <motion.div
@@ -120,7 +78,10 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ scheduleDetails })
         {/* Tour Description */}
         {scheduleDetails.tourDescription && (
           <motion.div variants={infoRowVariants}>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Info size={11} />
               Description
             </p>
@@ -135,9 +96,15 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ scheduleDetails })
         )}
 
         {/* Duration & Season */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Clock size={11} />
               Duration
             </p>
@@ -150,7 +117,10 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ scheduleDetails })
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Calendar size={11} />
               Season
             </p>
@@ -165,9 +135,15 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ scheduleDetails })
         </motion.div>
 
         {/* Locations */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <MapPin size={11} />
               Start Location
             </p>
@@ -180,7 +156,10 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ scheduleDetails })
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Navigation size={11} />
               End Location
             </p>
@@ -196,7 +175,10 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ scheduleDetails })
 
         {/* Coordinates */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Coordinates
           </p>
           <motion.div
@@ -204,13 +186,17 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ scheduleDetails })
             className="text-xs font-mono"
             style={{ color: theme.textSecondary }}
           >
-            {scheduleDetails.latitude?.toFixed(6)}°, {scheduleDetails.longitude?.toFixed(6)}°
+            {scheduleDetails.latitude?.toFixed(6)}°,{" "}
+            {scheduleDetails.longitude?.toFixed(6)}°
           </motion.div>
         </motion.div>
 
         {/* Tour Status */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Tour Status
           </p>
           <motion.div
@@ -218,10 +204,15 @@ export const TourInfoPanel: React.FC<TourInfoPanelProps> = ({ scheduleDetails })
             className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium"
             style={{
               background: hexToRgba(
-                scheduleDetails.tourStatus === "ACTIVE" ? theme.success : theme.error,
-                0.1
+                scheduleDetails.tourStatus === "ACTIVE"
+                  ? theme.success
+                  : theme.error,
+                0.1,
               ),
-              color: scheduleDetails.tourStatus === "ACTIVE" ? theme.success : theme.error,
+              color:
+                scheduleDetails.tourStatus === "ACTIVE"
+                  ? theme.success
+                  : theme.error,
               border: `1px solid ${
                 scheduleDetails.tourStatus === "ACTIVE"
                   ? hexToRgba(theme.success, 0.3)

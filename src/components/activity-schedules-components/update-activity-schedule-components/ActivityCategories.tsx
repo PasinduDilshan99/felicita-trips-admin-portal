@@ -1,34 +1,11 @@
 "use client";
 
 import React from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Tag, ChevronDown } from "lucide-react";
-import { ActivityCategoryDto } from "@/types/activity-schedule-types";
 import { useTheme } from "@/contexts/ThemeContext";
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const }
-  },
-};
-
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: { 
-    opacity: 1, 
-    height: "auto", 
-    transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const }
-  },
-};
-
-interface ActivityCategoriesProps {
-  categories: ActivityCategoryDto[];
-  expandedSections: Set<string>;
-  onToggleSection: (section: string) => void;
-}
+import { ActivityCategoriesProps } from "@/types/activity-schedule-types";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
 
 export const ActivityCategories: React.FC<ActivityCategoriesProps> = ({
   categories,
@@ -55,38 +32,59 @@ export const ActivityCategories: React.FC<ActivityCategoriesProps> = ({
         onClick={() => onToggleSection("categories")}
         className="w-full flex items-center justify-between p-4 cursor-pointer transition-colors"
         style={{
-          backgroundColor: expandedSections.has("categories") ? `${theme.primary}05` : "transparent",
-          borderBottom: expandedSections.has("categories") ? `1px solid ${theme.border}` : "none",
+          backgroundColor: expandedSections.has("categories")
+            ? `${theme.primary}05`
+            : "transparent",
+          borderBottom: expandedSections.has("categories")
+            ? `1px solid ${theme.border}`
+            : "none",
         }}
       >
         <div className="flex items-center gap-3">
           <span
             className="flex items-center justify-center w-8 h-8 rounded-lg"
-            style={{ backgroundColor: `${theme.primary}18`, color: theme.primary }}
+            style={{
+              backgroundColor: `${theme.primary}18`,
+              color: theme.primary,
+            }}
           >
             <Tag className="w-4 h-4" />
           </span>
           <div>
-            <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+            <h2
+              className="text-sm sm:text-base font-semibold"
+              style={{ color: theme.text }}
+            >
               Activity Categories
             </h2>
-            <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs mt-0.5"
+              style={{ color: theme.textSecondary }}
+            >
               Read-only category list ({categories.length} categories)
             </p>
           </div>
         </div>
         <ChevronDown
           className="w-4 h-4 transition-transform duration-200"
-          style={{ 
-            transform: expandedSections.has("categories") ? "rotate(180deg)" : "none", 
-            color: theme.textSecondary 
+          style={{
+            transform: expandedSections.has("categories")
+              ? "rotate(180deg)"
+              : "none",
+            color: theme.textSecondary,
           }}
         />
       </button>
 
       <AnimatePresence>
         {expandedSections.has("categories") && (
-          <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="hidden" className="p-6">
+          <motion.div
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            className="p-6"
+          >
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
                 <span
@@ -100,7 +98,9 @@ export const ActivityCategories: React.FC<ActivityCategoriesProps> = ({
                 >
                   <Tag className="w-3 h-3" />
                   {category.name}
-                  {category.is_primary && <span className="text-yellow-500 text-xs ml-0.5">★</span>}
+                  {category.is_primary && (
+                    <span className="text-yellow-500 text-xs ml-0.5">★</span>
+                  )}
                 </span>
               ))}
             </div>

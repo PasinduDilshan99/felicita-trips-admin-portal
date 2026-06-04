@@ -1,8 +1,7 @@
-// components/tour-components/TourCard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   MapPin,
   Clock,
@@ -14,111 +13,31 @@ import {
   ChevronDown,
   ChevronUp,
   Tag,
-  DollarSign,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import { Tour, TourImage } from "@/types/tour-types";
 import { hexToRgba } from "@/utils/functions";
-import { TOUR_CATEGORIES_PAGE_URL } from "@/utils/urls";
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-  hover: {
-    y: -4,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-};
-
-const imageVariants: Variants = {
-  rest: { scale: 1 },
-  hover: { scale: 1.05, transition: { duration: 0.4 } },
-};
-
-const overlayVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.3 } },
-};
-
-const quickViewVariants: Variants = {
-  hidden: { opacity: 0, y: -10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.1 } },
-};
-
-const thumbnailVariants: Variants = {
-  rest: { scale: 1, opacity: 0.7 },
-  active: { scale: 1.05, opacity: 1 },
-  hover: { scale: 1.02, transition: { duration: 0.15 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const buttonVariants: Variants = {
-  rest: { scale: 1, y: 0 },
-  hover: {
-    scale: 1.02,
-    y: -2,
-    boxShadow: "0 8px 25px -4px rgba(0,0,0,0.2)",
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  tap: {
-    scale: 0.98,
-    y: 0,
-    transition: { duration: 0.1 },
-  },
-};
-
-const shineVariants: Variants = {
-  rest: { x: "-100%" },
-  hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
-};
-
-// Helper to safely get string value
-const getSafeString = (value: any, fallback: string = ""): string => {
-  if (!value) return fallback;
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return value.toString();
-  return fallback;
-};
-
-// Helper to truncate description
-const truncateDescription = (description: string, maxLength: number = 120): string => {
-  if (!description) return "";
-  if (description.length <= maxLength) return description;
-  let truncated = description.substring(0, maxLength);
-  const lastSpaceIndex = truncated.lastIndexOf(" ");
-  if (lastSpaceIndex > 0 && lastSpaceIndex > maxLength - 20) {
-    truncated = truncated.substring(0, lastSpaceIndex);
-  }
-  return truncated + "...";
-};
+import {
+  TOUR_CATEGORY_DETAILS_VIEW_URL,
+  TOUR_DETAILS_VIEW_PAGE_URL,
+} from "@/utils/urls";
+import { getSafeString, truncateDescription } from "@/utils/commonFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import {
+  buttonVariants,
+  cardVariants,
+  contentVariants,
+  imageVariants,
+  itemVariants,
+  overlayVariants,
+  quickViewVariants,
+  shineVariants,
+  thumbnailVariants,
+} from "@/app/animations/variants";
 
 interface TourCardProps {
   tour: Tour;
@@ -144,10 +63,15 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
   const fullDescription = description;
   const truncatedDesc = truncateDescription(fullDescription, 100);
   const needsTruncation = fullDescription.length > 100;
-  const displayedDescription = isDescriptionExpanded ? fullDescription : truncatedDesc;
+  const displayedDescription = isDescriptionExpanded
+    ? fullDescription
+    : truncatedDesc;
 
   const tourTypeName = getSafeString(tour?.tourTypeName, "N/A");
-  const tourCategoryName = getSafeString(tour?.tourCategoryName, "Uncategorized");
+  const tourCategoryName = getSafeString(
+    tour?.tourCategoryName,
+    "Uncategorized",
+  );
   const seasonName = getSafeString(tour?.seasonName, "N/A");
   const status = tour?.statusName || "INACTIVE";
   const duration = tour?.duration || 0;
@@ -156,12 +80,16 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
 
   const handleCategoryClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`${TOUR_CATEGORIES_PAGE_URL}?name=${encodeURIComponent(tourCategoryName)}`);
+    router.push(
+      `${TOUR_CATEGORY_DETAILS_VIEW_URL}?name=${encodeURIComponent(tourCategoryName)}`,
+    );
   };
 
   const handleTypeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`${TOUR_CATEGORIES_PAGE_URL}?name=${encodeURIComponent(tourTypeName)}`);
+    router.push(
+      `${TOUR_CATEGORY_DETAILS_VIEW_URL}?name=${encodeURIComponent(tourTypeName)}`,
+    );
   };
 
   const getModalImages = (): ImageModalImage[] => {
@@ -185,7 +113,7 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1,
     );
     setIsAutoRotating(false);
   };
@@ -215,7 +143,9 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
   };
 
   const handleViewDetails = () => {
-    router.push(`${TOUR_CATEGORIES_PAGE_URL}/${tourId}?name=${encodeURIComponent(tourName)}`);
+    router.push(
+      `${TOUR_DETAILS_VIEW_PAGE_URL}/${tourId}?name=${encodeURIComponent(tourName)}`,
+    );
   };
 
   const toggleDescription = (e: React.MouseEvent) => {
@@ -223,7 +153,8 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
     setIsDescriptionExpanded(!isDescriptionExpanded);
   };
 
-  const currentImage = images[currentImageIndex]?.imageUrl || PLACE_HOLDER_IMAGE;
+  const currentImage =
+    images[currentImageIndex]?.imageUrl || PLACE_HOLDER_IMAGE;
 
   if (!tour || !tour.tourId) return null;
 
@@ -301,7 +232,11 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
               animate={isHovered ? "visible" : "hidden"}
               onClick={handleViewDetails}
               className="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-              whileHover={{ scale: 1.05, backgroundColor: "white", color: "#1f2937" }}
+              whileHover={{
+                scale: 1.05,
+                backgroundColor: "white",
+                color: "#1f2937",
+              }}
               whileTap={{ scale: 0.95 }}
             >
               <Eye className="w-3.5 h-3.5" />
@@ -325,8 +260,16 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
             {/* Navigation Arrows */}
             {images.length > 1 && (
               <>
-                <NavigationButton direction="left" onClick={handlePrevImage} size="sm" />
-                <NavigationButton direction="right" onClick={handleNextImage} size="sm" />
+                <NavigationButton
+                  direction="left"
+                  onClick={handlePrevImage}
+                  size="sm"
+                />
+                <NavigationButton
+                  direction="right"
+                  onClick={handleNextImage}
+                  size="sm"
+                />
               </>
             )}
 
@@ -347,7 +290,10 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
 
         {/* Thumbnail Gallery */}
         {images.length > 1 && (
-          <div className="px-4 pt-4 pb-2" style={{ borderBottom: `1px solid ${theme.border}` }}>
+          <div
+            className="px-4 pt-4 pb-2"
+            style={{ borderBottom: `1px solid ${theme.border}` }}
+          >
             <div className="flex gap-2 overflow-x-auto pb-2">
               {images.map((image: TourImage, index: number) => (
                 <motion.div
@@ -366,7 +312,10 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
                       currentImageIndex === index ? "scale-105" : ""
                     }`}
                     style={{
-                      borderColor: currentImageIndex === index ? theme.primary : theme.border,
+                      borderColor:
+                        currentImageIndex === index
+                          ? theme.primary
+                          : theme.border,
                     }}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = PLACE_HOLDER_IMAGE;
@@ -379,7 +328,11 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
                         ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
                         : "bg-white/90 backdrop-blur-sm text-gray-600 opacity-0 group-hover/thumb:opacity-100 hover:bg-blue-500 hover:text-white"
                     }`}
-                    title={primaryImageIndex === index ? "Primary Image" : "Set as Primary"}
+                    title={
+                      primaryImageIndex === index
+                        ? "Primary Image"
+                        : "Set as Primary"
+                    }
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
@@ -396,7 +349,12 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
         )}
 
         {/* Content Section */}
-        <motion.div variants={contentVariants} initial="hidden" animate="visible" className="p-5 flex-grow flex flex-col">
+        <motion.div
+          variants={contentVariants}
+          initial="hidden"
+          animate="visible"
+          className="p-5 flex-grow flex flex-col"
+        >
           <motion.div variants={itemVariants} className="mb-4">
             <motion.h3
               className="text-lg sm:text-xl font-bold mb-2 line-clamp-1 transition-colors duration-200 cursor-pointer"
@@ -408,7 +366,10 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
             </motion.h3>
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center">
-                <Tag className="w-3.5 h-3.5 mr-1.5" style={{ color: theme.success }} />
+                <Tag
+                  className="w-3.5 h-3.5 mr-1.5"
+                  style={{ color: theme.success }}
+                />
                 <span
                   className="text-xs sm:text-sm font-medium cursor-pointer"
                   style={{ color: theme.success }}
@@ -423,8 +384,14 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
                   whileHover={{ x: 2 }}
                   onClick={handleTypeClick}
                 >
-                  <Tag className="w-3 h-3 mr-1" style={{ color: theme.textSecondary }} />
-                  <span className="text-xs" style={{ color: theme.textSecondary }}>
+                  <Tag
+                    className="w-3 h-3 mr-1"
+                    style={{ color: theme.textSecondary }}
+                  />
+                  <span
+                    className="text-xs"
+                    style={{ color: theme.textSecondary }}
+                  >
                     {tourTypeName}
                   </span>
                 </motion.div>
@@ -435,7 +402,10 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
           {/* Description */}
           {fullDescription && (
             <motion.div variants={itemVariants} className="mb-4">
-              <p className="text-sm leading-relaxed" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: theme.textSecondary }}
+              >
                 {displayedDescription}
               </p>
               {needsTruncation && (
@@ -447,9 +417,13 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
                   whileTap={{ scale: 0.98 }}
                 >
                   {isDescriptionExpanded ? (
-                    <>Show less <ChevronUp className="w-3 h-3" /></>
+                    <>
+                      Show less <ChevronUp className="w-3 h-3" />
+                    </>
                   ) : (
-                    <>Read more <ChevronDown className="w-3 h-3" /></>
+                    <>
+                      Read more <ChevronDown className="w-3 h-3" />
+                    </>
                   )}
                 </motion.button>
               )}
@@ -468,29 +442,57 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
           >
             <div className="text-center">
               <div className="flex items-center justify-center mb-1">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: hexToRgba(theme.accent, 0.1) }}>
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: hexToRgba(theme.accent, 0.1) }}
+                >
                   <Clock className="w-4 h-4" style={{ color: theme.accent }} />
                 </div>
               </div>
-              <div className="text-xs mb-1" style={{ color: theme.textSecondary }}>Duration</div>
-              <div className="text-sm font-bold" style={{ color: theme.text }}>{duration} days</div>
+              <div
+                className="text-xs mb-1"
+                style={{ color: theme.textSecondary }}
+              >
+                Duration
+              </div>
+              <div className="text-sm font-bold" style={{ color: theme.text }}>
+                {duration} days
+              </div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center mb-1">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: hexToRgba(theme.success, 0.1) }}>
-                  <Calendar className="w-4 h-4" style={{ color: theme.success }} />
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: hexToRgba(theme.success, 0.1) }}
+                >
+                  <Calendar
+                    className="w-4 h-4"
+                    style={{ color: theme.success }}
+                  />
                 </div>
               </div>
-              <div className="text-xs mb-1" style={{ color: theme.textSecondary }}>Season</div>
-              <div className="text-sm font-bold" style={{ color: theme.text }}>{seasonName}</div>
+              <div
+                className="text-xs mb-1"
+                style={{ color: theme.textSecondary }}
+              >
+                Season
+              </div>
+              <div className="text-sm font-bold" style={{ color: theme.text }}>
+                {seasonName}
+              </div>
             </div>
           </motion.div>
 
           {/* Location Info */}
           <motion.div variants={itemVariants} className="mb-4">
-            <div className="flex items-center gap-2 text-xs" style={{ color: theme.textSecondary }}>
+            <div
+              className="flex items-center gap-2 text-xs"
+              style={{ color: theme.textSecondary }}
+            >
               <MapPin className="w-3.5 h-3.5" />
-              <span className="truncate">{startLocation} → {endLocation}</span>
+              <span className="truncate">
+                {startLocation} → {endLocation}
+              </span>
             </div>
           </motion.div>
 
@@ -514,10 +516,14 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onImageClick }) => {
               animate={isHovered ? "hover" : "rest"}
               className="absolute inset-0"
               style={{
-                background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
+                background:
+                  "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
               }}
             />
-            <span className="absolute inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.35)" }} />
+            <span
+              className="absolute inset-x-0 top-0 h-px"
+              style={{ background: "rgba(255,255,255,0.35)" }}
+            />
             <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
             <span className="relative tracking-wide text-sm">View Details</span>
             <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />

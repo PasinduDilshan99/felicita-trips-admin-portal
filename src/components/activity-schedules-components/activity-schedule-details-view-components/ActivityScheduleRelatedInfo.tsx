@@ -1,4 +1,3 @@
-// components/activity-schedules-components/activity-schedule-details-view-components/ActivityScheduleRelatedInfo.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -11,85 +10,10 @@ import {
   Users,
   DollarSign,
   Package,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface ActivityScheduleRelatedInfoProps {
-  // Activity
-  activityId: number;
-  activityName: string;
-  activityDescription: string;
-  activityStatus: string;
-  durationHours: number;
-  availableFrom: string;
-  availableTo: string;
-  priceLocal: number;
-  priceForeigners: number;
-  minParticipate: number;
-  maxParticipate: number;
-  season: string;
-
-  // Destination
-  destinationId: number;
-  destinationName: string;
-
-  // Tour
-  tourId: number;
-  tourName: string | null;
-  tourDescription: string | null;
-  tourDuration: number;
-  startLocation: string | null;
-  endLocation: string | null;
-  tourStatus: string | null;
-
-  // Tour Schedule
-  tourScheduleId: number;
-  tourScheduleName: string | null;
-  tourScheduleStartDate: string | null;
-  tourScheduleEndDate: string | null;
-  tourScheduleDurationStart: number;
-  tourScheduleDurationEnd: number;
-  tourScheduleStatus: string | null;
-
-  // Package
-  packageId: number;
-  packageName: string | null;
-  packageDescription: string | null;
-  totalPrice: number | null;
-  discountPercentage: number | null;
-  pricePerPerson: number | null;
-  minPersonCount: number;
-  maxPersonCount: number;
-  packageStatus: string | null;
-
-  // Package Schedule
-  packageScheduleId: number;
-  packageScheduleName: string | null;
-  packageScheduleStartDate: string | null;
-  packageScheduleEndDate: string | null;
-  packageScheduleDurationStart: number;
-  packageScheduleDurationEnd: number;
-  packageScheduleStatus: string | null;
-
-  // Callbacks
-  onViewActivity: () => void;
-  onViewDestination: () => void;
-  onViewTour: () => void;
-  onViewTourSchedule: () => void;
-  onViewPackage: () => void;
-  onViewPackageSchedule: () => void;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { ActivityScheduleRelatedInfoProps } from "@/types/activity-schedule-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const ActivityScheduleRelatedInfo: React.FC<
   ActivityScheduleRelatedInfoProps

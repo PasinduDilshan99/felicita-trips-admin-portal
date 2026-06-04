@@ -1,4 +1,3 @@
-// components/ProtectedRoute.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,18 +5,13 @@ import { useRouter } from "next/navigation";
 import { UNIQUE_CODE_NAME } from "@/utils/constant";
 import { useAuth } from "@/contexts/AuthContext";
 import CommonLoading from "@/components/common-components/CommonLoading";
-
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  requiredPrivileges?: string[];
-  unauthorizedRedirect?: string;
-  showLoading?: boolean;
-}
+import { ProtectedRouteProps } from "@/types/protected-route-types";
+import { LOGIN_PAGE_URL, UNAUTHORIZED_PAGE_URL } from "@/utils/urls";
 
 export default function ProtectedRoute({
   children,
   requiredPrivileges = [],
-  unauthorizedRedirect = "/unauthorized",
+  unauthorizedRedirect = UNAUTHORIZED_PAGE_URL,
   showLoading = true,
 }: ProtectedRouteProps) {
   const router = useRouter();
@@ -31,13 +25,13 @@ export default function ProtectedRoute({
 
       const uniqueCode = sessionStorage.getItem(UNIQUE_CODE_NAME);
       if (!uniqueCode) {
-        router.push("/login");
+        router.push(LOGIN_PAGE_URL);
         return;
       }
 
       if (requiredPrivileges.length > 0) {
         const hasAllPrivileges = requiredPrivileges.every((privilege) =>
-          hasPrivilege(privilege)
+          hasPrivilege(privilege),
         );
 
         if (!hasAllPrivileges) {
@@ -53,7 +47,13 @@ export default function ProtectedRoute({
     if (!authLoading) {
       checkAccess();
     }
-  }, [router, requiredPrivileges, unauthorizedRedirect, authLoading, hasPrivilege]);
+  }, [
+    router,
+    requiredPrivileges,
+    unauthorizedRedirect,
+    authLoading,
+    hasPrivilege,
+  ]);
 
   if (authLoading || isChecking) {
     if (showLoading) {

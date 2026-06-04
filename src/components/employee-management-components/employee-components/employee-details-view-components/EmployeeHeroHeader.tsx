@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { PageHeader } from "@/components/common-components/Breadcrumb";
+import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import ActionButtons from "@/components/common-components/ActionButtons";
 import { EmployeeFullDetails } from "@/types/employee-types";
 import { hexToRgba } from "@/utils/functions";

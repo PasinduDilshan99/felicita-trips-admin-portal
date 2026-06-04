@@ -1,0 +1,2 @@
+export const DESTINATION_DESCRIPTION_MAX = 3500;
+export const DESTINATION_NAME_MAX = 250;

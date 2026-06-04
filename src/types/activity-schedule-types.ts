@@ -1,5 +1,6 @@
 // types/activity-schedule-types.ts
 
+import { Activity } from "./activity-types";
 import { ApiResponse } from "./common-types";
 
 // Activity Category Type
@@ -57,7 +58,8 @@ export interface ActivityScheduleResponse {
   activityScheduleResponseDtos: ActivityScheduleListItem[];
 }
 
-export type ActivityScheduleListApiResponse = ApiResponse<ActivityScheduleResponse>;
+export type ActivityScheduleListApiResponse =
+  ApiResponse<ActivityScheduleResponse>;
 
 // Filter Parameters
 export interface ActivityScheduleFilterParams {
@@ -123,7 +125,8 @@ export interface ActivityScheduleParamsData {
   sortByResponses: SortByOption[];
 }
 
-export type ActivityScheduleParamsApiResponse = ApiResponse<ActivityScheduleParamsData>;
+export type ActivityScheduleParamsApiResponse =
+  ApiResponse<ActivityScheduleParamsData>;
 
 // Activity Schedule Details
 export interface ActivityScheduleDetails {
@@ -189,7 +192,8 @@ export interface ActivityScheduleDetails {
   images: ActivityScheduleImage[];
 }
 
-export type ActivityScheduleDetailsApiResponse = ApiResponse<ActivityScheduleDetails>;
+export type ActivityScheduleDetailsApiResponse =
+  ApiResponse<ActivityScheduleDetails>;
 
 // Create Activity Schedule Request
 export interface CreateActivityScheduleRequest {
@@ -210,7 +214,8 @@ export interface CreateActivityScheduleResponse {
   message: string;
 }
 
-export type CreateActivityScheduleApiResponse = ApiResponse<CreateActivityScheduleResponse>;
+export type CreateActivityScheduleApiResponse =
+  ApiResponse<CreateActivityScheduleResponse>;
 
 // Update Activity Schedule Request
 export interface UpdateActivityScheduleRequest {
@@ -233,7 +238,8 @@ export interface UpdateActivityScheduleResponse {
   id: number;
 }
 
-export type UpdateActivityScheduleApiResponse = ApiResponse<UpdateActivityScheduleResponse>;
+export type UpdateActivityScheduleApiResponse =
+  ApiResponse<UpdateActivityScheduleResponse>;
 
 // Terminate Activity Schedule Request
 export interface TerminateActivityScheduleRequest {
@@ -244,7 +250,8 @@ export interface TerminateActivityScheduleResponse {
   message: string;
 }
 
-export type TerminateActivityScheduleApiResponse = ApiResponse<TerminateActivityScheduleResponse>;
+export type TerminateActivityScheduleApiResponse =
+  ApiResponse<TerminateActivityScheduleResponse>;
 
 // Get Activity Schedule Details Request
 export interface GetActivityScheduleDetailsRequest {
@@ -259,4 +266,163 @@ export interface ActivityScheduleIdAndName {
   activityScheduleName: string;
 }
 
-export type ActivityScheduleIdAndNamesApiResponse = ApiResponse<ActivityScheduleIdAndName[]>;
+export type ActivityScheduleIdAndNamesApiResponse = ApiResponse<
+  ActivityScheduleIdAndName[]
+>;
+
+export interface ActivityScheduleCardProps {
+  schedule: ActivityScheduleListItem;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface ActivityScheduleListCardProps {
+  schedule: ActivityScheduleListItem;
+  onImageClick?: (imageIndex: number) => void;
+}
+
+export interface ActivityScheduleCategoriesProps {
+  categories: ActivityCategoryDto[];
+}
+
+export interface ActivityScheduleOverviewProps {
+  name: string;
+  description: string;
+  assumeStartDate: string;
+  assumeEndDate: string;
+  durationStart: number;
+  durationEnd: number;
+  specialNote: string;
+}
+
+export interface ActivityScheduleRelatedInfoProps {
+  // Activity
+  activityId: number;
+  activityName: string;
+  activityDescription: string;
+  activityStatus: string;
+  durationHours: number;
+  availableFrom: string;
+  availableTo: string;
+  priceLocal: number;
+  priceForeigners: number;
+  minParticipate: number;
+  maxParticipate: number;
+  season: string;
+
+  // Destination
+  destinationId: number;
+  destinationName: string;
+
+  // Tour
+  tourId: number;
+  tourName: string | null;
+  tourDescription: string | null;
+  tourDuration: number;
+  startLocation: string | null;
+  endLocation: string | null;
+  tourStatus: string | null;
+
+  // Tour Schedule
+  tourScheduleId: number;
+  tourScheduleName: string | null;
+  tourScheduleStartDate: string | null;
+  tourScheduleEndDate: string | null;
+  tourScheduleDurationStart: number;
+  tourScheduleDurationEnd: number;
+  tourScheduleStatus: string | null;
+
+  // Package
+  packageId: number;
+  packageName: string | null;
+  packageDescription: string | null;
+  totalPrice: number | null;
+  discountPercentage: number | null;
+  pricePerPerson: number | null;
+  minPersonCount: number;
+  maxPersonCount: number;
+  packageStatus: string | null;
+
+  // Package Schedule
+  packageScheduleId: number;
+  packageScheduleName: string | null;
+  packageScheduleStartDate: string | null;
+  packageScheduleEndDate: string | null;
+  packageScheduleDurationStart: number;
+  packageScheduleDurationEnd: number;
+  packageScheduleStatus: string | null;
+
+  // Callbacks
+  onViewActivity: () => void;
+  onViewDestination: () => void;
+  onViewTour: () => void;
+  onViewTourSchedule: () => void;
+  onViewPackage: () => void;
+  onViewPackageSchedule: () => void;
+}
+
+export interface ActivitySelectorProps {
+  selectedActivityId?: number;
+  onActivitySelect: (activityId: number, activityDetails?: Activity) => void;
+  onActivityClear?: () => void;
+  error?: string;
+  required?: boolean;
+  label?: string;
+  placeholder?: string;
+  showDetails?: boolean;
+  fetchDetails?: boolean;
+}
+
+export interface ActivityListItem {
+  activityId: number;
+  activityName: string;
+}
+
+export interface ActivityCategoriesProps {
+  categories: ActivityCategoryDto[];
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+}
+
+export interface ActivityImagesProps {
+  images: ActivityScheduleImage[];
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+}
+
+export interface ActivityInformationProps {
+  schedule: ActivityScheduleDetails;
+  formatPrice: (price: number) => string;
+}
+
+export interface ActivityScheduleSearchItem {
+  id: number;
+  name: string;
+}
+
+export interface ActivityInfoPanelProps {
+  scheduleDetails: ActivityScheduleDetails;
+}
+
+export interface ActivityScheduleStatsProps {
+  scheduleDetails: ActivityScheduleDetails;
+}
+
+export interface StatItem {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  color: string;
+  formatter?: (value: number | string) => string | number;
+}
+
+export interface BasicInfoPanelProps {
+  scheduleDetails: ActivityScheduleDetails;
+}
+
+export interface CategoriesListProps {
+  categories: ActivityCategoryDto[];
+}
+
+export interface PackageInfoPanelProps {
+  scheduleDetails: ActivityScheduleDetails;
+}

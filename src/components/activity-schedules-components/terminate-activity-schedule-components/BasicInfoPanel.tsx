@@ -1,79 +1,27 @@
-// components/activity-schedules-components/terminate-activity-schedule-components/BasicInfoPanel.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { Calendar, Clock, FileText, Info, AlertCircle } from "lucide-react";
-import { ActivityScheduleDetails } from "@/types/activity-schedule-types";
+import { motion } from "framer-motion";
+import { Calendar, Clock, FileText, Info } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { BasicInfoPanelProps } from "@/types/activity-schedule-types";
+import {
+  cardVariants,
+  contentVariants,
+  headerVariants,
+  infoRowVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const infoRowVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-};
-
-interface BasicInfoPanelProps {
-  scheduleDetails: ActivityScheduleDetails;
-}
-
-export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ scheduleDetails }) => {
+export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({
+  scheduleDetails,
+}) => {
   const { theme } = useTheme();
 
   const formatDate = (date: string): string => {
     if (!date) return "N/A";
     return new Date(date).toLocaleString();
-  };
-
-  const formatTime = (time: string): string => {
-    if (!time) return "N/A";
-    return time.length > 5 ? time.substring(0, 5) : time;
   };
 
   return (
@@ -110,7 +58,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ scheduleDetails 
       >
         {/* Schedule Name */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Schedule Name
           </p>
           <motion.div
@@ -124,7 +75,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ scheduleDetails 
 
         {/* Description */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1 flex items-center gap-1"
+            style={{ color: theme.textSecondary }}
+          >
             <FileText size={11} />
             Description
           </p>
@@ -138,9 +92,15 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ scheduleDetails 
         </motion.div>
 
         {/* Date Range */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Calendar size={11} />
               Start Date
             </p>
@@ -153,7 +113,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ scheduleDetails 
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Calendar size={11} />
               End Date
             </p>
@@ -168,9 +131,15 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ scheduleDetails 
         </motion.div>
 
         {/* Duration Range */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Clock size={11} />
               Duration Start
             </p>
@@ -183,7 +152,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ scheduleDetails 
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Clock size={11} />
               Duration End
             </p>
@@ -200,7 +172,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ scheduleDetails 
         {/* Special Note */}
         {scheduleDetails.scheduleSpecialNote && (
           <motion.div variants={infoRowVariants}>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Info size={11} />
               Special Note
             </p>
@@ -216,7 +191,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ scheduleDetails 
 
         {/* Status */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Schedule Status
           </p>
           <motion.div
@@ -224,18 +202,25 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ scheduleDetails 
             className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium"
             style={{
               background: hexToRgba(
-                scheduleDetails.scheduleStatus === "ACTIVE" ? theme.success :
-                scheduleDetails.scheduleStatus === "INACTIVE" ? theme.warning || "#f59e0b" :
-                theme.error,
-                0.1
+                scheduleDetails.scheduleStatus === "ACTIVE"
+                  ? theme.success
+                  : scheduleDetails.scheduleStatus === "INACTIVE"
+                    ? theme.warning || "#f59e0b"
+                    : theme.error,
+                0.1,
               ),
-              color: scheduleDetails.scheduleStatus === "ACTIVE" ? theme.success :
-                     scheduleDetails.scheduleStatus === "INACTIVE" ? theme.warning || "#f59e0b" :
-                     theme.error,
+              color:
+                scheduleDetails.scheduleStatus === "ACTIVE"
+                  ? theme.success
+                  : scheduleDetails.scheduleStatus === "INACTIVE"
+                    ? theme.warning || "#f59e0b"
+                    : theme.error,
               border: `1px solid ${
-                scheduleDetails.scheduleStatus === "ACTIVE" ? hexToRgba(theme.success, 0.3) :
-                scheduleDetails.scheduleStatus === "INACTIVE" ? hexToRgba(theme.warning || "#f59e0b", 0.3) :
-                hexToRgba(theme.error, 0.3)
+                scheduleDetails.scheduleStatus === "ACTIVE"
+                  ? hexToRgba(theme.success, 0.3)
+                  : scheduleDetails.scheduleStatus === "INACTIVE"
+                    ? hexToRgba(theme.warning || "#f59e0b", 0.3)
+                    : hexToRgba(theme.error, 0.3)
               }`,
             }}
           >

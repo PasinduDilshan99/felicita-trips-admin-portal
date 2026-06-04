@@ -1,62 +1,30 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
-import { 
-  Users, 
-  ImageIcon, 
-  Plus, 
-  X, 
-  Star, 
-  ChevronDown, 
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Users,
+  ImageIcon,
+  Plus,
+  X,
+  Star,
+  ChevronDown,
   Loader2,
   Upload,
   Trash2,
   Edit2,
   Camera,
   MapPin,
-  Calendar,
-  Clock
+  Clock,
 } from "lucide-react";
-import { TourTypeDetails, TourReference } from "@/types/tour-type-types";
-import { TourNameId } from "@/types/tour-types";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import { TourTypeReadOnlyDetailsProps } from "@/types/tour-type-types";
+import ImageModal from "@/components/common-components/ImageModal";
+import { ImageModalImage } from "@/types/common-components-types";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
 
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const }
-  },
-};
-
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: { 
-    opacity: 1, 
-    height: "auto", 
-    transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const }
-  },
-};
-
-interface TourTypeReadOnlyDetailsProps {
-  tourType: TourTypeDetails;
-  allTours: TourNameId[];
-  loadingTours: boolean;
-  expandedSections: Set<string>;
-  onToggleSection: (section: string) => void;
-  onAddTour: (tourId: number) => void;
-  onRemoveTour: (tourId: number) => void;
-  onSetPrimaryTour: (tourId: number) => void;
-  onRemoveImage: (imageId: number) => void;
-  onAddNewImage: (file: File, name: string, description: string) => Promise<void>;
-  onUpdateImage: (imageId: number, name: string, description: string) => void;
-  uploadingImages: boolean;
-  theme: any;
-}
-
-export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = ({
+export const TourTypeReadOnlyDetails: React.FC<
+  TourTypeReadOnlyDetailsProps
+> = ({
   tourType,
   allTours,
   loadingTours,
@@ -79,7 +47,7 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
   const [editingImage, setEditingImage] = useState<any>(null);
   const [uploadingLocalImage, setUploadingLocalImage] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  
+
   const [newImageData, setNewImageData] = useState({
     name: "",
     description: "",
@@ -91,9 +59,8 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
     description: "",
   });
 
-  // Get tours not already in the tour type
   const availableTours = allTours.filter(
-    t => !tourType.tours.some(existing => existing.tourId === t.tourId)
+    (t) => !tourType.tours.some((existing) => existing.tourId === t.tourId),
   );
 
   const modalImages: ImageModalImage[] = tourType.images.map((img) => ({
@@ -135,7 +102,11 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
 
     setUploadingLocalImage(true);
     try {
-      await onAddNewImage(newImageData.file, newImageData.name, newImageData.description);
+      await onAddNewImage(
+        newImageData.file,
+        newImageData.name,
+        newImageData.description,
+      );
       setNewImageData({ name: "", description: "", file: null });
       setShowNewImageForm(false);
       if (fileInputRef.current) {
@@ -155,7 +126,11 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
       alert("Image name is required");
       return;
     }
-    onUpdateImage(editingImage.imageId, editImageData.name, editImageData.description);
+    onUpdateImage(
+      editingImage.imageId,
+      editImageData.name,
+      editImageData.description,
+    );
     setEditingImage(null);
     setEditImageData({ name: "", description: "" });
   };
@@ -185,8 +160,8 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
     transition: "border-color 0.18s ease, box-shadow 0.18s ease",
   };
 
-  const primaryTour = tourType.tours.find(t => t.primaryType);
-  const otherTours = tourType.tours.filter(t => !t.primaryType);
+  const primaryTour = tourType.tours.find((t) => t.primaryType);
+  const otherTours = tourType.tours.filter((t) => !t.primaryType);
 
   return (
     <div className="space-y-6">
@@ -206,52 +181,96 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
           onClick={() => onToggleSection("tours")}
           className="w-full flex items-center justify-between p-4 cursor-pointer transition-colors"
           style={{
-            backgroundColor: expandedSections.has("tours") ? `${theme.primary}05` : "transparent",
-            borderBottom: expandedSections.has("tours") ? `1px solid ${theme.border}` : "none",
+            backgroundColor: expandedSections.has("tours")
+              ? `${theme.primary}05`
+              : "transparent",
+            borderBottom: expandedSections.has("tours")
+              ? `1px solid ${theme.border}`
+              : "none",
           }}
         >
           <div className="flex items-center gap-3">
             <span
               className="flex items-center justify-center w-8 h-8 rounded-lg"
-              style={{ backgroundColor: `${theme.primary}18`, color: theme.primary }}
+              style={{
+                backgroundColor: `${theme.primary}18`,
+                color: theme.primary,
+              }}
             >
               <Users className="w-4 h-4" />
             </span>
             <div>
-              <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+              <h2
+                className="text-sm sm:text-base font-semibold"
+                style={{ color: theme.text }}
+              >
                 Associated Tours
               </h2>
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
                 Manage tours in this type ({tourType.totalTours} total)
               </p>
             </div>
           </div>
           <ChevronDown
             className="w-4 h-4 transition-transform duration-200"
-            style={{ 
-              transform: expandedSections.has("tours") ? "rotate(180deg)" : "none", 
-              color: theme.textSecondary 
+            style={{
+              transform: expandedSections.has("tours")
+                ? "rotate(180deg)"
+                : "none",
+              color: theme.textSecondary,
             }}
           />
         </button>
 
         <AnimatePresence>
           {expandedSections.has("tours") && (
-            <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="hidden" className="p-6">
+            <motion.div
+              variants={sectionVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="p-6"
+            >
               {/* Primary Tour */}
               {primaryTour && (
                 <div className="mb-4">
-                  <h3 className="text-sm font-semibold mb-2 flex items-center gap-1" style={{ color: theme.text }}>
-                    <Star className="w-3.5 h-3.5" style={{ color: theme.warning }} />
+                  <h3
+                    className="text-sm font-semibold mb-2 flex items-center gap-1"
+                    style={{ color: theme.text }}
+                  >
+                    <Star
+                      className="w-3.5 h-3.5"
+                      style={{ color: theme.warning }}
+                    />
                     Primary Tour
                   </h3>
-                  <div className="p-3 rounded-lg" style={{ backgroundColor: `${theme.warning}10`, border: `1px solid ${theme.warning}30` }}>
+                  <div
+                    className="p-3 rounded-lg"
+                    style={{
+                      backgroundColor: `${theme.warning}10`,
+                      border: `1px solid ${theme.warning}30`,
+                    }}
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium" style={{ color: theme.text }}>{primaryTour.tourName}</p>
-                        <div className="flex items-center gap-2 mt-1 text-xs" style={{ color: theme.textSecondary }}>
+                        <p
+                          className="text-sm font-medium"
+                          style={{ color: theme.text }}
+                        >
+                          {primaryTour.tourName}
+                        </p>
+                        <div
+                          className="flex items-center gap-2 mt-1 text-xs"
+                          style={{ color: theme.textSecondary }}
+                        >
                           <MapPin className="w-3 h-3" />
-                          <span>{primaryTour.startLocation} → {primaryTour.endLocation}</span>
+                          <span>
+                            {primaryTour.startLocation} →{" "}
+                            {primaryTour.endLocation}
+                          </span>
                           <Clock className="w-3 h-3 ml-2" />
                           <span>{primaryTour.duration} days</span>
                         </div>
@@ -264,7 +283,10 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
               {/* Other Tours */}
               {otherTours.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                  <h3
+                    className="text-sm font-semibold mb-2"
+                    style={{ color: theme.textSecondary }}
+                  >
                     Other Tours ({otherTours.length})
                   </h3>
                   <div className="space-y-2">
@@ -272,13 +294,26 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                       <div
                         key={tour.tourId}
                         className="flex items-center justify-between p-3 rounded-lg"
-                        style={{ backgroundColor: `${theme.border}10`, border: `1px solid ${theme.border}` }}
+                        style={{
+                          backgroundColor: `${theme.border}10`,
+                          border: `1px solid ${theme.border}`,
+                        }}
                       >
                         <div>
-                          <p className="text-sm font-medium" style={{ color: theme.text }}>{tour.tourName}</p>
-                          <div className="flex items-center gap-2 mt-1 text-xs" style={{ color: theme.textSecondary }}>
+                          <p
+                            className="text-sm font-medium"
+                            style={{ color: theme.text }}
+                          >
+                            {tour.tourName}
+                          </p>
+                          <div
+                            className="flex items-center gap-2 mt-1 text-xs"
+                            style={{ color: theme.textSecondary }}
+                          >
                             <MapPin className="w-3 h-3" />
-                            <span>{tour.startLocation} → {tour.endLocation}</span>
+                            <span>
+                              {tour.startLocation} → {tour.endLocation}
+                            </span>
                             <Clock className="w-3 h-3 ml-2" />
                             <span>{tour.duration} days</span>
                           </div>
@@ -315,14 +350,23 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className="mt-4 p-3 rounded-lg"
-                    style={{ backgroundColor: `${theme.primary}10`, border: `1px solid ${theme.primary}30` }}
+                    style={{
+                      backgroundColor: `${theme.primary}10`,
+                      border: `1px solid ${theme.primary}30`,
+                    }}
                   >
                     <div className="flex items-center gap-2">
                       <select
                         value={selectedTourId || ""}
-                        onChange={(e) => setSelectedTourId(parseInt(e.target.value))}
+                        onChange={(e) =>
+                          setSelectedTourId(parseInt(e.target.value))
+                        }
                         className="flex-1 px-3 py-1.5 rounded-lg border text-sm"
-                        style={{ backgroundColor: theme.background, borderColor: theme.border, color: theme.text }}
+                        style={{
+                          backgroundColor: theme.background,
+                          borderColor: theme.border,
+                          color: theme.text,
+                        }}
                         disabled={loadingTours}
                       >
                         <option value="">Select a tour...</option>
@@ -343,7 +387,11 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                       <button
                         onClick={() => setShowAddTourForm(false)}
                         className="px-3 py-1.5 rounded-lg text-sm"
-                        style={{ backgroundColor: theme.background, border: `1px solid ${theme.border}`, color: theme.textSecondary }}
+                        style={{
+                          backgroundColor: theme.background,
+                          border: `1px solid ${theme.border}`,
+                          color: theme.textSecondary,
+                        }}
                       >
                         Cancel
                       </button>
@@ -355,7 +403,10 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
               <button
                 onClick={() => setShowAddTourForm(true)}
                 className="mt-3 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-                style={{ backgroundColor: `${theme.primary}10`, color: theme.primary }}
+                style={{
+                  backgroundColor: `${theme.primary}10`,
+                  color: theme.primary,
+                }}
               >
                 <Plus className="w-3.5 h-3.5" />
                 Add Tour
@@ -381,38 +432,59 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
           onClick={() => onToggleSection("images")}
           className="w-full flex items-center justify-between p-4 cursor-pointer transition-colors"
           style={{
-            backgroundColor: expandedSections.has("images") ? `${theme.error}05` : "transparent",
-            borderBottom: expandedSections.has("images") ? `1px solid ${theme.border}` : "none",
+            backgroundColor: expandedSections.has("images")
+              ? `${theme.error}05`
+              : "transparent",
+            borderBottom: expandedSections.has("images")
+              ? `1px solid ${theme.border}`
+              : "none",
           }}
         >
           <div className="flex items-center gap-3">
             <span
               className="flex items-center justify-center w-8 h-8 rounded-lg"
-              style={{ backgroundColor: `${theme.error}18`, color: theme.error }}
+              style={{
+                backgroundColor: `${theme.error}18`,
+                color: theme.error,
+              }}
             >
               <ImageIcon className="w-4 h-4" />
             </span>
             <div>
-              <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+              <h2
+                className="text-sm sm:text-base font-semibold"
+                style={{ color: theme.text }}
+              >
                 Tour Type Images
               </h2>
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
                 Manage images for this tour type
               </p>
             </div>
           </div>
           <ChevronDown
             className="w-4 h-4 transition-transform duration-200"
-            style={{ 
-              transform: expandedSections.has("images") ? "rotate(180deg)" : "none", 
-              color: theme.textSecondary 
+            style={{
+              transform: expandedSections.has("images")
+                ? "rotate(180deg)"
+                : "none",
+              color: theme.textSecondary,
             }}
           />
         </button>
 
         <AnimatePresence>
           {expandedSections.has("images") && (
-            <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="hidden" className="p-6">
+            <motion.div
+              variants={sectionVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="p-6"
+            >
               {/* Edit Image Modal */}
               <AnimatePresence>
                 {editingImage && (
@@ -428,31 +500,50 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                       style={{ backgroundColor: theme.surface }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <h3 className="text-lg font-semibold mb-4" style={{ color: theme.text }}>
+                      <h3
+                        className="text-lg font-semibold mb-4"
+                        style={{ color: theme.text }}
+                      >
                         Edit Image
                       </h3>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
+                          <label
+                            className="block text-sm font-medium mb-1"
+                            style={{ color: theme.textSecondary }}
+                          >
                             Image Name
                           </label>
                           <input
                             type="text"
                             value={editImageData.name}
-                            onChange={(e) => setEditImageData({ ...editImageData, name: e.target.value })}
+                            onChange={(e) =>
+                              setEditImageData({
+                                ...editImageData,
+                                name: e.target.value,
+                              })
+                            }
                             className="w-full px-3 py-2 rounded-lg border-2"
                             style={{ ...fieldBase, borderColor: theme.border }}
                             {...focusHandlers}
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
+                          <label
+                            className="block text-sm font-medium mb-1"
+                            style={{ color: theme.textSecondary }}
+                          >
                             Description
                           </label>
                           <input
                             type="text"
                             value={editImageData.description}
-                            onChange={(e) => setEditImageData({ ...editImageData, description: e.target.value })}
+                            onChange={(e) =>
+                              setEditImageData({
+                                ...editImageData,
+                                description: e.target.value,
+                              })
+                            }
                             className="w-full px-3 py-2 rounded-lg border-2"
                             style={{ ...fieldBase, borderColor: theme.border }}
                             {...focusHandlers}
@@ -498,13 +589,20 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                     }}
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-sm font-semibold" style={{ color: theme.text }}>
+                      <h4
+                        className="text-sm font-semibold"
+                        style={{ color: theme.text }}
+                      >
                         Add New Image
                       </h4>
                       <button
                         onClick={() => {
                           setShowNewImageForm(false);
-                          setNewImageData({ name: "", description: "", file: null });
+                          setNewImageData({
+                            name: "",
+                            description: "",
+                            file: null,
+                          });
                         }}
                         className="p-1 rounded hover:bg-black/10"
                       >
@@ -514,8 +612,12 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
 
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
-                          Image File <span style={{ color: theme.error }}>*</span>
+                        <label
+                          className="block text-xs font-medium mb-1"
+                          style={{ color: theme.textSecondary }}
+                        >
+                          Image File{" "}
+                          <span style={{ color: theme.error }}>*</span>
                         </label>
                         <div
                           className="border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all"
@@ -529,9 +631,17 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                             onChange={handleFileSelect}
                             className="hidden"
                           />
-                          <Upload className="w-6 h-6 mx-auto mb-2" style={{ color: theme.textSecondary }} />
-                          <p className="text-sm" style={{ color: theme.textSecondary }}>
-                            {newImageData.file ? newImageData.file.name : "Click to select image"}
+                          <Upload
+                            className="w-6 h-6 mx-auto mb-2"
+                            style={{ color: theme.textSecondary }}
+                          />
+                          <p
+                            className="text-sm"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            {newImageData.file
+                              ? newImageData.file.name
+                              : "Click to select image"}
                           </p>
                         </div>
                       </div>
@@ -547,13 +657,22 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                       )}
 
                       <div>
-                        <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
-                          Image Name <span style={{ color: theme.error }}>*</span>
+                        <label
+                          className="block text-xs font-medium mb-1"
+                          style={{ color: theme.textSecondary }}
+                        >
+                          Image Name{" "}
+                          <span style={{ color: theme.error }}>*</span>
                         </label>
                         <input
                           type="text"
                           value={newImageData.name}
-                          onChange={(e) => setNewImageData({ ...newImageData, name: e.target.value })}
+                          onChange={(e) =>
+                            setNewImageData({
+                              ...newImageData,
+                              name: e.target.value,
+                            })
+                          }
                           className="w-full px-3 py-2 rounded-lg border-2 text-sm"
                           style={{ ...fieldBase, borderColor: theme.border }}
                           placeholder="e.g., Tour Type Image"
@@ -562,13 +681,21 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+                        <label
+                          className="block text-xs font-medium mb-1"
+                          style={{ color: theme.textSecondary }}
+                        >
                           Description
                         </label>
                         <input
                           type="text"
                           value={newImageData.description}
-                          onChange={(e) => setNewImageData({ ...newImageData, description: e.target.value })}
+                          onChange={(e) =>
+                            setNewImageData({
+                              ...newImageData,
+                              description: e.target.value,
+                            })
+                          }
                           className="w-full px-3 py-2 rounded-lg border-2 text-sm"
                           style={{ ...fieldBase, borderColor: theme.border }}
                           placeholder="Optional description"
@@ -580,7 +707,11 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                         <button
                           onClick={() => {
                             setShowNewImageForm(false);
-                            setNewImageData({ name: "", description: "", file: null });
+                            setNewImageData({
+                              name: "",
+                              description: "",
+                              file: null,
+                            });
                           }}
                           className="flex-1 px-3 py-2 rounded-lg text-sm"
                           style={{
@@ -619,9 +750,15 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
               {tourType.images.length === 0 && (
                 <div
                   className="text-center py-8 rounded-xl"
-                  style={{ backgroundColor: `${theme.border}20`, border: `1px dashed ${theme.border}` }}
+                  style={{
+                    backgroundColor: `${theme.border}20`,
+                    border: `1px dashed ${theme.border}`,
+                  }}
                 >
-                  <Camera className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: theme.textSecondary }} />
+                  <Camera
+                    className="w-12 h-12 mx-auto mb-3 opacity-30"
+                    style={{ color: theme.textSecondary }}
+                  />
                   <p className="text-sm" style={{ color: theme.textSecondary }}>
                     No images added yet
                   </p>
@@ -633,14 +770,31 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                   <div
                     key={image.imageId}
                     className="relative group rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
-                    style={{ border: `1px solid ${theme.border}`, backgroundColor: theme.background }}
+                    style={{
+                      border: `1px solid ${theme.border}`,
+                      backgroundColor: theme.background,
+                    }}
                     onClick={() => openImageModal(index)}
                   >
-                    <img src={image.imageUrl} alt={image.name} className="w-full h-32 object-cover" />
+                    <img
+                      src={image.imageUrl}
+                      alt={image.name}
+                      className="w-full h-32 object-cover"
+                    />
                     <div className="p-2">
-                      <p className="text-xs font-medium truncate" style={{ color: theme.text }}>{image.name}</p>
+                      <p
+                        className="text-xs font-medium truncate"
+                        style={{ color: theme.text }}
+                      >
+                        {image.name}
+                      </p>
                       {image.description && (
-                        <p className="text-xs truncate mt-0.5" style={{ color: theme.textSecondary }}>{image.description}</p>
+                        <p
+                          className="text-xs truncate mt-0.5"
+                          style={{ color: theme.textSecondary }}
+                        >
+                          {image.description}
+                        </p>
                       )}
                     </div>
                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -648,7 +802,10 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
                         onClick={(e) => {
                           e.stopPropagation();
                           setEditingImage(image);
-                          setEditImageData({ name: image.name, description: image.description || "" });
+                          setEditImageData({
+                            name: image.name,
+                            description: image.description || "",
+                          });
                         }}
                         className="p-1.5 rounded-full bg-blue-500 text-white shadow-lg hover:scale-110 transition-transform"
                       >
@@ -671,7 +828,10 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
               <button
                 onClick={() => setShowNewImageForm(true)}
                 className="mt-4 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-                style={{ backgroundColor: `${theme.success}10`, color: theme.success }}
+                style={{
+                  backgroundColor: `${theme.success}10`,
+                  color: theme.success,
+                }}
               >
                 <Plus className="w-3.5 h-3.5" />
                 Add Image
@@ -679,10 +839,18 @@ export const TourTypeReadOnlyDetails: React.FC<TourTypeReadOnlyDetailsProps> = (
 
               {/* Uploading Indicator */}
               {(uploadingImages || uploadingLocalImage) && (
-                <div className="mt-4 p-3 rounded-lg flex items-center gap-2" style={{ backgroundColor: `${theme.primary}10` }}>
-                  <Loader2 className="w-4 h-4 animate-spin" style={{ color: theme.primary }} />
+                <div
+                  className="mt-4 p-3 rounded-lg flex items-center gap-2"
+                  style={{ backgroundColor: `${theme.primary}10` }}
+                >
+                  <Loader2
+                    className="w-4 h-4 animate-spin"
+                    style={{ color: theme.primary }}
+                  />
                   <span className="text-sm" style={{ color: theme.primary }}>
-                    {uploadingLocalImage ? "Uploading image to Cloudinary..." : "Processing images..."}
+                    {uploadingLocalImage
+                      ? "Uploading image to Cloudinary..."
+                      : "Processing images..."}
                   </span>
                 </div>
               )}

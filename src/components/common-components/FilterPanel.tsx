@@ -3,78 +3,8 @@
 import React from 'react';
 import { Search, RefreshCw, Filter, X, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-export type FilterFieldType =
-  | 'text'
-  | 'number'
-  | 'select'
-  | 'multiselect'
-  | 'date'
-  | 'daterange'
-  | 'boolean'
-  | 'search';
-
-export interface FilterOption {
-  value: string | number;
-  label: string;
-}
-
-export interface FilterField {
-  key: string;
-  label: string;
-  type: FilterFieldType;
-  placeholder?: string;
-  options?: FilterOption[];
-  defaultValue?: any;
-  min?: number;
-  max?: number;
-  step?: number;
-  width?: 'full' | 'half' | 'third' | 'quarter';
-}
-
-export interface SortOption {
-  value: string;
-  label: string;
-}
-
-export interface FilterPanelProps {
-  filters: Record<string, any>;
-  fields: FilterField[];
-  onFilterChange: (key: string, value: any) => void;
-  onSearch: () => void;
-  onReset: () => void;
-  onPageSizeChange?: (pageSize: number) => void;
-  onSortChange?: (sortBy: string, sortDirection: 'ASC' | 'DESC') => void;
-  pageSize?: number;
-  pageSizeOptions?: number[];
-  showPageSize?: boolean;
-  showSorting?: boolean;
-  sortOptions?: SortOption[];
-  sortBy?: string;
-  sortDirection?: 'ASC' | 'DESC';
-  title?: string;
-  searchButtonText?: string;
-  resetButtonText?: string;
-  showActiveFilters?: boolean;
-  collapsible?: boolean;
-  defaultCollapsed?: boolean;
-  isLoading?: boolean;
-}
-
-// ─── Inline animation styles injected once ──────────────────────────────────
+import { FilterField, FilterPanelProps } from '@/types/filter-types';
+import { hexToRgba } from '@/utils/functions';
 
 const ANIMATION_STYLES = `
   @keyframes fp-fadeSlideIn {
@@ -132,8 +62,6 @@ function injectStyles() {
   stylesInjected = true;
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
-
 const FilterPanel: React.FC<FilterPanelProps> = ({
   filters,
   fields,
@@ -159,14 +87,11 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 }) => {
   const { theme } = useTheme();
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
-  const [bodyKey, setBodyKey] = React.useState(0); // re-mount body to retrigger animation
+  const [bodyKey, setBodyKey] = React.useState(0);
 
   React.useEffect(() => { injectStyles(); }, []);
 
-  // CSS variable for primary shadow (used in hover on search button)
   const primaryShadow = hexToRgba(theme.primary, 0.35);
-
-  // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleInputChange = (key: string, value: any) =>
     onFilterChange(key, value === '' ? null : value);
@@ -190,8 +115,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     if (!next) setBodyKey(k => k + 1); // animate body on open
   };
 
-  // ── Active filter count ───────────────────────────────────────────────────
-
   const activeFilterCount = Object.keys(filters).filter(key => {
     const v = filters[key];
     if (v === null || v === undefined || v === '') return false;
@@ -199,7 +122,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     return true;
   }).length;
 
-  // ── Grid layout ───────────────────────────────────────────────────────────
 
   const getGridCols = () => {
     if (fields.some(f => f.width === 'quarter'))
@@ -218,8 +140,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
       default:        return 'md:col-span-1 lg:col-span-1';
     }
   };
-
-  // ── Shared input styles ───────────────────────────────────────────────────
 
   const baseInput: React.CSSProperties = {
     width: '100%',

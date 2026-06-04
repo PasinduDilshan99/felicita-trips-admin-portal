@@ -1,35 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ImageIcon, ChevronDown } from "lucide-react";
-import { ActivityScheduleImage } from "@/types/activity-schedule-types";
+import { ActivityImagesProps } from "@/types/activity-schedule-types";
 import { useTheme } from "@/contexts/ThemeContext";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const }
-  },
-};
-
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: { 
-    opacity: 1, 
-    height: "auto", 
-    transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const }
-  },
-};
-
-interface ActivityImagesProps {
-  images: ActivityScheduleImage[];
-  expandedSections: Set<string>;
-  onToggleSection: (section: string) => void;
-}
+import ImageModal from "@/components/common-components/ImageModal";
+import { ImageModalImage } from "@/types/common-components-types";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
 
 export const ActivityImages: React.FC<ActivityImagesProps> = ({
   images,
@@ -71,51 +49,89 @@ export const ActivityImages: React.FC<ActivityImagesProps> = ({
           onClick={() => onToggleSection("images")}
           className="w-full flex items-center justify-between p-4 cursor-pointer transition-colors"
           style={{
-            backgroundColor: expandedSections.has("images") ? `${theme.error}05` : "transparent",
-            borderBottom: expandedSections.has("images") ? `1px solid ${theme.border}` : "none",
+            backgroundColor: expandedSections.has("images")
+              ? `${theme.error}05`
+              : "transparent",
+            borderBottom: expandedSections.has("images")
+              ? `1px solid ${theme.border}`
+              : "none",
           }}
         >
           <div className="flex items-center gap-3">
             <span
               className="flex items-center justify-center w-8 h-8 rounded-lg"
-              style={{ backgroundColor: `${theme.error}18`, color: theme.error }}
+              style={{
+                backgroundColor: `${theme.error}18`,
+                color: theme.error,
+              }}
             >
               <ImageIcon className="w-4 h-4" />
             </span>
             <div>
-              <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+              <h2
+                className="text-sm sm:text-base font-semibold"
+                style={{ color: theme.text }}
+              >
                 Activity Images
               </h2>
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
                 Read-only image list ({images.length} images)
               </p>
             </div>
           </div>
           <ChevronDown
             className="w-4 h-4 transition-transform duration-200"
-            style={{ 
-              transform: expandedSections.has("images") ? "rotate(180deg)" : "none", 
-              color: theme.textSecondary 
+            style={{
+              transform: expandedSections.has("images")
+                ? "rotate(180deg)"
+                : "none",
+              color: theme.textSecondary,
             }}
           />
         </button>
 
         <AnimatePresence>
           {expandedSections.has("images") && (
-            <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="hidden" className="p-6">
+            <motion.div
+              variants={sectionVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="p-6"
+            >
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {images.map((image, index) => (
                   <div
                     key={image.id}
                     className="rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
-                    style={{ border: `1px solid ${theme.border}`, backgroundColor: theme.background }}
+                    style={{
+                      border: `1px solid ${theme.border}`,
+                      backgroundColor: theme.background,
+                    }}
                     onClick={() => openImageModal(index)}
                   >
-                    <img src={image.image_url} alt={image.name} className="w-full h-32 object-cover" />
+                    <img
+                      src={image.image_url}
+                      alt={image.name}
+                      className="w-full h-32 object-cover"
+                    />
                     <div className="p-2">
-                      <p className="text-xs font-medium truncate" style={{ color: theme.text }}>{image.name}</p>
+                      <p
+                        className="text-xs font-medium truncate"
+                        style={{ color: theme.text }}
+                      >
+                        {image.name}
+                      </p>
                       {image.description && (
-                        <p className="text-xs truncate mt-0.5" style={{ color: theme.textSecondary }}>{image.description}</p>
+                        <p
+                          className="text-xs truncate mt-0.5"
+                          style={{ color: theme.textSecondary }}
+                        >
+                          {image.description}
+                        </p>
                       )}
                     </div>
                   </div>

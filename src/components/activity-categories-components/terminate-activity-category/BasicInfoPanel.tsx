@@ -1,69 +1,26 @@
-// components/activity-categories-components/terminate-activity-category-components/BasicInfoPanel.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { Tag, Info, Palette, Calendar, User, Clock } from "lucide-react";
+import { motion } from "framer-motion";
+import { Tag, Info, Palette, User, Clock } from "lucide-react";
 import { ActivityCategoryDetails } from "@/types/activity-category-types";
 import { useTheme } from "@/contexts/ThemeContext";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const infoRowVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-};
+import {
+  cardVariants,
+  contentVariants,
+  headerVariants,
+  infoRowVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
 interface BasicInfoPanelProps {
   categoryDetails: ActivityCategoryDetails;
 }
 
-export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ categoryDetails }) => {
+export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({
+  categoryDetails,
+}) => {
   const { theme } = useTheme();
 
   const formatDate = (date: string): string => {
@@ -105,7 +62,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ categoryDetails 
       >
         {/* Category Name */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Category Name
           </p>
           <motion.div
@@ -119,7 +79,10 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ categoryDetails 
 
         {/* Description */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1 flex items-center gap-1"
+            style={{ color: theme.textSecondary }}
+          >
             <Info size={11} />
             Description
           </p>
@@ -133,18 +96,24 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ categoryDetails 
         </motion.div>
 
         {/* Colors */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Palette size={11} />
               Color
             </p>
             <div className="flex items-center gap-2">
               <div
                 className="w-6 h-6 rounded-md border"
-                style={{ 
+                style={{
                   backgroundColor: categoryDetails.color,
-                  borderColor: theme.border
+                  borderColor: theme.border,
                 }}
               />
               <span className="text-xs" style={{ color: theme.text }}>
@@ -153,16 +122,19 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ categoryDetails 
             </div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Palette size={11} />
               Hover Color
             </p>
             <div className="flex items-center gap-2">
               <div
                 className="w-6 h-6 rounded-md border"
-                style={{ 
+                style={{
                   backgroundColor: categoryDetails.hoverColor,
-                  borderColor: theme.border
+                  borderColor: theme.border,
                 }}
               />
               <span className="text-xs" style={{ color: theme.text }}>
@@ -173,19 +145,30 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ categoryDetails 
         </motion.div>
 
         {/* Audit Information */}
-        <motion.div variants={infoRowVariants} className="pt-2 space-y-2 border-t" style={{ borderColor: hexToRgba(theme.border, 0.5) }}>
+        <motion.div
+          variants={infoRowVariants}
+          className="pt-2 space-y-2 border-t"
+          style={{ borderColor: hexToRgba(theme.border, 0.5) }}
+        >
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <p className="text-[10px] flex items-center gap-1" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] flex items-center gap-1"
+                style={{ color: theme.textSecondary }}
+              >
                 <User size={10} />
                 Created By
               </p>
               <p className="text-xs" style={{ color: theme.textSecondary }}>
-                {categoryDetails.createdByName} (ID: {categoryDetails.createdBy})
+                {categoryDetails.createdByName} (ID: {categoryDetails.createdBy}
+                )
               </p>
             </div>
             <div>
-              <p className="text-[10px] flex items-center gap-1" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] flex items-center gap-1"
+                style={{ color: theme.textSecondary }}
+              >
                 <Clock size={10} />
                 Created At
               </p>
@@ -198,16 +181,24 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ categoryDetails 
           {categoryDetails.updatedByName && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-[10px] flex items-center gap-1" style={{ color: theme.textSecondary }}>
+                <p
+                  className="text-[10px] flex items-center gap-1"
+                  style={{ color: theme.textSecondary }}
+                >
                   <User size={10} />
                   Updated By
                 </p>
                 <p className="text-xs" style={{ color: theme.textSecondary }}>
-                  {categoryDetails.updatedByName} {categoryDetails.updatedBy && `(ID: ${categoryDetails.updatedBy})`}
+                  {categoryDetails.updatedByName}{" "}
+                  {categoryDetails.updatedBy &&
+                    `(ID: ${categoryDetails.updatedBy})`}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] flex items-center gap-1" style={{ color: theme.textSecondary }}>
+                <p
+                  className="text-[10px] flex items-center gap-1"
+                  style={{ color: theme.textSecondary }}
+                >
                   <Clock size={10} />
                   Updated At
                 </p>
@@ -221,16 +212,24 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({ categoryDetails 
           {categoryDetails.terminatedBy && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-[10px] flex items-center gap-1" style={{ color: theme.error }}>
+                <p
+                  className="text-[10px] flex items-center gap-1"
+                  style={{ color: theme.error }}
+                >
                   <User size={10} />
                   Terminated By
                 </p>
                 <p className="text-xs" style={{ color: theme.error }}>
-                  {categoryDetails.terminatedBy} {categoryDetails.terminatedBy && `(ID: ${categoryDetails.terminatedBy})`}
+                  {categoryDetails.terminatedBy}{" "}
+                  {categoryDetails.terminatedBy &&
+                    `(ID: ${categoryDetails.terminatedBy})`}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] flex items-center gap-1" style={{ color: theme.error }}>
+                <p
+                  className="text-[10px] flex items-center gap-1"
+                  style={{ color: theme.error }}
+                >
                   <Clock size={10} />
                   Terminated At
                 </p>

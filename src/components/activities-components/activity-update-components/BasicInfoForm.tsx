@@ -1,45 +1,20 @@
-// components/activities-components/update-activity-components/BasicInfoForm.tsx
 "use client";
 
 import React, { useId } from "react";
-import { Edit, CheckCircle2, Clock, Users, Banknote, Calendar } from "lucide-react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { Activity } from "@/types/activity-types";
-import { SeasonType } from "@/types/common-types";
+import {
+  Edit,
+  CheckCircle2,
+  Clock,
+  Users,
+  Banknote,
+  Calendar,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BasicInfoFormProps } from "@/types/activity-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
-
-interface BasicInfoFormProps {
-  activity: Activity;
-  hasChanged: (field: string) => boolean;
-  onFieldChange: (field: string, value: any) => void;
-  availableSeasons: SeasonType[];
-}
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-};
-
-const fieldVariants: Variants = {
-  hidden: { opacity: 0, y: 14 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.38, ease: EASE_OUT },
-  },
-};
-
-const STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "Active", description: "Available for booking", color: "#059669" },
-  { value: "INACTIVE", label: "Inactive", description: "Temporarily unavailable", color: "#6b7280" },
-];
+import { cardVariants, fieldVariants } from "@/app/animations/variants";
+import { ACTIVITY_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
 
 export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   activity,
@@ -52,12 +27,22 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   const uid = useId();
 
   const focusHandlers = (isChanged: boolean) => ({
-    onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    onFocus: (
+      e: React.FocusEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
       e.currentTarget.style.borderColor = theme.primary;
       e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}18`;
     },
-    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      e.currentTarget.style.borderColor = isChanged ? theme.primary : theme.border;
+    onBlur: (
+      e: React.FocusEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
+      e.currentTarget.style.borderColor = isChanged
+        ? theme.primary
+        : theme.border;
       e.currentTarget.style.boxShadow = "none";
     },
   });
@@ -99,7 +84,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           <Edit className="w-4 h-4" />
         </span>
         <div>
-          <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+          <h2
+            className="text-sm sm:text-base font-semibold"
+            style={{ color: theme.text }}
+          >
             Basic Information
           </h2>
           <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
@@ -127,7 +115,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
             style={{
               ...fieldBase,
               borderColor: hasChanged("name") ? theme.primary : theme.border,
-              backgroundColor: hasChanged("name") ? `${theme.primary}10` : theme.background,
+              backgroundColor: hasChanged("name")
+                ? `${theme.primary}10`
+                : theme.background,
             }}
             placeholder="e.g., Guided Nature Walk"
             {...focusHandlers(hasChanged("name"))}
@@ -164,8 +154,12 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
             className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none"
             style={{
               ...fieldBase,
-              borderColor: hasChanged("description") ? theme.primary : theme.border,
-              backgroundColor: hasChanged("description") ? `${theme.primary}10` : theme.background,
+              borderColor: hasChanged("description")
+                ? theme.primary
+                : theme.border,
+              backgroundColor: hasChanged("description")
+                ? `${theme.primary}10`
+                : theme.background,
             }}
             placeholder="Describe the activity in detail..."
             {...focusHandlers(hasChanged("description"))}
@@ -184,11 +178,15 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
             </label>
             <select
               value={activity.seasonId}
-              onChange={(e) => onFieldChange("seasonId", parseInt(e.target.value))}
+              onChange={(e) =>
+                onFieldChange("seasonId", parseInt(e.target.value))
+              }
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm cursor-pointer"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("seasonId") ? theme.primary : theme.border,
+                borderColor: hasChanged("seasonId")
+                  ? theme.primary
+                  : theme.border,
               }}
               {...focusHandlers(hasChanged("seasonId"))}
             >
@@ -203,11 +201,14 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
 
           {/* Status */}
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               Status
             </label>
             <div className="grid grid-cols-2 gap-3">
-              {STATUS_OPTIONS.map((opt) => {
+              {ACTIVITY_UPDATE_STATUS_OPTIONS.map((opt) => {
                 const isSelected = activity.status === opt.value;
                 return (
                   <button
@@ -216,7 +217,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                     onClick={() => onFieldChange("status", opt.value)}
                     className="flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 text-left cursor-pointer transition-all"
                     style={{
-                      backgroundColor: isSelected ? `${opt.color}10` : theme.background,
+                      backgroundColor: isSelected
+                        ? `${opt.color}10`
+                        : theme.background,
                       borderColor: isSelected ? opt.color : theme.border,
                     }}
                   >
@@ -224,10 +227,18 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                       className="w-2 h-2 rounded-full flex-shrink-0"
                       style={{ backgroundColor: opt.color }}
                     />
-                    <span className="flex-1 text-sm font-medium" style={{ color: isSelected ? opt.color : theme.text }}>
+                    <span
+                      className="flex-1 text-sm font-medium"
+                      style={{ color: isSelected ? opt.color : theme.text }}
+                    >
                       {opt.label}
                     </span>
-                    {isSelected && <CheckCircle2 className="w-4 h-4" style={{ color: opt.color }} />}
+                    {isSelected && (
+                      <CheckCircle2
+                        className="w-4 h-4"
+                        style={{ color: opt.color }}
+                      />
+                    )}
                   </button>
                 );
               })}
@@ -238,7 +249,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
         {/* Duration & Times */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-5">
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5 flex items-center gap-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               <Clock className="w-3.5 h-3.5" />
               Duration (hours) <span style={{ color: theme.error }}>*</span>
             </label>
@@ -247,18 +261,25 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               step="0.5"
               min="0.5"
               value={activity.duration_hours}
-              onChange={(e) => onFieldChange("duration_hours", parseFloat(e.target.value))}
+              onChange={(e) =>
+                onFieldChange("duration_hours", parseFloat(e.target.value))
+              }
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("duration_hours") ? theme.primary : theme.border,
+                borderColor: hasChanged("duration_hours")
+                  ? theme.primary
+                  : theme.border,
               }}
               {...focusHandlers(hasChanged("duration_hours"))}
             />
           </motion.div>
 
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5 flex items-center gap-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               <Clock className="w-3.5 h-3.5" />
               Available From
             </label>
@@ -269,14 +290,19 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("available_from") ? theme.primary : theme.border,
+                borderColor: hasChanged("available_from")
+                  ? theme.primary
+                  : theme.border,
               }}
               {...focusHandlers(hasChanged("available_from"))}
             />
           </motion.div>
 
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5 flex items-center gap-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               <Clock className="w-3.5 h-3.5" />
               Available To
             </label>
@@ -287,7 +313,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("available_to") ? theme.primary : theme.border,
+                borderColor: hasChanged("available_to")
+                  ? theme.primary
+                  : theme.border,
               }}
               {...focusHandlers(hasChanged("available_to"))}
             />
@@ -302,59 +330,95 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
             border: `1px solid ${theme.border}`,
           }}
         >
-          <p className="text-xs font-semibold uppercase tracking-wide mb-3 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-semibold uppercase tracking-wide mb-3 flex items-center gap-1.5"
+            style={{ color: theme.textSecondary }}
+          >
             <Banknote className="w-3.5 h-3.5" /> Pricing (USD)
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: theme.textSecondary }}>
+              <label
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: theme.textSecondary }}
+              >
                 Local Price <span style={{ color: theme.error }}>*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: theme.textSecondary }}>$</span>
+                <span
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-sm"
+                  style={{ color: theme.textSecondary }}
+                >
+                  $
+                </span>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   value={activity.price_local}
-                  onChange={(e) => onFieldChange("price_local", parseFloat(e.target.value))}
+                  onChange={(e) =>
+                    onFieldChange("price_local", parseFloat(e.target.value))
+                  }
                   className="w-full pl-8 pr-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
                   style={{
                     ...fieldBase,
-                    borderColor: hasChanged("price_local") ? theme.primary : theme.border,
+                    borderColor: hasChanged("price_local")
+                      ? theme.primary
+                      : theme.border,
                   }}
                   {...focusHandlers(hasChanged("price_local"))}
                 />
               </div>
               {activity.price_local > 0 && (
-                <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
+                <p
+                  className="text-xs mt-1"
+                  style={{ color: theme.textSecondary }}
+                >
                   ≈ {formatPrice(activity.price_local)}
                 </p>
               )}
             </motion.div>
 
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: theme.textSecondary }}>
+              <label
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: theme.textSecondary }}
+              >
                 Foreigners Price <span style={{ color: theme.error }}>*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: theme.textSecondary }}>$</span>
+                <span
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-sm"
+                  style={{ color: theme.textSecondary }}
+                >
+                  $
+                </span>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   value={activity.price_foreigners}
-                  onChange={(e) => onFieldChange("price_foreigners", parseFloat(e.target.value))}
+                  onChange={(e) =>
+                    onFieldChange(
+                      "price_foreigners",
+                      parseFloat(e.target.value),
+                    )
+                  }
                   className="w-full pl-8 pr-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
                   style={{
                     ...fieldBase,
-                    borderColor: hasChanged("price_foreigners") ? theme.primary : theme.border,
+                    borderColor: hasChanged("price_foreigners")
+                      ? theme.primary
+                      : theme.border,
                   }}
                   {...focusHandlers(hasChanged("price_foreigners"))}
                 />
               </div>
               {activity.price_foreigners > 0 && (
-                <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
+                <p
+                  className="text-xs mt-1"
+                  style={{ color: theme.textSecondary }}
+                >
                   ≈ {formatPrice(activity.price_foreigners)}
                 </p>
               )}
@@ -370,41 +434,60 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
             border: `1px solid ${theme.border}`,
           }}
         >
-          <p className="text-xs font-semibold uppercase tracking-wide mb-3 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-semibold uppercase tracking-wide mb-3 flex items-center gap-1.5"
+            style={{ color: theme.textSecondary }}
+          >
             <Users className="w-3.5 h-3.5" /> Participants
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: theme.textSecondary }}>
-                Minimum Participants <span style={{ color: theme.error }}>*</span>
+              <label
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: theme.textSecondary }}
+              >
+                Minimum Participants{" "}
+                <span style={{ color: theme.error }}>*</span>
               </label>
               <input
                 type="number"
                 min="1"
                 value={activity.min_participate}
-                onChange={(e) => onFieldChange("min_participate", parseInt(e.target.value))}
+                onChange={(e) =>
+                  onFieldChange("min_participate", parseInt(e.target.value))
+                }
                 className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
                 style={{
                   ...fieldBase,
-                  borderColor: hasChanged("min_participate") ? theme.primary : theme.border,
+                  borderColor: hasChanged("min_participate")
+                    ? theme.primary
+                    : theme.border,
                 }}
                 {...focusHandlers(hasChanged("min_participate"))}
               />
             </motion.div>
 
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: theme.textSecondary }}>
-                Maximum Participants <span style={{ color: theme.error }}>*</span>
+              <label
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: theme.textSecondary }}
+              >
+                Maximum Participants{" "}
+                <span style={{ color: theme.error }}>*</span>
               </label>
               <input
                 type="number"
                 min="1"
                 value={activity.max_participate}
-                onChange={(e) => onFieldChange("max_participate", parseInt(e.target.value))}
+                onChange={(e) =>
+                  onFieldChange("max_participate", parseInt(e.target.value))
+                }
                 className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
                 style={{
                   ...fieldBase,
-                  borderColor: hasChanged("max_participate") ? theme.primary : theme.border,
+                  borderColor: hasChanged("max_participate")
+                    ? theme.primary
+                    : theme.border,
                 }}
                 {...focusHandlers(hasChanged("max_participate"))}
               />

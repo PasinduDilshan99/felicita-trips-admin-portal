@@ -1,100 +1,30 @@
-// components/package-types-components/terminate-package-type-components/PackagesList.tsx
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { Package, Star, Calendar, ChevronDown, AlertCircle } from "lucide-react";
-import { PackageBasicDetail } from "@/types/package-type-types";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Package,
+  Star,
+  Calendar,
+  ChevronDown,
+  AlertCircle,
+} from "lucide-react";
+import {
+  PackageBasicDetail,
+  PackagesListProps,
+} from "@/types/package-type-types";
 import { useTheme } from "@/contexts/ThemeContext";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.04,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const packageCardVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-  exit: {
-    opacity: 0,
-    y: -10,
-    transition: { duration: 0.2, ease: "easeIn" },
-  },
-};
-
-const chevronVariants: Variants = {
-  closed: { rotate: 0 },
-  open: { rotate: 180 },
-};
-
-const detailVariants: Variants = {
-  hidden: { opacity: 0, height: 0, marginTop: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    marginTop: 12,
-    transition: {
-      duration: 0.25,
-      ease: EASE_OUT,
-    },
-  },
-  exit: {
-    opacity: 0,
-    height: 0,
-    marginTop: 0,
-    transition: {
-      duration: 0.2,
-      ease: "easeIn",
-    },
-  },
-};
-
-const emptyVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-interface PackagesListProps {
-  packages: PackageBasicDetail[];
-}
+import {
+  cardVariants,
+  chevronVariants,
+  contentVariants,
+  detailVariants,
+  EASE_OUT,
+  emptyVariants,
+  headerVariants,
+  packageCardVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
 export const PackagesList: React.FC<PackagesListProps> = ({ packages }) => {
   const { theme } = useTheme();
@@ -104,7 +34,7 @@ export const PackagesList: React.FC<PackagesListProps> = ({ packages }) => {
     setExpandedPackages((prev) =>
       prev.includes(packageId)
         ? prev.filter((id) => id !== packageId)
-        : [...prev, packageId]
+        : [...prev, packageId],
     );
   };
 
@@ -132,18 +62,28 @@ export const PackagesList: React.FC<PackagesListProps> = ({ packages }) => {
           </h3>
         </div>
         <div className="px-4 py-4 text-center">
-          <AlertCircle size={24} className="mx-auto mb-2 opacity-30" style={{ color: theme.textSecondary }} />
-          <p className="text-xs" style={{ color: theme.textSecondary }}>No packages associated with this type</p>
+          <AlertCircle
+            size={24}
+            className="mx-auto mb-2 opacity-30"
+            style={{ color: theme.textSecondary }}
+          />
+          <p className="text-xs" style={{ color: theme.textSecondary }}>
+            No packages associated with this type
+          </p>
         </div>
       </motion.div>
     );
   }
 
   // Separate primary and secondary packages
-  const primaryPackages = packages.filter(pkg => pkg.primaryType);
-  const secondaryPackages = packages.filter(pkg => !pkg.primaryType);
+  const primaryPackages = packages.filter((pkg) => pkg.primaryType);
+  const secondaryPackages = packages.filter((pkg) => !pkg.primaryType);
 
-  const renderPackageSection = (title: string, pkgList: PackageBasicDetail[], isPrimary: boolean) => {
+  const renderPackageSection = (
+    title: string,
+    pkgList: PackageBasicDetail[],
+    isPrimary: boolean,
+  ) => {
     if (pkgList.length === 0) return null;
 
     return (
@@ -154,7 +94,10 @@ export const PackagesList: React.FC<PackagesListProps> = ({ packages }) => {
           ) : (
             <Package size={12} style={{ color: theme.accent }} />
           )}
-          <h4 className="text-xs font-semibold" style={{ color: theme.textSecondary }}>
+          <h4
+            className="text-xs font-semibold"
+            style={{ color: theme.textSecondary }}
+          >
             {title} ({pkgList.length})
           </h4>
         </div>
@@ -176,26 +119,44 @@ export const PackagesList: React.FC<PackagesListProps> = ({ packages }) => {
               <motion.button
                 onClick={() => togglePackage(pkg.packageId)}
                 className="w-full px-3 py-2.5 flex items-center justify-between text-left cursor-pointer"
-                whileHover={{ backgroundColor: hexToRgba(isPrimary ? theme.warning || "#f59e0b" : theme.accent, 0.05) }}
+                whileHover={{
+                  backgroundColor: hexToRgba(
+                    isPrimary ? theme.warning || "#f59e0b" : theme.accent,
+                    0.05,
+                  ),
+                }}
                 transition={{ duration: 0.15 }}
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     {isPrimary && (
-                      <Star size={12} style={{ color: theme.warning || "#f59e0b" }} />
+                      <Star
+                        size={12}
+                        style={{ color: theme.warning || "#f59e0b" }}
+                      />
                     )}
-                    <p className="text-sm font-medium truncate" style={{ color: theme.text }}>
+                    <p
+                      className="text-sm font-medium truncate"
+                      style={{ color: theme.text }}
+                    >
                       {pkg.packageName}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     {pkg.startDate && pkg.endDate && (
                       <>
-                        <span className="text-xs flex items-center gap-1" style={{ color: theme.textSecondary }}>
+                        <span
+                          className="text-xs flex items-center gap-1"
+                          style={{ color: theme.textSecondary }}
+                        >
                           <Calendar size={10} />
-                          {formatDate(pkg.startDate)} – {formatDate(pkg.endDate)}
+                          {formatDate(pkg.startDate)} –{" "}
+                          {formatDate(pkg.endDate)}
                         </span>
-                        <span className="w-1 h-1 rounded-full" style={{ backgroundColor: theme.border }} />
+                        <span
+                          className="w-1 h-1 rounded-full"
+                          style={{ backgroundColor: theme.border }}
+                        />
                       </>
                     )}
                     <span
@@ -203,9 +164,10 @@ export const PackagesList: React.FC<PackagesListProps> = ({ packages }) => {
                       style={{
                         background: hexToRgba(
                           pkg.status === "ACTIVE" ? theme.success : theme.error,
-                          0.1
+                          0.1,
                         ),
-                        color: pkg.status === "ACTIVE" ? theme.success : theme.error,
+                        color:
+                          pkg.status === "ACTIVE" ? theme.success : theme.error,
                       }}
                     >
                       {pkg.status}
@@ -216,7 +178,11 @@ export const PackagesList: React.FC<PackagesListProps> = ({ packages }) => {
                   variants={chevronVariants}
                   animate={isExpanded ? "open" : "closed"}
                   transition={{ duration: 0.25, ease: EASE_OUT }}
-                  style={{ color: isPrimary ? theme.warning || "#f59e0b" : theme.accent }}
+                  style={{
+                    color: isPrimary
+                      ? theme.warning || "#f59e0b"
+                      : theme.accent,
+                  }}
                 >
                   <ChevronDown size={16} />
                 </motion.div>
@@ -231,47 +197,95 @@ export const PackagesList: React.FC<PackagesListProps> = ({ packages }) => {
                     animate="visible"
                     exit="exit"
                     className="px-3 pb-3"
-                    style={{ borderTop: `1px solid ${hexToRgba(isPrimary ? theme.warning || "#f59e0b" : theme.accent, 0.15)}` }}
+                    style={{
+                      borderTop: `1px solid ${hexToRgba(isPrimary ? theme.warning || "#f59e0b" : theme.accent, 0.15)}`,
+                    }}
                   >
                     <div className="grid gap-2 mt-2">
                       {pkg.description && (
                         <div className="flex items-start gap-2">
-                          <p className="text-xs" style={{ color: theme.textSecondary }}>
+                          <p
+                            className="text-xs"
+                            style={{ color: theme.textSecondary }}
+                          >
                             {pkg.description}
                           </p>
                         </div>
                       )}
-                      <div className="grid grid-cols-2 gap-2 pt-1 border-t" style={{ borderColor: hexToRgba(theme.border, 0.5) }}>
+                      <div
+                        className="grid grid-cols-2 gap-2 pt-1 border-t"
+                        style={{ borderColor: hexToRgba(theme.border, 0.5) }}
+                      >
                         <div>
-                          <p className="text-[10px]" style={{ color: theme.textSecondary }}>Package ID</p>
-                          <p className="text-xs" style={{ color: theme.textSecondary }}>#{pkg.packageId}</p>
+                          <p
+                            className="text-[10px]"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            Package ID
+                          </p>
+                          <p
+                            className="text-xs"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            #{pkg.packageId}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-[10px]" style={{ color: theme.textSecondary }}>Package Type</p>
-                          <p className="text-xs" style={{ color: theme.textSecondary }}>{pkg.primaryType ? "Primary" : "Secondary"}</p>
+                          <p
+                            className="text-[10px]"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            Package Type
+                          </p>
+                          <p
+                            className="text-xs"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            {pkg.primaryType ? "Primary" : "Secondary"}
+                          </p>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <p className="text-[10px]" style={{ color: theme.textSecondary }}>Color</p>
+                          <p
+                            className="text-[10px]"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            Color
+                          </p>
                           <div className="flex items-center gap-1 mt-0.5">
                             <div
                               className="w-4 h-4 rounded border"
-                              style={{ backgroundColor: pkg.color || theme.primary }}
+                              style={{
+                                backgroundColor: pkg.color || theme.primary,
+                              }}
                             />
-                            <span className="text-[10px]" style={{ color: theme.textSecondary }}>
+                            <span
+                              className="text-[10px]"
+                              style={{ color: theme.textSecondary }}
+                            >
                               {pkg.color || "Default"}
                             </span>
                           </div>
                         </div>
                         <div>
-                          <p className="text-[10px]" style={{ color: theme.textSecondary }}>Hover Color</p>
+                          <p
+                            className="text-[10px]"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            Hover Color
+                          </p>
                           <div className="flex items-center gap-1 mt-0.5">
                             <div
                               className="w-4 h-4 rounded border"
-                              style={{ backgroundColor: pkg.hoverColor || theme.accent }}
+                              style={{
+                                backgroundColor: pkg.hoverColor || theme.accent,
+                              }}
                             />
-                            <span className="text-[10px]" style={{ color: theme.textSecondary }}>
+                            <span
+                              className="text-[10px]"
+                              style={{ color: theme.textSecondary }}
+                            >
                               {pkg.hoverColor || "Default"}
                             </span>
                           </div>
@@ -308,7 +322,10 @@ export const PackagesList: React.FC<PackagesListProps> = ({ packages }) => {
         style={{ borderBottom: `1px solid ${hexToRgba(theme.border, 0.8)}` }}
       >
         <div className="flex items-center gap-2">
-          <Package className="w-4 h-4" style={{ color: theme.warning || theme.accent }} />
+          <Package
+            className="w-4 h-4"
+            style={{ color: theme.warning || theme.accent }}
+          />
           <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
             Associated Packages ({packages.length})
           </h3>

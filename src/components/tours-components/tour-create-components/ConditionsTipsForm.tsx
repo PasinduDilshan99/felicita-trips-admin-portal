@@ -1,29 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { FileText, Lightbulb, Plus, X, AlertCircle, ChevronDown } from "lucide-react";
+import { FileText, Lightbulb, Plus, X, ChevronDown } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { FormHeader } from "@/components/common-components/create-components/FormHeader";
-
-interface Condition {
-  conditionText: string;
-  displayOrder: number;
-  status: "ACTIVE" | "INACTIVE";
-}
-
-interface TravelTip {
-  tipTitle: string;
-  tipDescription: string;
-  displayOrder: number;
-  status: "ACTIVE" | "INACTIVE";
-}
-
-interface ConditionsTipsFormProps {
-  conditions: Condition[];
-  travelTips: TravelTip[];
-  onConditionsChange: (conditions: Condition[]) => void;
-  onTravelTipsChange: (travelTips: TravelTip[]) => void;
-}
+import { ConditionsTipsFormProps } from "@/types/tour-types";
 
 export const ConditionsTipsForm: React.FC<ConditionsTipsFormProps> = ({
   conditions,
@@ -51,7 +31,10 @@ export const ConditionsTipsForm: React.FC<ConditionsTipsFormProps> = ({
 
   const removeCondition = (index: number) => {
     const newConditions = conditions.filter((_, i) => i !== index);
-    const reordered = newConditions.map((cond, idx) => ({ ...cond, displayOrder: idx }));
+    const reordered = newConditions.map((cond, idx) => ({
+      ...cond,
+      displayOrder: idx,
+    }));
     onConditionsChange(reordered);
   };
 
@@ -71,7 +54,10 @@ export const ConditionsTipsForm: React.FC<ConditionsTipsFormProps> = ({
 
   const removeTravelTip = (index: number) => {
     const newTips = travelTips.filter((_, i) => i !== index);
-    const reordered = newTips.map((tip, idx) => ({ ...tip, displayOrder: idx }));
+    const reordered = newTips.map((tip, idx) => ({
+      ...tip,
+      displayOrder: idx,
+    }));
     onTravelTipsChange(reordered);
   };
 
@@ -100,10 +86,16 @@ export const ConditionsTipsForm: React.FC<ConditionsTipsFormProps> = ({
             <FileText className="w-4 h-4" />
           </span>
           <div>
-            <h2 className="text-base font-semibold leading-tight" style={{ color: theme.text }}>
+            <h2
+              className="text-base font-semibold leading-tight"
+              style={{ color: theme.text }}
+            >
               Conditions & Travel Tips
             </h2>
-            <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs mt-0.5"
+              style={{ color: theme.textSecondary }}
+            >
               Terms, conditions, and helpful tips for travelers
             </p>
           </div>
@@ -122,11 +114,14 @@ export const ConditionsTipsForm: React.FC<ConditionsTipsFormProps> = ({
           {/* Conditions */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+              <h3
+                className="text-sm font-semibold"
+                style={{ color: theme.text }}
+              >
                 Terms & Conditions
               </h3>
             </div>
-            
+
             <div className="space-y-2 mb-4">
               {conditions.map((cond, index) => (
                 <div
@@ -151,7 +146,7 @@ export const ConditionsTipsForm: React.FC<ConditionsTipsFormProps> = ({
                 </div>
               ))}
             </div>
-            
+
             <div className="flex gap-2">
               <input
                 type="text"
@@ -185,11 +180,14 @@ export const ConditionsTipsForm: React.FC<ConditionsTipsFormProps> = ({
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Lightbulb className="w-4 h-4" style={{ color: theme.accent }} />
-              <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+              <h3
+                className="text-sm font-semibold"
+                style={{ color: theme.text }}
+              >
                 Travel Tips
               </h3>
             </div>
-            
+
             <div className="space-y-3 mb-4">
               {travelTips.map((tip, index) => (
                 <div
@@ -201,7 +199,10 @@ export const ConditionsTipsForm: React.FC<ConditionsTipsFormProps> = ({
                   }}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium" style={{ color: theme.text }}>
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {tip.tipTitle}
                     </span>
                     <button
@@ -219,12 +220,14 @@ export const ConditionsTipsForm: React.FC<ConditionsTipsFormProps> = ({
                 </div>
               ))}
             </div>
-            
+
             <div className="space-y-3">
               <input
                 type="text"
                 value={newTip.title}
-                onChange={(e) => setNewTip({ ...newTip, title: e.target.value })}
+                onChange={(e) =>
+                  setNewTip({ ...newTip, title: e.target.value })
+                }
                 placeholder="Tip title..."
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{
@@ -235,7 +238,9 @@ export const ConditionsTipsForm: React.FC<ConditionsTipsFormProps> = ({
               />
               <textarea
                 value={newTip.description}
-                onChange={(e) => setNewTip({ ...newTip, description: e.target.value })}
+                onChange={(e) =>
+                  setNewTip({ ...newTip, description: e.target.value })
+                }
                 placeholder="Tip description..."
                 rows={2}
                 className="w-full px-3 py-2 rounded-lg text-sm resize-none"

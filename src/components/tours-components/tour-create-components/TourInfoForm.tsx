@@ -5,20 +5,8 @@ import { FileText } from "lucide-react";
 import { FormHeader } from "@/components/common-components/create-components/FormHeader";
 import { InputField } from "@/components/common-components/create-components/InputField";
 import { StatusSelector } from "@/components/common-components/StatusSelector";
-
-interface TourInfoFormProps {
-  formData: any;
-  errors: Record<string, string>;
-  onInputChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => void;
-  onStatusChange: (value: "ACTIVE" | "INACTIVE") => void;
-}
-
-const NAME_MAX = 200;
-const DESCRIPTION_MAX = 5000;
+import { TourInfoFormProps } from "@/types/tour-types";
+import { TOUR_DESCRIPTION_MAX_CHARACTERS, TOUR_NAME_MAX_CHARACTERS } from "@/data/tour-constant-data";
 
 export const TourInfoForm: React.FC<TourInfoFormProps> = ({
   formData,
@@ -49,7 +37,7 @@ export const TourInfoForm: React.FC<TourInfoFormProps> = ({
           onChange={onInputChange}
           required
           placeholder="e.g., Sri Lanka Cultural Tour"
-          maxLength={NAME_MAX}
+          maxLength={TOUR_NAME_MAX_CHARACTERS}
           showCounter
           error={errors.name}
         />
@@ -63,7 +51,7 @@ export const TourInfoForm: React.FC<TourInfoFormProps> = ({
           required
           rows={5}
           placeholder="Describe the tour, highlights, what customers can expect..."
-          maxLength={DESCRIPTION_MAX}
+          maxLength={TOUR_DESCRIPTION_MAX_CHARACTERS}
           showCounter
           error={errors.description}
         />

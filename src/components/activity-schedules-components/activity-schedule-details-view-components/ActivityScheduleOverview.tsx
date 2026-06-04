@@ -1,30 +1,21 @@
-// components/activity-schedules-components/activity-schedule-details-view-components/ActivityScheduleOverview.tsx
 "use client";
 
 import React, { useState } from "react";
-import { Calendar, Clock, AlertCircle, ChevronDown, ChevronUp, FileText } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { ActivityScheduleOverviewProps } from "@/types/activity-schedule-types";
+import { hexToRgba } from "@/utils/functions";
 
-interface ActivityScheduleOverviewProps {
-  name: string;
-  description: string;
-  assumeStartDate: string;
-  assumeEndDate: string;
-  durationStart: number;
-  durationEnd: number;
-  specialNote: string;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-export const ActivityScheduleOverview: React.FC<ActivityScheduleOverviewProps> = ({
+export const ActivityScheduleOverview: React.FC<
+  ActivityScheduleOverviewProps
+> = ({
   name,
   description,
   assumeStartDate,
@@ -67,7 +58,10 @@ export const ActivityScheduleOverview: React.FC<ActivityScheduleOverviewProps> =
         className="px-4 sm:px-6 py-3 sm:py-4"
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
-        <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+        <h2
+          className="text-base sm:text-lg font-semibold"
+          style={{ color: theme.text }}
+        >
           Schedule Overview
         </h2>
       </div>
@@ -75,10 +69,16 @@ export const ActivityScheduleOverview: React.FC<ActivityScheduleOverviewProps> =
       <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4">
         {/* Schedule Name */}
         <div>
-          <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Schedule Name
           </p>
-          <h3 className="text-lg sm:text-xl font-bold" style={{ color: theme.text }}>
+          <h3
+            className="text-lg sm:text-xl font-bold"
+            style={{ color: theme.text }}
+          >
             {name}
           </h3>
         </div>
@@ -86,23 +86,41 @@ export const ActivityScheduleOverview: React.FC<ActivityScheduleOverviewProps> =
         {/* Date Range */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex items-start gap-2">
-            <Calendar className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: theme.success }} />
+            <Calendar
+              className="w-4 h-4 mt-0.5 flex-shrink-0"
+              style={{ color: theme.success }}
+            />
             <div>
-              <p className="text-[10px] sm:text-xs font-medium" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] sm:text-xs font-medium"
+                style={{ color: theme.textSecondary }}
+              >
                 Start Date
               </p>
-              <p className="text-sm sm:text-base font-medium" style={{ color: theme.text }}>
+              <p
+                className="text-sm sm:text-base font-medium"
+                style={{ color: theme.text }}
+              >
                 {formatDate(assumeStartDate)}
               </p>
             </div>
           </div>
           <div className="flex items-start gap-2">
-            <Calendar className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: theme.error }} />
+            <Calendar
+              className="w-4 h-4 mt-0.5 flex-shrink-0"
+              style={{ color: theme.error }}
+            />
             <div>
-              <p className="text-[10px] sm:text-xs font-medium" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] sm:text-xs font-medium"
+                style={{ color: theme.textSecondary }}
+              >
                 End Date
               </p>
-              <p className="text-sm sm:text-base font-medium" style={{ color: theme.text }}>
+              <p
+                className="text-sm sm:text-base font-medium"
+                style={{ color: theme.text }}
+              >
                 {formatDate(assumeEndDate)}
               </p>
             </div>
@@ -111,12 +129,21 @@ export const ActivityScheduleOverview: React.FC<ActivityScheduleOverviewProps> =
 
         {/* Duration Range */}
         <div className="flex items-start gap-2">
-          <Clock className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+          <Clock
+            className="w-4 h-4 mt-0.5 flex-shrink-0"
+            style={{ color: theme.primary }}
+          />
           <div>
-            <p className="text-[10px] sm:text-xs font-medium" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium"
+              style={{ color: theme.textSecondary }}
+            >
               Duration Range
             </p>
-            <p className="text-sm sm:text-base font-medium" style={{ color: theme.text }}>
+            <p
+              className="text-sm sm:text-base font-medium"
+              style={{ color: theme.text }}
+            >
               {durationStart} - {durationEnd} hours
             </p>
           </div>
@@ -125,7 +152,10 @@ export const ActivityScheduleOverview: React.FC<ActivityScheduleOverviewProps> =
         {/* Description */}
         {description && (
           <div>
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2"
+              style={{ color: theme.textSecondary }}
+            >
               Description
             </p>
             <div
@@ -136,9 +166,14 @@ export const ActivityScheduleOverview: React.FC<ActivityScheduleOverviewProps> =
               }}
             >
               <div className="flex gap-2">
-                <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" style={{ color: theme.primary }} />
+                <FileText
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5"
+                  style={{ color: theme.primary }}
+                />
                 <div className="flex-1">
-                  <p style={{ color: theme.textSecondary }}>{truncatedDescription}</p>
+                  <p style={{ color: theme.textSecondary }}>
+                    {truncatedDescription}
+                  </p>
                   {description.length > 400 && (
                     <button
                       onClick={() => setIsExpanded(!isExpanded)}
@@ -173,12 +208,21 @@ export const ActivityScheduleOverview: React.FC<ActivityScheduleOverviewProps> =
               border: `1px solid ${hexToRgba(theme.warning, 0.15)}`,
             }}
           >
-            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: theme.warning }} />
+            <AlertCircle
+              className="w-4 h-4 flex-shrink-0 mt-0.5"
+              style={{ color: theme.warning }}
+            />
             <div>
-              <p className="text-xs font-semibold mb-1" style={{ color: theme.warning }}>
+              <p
+                className="text-xs font-semibold mb-1"
+                style={{ color: theme.warning }}
+              >
                 Special Note
               </p>
-              <p className="text-xs sm:text-sm" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs sm:text-sm"
+                style={{ color: theme.textSecondary }}
+              >
                 {specialNote}
               </p>
             </div>

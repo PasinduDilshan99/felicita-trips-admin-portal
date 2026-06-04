@@ -4,19 +4,11 @@ import React, { useId, useRef } from "react";
 import { FileText, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DESTINATION_STATUS_OPTIONS } from "@/data/status-options-data";
-
-interface DestinationInfoFormProps {
-  formData: any;
-  errors: Record<string, string>;
-  onInputChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => void;
-}
-
-const DESCRIPTION_MAX = 3500;
-const NAME_MAX = 250;
+import { DestinationInfoFormProps } from "@/types/destination-types";
+import {
+  DESTINATION_DESCRIPTION_MAX,
+  DESTINATION_NAME_MAX,
+} from "@/validations/destinationValidations";
 
 export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
   formData,
@@ -28,7 +20,7 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
   const statusRef = useRef<HTMLSelectElement>(null);
 
   const descLength = (formData.description ?? "").length;
-  const descPct = (descLength / DESCRIPTION_MAX) * 100;
+  const descPct = (descLength / DESTINATION_DESCRIPTION_MAX) * 100;
   const descColor =
     descPct > 90 ? theme.error : descPct > 70 ? "#f59e0b" : theme.primary;
 
@@ -102,7 +94,6 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
           boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
         }}
       >
-        {/* ── Header ── */}
         <div
           className="flex items-center gap-3 px-6 py-4"
           style={{ borderBottom: `1px solid ${theme.border}` }}
@@ -132,9 +123,7 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
           </div>
         </div>
 
-        {/* ── Fields ── */}
         <div className="px-6 py-6 space-y-6">
-          {/* Name */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label
@@ -149,12 +138,12 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
                 className="text-xs tabular-nums"
                 style={{
                   color:
-                    (formData.name ?? "").length > NAME_MAX * 0.9
+                    (formData.name ?? "").length > DESTINATION_NAME_MAX * 0.9
                       ? theme.error
                       : theme.textSecondary,
                 }}
               >
-                {(formData.name ?? "").length}/{NAME_MAX}
+                {(formData.name ?? "").length}/{DESTINATION_NAME_MAX}
               </span>
             </div>
             <input
@@ -164,7 +153,7 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
               value={formData.name}
               onChange={onInputChange}
               placeholder="e.g. Sigiriya Rock Fortress"
-              maxLength={NAME_MAX}
+              maxLength={DESTINATION_NAME_MAX}
               className={`w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm${
                 errors.name ? " field-error" : ""
               }`}
@@ -185,7 +174,6 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
             )}
           </div>
 
-          {/* Description */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label
@@ -204,7 +192,7 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
               onChange={onInputChange}
               rows={5}
               placeholder="Describe what makes this destination special…"
-              maxLength={DESCRIPTION_MAX}
+              maxLength={DESTINATION_DESCRIPTION_MAX}
               className={`w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none${
                 errors.description ? " field-error" : ""
               }`}
@@ -215,7 +203,6 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
               {...focusHandlers(!!errors.description)}
             />
 
-            {/* Progress bar + counter */}
             <div className="mt-2 space-y-1">
               <div
                 className="w-full h-1 rounded-full overflow-hidden"
@@ -245,13 +232,12 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
                   className="text-xs tabular-nums ml-auto"
                   style={{ color: descColor }}
                 >
-                  {descLength}/{DESCRIPTION_MAX}
+                  {descLength}/{DESTINATION_DESCRIPTION_MAX}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Status */}
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -260,7 +246,6 @@ export const DestinationInfoForm: React.FC<DestinationInfoFormProps> = ({
               Status
             </label>
 
-            {/* Hidden select keeps onInputChange contract intact */}
             <select
               ref={statusRef}
               name="status"

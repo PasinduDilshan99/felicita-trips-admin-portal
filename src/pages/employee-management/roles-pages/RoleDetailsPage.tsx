@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, type Variants } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/Breadcrumb";
+import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { RoleService } from "@/services/roleService";
 import { RoleDetails, PrivilegeInRole } from "@/types/role-types";
 import { useTheme } from "@/contexts/ThemeContext";

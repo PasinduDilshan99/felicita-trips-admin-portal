@@ -1,24 +1,10 @@
-// components/packages-components/package-details-view-components/PackageTourInfo.tsx
 "use client";
 
 import React from "react";
 import { MapPin, ExternalLink } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface PackageTourInfoProps {
-  tourId: number;
-  tourName: string;
-  onViewTour: () => void;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { PackageTourInfoProps } from "@/types/package-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const PackageTourInfo: React.FC<PackageTourInfoProps> = ({
   tourId,

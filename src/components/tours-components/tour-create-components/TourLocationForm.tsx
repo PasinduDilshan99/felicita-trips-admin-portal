@@ -1,27 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  MapPin,
-  Navigation,
-  AlertCircle,
-  ExternalLink,
-  ChevronDown,
-} from "lucide-react";
+import { MapPin, Navigation, ExternalLink, ChevronDown } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { FormHeader } from "@/components/common-components/create-components/FormHeader";
 import { InputField } from "@/components/common-components/create-components/InputField";
-
-interface TourLocationFormProps {
-  formData: any;
-  errors: Record<string, string>;
-  loading: boolean;
-  onInputChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => void;
-}
+import { TourLocationFormProps } from "@/types/tour-types";
 
 export const TourLocationForm: React.FC<TourLocationFormProps> = ({
   formData,

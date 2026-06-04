@@ -1,83 +1,37 @@
-// components/package-schedules-components/terminate-package-schedule-components/PackageInfoPanel.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { Package, Calendar, DollarSign, Users, Percent, AlertCircle, Palette } from "lucide-react";
-import { PackageScheduleDetails } from "@/types/package-schedule-types";
+import { motion } from "framer-motion";
+import { Package, DollarSign, Users, Percent, Palette } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { PackageInfoPanelProps } from "@/types/package-schedule-types";
+import {
+  cardVariants,
+  contentVariants,
+  headerVariants,
+  infoRowVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const infoRowVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-};
-
-interface PackageInfoPanelProps {
-  scheduleDetails: PackageScheduleDetails;
-}
-
-export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDetails }) => {
+export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({
+  scheduleDetails,
+}) => {
   const { theme } = useTheme();
   const { formatPrice } = useCurrency();
 
-  const formatDate = (date: string): string => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString();
+  const calculateDiscountedPrice = (
+    price: number,
+    discount: number,
+  ): number => {
+    return price - (price * discount) / 100;
   };
 
-  const calculateDiscountedPrice = (price: number, discount: number): number => {
-    return price - (price * discount / 100);
-  };
-
-  const discountedPrice = calculateDiscountedPrice(scheduleDetails.totalPrice, scheduleDetails.discountPercentage);
+  const discountedPrice = calculateDiscountedPrice(
+    scheduleDetails.totalPrice,
+    scheduleDetails.discountPercentage,
+  );
 
   return (
     <motion.div
@@ -113,7 +67,10 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
       >
         {/* Package Name */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Package Name
           </p>
           <motion.div
@@ -128,7 +85,10 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
         {/* Package Description */}
         {scheduleDetails.packageDescription && (
           <motion.div variants={infoRowVariants}>
-            <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1"
+              style={{ color: theme.textSecondary }}
+            >
               Description
             </p>
             <motion.div
@@ -143,7 +103,10 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
 
         {/* Package Type */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Package Type
           </p>
           <motion.div
@@ -154,16 +117,25 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
             {scheduleDetails.packageTypeName}
           </motion.div>
           {scheduleDetails.packageTypeDescription && (
-            <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs mt-0.5"
+              style={{ color: theme.textSecondary }}
+            >
               {scheduleDetails.packageTypeDescription}
             </p>
           )}
         </motion.div>
 
         {/* Pricing */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <DollarSign size={11} />
               Total Price
             </p>
@@ -176,7 +148,10 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Percent size={11} />
               Discount
             </p>
@@ -191,9 +166,15 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
         </motion.div>
 
         {/* Discounted Price & Price Per Person */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <DollarSign size={11} />
               Discounted Price
             </p>
@@ -206,7 +187,10 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
             </motion.div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Users size={11} />
               Price Per Person
             </p>
@@ -222,7 +206,10 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
 
         {/* Group Size */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1 flex items-center gap-1"
+            style={{ color: theme.textSecondary }}
+          >
             <Users size={11} />
             Group Size
           </p>
@@ -231,23 +218,30 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
             className="text-sm"
             style={{ color: theme.text }}
           >
-            {scheduleDetails.minPersonCount}–{scheduleDetails.maxPersonCount} people
+            {scheduleDetails.minPersonCount}–{scheduleDetails.maxPersonCount}{" "}
+            people
           </motion.div>
         </motion.div>
 
         {/* Colors */}
-        <motion.div variants={infoRowVariants} className="grid grid-cols-2 gap-3">
+        <motion.div
+          variants={infoRowVariants}
+          className="grid grid-cols-2 gap-3"
+        >
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Palette size={11} />
               Color
             </p>
             <div className="flex items-center gap-2">
               <div
                 className="w-6 h-6 rounded-md border"
-                style={{ 
+                style={{
                   backgroundColor: scheduleDetails.color || theme.primary,
-                  borderColor: theme.border
+                  borderColor: theme.border,
                 }}
               />
               <span className="text-xs" style={{ color: theme.text }}>
@@ -256,16 +250,19 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
             </div>
           </div>
           <div>
-            <p className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium mb-1 flex items-center gap-1"
+              style={{ color: theme.textSecondary }}
+            >
               <Palette size={11} />
               Hover Color
             </p>
             <div className="flex items-center gap-2">
               <div
                 className="w-6 h-6 rounded-md border"
-                style={{ 
+                style={{
                   backgroundColor: scheduleDetails.hoverColor || theme.accent,
-                  borderColor: theme.border
+                  borderColor: theme.border,
                 }}
               />
               <span className="text-xs" style={{ color: theme.text }}>
@@ -277,7 +274,10 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
 
         {/* Package Status */}
         <motion.div variants={infoRowVariants}>
-          <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-xs font-medium mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Package Status
           </p>
           <motion.div
@@ -285,10 +285,15 @@ export const PackageInfoPanel: React.FC<PackageInfoPanelProps> = ({ scheduleDeta
             className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium"
             style={{
               background: hexToRgba(
-                scheduleDetails.packageStatus === "ACTIVE" ? theme.success : theme.error,
-                0.1
+                scheduleDetails.packageStatus === "ACTIVE"
+                  ? theme.success
+                  : theme.error,
+                0.1,
               ),
-              color: scheduleDetails.packageStatus === "ACTIVE" ? theme.success : theme.error,
+              color:
+                scheduleDetails.packageStatus === "ACTIVE"
+                  ? theme.success
+                  : theme.error,
               border: `1px solid ${
                 scheduleDetails.packageStatus === "ACTIVE"
                   ? hexToRgba(theme.success, 0.3)

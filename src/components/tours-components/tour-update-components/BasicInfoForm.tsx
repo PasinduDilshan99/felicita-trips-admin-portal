@@ -1,36 +1,12 @@
-// components/tours-components/update-tour-components/BasicInfoForm.tsx
 "use client";
 
 import React, { useId } from "react";
-import { Edit, Calendar, MapPin, Navigation, Clock, AlertCircle } from "lucide-react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { TourAllDetails } from "@/types/tour-types";
-import { SeasonType } from "@/types/common-types";
+import { Edit, Calendar, MapPin, Navigation, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface BasicInfoFormProps {
-  tour: TourAllDetails;
-  hasChanged: (field: string) => boolean;
-  onFieldChange: (field: string, value: any) => void;
-  availableSeasons: SeasonType[];
-}
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
-};
-
-const fieldVariants: Variants = {
-  hidden: { opacity: 0, y: 14 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.38, ease: EASE_OUT } },
-};
-
-const STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "Active", description: "Available for booking", color: "#059669" },
-  { value: "INACTIVE", label: "Inactive", description: "Temporarily unavailable", color: "#6b7280" },
-];
+import { cardVariants, fieldVariants } from "@/app/animations/variants";
+import { TOUR_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
+import { BasicInfoFormProps } from "@/types/tour-types";
 
 export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   tour,
@@ -42,12 +18,22 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   const uid = useId();
 
   const focusHandlers = (isChanged: boolean) => ({
-    onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    onFocus: (
+      e: React.FocusEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
       e.currentTarget.style.borderColor = theme.primary;
       e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}18`;
     },
-    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      e.currentTarget.style.borderColor = isChanged ? theme.primary : theme.border;
+    onBlur: (
+      e: React.FocusEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
+      e.currentTarget.style.borderColor = isChanged
+        ? theme.primary
+        : theme.border;
       e.currentTarget.style.boxShadow = "none";
     },
   });
@@ -84,7 +70,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           <Edit className="w-4 h-4" />
         </span>
         <div>
-          <h2 className="text-sm sm:text-base font-semibold" style={{ color: theme.text }}>
+          <h2
+            className="text-sm sm:text-base font-semibold"
+            style={{ color: theme.text }}
+          >
             Basic Information
           </h2>
           <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
@@ -112,8 +101,12 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("tourName") ? theme.primary : theme.border,
-                backgroundColor: hasChanged("tourName") ? `${theme.primary}10` : theme.background,
+                borderColor: hasChanged("tourName")
+                  ? theme.primary
+                  : theme.border,
+                backgroundColor: hasChanged("tourName")
+                  ? `${theme.primary}10`
+                  : theme.background,
               }}
               placeholder="e.g., Sri Lanka Adventure Tour"
               {...focusHandlers(hasChanged("tourName"))}
@@ -150,8 +143,12 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("tourDescription") ? theme.primary : theme.border,
-                backgroundColor: hasChanged("tourDescription") ? `${theme.primary}10` : theme.background,
+                borderColor: hasChanged("tourDescription")
+                  ? theme.primary
+                  : theme.border,
+                backgroundColor: hasChanged("tourDescription")
+                  ? `${theme.primary}10`
+                  : theme.background,
               }}
               placeholder="Describe the tour in detail..."
               {...focusHandlers(hasChanged("tourDescription"))}
@@ -160,7 +157,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
 
           {/* Duration */}
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5 flex items-center gap-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               <Clock className="w-3.5 h-3.5" />
               Duration (days) <span style={{ color: theme.error }}>*</span>
             </label>
@@ -168,11 +168,15 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               type="number"
               min="1"
               value={tour.duration}
-              onChange={(e) => onFieldChange("duration", parseInt(e.target.value))}
+              onChange={(e) =>
+                onFieldChange("duration", parseInt(e.target.value))
+              }
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("duration") ? theme.primary : theme.border,
+                borderColor: hasChanged("duration")
+                  ? theme.primary
+                  : theme.border,
               }}
               {...focusHandlers(hasChanged("duration"))}
             />
@@ -180,7 +184,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
 
           {/* Season */}
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5 flex items-center gap-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               <Calendar className="w-3.5 h-3.5" />
               Season <span style={{ color: theme.error }}>*</span>
             </label>
@@ -190,7 +197,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm cursor-pointer"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("seasonName") ? theme.primary : theme.border,
+                borderColor: hasChanged("seasonName")
+                  ? theme.primary
+                  : theme.border,
               }}
               {...focusHandlers(hasChanged("seasonName"))}
             >
@@ -205,7 +214,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
 
           {/* Start Location */}
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5 flex items-center gap-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               <MapPin className="w-3.5 h-3.5" />
               Start Location <span style={{ color: theme.error }}>*</span>
             </label>
@@ -216,7 +228,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("startLocation") ? theme.primary : theme.border,
+                borderColor: hasChanged("startLocation")
+                  ? theme.primary
+                  : theme.border,
               }}
               placeholder="e.g., Colombo"
               {...focusHandlers(hasChanged("startLocation"))}
@@ -225,7 +239,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
 
           {/* End Location */}
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5 flex items-center gap-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               <MapPin className="w-3.5 h-3.5" />
               End Location <span style={{ color: theme.error }}>*</span>
             </label>
@@ -236,7 +253,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("endLocation") ? theme.primary : theme.border,
+                borderColor: hasChanged("endLocation")
+                  ? theme.primary
+                  : theme.border,
               }}
               placeholder="e.g., Colombo"
               {...focusHandlers(hasChanged("endLocation"))}
@@ -245,7 +264,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
 
           {/* Latitude & Longitude */}
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5 flex items-center gap-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               <Navigation className="w-3.5 h-3.5" />
               Latitude
             </label>
@@ -253,11 +275,15 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               type="number"
               step="0.000001"
               value={tour.latitude}
-              onChange={(e) => onFieldChange("latitude", parseFloat(e.target.value))}
+              onChange={(e) =>
+                onFieldChange("latitude", parseFloat(e.target.value))
+              }
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("latitude") ? theme.primary : theme.border,
+                borderColor: hasChanged("latitude")
+                  ? theme.primary
+                  : theme.border,
               }}
               placeholder="e.g., 6.9271"
               {...focusHandlers(hasChanged("latitude"))}
@@ -265,7 +291,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           </motion.div>
 
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5 flex items-center gap-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               <Navigation className="w-3.5 h-3.5" />
               Longitude
             </label>
@@ -273,11 +302,15 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               type="number"
               step="0.000001"
               value={tour.longitude}
-              onChange={(e) => onFieldChange("longitude", parseFloat(e.target.value))}
+              onChange={(e) =>
+                onFieldChange("longitude", parseFloat(e.target.value))
+              }
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("longitude") ? theme.primary : theme.border,
+                borderColor: hasChanged("longitude")
+                  ? theme.primary
+                  : theme.border,
               }}
               placeholder="e.g., 79.8612"
               {...focusHandlers(hasChanged("longitude"))}
@@ -286,11 +319,14 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
 
           {/* Status */}
           <motion.div variants={fieldVariants} className="lg:col-span-2">
-            <label className="block text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: theme.textSecondary }}
+            >
               Status
             </label>
             <div className="grid grid-cols-2 gap-3">
-              {STATUS_OPTIONS.map((opt) => {
+              {TOUR_UPDATE_STATUS_OPTIONS.map((opt) => {
                 const isSelected = tour.statusName === opt.value;
                 return (
                   <button
@@ -299,7 +335,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                     onClick={() => onFieldChange("statusName", opt.value)}
                     className="flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 text-left cursor-pointer transition-all"
                     style={{
-                      backgroundColor: isSelected ? `${opt.color}10` : theme.background,
+                      backgroundColor: isSelected
+                        ? `${opt.color}10`
+                        : theme.background,
                       borderColor: isSelected ? opt.color : theme.border,
                     }}
                   >
@@ -307,12 +345,26 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
                       className="w-2 h-2 rounded-full flex-shrink-0"
                       style={{ backgroundColor: opt.color }}
                     />
-                    <span className="flex-1 text-sm font-medium" style={{ color: isSelected ? opt.color : theme.text }}>
+                    <span
+                      className="flex-1 text-sm font-medium"
+                      style={{ color: isSelected ? opt.color : theme.text }}
+                    >
                       {opt.label}
                     </span>
                     {isSelected && (
-                      <svg className="w-4 h-4" style={{ color: opt.color }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="w-4 h-4"
+                        style={{ color: opt.color }}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     )}
                   </button>
@@ -323,7 +375,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
 
           {/* Assign To & Message */}
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               Assign To
             </label>
             <input
@@ -333,7 +388,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("assignTo") ? theme.primary : theme.border,
+                borderColor: hasChanged("assignTo")
+                  ? theme.primary
+                  : theme.border,
               }}
               placeholder="Assigned person or department"
               {...focusHandlers(hasChanged("assignTo"))}
@@ -341,7 +398,10 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           </motion.div>
 
           <motion.div variants={fieldVariants}>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: theme.textSecondary }}>
+            <label
+              className="block text-sm font-medium mb-1.5"
+              style={{ color: theme.textSecondary }}
+            >
               Assign Message
             </label>
             <textarea
@@ -351,7 +411,9 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
               className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none"
               style={{
                 ...fieldBase,
-                borderColor: hasChanged("assignMessage") ? theme.primary : theme.border,
+                borderColor: hasChanged("assignMessage")
+                  ? theme.primary
+                  : theme.border,
               }}
               placeholder="Additional assignment notes..."
               {...focusHandlers(hasChanged("assignMessage"))}

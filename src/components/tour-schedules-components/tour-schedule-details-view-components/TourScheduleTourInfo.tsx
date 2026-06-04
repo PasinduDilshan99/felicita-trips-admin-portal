@@ -1,4 +1,3 @@
-// components/tour-schedules-components/tour-schedule-details-view-components/TourScheduleTourInfo.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -7,35 +6,11 @@ import {
   Clock,
   Calendar,
   AlertCircle,
-  ChevronDown,
-  ChevronUp,
   ExternalLink,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface TourScheduleTourInfoProps {
-  tourId: number;
-  tourName: string;
-  tourDescription: string;
-  tourDuration: number;
-  startLocation: string;
-  endLocation: string;
-  latitude: number;
-  longitude: number;
-  season: string | null;
-  tourStatus: string;
-  assignMessage: string;
-  onViewTour: () => void;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { TourScheduleTourInfoProps } from "@/types/tour-schedule-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const TourScheduleTourInfo: React.FC<TourScheduleTourInfoProps> = ({
   tourId,
@@ -76,22 +51,37 @@ export const TourScheduleTourInfo: React.FC<TourScheduleTourInfoProps> = ({
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
         <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: theme.primary }} />
-          <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+          <MapPin
+            className="w-4 h-4 sm:w-5 sm:h-5"
+            style={{ color: theme.primary }}
+          />
+          <h2
+            className="text-base sm:text-lg font-semibold"
+            style={{ color: theme.text }}
+          >
             Associated Tour
           </h2>
         </div>
-        <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 opacity-60" style={{ color: theme.primary }} />
+        <ExternalLink
+          className="w-4 h-4 sm:w-5 sm:h-5 opacity-60"
+          style={{ color: theme.primary }}
+        />
       </div>
 
       <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-3">
         {/* Tour Name and Status */}
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1"
+              style={{ color: theme.textSecondary }}
+            >
               Tour Name
             </p>
-            <h3 className="font-semibold text-sm sm:text-base hover:underline" style={{ color: theme.primary }}>
+            <h3
+              className="font-semibold text-sm sm:text-base hover:underline"
+              style={{ color: theme.primary }}
+            >
               {tourName}
             </h3>
           </div>
@@ -105,10 +95,15 @@ export const TourScheduleTourInfo: React.FC<TourScheduleTourInfoProps> = ({
         </div>
 
         {/* Basic Info */}
-        <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: theme.textSecondary }}>
+        <div
+          className="grid grid-cols-2 gap-2 text-xs"
+          style={{ color: theme.textSecondary }}
+        >
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            <span>{tourDuration} {tourDuration === 1 ? "day" : "days"}</span>
+            <span>
+              {tourDuration} {tourDuration === 1 ? "day" : "days"}
+            </span>
           </div>
           {season && (
             <div className="flex items-center gap-1">
@@ -118,14 +113,19 @@ export const TourScheduleTourInfo: React.FC<TourScheduleTourInfoProps> = ({
           )}
           <div className="flex items-center gap-1 col-span-2">
             <MapPin className="w-3 h-3" />
-            <span>{startLocation} → {endLocation}</span>
+            <span>
+              {startLocation} → {endLocation}
+            </span>
           </div>
         </div>
 
         {/* Description */}
         {tourDescription && (
           <div>
-            <p className="text-[10px] sm:text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium mb-1"
+              style={{ color: theme.textSecondary }}
+            >
               Tour Description
             </p>
             <p className="text-xs" style={{ color: theme.textSecondary }}>
@@ -162,7 +162,10 @@ export const TourScheduleTourInfo: React.FC<TourScheduleTourInfoProps> = ({
 
         {/* Coordinates */}
         {latitude && longitude && (
-          <div className="text-[10px] font-mono" style={{ color: theme.textSecondary }}>
+          <div
+            className="text-[10px] font-mono"
+            style={{ color: theme.textSecondary }}
+          >
             📍 {latitude.toFixed(6)}°, {longitude.toFixed(6)}°
           </div>
         )}

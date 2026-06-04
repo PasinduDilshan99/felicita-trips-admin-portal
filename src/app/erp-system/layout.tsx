@@ -1,5 +1,5 @@
 // app/travel-management/layout.tsx
-import Sidebar from "@/components/common-components/SideBar";
+import Sidebar from "@/components/common-components/static-components/SideBar";
 import React from "react";
 
 // Sidebar data for travel management

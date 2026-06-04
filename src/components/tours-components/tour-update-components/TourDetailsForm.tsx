@@ -1,4 +1,3 @@
-// components/tours-components/update-tour-components/TourDetailsForm.tsx
 "use client";
 
 import React from "react";
@@ -19,7 +18,13 @@ import {
   TravelTipInput,
   UpdateTravelTipInput,
 } from "@/types/tour-types";
-import { TourType, TourCategory, DestinationCategory, ActivityCategory, SeasonType } from "@/types/common-types";
+import {
+  TourType,
+  TourCategory,
+  DestinationCategory,
+  ActivityCategory,
+  SeasonType,
+} from "@/types/common-types";
 import { BasicInfoForm } from "./BasicInfoForm";
 import { TourTypesAndCategoriesForm } from "./TourTypesAndCategoriesForm";
 import { ImagesManagement } from "./ImagesManagement";
@@ -65,30 +70,78 @@ interface TourDetailsFormProps {
   onBasicFieldChange: (field: string, value: any) => void;
   onAddTourType: (typeId: number) => void;
   onRemoveTourType: (typeId: number) => void;
-  onUpdateTourType: (typeId: number, isPrimary: boolean, status: "ACTIVE" | "INACTIVE") => void;
+  onUpdateTourType: (
+    typeId: number,
+    isPrimary: boolean,
+    status: "ACTIVE" | "INACTIVE",
+  ) => void;
   onAddTourCategory: (categoryId: number) => void;
   onRemoveTourCategory: (categoryId: number) => void;
-  onUpdateTourCategory: (categoryId: number, isPrimary: boolean, status: "ACTIVE" | "INACTIVE") => void;
+  onUpdateTourCategory: (
+    categoryId: number,
+    isPrimary: boolean,
+    status: "ACTIVE" | "INACTIVE",
+  ) => void;
   onRemoveImage: (imageId: number) => void;
-  onAddNewImage: (file: File, name: string, description: string) => Promise<void>;
+  onAddNewImage: (
+    file: File,
+    name: string,
+    description: string,
+  ) => Promise<void>;
   onUpdateImage: (imageId: number, name: string, description: string) => void;
-  onAddDestination: (destinationId: number, activityId: number, dayNumber: number) => void;
+  onAddDestination: (
+    destinationId: number,
+    activityId: number,
+    dayNumber: number,
+  ) => void;
   onRemoveDestination: (tourDestinationId: number) => void;
   onRemoveActivity: (activityId: number) => void;
-  onUpdateDestination: (tourDestinationId: number, dayNumber: number, status: "ACTIVE" | "INACTIVE") => void;
-  onAddActivityToDestination?: (destinationId: number, activityId: number) => void;
+  onUpdateDestination: (
+    tourDestinationId: number,
+    dayNumber: number,
+    status: "ACTIVE" | "INACTIVE",
+  ) => void;
+  onAddActivityToDestination?: (
+    destinationId: number,
+    activityId: number,
+  ) => void;
   onAddInclusion: (text: string, displayOrder: number) => void;
   onRemoveInclusion: (id: number) => void;
-  onUpdateInclusion: (id: number, text: string, displayOrder: number, status: "ACTIVE" | "INACTIVE") => void;
+  onUpdateInclusion: (
+    id: number,
+    text: string,
+    displayOrder: number,
+    status: "ACTIVE" | "INACTIVE",
+  ) => void;
   onAddExclusion: (text: string, displayOrder: number) => void;
   onRemoveExclusion: (id: number) => void;
-  onUpdateExclusion: (id: number, text: string, displayOrder: number, status: "ACTIVE" | "INACTIVE") => void;
+  onUpdateExclusion: (
+    id: number,
+    text: string,
+    displayOrder: number,
+    status: "ACTIVE" | "INACTIVE",
+  ) => void;
   onAddCondition: (text: string, displayOrder: number) => void;
   onRemoveCondition: (id: number) => void;
-  onUpdateCondition: (id: number, text: string, displayOrder: number, status: "ACTIVE" | "INACTIVE") => void;
-  onAddTravelTip: (title: string, description: string, displayOrder: number) => void;
+  onUpdateCondition: (
+    id: number,
+    text: string,
+    displayOrder: number,
+    status: "ACTIVE" | "INACTIVE",
+  ) => void;
+  onAddTravelTip: (
+    title: string,
+    description: string,
+    displayOrder: number,
+  ) => void;
   onRemoveTravelTip: (id: number) => void;
-  onUpdateTravelTip: (id: number, title: string, description: string, displayOrder: number, status: "ACTIVE" | "INACTIVE") => void;
+  onUpdateTravelTip: (
+    id: number,
+    title: string,
+    description: string,
+    displayOrder: number,
+    status: "ACTIVE" | "INACTIVE",
+  ) => void;
   uploadingImages: boolean;
 }
 
@@ -158,7 +211,10 @@ const TourDetailsForm: React.FC<TourDetailsFormProps> = ({
 }) => {
   const hasChanged = (field: string): boolean => {
     if (!originalTour) return false;
-    return originalTour[field as keyof TourAllDetails] !== tour[field as keyof TourAllDetails];
+    return (
+      originalTour[field as keyof TourAllDetails] !==
+      tour[field as keyof TourAllDetails]
+    );
   };
 
   return (

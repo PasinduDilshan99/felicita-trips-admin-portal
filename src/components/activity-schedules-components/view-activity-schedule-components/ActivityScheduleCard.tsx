@@ -1,8 +1,7 @@
-// components/activity-schedule-components/ActivityScheduleCard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Clock,
   Calendar,
@@ -11,7 +10,6 @@ import {
   Star,
   Check,
   Users,
-  DollarSign,
   MapPin,
   Tag,
   ChevronDown,
@@ -21,142 +19,38 @@ import { useRouter } from "next/navigation";
 import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import { useTheme } from "@/contexts/ThemeContext";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
-import { ActivityScheduleListItem, ActivityScheduleImage, ActivityCategoryDto } from "@/types/activity-schedule-types";
+import ImageModal from "@/components/common-components/ImageModal";
+import {
+  ActivityScheduleImage,
+  ActivityCategoryDto,
+  ActivityScheduleCardProps,
+} from "@/types/activity-schedule-types";
 import { hexToRgba } from "@/utils/functions";
-import { ACTIVITY_CATEGORIES_PAGE_URL } from "@/utils/urls";
+import { ACTIVITY_SCHEDULE_DETAILS_VIEW_URL } from "@/utils/urls";
+import {
+  formatDate,
+  formatPrice,
+  formatTime,
+  getSafeString,
+  truncateDescription,
+} from "@/utils/commonFunctions";
+import { ImageModalImage } from "@/types/common-components-types";
+import {
+  buttonVariants,
+  cardVariants,
+  contentVariants,
+  imageVariants,
+  itemVariants,
+  overlayVariants,
+  quickViewVariants,
+  shineVariants,
+  thumbnailVariants,
+} from "@/app/animations/variants";
 
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-  hover: {
-    y: -4,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-};
-
-const imageVariants: Variants = {
-  rest: { scale: 1 },
-  hover: { scale: 1.05, transition: { duration: 0.4 } },
-};
-
-const overlayVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.3 } },
-};
-
-const quickViewVariants: Variants = {
-  hidden: { opacity: 0, y: -10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.1 } },
-};
-
-const thumbnailVariants: Variants = {
-  rest: { scale: 1, opacity: 0.7 },
-  active: { scale: 1.05, opacity: 1 },
-  hover: { scale: 1.02, transition: { duration: 0.15 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const buttonVariants: Variants = {
-  rest: { scale: 1, y: 0 },
-  hover: {
-    scale: 1.02,
-    y: -2,
-    boxShadow: "0 8px 25px -4px rgba(0,0,0,0.2)",
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  tap: {
-    scale: 0.98,
-    y: 0,
-    transition: { duration: 0.1 },
-  },
-};
-
-const shineVariants: Variants = {
-  rest: { x: "-100%" },
-  hover: { x: "100%", transition: { duration: 0.6, ease: "easeInOut" } },
-};
-
-// Helper functions
-const getSafeString = (value: any, fallback: string = ""): string => {
-  if (!value) return fallback;
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return value.toString();
-  return fallback;
-};
-
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-};
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return "N/A";
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch {
-    return dateString;
-  }
-};
-
-const formatTime = (timeString: string): string => {
-  if (!timeString) return "N/A";
-  if (timeString.match(/^\d{2}:\d{2}$/)) return timeString;
-  if (timeString.match(/^\d{2}:\d{2}:\d{2}$/)) {
-    return timeString.substring(0, 5);
-  }
-  return timeString;
-};
-
-const truncateDescription = (description: string, maxLength: number = 100): string => {
-  if (!description) return "";
-  if (description.length <= maxLength) return description;
-  let truncated = description.substring(0, maxLength);
-  const lastSpaceIndex = truncated.lastIndexOf(" ");
-  if (lastSpaceIndex > 0 && lastSpaceIndex > maxLength - 20) {
-    truncated = truncated.substring(0, lastSpaceIndex);
-  }
-  return truncated + "...";
-};
-
-interface ActivityScheduleCardProps {
-  schedule: ActivityScheduleListItem;
-  onImageClick?: (imageIndex: number) => void;
-}
-
-const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, onImageClick }) => {
+const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({
+  schedule,
+  onImageClick,
+}) => {
   const router = useRouter();
   const { theme } = useTheme();
 
@@ -174,13 +68,21 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
   const displayCategory = primaryCategory || categories[0];
 
   const scheduleKey = `${schedule?.activityId}-${schedule?.scheduleId}`;
-  const scheduleName = getSafeString(schedule?.activityScheduleName, "Unnamed Schedule");
+  const scheduleName = getSafeString(
+    schedule?.activityScheduleName,
+    "Unnamed Schedule",
+  );
   const activityName = getSafeString(schedule?.activityName, "");
-  const description = getSafeString(schedule?.description || schedule?.scheduleDescription, "");
+  const description = getSafeString(
+    schedule?.description || schedule?.scheduleDescription,
+    "",
+  );
   const fullDescription = description;
   const truncatedDesc = truncateDescription(fullDescription, 100);
   const needsTruncation = fullDescription.length > 100;
-  const displayedDescription = isDescriptionExpanded ? fullDescription : truncatedDesc;
+  const displayedDescription = isDescriptionExpanded
+    ? fullDescription
+    : truncatedDesc;
 
   const status = schedule?.status || "INACTIVE";
   const scheduleStatus = schedule?.scheduleStatus || "INACTIVE";
@@ -197,7 +99,9 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
   const scheduleEndDate = schedule?.scheduleAssumeEndDate;
 
   const handleViewDetails = () => {
-    router.push(`${ACTIVITY_CATEGORIES_PAGE_URL}/${schedule.activityId}/${schedule.scheduleId}`);
+    router.push(
+      `${ACTIVITY_SCHEDULE_DETAILS_VIEW_URL}/${schedule.scheduleId}?name=${schedule.activityScheduleName}`,
+    );
   };
 
   const getModalImages = (): ImageModalImage[] => {
@@ -221,7 +125,7 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1,
     );
     setIsAutoRotating(false);
   };
@@ -255,7 +159,8 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
     setIsDescriptionExpanded(!isDescriptionExpanded);
   };
 
-  const currentImage = images[currentImageIndex]?.image_url || PLACE_HOLDER_IMAGE;
+  const currentImage =
+    images[currentImageIndex]?.image_url || PLACE_HOLDER_IMAGE;
   const isActive = status === "ACTIVE" && scheduleStatus === "ACTIVE";
 
   if (!schedule || !schedule.activityId) return null;
@@ -334,7 +239,11 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
               animate={isHovered ? "visible" : "hidden"}
               onClick={handleViewDetails}
               className="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-              whileHover={{ scale: 1.05, backgroundColor: "white", color: "#1f2937" }}
+              whileHover={{
+                scale: 1.05,
+                backgroundColor: "white",
+                color: "#1f2937",
+              }}
               whileTap={{ scale: 0.95 }}
             >
               <Eye className="w-3.5 h-3.5" />
@@ -358,8 +267,16 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
             {/* Navigation Arrows */}
             {images.length > 1 && (
               <>
-                <NavigationButton direction="left" onClick={handlePrevImage} size="sm" />
-                <NavigationButton direction="right" onClick={handleNextImage} size="sm" />
+                <NavigationButton
+                  direction="left"
+                  onClick={handlePrevImage}
+                  size="sm"
+                />
+                <NavigationButton
+                  direction="right"
+                  onClick={handleNextImage}
+                  size="sm"
+                />
               </>
             )}
 
@@ -380,7 +297,10 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
 
         {/* Thumbnail Gallery */}
         {images.length > 1 && (
-          <div className="px-4 pt-4 pb-2" style={{ borderBottom: `1px solid ${theme.border}` }}>
+          <div
+            className="px-4 pt-4 pb-2"
+            style={{ borderBottom: `1px solid ${theme.border}` }}
+          >
             <div className="flex gap-2 overflow-x-auto pb-2">
               {images.map((image: ActivityScheduleImage, index: number) => (
                 <motion.div
@@ -399,7 +319,10 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
                       currentImageIndex === index ? "scale-105" : ""
                     }`}
                     style={{
-                      borderColor: currentImageIndex === index ? theme.primary : theme.border,
+                      borderColor:
+                        currentImageIndex === index
+                          ? theme.primary
+                          : theme.border,
                     }}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = PLACE_HOLDER_IMAGE;
@@ -412,7 +335,11 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
                         ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
                         : "bg-white/90 backdrop-blur-sm text-gray-600 opacity-0 group-hover/thumb:opacity-100 hover:bg-blue-500 hover:text-white"
                     }`}
-                    title={primaryImageIndex === index ? "Primary Image" : "Set as Primary"}
+                    title={
+                      primaryImageIndex === index
+                        ? "Primary Image"
+                        : "Set as Primary"
+                    }
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
@@ -429,7 +356,12 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
         )}
 
         {/* Content Section */}
-        <motion.div variants={contentVariants} initial="hidden" animate="visible" className="p-5 flex-grow flex flex-col">
+        <motion.div
+          variants={contentVariants}
+          initial="hidden"
+          animate="visible"
+          className="p-5 flex-grow flex flex-col"
+        >
           <motion.div variants={itemVariants} className="mb-4">
             <motion.h3
               className="text-lg sm:text-xl font-bold mb-2 line-clamp-1 transition-colors duration-200 cursor-pointer"
@@ -441,14 +373,26 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
             </motion.h3>
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center">
-                <Tag className="w-3.5 h-3.5 mr-1.5" style={{ color: theme.success }} />
-                <span className="text-xs sm:text-sm font-medium" style={{ color: theme.textSecondary }}>
+                <Tag
+                  className="w-3.5 h-3.5 mr-1.5"
+                  style={{ color: theme.success }}
+                />
+                <span
+                  className="text-xs sm:text-sm font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
                   {activityName}
                 </span>
               </div>
               <div className="flex items-center">
-                <MapPin className="w-3 h-3 mr-1" style={{ color: theme.textSecondary }} />
-                <span className="text-xs truncate max-w-[120px]" style={{ color: theme.textSecondary }}>
+                <MapPin
+                  className="w-3 h-3 mr-1"
+                  style={{ color: theme.textSecondary }}
+                />
+                <span
+                  className="text-xs truncate max-w-[120px]"
+                  style={{ color: theme.textSecondary }}
+                >
                   {destinationName}
                 </span>
               </div>
@@ -473,7 +417,10 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
                   </span>
                 ))}
                 {categories.length > 2 && (
-                  <span className="px-2 py-0.5 rounded text-xs" style={{ color: theme.textSecondary }}>
+                  <span
+                    className="px-2 py-0.5 rounded text-xs"
+                    style={{ color: theme.textSecondary }}
+                  >
                     +{categories.length - 2}
                   </span>
                 )}
@@ -484,7 +431,10 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
           {/* Description */}
           {fullDescription && (
             <motion.div variants={itemVariants} className="mb-4">
-              <p className="text-sm leading-relaxed" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: theme.textSecondary }}
+              >
                 {displayedDescription}
               </p>
               {needsTruncation && (
@@ -496,9 +446,13 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
                   whileTap={{ scale: 0.98 }}
                 >
                   {isDescriptionExpanded ? (
-                    <>Show less <ChevronUp className="w-3 h-3" /></>
+                    <>
+                      Show less <ChevronUp className="w-3 h-3" />
+                    </>
                   ) : (
-                    <>Read more <ChevronDown className="w-3 h-3" /></>
+                    <>
+                      Read more <ChevronDown className="w-3 h-3" />
+                    </>
                   )}
                 </motion.button>
               )}
@@ -517,21 +471,41 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
           >
             <div className="text-center">
               <div className="flex items-center justify-center mb-1">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: hexToRgba(theme.accent, 0.1) }}>
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: hexToRgba(theme.accent, 0.1) }}
+                >
                   <Clock className="w-4 h-4" style={{ color: theme.accent }} />
                 </div>
               </div>
-              <div className="text-xs mb-1" style={{ color: theme.textSecondary }}>Duration</div>
-              <div className="text-sm font-bold" style={{ color: theme.text }}>{duration}h</div>
+              <div
+                className="text-xs mb-1"
+                style={{ color: theme.textSecondary }}
+              >
+                Duration
+              </div>
+              <div className="text-sm font-bold" style={{ color: theme.text }}>
+                {duration}h
+              </div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center mb-1">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: hexToRgba(theme.primary, 0.1) }}>
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: hexToRgba(theme.primary, 0.1) }}
+                >
                   <Users className="w-4 h-4" style={{ color: theme.primary }} />
                 </div>
               </div>
-              <div className="text-xs mb-1" style={{ color: theme.textSecondary }}>Group Size</div>
-              <div className="text-sm font-bold" style={{ color: theme.text }}>{minParticipate}-{maxParticipate}</div>
+              <div
+                className="text-xs mb-1"
+                style={{ color: theme.textSecondary }}
+              >
+                Group Size
+              </div>
+              <div className="text-sm font-bold" style={{ color: theme.text }}>
+                {minParticipate}-{maxParticipate}
+              </div>
             </div>
           </motion.div>
 
@@ -539,14 +513,24 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
           <motion.div variants={itemVariants} className="mb-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs" style={{ color: theme.textSecondary }}>Local Price</div>
-                <div className="text-lg font-bold" style={{ color: theme.primary }}>
+                <div className="text-xs" style={{ color: theme.textSecondary }}>
+                  Local Price
+                </div>
+                <div
+                  className="text-lg font-bold"
+                  style={{ color: theme.primary }}
+                >
                   {formatPrice(priceLocal)}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs" style={{ color: theme.textSecondary }}>Foreigner Price</div>
-                <div className="text-lg font-bold" style={{ color: theme.success }}>
+                <div className="text-xs" style={{ color: theme.textSecondary }}>
+                  Foreigner Price
+                </div>
+                <div
+                  className="text-lg font-bold"
+                  style={{ color: theme.success }}
+                >
                   {formatPrice(priceForeigners)}
                 </div>
               </div>
@@ -556,21 +540,35 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
           {/* Schedule Date Range */}
           {scheduleStartDate && scheduleEndDate && (
             <motion.div variants={itemVariants} className="mb-4">
-              <div className="flex items-center gap-2 text-xs" style={{ color: theme.textSecondary }}>
+              <div
+                className="flex items-center gap-2 text-xs"
+                style={{ color: theme.textSecondary }}
+              >
                 <Calendar className="w-3.5 h-3.5" />
-                <span>{formatDate(scheduleStartDate)} - {formatDate(scheduleEndDate)}</span>
+                <span>
+                  {formatDate(scheduleStartDate)} -{" "}
+                  {formatDate(scheduleEndDate)}
+                </span>
               </div>
             </motion.div>
           )}
 
           {/* Availability */}
           <motion.div variants={itemVariants} className="mb-4">
-            <div className="flex items-center gap-2 text-xs" style={{ color: theme.textSecondary }}>
+            <div
+              className="flex items-center gap-2 text-xs"
+              style={{ color: theme.textSecondary }}
+            >
               <Clock className="w-3.5 h-3.5" />
-              <span>Available: {availableFrom} - {availableTo}</span>
+              <span>
+                Available: {availableFrom} - {availableTo}
+              </span>
             </div>
             {season && season !== "N/A" && (
-              <div className="flex items-center gap-2 text-xs mt-1" style={{ color: theme.textSecondary }}>
+              <div
+                className="flex items-center gap-2 text-xs mt-1"
+                style={{ color: theme.textSecondary }}
+              >
                 <Calendar className="w-3.5 h-3.5" />
                 <span>Season: {season}</span>
               </div>
@@ -597,10 +595,14 @@ const ActivityScheduleCard: React.FC<ActivityScheduleCardProps> = ({ schedule, o
               animate={isHovered ? "hover" : "rest"}
               className="absolute inset-0"
               style={{
-                background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
+                background:
+                  "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)",
               }}
             />
-            <span className="absolute inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.35)" }} />
+            <span
+              className="absolute inset-x-0 top-0 h-px"
+              style={{ background: "rgba(255,255,255,0.35)" }}
+            />
             <Eye className="relative w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
             <span className="relative tracking-wide text-sm">View Details</span>
             <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />

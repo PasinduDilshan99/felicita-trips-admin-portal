@@ -1,28 +1,22 @@
-// components/tour-schedule-components/TourSelector.tsx
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MapPin, Search, ChevronDown, Check, AlertCircle, Loader, Clock, DollarSign, Calendar, RefreshCw, Compass } from "lucide-react";
+import {
+  MapPin,
+  Search,
+  ChevronDown,
+  Check,
+  AlertCircle,
+  Loader,
+  Clock,
+  Calendar,
+  RefreshCw,
+  Compass,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { TourService } from "@/services/tourService";
 import { Tour } from "@/types/tour-types";
-
-interface TourSelectorProps {
-  selectedTourId?: number;
-  onTourSelect: (tourId: number, tourDetails?: Tour) => void;
-  onTourClear?: () => void;
-  error?: string;
-  required?: boolean;
-  label?: string;
-  placeholder?: string;
-  showDetails?: boolean;
-  fetchDetails?: boolean;
-}
-
-interface TourListItem {
-  tourId: number;
-  tourName: string;
-}
+import { TourListItem, TourSelectorProps } from "@/types/tour-schedule-types";
 
 export const TourSelector: React.FC<TourSelectorProps> = ({
   selectedTourId,
@@ -96,7 +90,11 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
       }
     } catch (err) {
       console.error("Error fetching tours:", err);
-      setApiError(err instanceof Error ? err.message : "Error loading tours. Please try again.");
+      setApiError(
+        err instanceof Error
+          ? err.message
+          : "Error loading tours. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -111,7 +109,10 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
   // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
         setSearchQuery("");
       }
@@ -125,21 +126,21 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
     if (isDropdownOpen && dropdownRef.current && dropdownMenuRef.current) {
       const inputRect = dropdownRef.current.getBoundingClientRect();
       const dropdownMenu = dropdownMenuRef.current;
-      
-      dropdownMenu.style.position = 'absolute';
-      dropdownMenu.style.top = '100%';
-      dropdownMenu.style.left = '0';
-      dropdownMenu.style.right = '0';
-      dropdownMenu.style.marginTop = '8px';
-      
+
+      dropdownMenu.style.position = "absolute";
+      dropdownMenu.style.top = "100%";
+      dropdownMenu.style.left = "0";
+      dropdownMenu.style.right = "0";
+      dropdownMenu.style.marginTop = "8px";
+
       const menuHeight = 300;
       const spaceBelow = window.innerHeight - inputRect.bottom;
-      
+
       if (spaceBelow < menuHeight && inputRect.top > menuHeight) {
-        dropdownMenu.style.top = 'auto';
-        dropdownMenu.style.bottom = '100%';
-        dropdownMenu.style.marginBottom = '8px';
-        dropdownMenu.style.marginTop = '0';
+        dropdownMenu.style.top = "auto";
+        dropdownMenu.style.bottom = "100%";
+        dropdownMenu.style.marginBottom = "8px";
+        dropdownMenu.style.marginTop = "0";
       }
     }
   }, [isDropdownOpen]);
@@ -147,7 +148,7 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
   const filteredTours = React.useMemo(() => {
     if (!searchQuery.trim()) return tours;
     return tours.filter((tour) =>
-      tour.tourName.toLowerCase().includes(searchQuery.toLowerCase())
+      tour.tourName.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [tours, searchQuery]);
 
@@ -186,12 +187,18 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
       >
         <span
           className="flex items-center justify-center w-8 h-8 rounded-lg"
-          style={{ backgroundColor: `${theme.primary}18`, color: theme.primary }}
+          style={{
+            backgroundColor: `${theme.primary}18`,
+            color: theme.primary,
+          }}
         >
           <Compass className="w-4 h-4" />
         </span>
         <div>
-          <h2 className="text-base font-semibold leading-tight" style={{ color: theme.text }}>
+          <h2
+            className="text-base font-semibold leading-tight"
+            style={{ color: theme.text }}
+          >
             {label}
             {required && <span style={{ color: theme.error }}> *</span>}
           </h2>
@@ -213,7 +220,11 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
 
       <div className="px-6 py-6 space-y-4">
         {!selectedTour ? (
-          <div className="relative" ref={dropdownRef} style={{ position: 'relative', zIndex: 50 }}>
+          <div
+            className="relative"
+            ref={dropdownRef}
+            style={{ position: "relative", zIndex: 50 }}
+          >
             <div className="relative">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
@@ -261,13 +272,22 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
                 }}
               >
                 {loading ? (
-                  <div className="p-4 text-center text-sm" style={{ color: theme.textSecondary }}>
-                    <Loader className="w-5 h-5 animate-spin mx-auto mb-2" style={{ color: theme.primary }} />
+                  <div
+                    className="p-4 text-center text-sm"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    <Loader
+                      className="w-5 h-5 animate-spin mx-auto mb-2"
+                      style={{ color: theme.primary }}
+                    />
                     Loading tours...
                   </div>
                 ) : apiError ? (
                   <div className="p-4 text-center">
-                    <div className="text-sm mb-2" style={{ color: theme.error }}>
+                    <div
+                      className="text-sm mb-2"
+                      style={{ color: theme.error }}
+                    >
                       <AlertCircle className="w-5 h-5 mx-auto mb-2" />
                       {apiError}
                     </div>
@@ -284,8 +304,13 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
                     </button>
                   </div>
                 ) : filteredTours.length === 0 ? (
-                  <div className="p-4 text-center text-sm" style={{ color: theme.textSecondary }}>
-                    {searchQuery ? "No tours match your search" : "No tours available"}
+                  <div
+                    className="p-4 text-center text-sm"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    {searchQuery
+                      ? "No tours match your search"
+                      : "No tours available"}
                   </div>
                 ) : (
                   filteredTours.map((tour) => {
@@ -297,7 +322,9 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
                         onClick={() => handleSelectTour(tour)}
                         className="w-full px-4 py-3 text-left transition-all duration-150 flex items-center justify-between group"
                         style={{
-                          backgroundColor: isSelected ? `${theme.primary}10` : "transparent",
+                          backgroundColor: isSelected
+                            ? `${theme.primary}10`
+                            : "transparent",
                         }}
                         onMouseEnter={(e) => {
                           if (!isSelected) {
@@ -306,7 +333,8 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
                         }}
                         onMouseLeave={(e) => {
                           if (!isSelected) {
-                            e.currentTarget.style.backgroundColor = "transparent";
+                            e.currentTarget.style.backgroundColor =
+                              "transparent";
                           }
                         }}
                       >
@@ -315,16 +343,24 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
                             <span
                               className="w-1.5 h-1.5 rounded-full transition-all duration-200 group-hover:scale-150"
                               style={{
-                                backgroundColor: isSelected ? theme.primary : theme.textSecondary,
+                                backgroundColor: isSelected
+                                  ? theme.primary
+                                  : theme.textSecondary,
                               }}
                             />
-                            <p className="text-sm font-medium" style={{ color: theme.text }}>
+                            <p
+                              className="text-sm font-medium"
+                              style={{ color: theme.text }}
+                            >
                               {tour.tourName}
                             </p>
                           </div>
                         </div>
                         {isSelected && (
-                          <Check className="w-4 h-4 ml-2 flex-shrink-0" style={{ color: theme.primary }} />
+                          <Check
+                            className="w-4 h-4 ml-2 flex-shrink-0"
+                            style={{ color: theme.primary }}
+                          />
                         )}
                       </button>
                     );
@@ -345,8 +381,14 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3">
-                    <Compass className="w-4 h-4" style={{ color: theme.primary }} />
-                    <p className="text-sm font-semibold" style={{ color: theme.text }}>
+                    <Compass
+                      className="w-4 h-4"
+                      style={{ color: theme.primary }}
+                    />
+                    <p
+                      className="text-sm font-semibold"
+                      style={{ color: theme.text }}
+                    >
                       {selectedTour.tourName}
                     </p>
                     {tourDetails?.tourTypeName && (
@@ -364,8 +406,14 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
 
                   {loadingDetails ? (
                     <div className="flex items-center gap-2 mt-2">
-                      <Loader className="w-4 h-4 animate-spin" style={{ color: theme.primary }} />
-                      <span className="text-xs" style={{ color: theme.textSecondary }}>
+                      <Loader
+                        className="w-4 h-4 animate-spin"
+                        style={{ color: theme.primary }}
+                      />
+                      <span
+                        className="text-xs"
+                        style={{ color: theme.textSecondary }}
+                      >
                         Loading tour details...
                       </span>
                     </div>
@@ -374,18 +422,35 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
                     tourDetails && (
                       <div className="space-y-3">
                         {tourDetails.tourDescription && (
-                          <p className="text-sm" style={{ color: theme.textSecondary }}>
+                          <p
+                            className="text-sm"
+                            style={{ color: theme.textSecondary }}
+                          >
                             {tourDetails.tourDescription}
                           </p>
                         )}
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-3 border-t" style={{ borderColor: theme.border }}>
+                        <div
+                          className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-3 border-t"
+                          style={{ borderColor: theme.border }}
+                        >
                           {/* Duration */}
                           <div className="flex items-center gap-2">
-                            <Clock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.primary }} />
+                            <Clock
+                              className="w-3.5 h-3.5 flex-shrink-0"
+                              style={{ color: theme.primary }}
+                            />
                             <div>
-                              <p className="text-xs" style={{ color: theme.textSecondary }}>Duration</p>
-                              <p className="text-xs font-medium" style={{ color: theme.text }}>
+                              <p
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
+                                Duration
+                              </p>
+                              <p
+                                className="text-xs font-medium"
+                                style={{ color: theme.text }}
+                              >
                                 {tourDetails.duration} days
                               </p>
                             </div>
@@ -393,10 +458,21 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
 
                           {/* Start Location */}
                           <div className="flex items-center gap-2">
-                            <MapPin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.success }} />
+                            <MapPin
+                              className="w-3.5 h-3.5 flex-shrink-0"
+                              style={{ color: theme.success }}
+                            />
                             <div>
-                              <p className="text-xs" style={{ color: theme.textSecondary }}>Start</p>
-                              <p className="text-xs font-medium" style={{ color: theme.text }}>
+                              <p
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
+                                Start
+                              </p>
+                              <p
+                                className="text-xs font-medium"
+                                style={{ color: theme.text }}
+                              >
                                 {tourDetails.startLocation}
                               </p>
                             </div>
@@ -404,10 +480,21 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
 
                           {/* End Location */}
                           <div className="flex items-center gap-2">
-                            <MapPin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.warning }} />
+                            <MapPin
+                              className="w-3.5 h-3.5 flex-shrink-0"
+                              style={{ color: theme.warning }}
+                            />
                             <div>
-                              <p className="text-xs" style={{ color: theme.textSecondary }}>End</p>
-                              <p className="text-xs font-medium" style={{ color: theme.text }}>
+                              <p
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
+                                End
+                              </p>
+                              <p
+                                className="text-xs font-medium"
+                                style={{ color: theme.text }}
+                              >
                                 {tourDetails.endLocation}
                               </p>
                             </div>
@@ -415,10 +502,21 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
 
                           {/* Category */}
                           <div className="flex items-center gap-2">
-                            <Compass className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.primary }} />
+                            <Compass
+                              className="w-3.5 h-3.5 flex-shrink-0"
+                              style={{ color: theme.primary }}
+                            />
                             <div>
-                              <p className="text-xs" style={{ color: theme.textSecondary }}>Category</p>
-                              <p className="text-xs font-medium" style={{ color: theme.text }}>
+                              <p
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
+                                Category
+                              </p>
+                              <p
+                                className="text-xs font-medium"
+                                style={{ color: theme.text }}
+                              >
                                 {tourDetails.tourCategoryName}
                               </p>
                             </div>
@@ -426,10 +524,21 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
 
                           {/* Season */}
                           <div className="flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.primary }} />
+                            <Calendar
+                              className="w-3.5 h-3.5 flex-shrink-0"
+                              style={{ color: theme.primary }}
+                            />
                             <div>
-                              <p className="text-xs" style={{ color: theme.textSecondary }}>Season</p>
-                              <p className="text-xs font-medium" style={{ color: theme.text }}>
+                              <p
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
+                                Season
+                              </p>
+                              <p
+                                className="text-xs font-medium"
+                                style={{ color: theme.text }}
+                              >
                                 {tourDetails.seasonName}
                               </p>
                             </div>
@@ -440,12 +549,23 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
                             <div
                               className="w-2 h-2 rounded-full"
                               style={{
-                                backgroundColor: tourDetails.statusName === "ACTIVE" ? theme.success : theme.error,
+                                backgroundColor:
+                                  tourDetails.statusName === "ACTIVE"
+                                    ? theme.success
+                                    : theme.error,
                               }}
                             />
                             <div>
-                              <p className="text-xs" style={{ color: theme.textSecondary }}>Status</p>
-                              <p className="text-xs font-medium" style={{ color: theme.text }}>
+                              <p
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
+                                Status
+                              </p>
+                              <p
+                                className="text-xs font-medium"
+                                style={{ color: theme.text }}
+                              >
                                 {tourDetails.statusName}
                               </p>
                             </div>
@@ -476,7 +596,10 @@ export const TourSelector: React.FC<TourSelectorProps> = ({
         )}
 
         {error && (
-          <p className="text-xs flex items-center gap-1" style={{ color: theme.error }}>
+          <p
+            className="text-xs flex items-center gap-1"
+            style={{ color: theme.error }}
+          >
             <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
             {error}
           </p>

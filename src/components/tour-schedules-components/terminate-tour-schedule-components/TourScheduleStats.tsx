@@ -1,86 +1,29 @@
-// components/tour-schedules-components/terminate-tour-schedule-components/TourScheduleStats.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { Calendar, Clock, MapPin, Hotel, Tag, Hash, AlertCircle } from "lucide-react";
-import { TourScheduleDetails } from "@/types/tour-schedule-types";
+import { motion } from "framer-motion";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Hotel,
+  Tag,
+  Hash,
+  AlertCircle,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { StatItem, TourScheduleStatsProps } from "@/types/tour-schedule-types";
+import { formatDate } from "@/utils/commonFunctions";
+import {
+  containerVariants,
+  statCardVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const statCardVariants: Variants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.38,
-      ease: EASE_OUT,
-    },
-  },
-  hover: {
-    y: -4,
-    scale: 1.02,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut",
-    },
-  },
-  tap: {
-    scale: 0.98,
-    transition: {
-      duration: 0.1,
-    },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.3,
-      ease: EASE_OUT,
-      delay: 0.1,
-    },
-  },
-};
-
-interface TourScheduleStatsProps {
-  scheduleDetails: TourScheduleDetails;
-}
-
-interface StatItem {
-  label: string;
-  value: number | string;
-  icon: React.ReactNode;
-  color: string;
-  formatter?: (value: number | string) => string | number;
-}
-
-export const TourScheduleStats: React.FC<TourScheduleStatsProps> = ({ scheduleDetails }) => {
+export const TourScheduleStats: React.FC<TourScheduleStatsProps> = ({
+  scheduleDetails,
+}) => {
   const { theme } = useTheme();
 
   const getStatusColor = (status: string): string => {
@@ -94,11 +37,6 @@ export const TourScheduleStats: React.FC<TourScheduleStatsProps> = ({ scheduleDe
       default:
         return theme.textSecondary;
     }
-  };
-
-  const formatDate = (date: string): string => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString();
   };
 
   const statItems: StatItem[] = [
@@ -174,8 +112,10 @@ export const TourScheduleStats: React.FC<TourScheduleStatsProps> = ({ scheduleDe
         }}
       >
         {statItems.map((item, i) => {
-          const displayValue = item.formatter ? item.formatter(item.value) : item.value;
-          
+          const displayValue = item.formatter
+            ? item.formatter(item.value)
+            : item.value;
+
           return (
             <motion.div
               key={`${item.label}-${i}`}
@@ -191,9 +131,14 @@ export const TourScheduleStats: React.FC<TourScheduleStatsProps> = ({ scheduleDe
                 backdropFilter: "blur(0px)",
               }}
             >
-              <div className="flex items-center gap-1.5" style={{ color: item.color, opacity: 0.85 }}>
+              <div
+                className="flex items-center gap-1.5"
+                style={{ color: item.color, opacity: 0.85 }}
+              >
                 <span className="flex-shrink-0">{item.icon}</span>
-                <span className="text-xs font-medium tracking-wide">{item.label}</span>
+                <span className="text-xs font-medium tracking-wide">
+                  {item.label}
+                </span>
               </div>
 
               <motion.p
@@ -208,7 +153,8 @@ export const TourScheduleStats: React.FC<TourScheduleStatsProps> = ({ scheduleDe
               </motion.p>
 
               {/* Status indicator dot */}
-              {(item.label === "Schedule Status" || item.label === "Tour Status") && (
+              {(item.label === "Schedule Status" ||
+                item.label === "Tour Status") && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}

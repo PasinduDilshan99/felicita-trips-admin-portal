@@ -1,77 +1,24 @@
-// components/packages-components/terminate-package-components/PackageStats.tsx
 "use client";
 
 import React from "react";
-import { motion, type Variants } from "framer-motion";
-import { DollarSign, Percent, Users, Calendar, Clock, Gift, AlertCircle } from "lucide-react";
-import { TourPackage } from "@/types/package-types";
+import { motion } from "framer-motion";
+import {
+  DollarSign,
+  Percent,
+  Users,
+  Calendar,
+  Gift,
+  AlertCircle,
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const statCardVariants: Variants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.38,
-      ease: EASE_OUT,
-    },
-  },
-  hover: {
-    y: -4,
-    scale: 1.02,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut",
-    },
-  },
-  tap: {
-    scale: 0.98,
-    transition: {
-      duration: 0.1,
-    },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.3,
-      ease: EASE_OUT,
-      delay: 0.1,
-    },
-  },
-};
-
-interface PackageStatsProps {
-  packageDetails: TourPackage;
-}
+import { PackageStatsProps } from "@/types/package-types";
+import {
+  containerVariants,
+  statCardVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
 
 interface StatItem {
   label: string;
@@ -81,7 +28,9 @@ interface StatItem {
   formatter?: (value: number | string) => string | number;
 }
 
-export const PackageStats: React.FC<PackageStatsProps> = ({ packageDetails }) => {
+export const PackageStats: React.FC<PackageStatsProps> = ({
+  packageDetails,
+}) => {
   const { theme } = useTheme();
   const { formatPrice, currentCurrency } = useCurrency();
 
@@ -98,11 +47,17 @@ export const PackageStats: React.FC<PackageStatsProps> = ({ packageDetails }) =>
     }
   };
 
-  const calculateDiscountedPrice = (price: number, discount: number): number => {
-    return price - (price * discount / 100);
+  const calculateDiscountedPrice = (
+    price: number,
+    discount: number,
+  ): number => {
+    return price - (price * discount) / 100;
   };
 
-  const discountedPrice = calculateDiscountedPrice(packageDetails.totalPrice, packageDetails.discountPercentage);
+  const discountedPrice = calculateDiscountedPrice(
+    packageDetails.totalPrice,
+    packageDetails.discountPercentage,
+  );
 
   const statItems: StatItem[] = [
     {
@@ -198,16 +153,25 @@ export const PackageStats: React.FC<PackageStatsProps> = ({ packageDetails }) =>
               backdropFilter: "blur(0px)",
             }}
           >
-            <div className="flex items-center gap-1.5" style={{ color: item.color, opacity: 0.85 }}>
+            <div
+              className="flex items-center gap-1.5"
+              style={{ color: item.color, opacity: 0.85 }}
+            >
               <span className="flex-shrink-0">{item.icon}</span>
-              <span className="text-xs font-medium tracking-wide">{item.label}</span>
+              <span className="text-xs font-medium tracking-wide">
+                {item.label}
+              </span>
             </div>
 
             <motion.p
               variants={valueVariants}
               className="text-base sm:text-lg font-bold mt-1.5 truncate"
               style={{ color: theme.text }}
-              key={typeof item.value === 'number' ? item.value : item.value.toString()}
+              key={
+                typeof item.value === "number"
+                  ? item.value
+                  : item.value.toString()
+              }
               initial="hidden"
               animate="visible"
             >
@@ -215,25 +179,29 @@ export const PackageStats: React.FC<PackageStatsProps> = ({ packageDetails }) =>
             </motion.p>
 
             {/* Show currency indicator for price items */}
-            {(item.label === "Total Price" || item.label === "Discounted Price" || item.label === "Price Per Person") && 
-             (item.label === "Total Price" ? packageDetails.totalPrice > 0 : true) && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="flex items-center gap-1 mt-1"
-              >
-                <span 
-                  className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
-                  style={{
-                    backgroundColor: `${item.color}15`,
-                    color: item.color,
-                  }}
+            {(item.label === "Total Price" ||
+              item.label === "Discounted Price" ||
+              item.label === "Price Per Person") &&
+              (item.label === "Total Price"
+                ? packageDetails.totalPrice > 0
+                : true) && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="flex items-center gap-1 mt-1"
                 >
-                  {currentCurrency.code}
-                </span>
-              </motion.div>
-            )}
+                  <span
+                    className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                    style={{
+                      backgroundColor: `${item.color}15`,
+                      color: item.color,
+                    }}
+                  >
+                    {currentCurrency.code}
+                  </span>
+                </motion.div>
+              )}
 
             {/* Status indicator dot */}
             {item.label === "Status" && (

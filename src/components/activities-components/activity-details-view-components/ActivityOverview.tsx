@@ -1,4 +1,3 @@
-// components/activities-components/view-activity-details-components/ActivityOverview.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -8,50 +7,42 @@ import {
   Clock,
   ChevronDown,
   ChevronUp,
+  ExternalLink,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface ActivityOverviewProps {
-  name: string;
-  description: string;
-  destinationName: string;
-  availableFrom: string;
-  availableTo: string;
-  durationHours: number;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { ActivityOverviewProps } from "@/types/activity-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const ActivityOverview: React.FC<ActivityOverviewProps> = ({
   name,
   description,
   destinationName,
+  destinationId,
   availableFrom,
   availableTo,
   durationHours,
+  seasonName,
+  onViewDestination,
 }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "Not specified";
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    try {
+      return new Date(dateStr).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
   };
 
   const truncatedDescription =
-    description.length > 300 && !isExpanded
-      ? description.slice(0, 300) + "..."
+    description?.length > 400 && !isExpanded
+      ? description.slice(0, 400) + "..."
       : description;
 
   return (
@@ -64,78 +55,180 @@ export const ActivityOverview: React.FC<ActivityOverviewProps> = ({
       }}
     >
       <div
-        className="px-6 py-4"
+        className="px-4 sm:px-6 py-3 sm:py-4"
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
-        <h2 className="text-lg font-semibold" style={{ color: theme.text }}>
-          Overview
+        <h2
+          className="text-base sm:text-lg font-semibold"
+          style={{ color: theme.text }}
+        >
+          Activity Overview
         </h2>
       </div>
 
-      <div className="px-6 py-5 space-y-5">
-        {/* Basic Info Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex items-start gap-3">
-            <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
-                Destination
-              </p>
-              <p className="text-sm font-medium mt-0.5" style={{ color: theme.text }}>
-                {destinationName || "Not specified"}
-              </p>
-            </div>
-          </div>
+      <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4">
+        {/* Activity Name */}
+        <div>
+          <p
+            className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1"
+            style={{ color: theme.textSecondary }}
+          >
+            Activity Name
+          </p>
+          <h3
+            className="text-lg sm:text-xl font-bold"
+            style={{ color: theme.text }}
+          >
+            {name}
+          </h3>
+        </div>
 
-          <div className="flex items-start gap-3">
-            <Clock className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+        {/* Basic Info Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex items-start gap-2">
+            <Clock
+              className="w-4 h-4 mt-0.5 flex-shrink-0"
+              style={{ color: theme.primary }}
+            />
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] sm:text-xs font-medium"
+                style={{ color: theme.textSecondary }}
+              >
                 Duration
               </p>
-              <p className="text-sm font-medium mt-0.5" style={{ color: theme.text }}>
-                {durationHours ? `${durationHours} hours` : "Not specified"}
+              <p
+                className="text-sm sm:text-base font-medium"
+                style={{ color: theme.text }}
+              >
+                {durationHours} hours
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3">
-            <Calendar className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+          {seasonName && (
+            <div className="flex items-start gap-2">
+              <Calendar
+                className="w-4 h-4 mt-0.5 flex-shrink-0"
+                style={{ color: theme.primary }}
+              />
+              <div>
+                <p
+                  className="text-[10px] sm:text-xs font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Season
+                </p>
+                <p
+                  className="text-sm sm:text-base font-medium"
+                  style={{ color: theme.text }}
+                >
+                  {seasonName}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-start gap-2">
+            <Calendar
+              className="w-4 h-4 mt-0.5 flex-shrink-0"
+              style={{ color: theme.success }}
+            />
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] sm:text-xs font-medium"
+                style={{ color: theme.textSecondary }}
+              >
                 Available From
               </p>
-              <p className="text-sm font-medium mt-0.5" style={{ color: theme.text }}>
+              <p
+                className="text-sm sm:text-base font-medium"
+                style={{ color: theme.text }}
+              >
                 {formatDate(availableFrom)}
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3">
-            <Calendar className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+          <div className="flex items-start gap-2">
+            <Calendar
+              className="w-4 h-4 mt-0.5 flex-shrink-0"
+              style={{ color: theme.error }}
+            />
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-[10px] sm:text-xs font-medium"
+                style={{ color: theme.textSecondary }}
+              >
                 Available To
               </p>
-              <p className="text-sm font-medium mt-0.5" style={{ color: theme.text }}>
+              <p
+                className="text-sm sm:text-base font-medium"
+                style={{ color: theme.text }}
+              >
                 {formatDate(availableTo)}
               </p>
             </div>
           </div>
         </div>
 
+        {/* Destination Info - Clickable */}
+        <div
+          className="rounded-xl p-3 cursor-pointer transition-all duration-200 hover:shadow-md"
+          style={{
+            backgroundColor: hexToRgba(theme.success, 0.05),
+            border: `1px solid ${hexToRgba(theme.success, 0.1)}`,
+          }}
+          onClick={onViewDestination}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4" style={{ color: theme.success }} />
+              <div>
+                <p
+                  className="text-[10px] sm:text-xs font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Destination
+                </p>
+                <p
+                  className="text-sm sm:text-base font-medium hover:underline"
+                  style={{ color: theme.success }}
+                >
+                  {destinationName}
+                </p>
+              </div>
+            </div>
+            <ExternalLink
+              className="w-4 h-4 opacity-60"
+              style={{ color: theme.success }}
+            />
+          </div>
+          <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
+            Click to view destination details
+          </p>
+        </div>
+
         {/* Description */}
         {description && (
-          <div className="pt-2">
-            <p className="text-xs font-medium uppercase tracking-wide mb-2" style={{ color: theme.textSecondary }}>
+          <div>
+            <p
+              className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2"
+              style={{ color: theme.textSecondary }}
+            >
               Description
             </p>
             <div
-              className="text-sm leading-relaxed"
-              style={{ color: theme.textSecondary }}
+              className="text-xs sm:text-sm leading-relaxed rounded-xl p-3 sm:p-4"
+              style={{
+                backgroundColor: hexToRgba(theme.primary, 0.03),
+                border: `1px solid ${hexToRgba(theme.primary, 0.08)}`,
+              }}
             >
-              <p>{truncatedDescription}</p>
-              {description.length > 300 && (
+              <p style={{ color: theme.textSecondary }}>
+                {truncatedDescription}
+              </p>
+              {description.length > 400 && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
                   className="inline-flex items-center gap-1 mt-2 text-xs font-medium transition-colors"

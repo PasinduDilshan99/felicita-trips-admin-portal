@@ -1,4 +1,3 @@
-// components/tours-components/tour-details-view-components/TourDayByDay.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -9,27 +8,22 @@ import {
   Activity,
   Clock,
   Users,
-  Calendar,
   Image as ImageIcon,
   Grid,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useRouter } from "next/navigation";
-import { DayToDayResponse, DayToDayDestinationActivity } from "@/types/tour-types";
-import ImageModal, { ImageModalImage } from "@/components/common-components/ImageModal";
+import {
+  DayToDayResponse,
+  DayToDayDestinationActivity,
+} from "@/types/tour-types";
+import ImageModal from "@/components/common-components/ImageModal";
+import { ImageModalImage } from "@/types/common-components-types";
+import { hexToRgba } from "@/utils/functions";
 
 interface TourDayByDayProps {
   dayToDayResponses: DayToDayResponse[];
 }
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
 
 export const TourDayByDay: React.FC<TourDayByDayProps> = ({
   dayToDayResponses,
@@ -37,9 +31,11 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
   const { theme } = useTheme();
   const router = useRouter();
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([1]));
-  const [expandedDestinations, setExpandedDestinations] = useState<Set<number>>(new Set());
+  const [expandedDestinations, setExpandedDestinations] = useState<Set<number>>(
+    new Set(),
+  );
   const [showAllImages, setShowAllImages] = useState<Set<number>>(new Set());
-  
+
   // Image modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImages, setModalImages] = useState<ImageModalImage[]>([]);
@@ -126,7 +122,10 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
           className="px-4 sm:px-6 py-3 sm:py-4"
           style={{ borderBottom: `1px solid ${theme.border}` }}
         >
-          <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+          <h2
+            className="text-base sm:text-lg font-semibold"
+            style={{ color: theme.text }}
+          >
             Day by Day Itinerary
           </h2>
         </div>
@@ -153,7 +152,10 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
           className="px-4 sm:px-6 py-3 sm:py-4"
           style={{ borderBottom: `1px solid ${theme.border}` }}
         >
-          <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+          <h2
+            className="text-base sm:text-lg font-semibold"
+            style={{ color: theme.text }}
+          >
             Day by Day Itinerary
           </h2>
           <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
@@ -191,18 +193,33 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
                       {day.dayNumber}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-sm sm:text-base" style={{ color: theme.text }}>
+                      <h3
+                        className="font-semibold text-sm sm:text-base"
+                        style={{ color: theme.text }}
+                      >
                         Day {day.dayNumber}
                       </h3>
-                      <p className="text-xs" style={{ color: theme.textSecondary }}>
-                        {destinations.length} {destinations.length === 1 ? "destination" : "destinations"}
+                      <p
+                        className="text-xs"
+                        style={{ color: theme.textSecondary }}
+                      >
+                        {destinations.length}{" "}
+                        {destinations.length === 1
+                          ? "destination"
+                          : "destinations"}
                       </p>
                     </div>
                   </div>
                   {isDayExpanded ? (
-                    <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: theme.textSecondary }} />
+                    <ChevronUp
+                      className="w-4 h-4 sm:w-5 sm:h-5"
+                      style={{ color: theme.textSecondary }}
+                    />
                   ) : (
-                    <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: theme.textSecondary }} />
+                    <ChevronDown
+                      className="w-4 h-4 sm:w-5 sm:h-5"
+                      style={{ color: theme.textSecondary }}
+                    />
                   )}
                 </button>
 
@@ -212,11 +229,17 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
                     {destinations.map((dest, destIdx) => {
                       const destination = dest.destination;
                       const activities = dest.activities || [];
-                      const isDestinationExpanded = expandedDestinations.has(destination.destinationId);
+                      const isDestinationExpanded = expandedDestinations.has(
+                        destination.destinationId,
+                      );
                       const isLast = destIdx === destinations.length - 1;
                       const destinationImages = destination.images || [];
-                      const showAllImagesForDest = showAllImages.has(destination.destinationId);
-                      const displayedImages = showAllImagesForDest ? destinationImages : destinationImages.slice(0, 4);
+                      const showAllImagesForDest = showAllImages.has(
+                        destination.destinationId,
+                      );
+                      const displayedImages = showAllImagesForDest
+                        ? destinationImages
+                        : destinationImages.slice(0, 4);
                       const hasMoreImages = destinationImages.length > 4;
 
                       return (
@@ -225,37 +248,60 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
                           <div
                             className="rounded-xl overflow-hidden"
                             style={{
-                              backgroundColor: hexToRgba(theme.accent || theme.primary, 0.03),
+                              backgroundColor: hexToRgba(
+                                theme.accent || theme.primary,
+                                0.03,
+                              ),
                               border: `1px solid ${hexToRgba(theme.accent || theme.primary, 0.1)}`,
                             }}
                           >
                             {/* Destination Header */}
                             <button
-                              onClick={() => toggleDestination(destination.destinationId)}
+                              onClick={() =>
+                                toggleDestination(destination.destinationId)
+                              }
                               className="w-full flex items-center justify-between p-3 text-left cursor-pointer transition-colors duration-200"
                             >
                               <div className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4" style={{ color: theme.accent || theme.primary }} />
+                                <MapPin
+                                  className="w-4 h-4"
+                                  style={{
+                                    color: theme.accent || theme.primary,
+                                  }}
+                                />
                                 <div>
                                   <h4
                                     className="font-semibold text-sm cursor-pointer hover:underline"
-                                    style={{ color: theme.accent || theme.primary }}
+                                    style={{
+                                      color: theme.accent || theme.primary,
+                                    }}
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleDestinationClick(destination.destinationId);
+                                      handleDestinationClick(
+                                        destination.destinationId,
+                                      );
                                     }}
                                   >
                                     {destination.destinationName}
                                   </h4>
-                                  <p className="text-xs" style={{ color: theme.textSecondary }}>
+                                  <p
+                                    className="text-xs"
+                                    style={{ color: theme.textSecondary }}
+                                  >
                                     {destination.location}
                                   </p>
                                 </div>
                               </div>
                               {isDestinationExpanded ? (
-                                <ChevronUp className="w-4 h-4" style={{ color: theme.textSecondary }} />
+                                <ChevronUp
+                                  className="w-4 h-4"
+                                  style={{ color: theme.textSecondary }}
+                                />
                               ) : (
-                                <ChevronDown className="w-4 h-4" style={{ color: theme.textSecondary }} />
+                                <ChevronDown
+                                  className="w-4 h-4"
+                                  style={{ color: theme.textSecondary }}
+                                />
                               )}
                             </button>
 
@@ -264,46 +310,62 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
                               <div className="px-3 pb-3 space-y-3">
                                 {/* Destination Description */}
                                 {destination.destinationDescription && (
-                                  <p className="text-xs sm:text-sm" style={{ color: theme.textSecondary }}>
+                                  <p
+                                    className="text-xs sm:text-sm"
+                                    style={{ color: theme.textSecondary }}
+                                  >
                                     {destination.destinationDescription}
                                   </p>
                                 )}
 
                                 {/* Destination Categories */}
-                                {destination.category && destination.category.length > 0 && (
-                                  <div className="flex flex-wrap gap-1">
-                                    {destination.category.map((cat) => (
-                                      <span
-                                        key={cat.id}
-                                        className="text-[10px] px-1.5 py-0.5 rounded-full"
-                                        style={{
-                                          backgroundColor: hexToRgba(theme.primary, 0.1),
-                                          color: theme.primary,
-                                        }}
-                                      >
-                                        {cat.name}
-                                        {cat.isPrimary && " ★"}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
+                                {destination.category &&
+                                  destination.category.length > 0 && (
+                                    <div className="flex flex-wrap gap-1">
+                                      {destination.category.map((cat) => (
+                                        <span
+                                          key={cat.id}
+                                          className="text-[10px] px-1.5 py-0.5 rounded-full"
+                                          style={{
+                                            backgroundColor: hexToRgba(
+                                              theme.primary,
+                                              0.1,
+                                            ),
+                                            color: theme.primary,
+                                          }}
+                                        >
+                                          {cat.name}
+                                          {cat.isPrimary && " ★"}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
 
                                 {/* Destination Images Gallery */}
                                 {destinationImages.length > 0 && (
                                   <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                      <p className="text-xs font-semibold flex items-center gap-1" style={{ color: theme.text }}>
+                                      <p
+                                        className="text-xs font-semibold flex items-center gap-1"
+                                        style={{ color: theme.text }}
+                                      >
                                         <ImageIcon className="w-3 h-3" />
                                         Images ({destinationImages.length})
                                       </p>
                                       {hasMoreImages && (
                                         <button
-                                          onClick={() => toggleShowAllImages(destination.destinationId)}
+                                          onClick={() =>
+                                            toggleShowAllImages(
+                                              destination.destinationId,
+                                            )
+                                          }
                                           className="flex items-center gap-1 text-[10px] font-medium transition-colors hover:opacity-80"
                                           style={{ color: theme.primary }}
                                         >
                                           <Grid className="w-3 h-3" />
-                                          {showAllImagesForDest ? "Show Less" : `Show All ${destinationImages.length}`}
+                                          {showAllImagesForDest
+                                            ? "Show Less"
+                                            : `Show All ${destinationImages.length}`}
                                         </button>
                                       )}
                                     </div>
@@ -311,18 +373,28 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
                                       {displayedImages.map((img, imgIdx) => (
                                         <button
                                           key={img.imageId}
-                                          onClick={() => handleImageClick(destinationImages, imgIdx)}
+                                          onClick={() =>
+                                            handleImageClick(
+                                              destinationImages,
+                                              imgIdx,
+                                            )
+                                          }
                                           className="relative aspect-video rounded-lg overflow-hidden cursor-pointer group"
                                         >
                                           <img
                                             src={img.imageUrl}
-                                            alt={img.imageName || `Image ${imgIdx + 1}`}
+                                            alt={
+                                              img.imageName ||
+                                              `Image ${imgIdx + 1}`
+                                            }
                                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                                           />
                                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200" />
                                           {img.imageName && (
                                             <div className="absolute bottom-0 left-0 right-0 p-1 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                              <p className="text-white text-[10px] truncate">{img.imageName}</p>
+                                              <p className="text-white text-[10px] truncate">
+                                                {img.imageName}
+                                              </p>
                                             </div>
                                           )}
                                         </button>
@@ -330,14 +402,22 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
                                     </div>
                                     {hasMoreImages && !showAllImagesForDest && (
                                       <button
-                                        onClick={() => toggleShowAllImages(destination.destinationId)}
+                                        onClick={() =>
+                                          toggleShowAllImages(
+                                            destination.destinationId,
+                                          )
+                                        }
                                         className="w-full text-center text-xs font-medium py-1.5 rounded-lg transition-colors hover:opacity-80"
                                         style={{
-                                          backgroundColor: hexToRgba(theme.primary, 0.05),
+                                          backgroundColor: hexToRgba(
+                                            theme.primary,
+                                            0.05,
+                                          ),
                                           color: theme.primary,
                                         }}
                                       >
-                                        +{destinationImages.length - 4} more images
+                                        +{destinationImages.length - 4} more
+                                        images
                                       </button>
                                     )}
                                   </div>
@@ -346,85 +426,160 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
                                 {/* Activities */}
                                 {activities.length > 0 && (
                                   <div className="space-y-2 mt-3">
-                                    <p className="text-xs font-semibold flex items-center gap-1" style={{ color: theme.text }}>
+                                    <p
+                                      className="text-xs font-semibold flex items-center gap-1"
+                                      style={{ color: theme.text }}
+                                    >
                                       <Activity className="w-3 h-3" />
                                       Activities ({activities.length})
                                     </p>
                                     <div className="space-y-2">
-                                      {activities.map((activity: DayToDayDestinationActivity) => (
-                                        <div
-                                          key={activity.activityId}
-                                          className="rounded-lg p-2 cursor-pointer transition-all duration-200 hover:translate-x-1"
-                                          style={{
-                                            backgroundColor: hexToRgba(theme.primary, 0.05),
-                                            border: `1px solid ${hexToRgba(theme.primary, 0.1)}`,
-                                          }}
-                                          onClick={() => handleActivityClick(activity.activityId)}
-                                        >
-                                          <div className="flex items-start justify-between flex-wrap gap-2">
-                                            <div className="flex-1">
-                                              <h5 className="text-sm font-medium hover:underline" style={{ color: theme.primary }}>
-                                                {activity.activityName}
-                                              </h5>
-                                              {activity.activityDescription && (
-                                                <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
-                                                  {activity.activityDescription.length > 100
-                                                    ? activity.activityDescription.slice(0, 100) + "..."
-                                                    : activity.activityDescription}
-                                                </p>
-                                              )}
-                                            </div>
-                                            <div className="flex flex-col items-end gap-1">
-                                              {activity.durationHours > 0 && (
-                                                <div className="flex items-center gap-1">
-                                                  <Clock className="w-3 h-3" style={{ color: theme.textSecondary }} />
-                                                  <span className="text-xs" style={{ color: theme.textSecondary }}>
-                                                    {activity.durationHours}h
-                                                  </span>
-                                                </div>
-                                              )}
-                                              {activity.minParticipate > 0 && activity.maxParticipate > 0 && (
-                                                <div className="flex items-center gap-1">
-                                                  <Users className="w-3 h-3" style={{ color: theme.textSecondary }} />
-                                                  <span className="text-xs" style={{ color: theme.textSecondary }}>
-                                                    {activity.minParticipate}-{activity.maxParticipate}
-                                                  </span>
-                                                </div>
-                                              )}
-                                            </div>
-                                          </div>
-                                          <div className="flex flex-wrap gap-2 mt-2">
-                                            {activity.season && (
-                                              <span
-                                                className="text-[10px] px-1.5 py-0.5 rounded-full"
-                                                style={{
-                                                  backgroundColor: hexToRgba(theme.warning, 0.1),
-                                                  color: theme.warning,
-                                                }}
-                                              >
-                                                {activity.season}
-                                              </span>
-                                            )}
-                                            {activity.activitiesCategory && activity.activitiesCategory.length > 0 && (
-                                              <>
-                                                {activity.activitiesCategory.map((cat) => (
-                                                  <span
-                                                    key={cat.id}
-                                                    className="text-[10px] px-1.5 py-0.5 rounded-full"
+                                      {activities.map(
+                                        (
+                                          activity: DayToDayDestinationActivity,
+                                        ) => (
+                                          <div
+                                            key={activity.activityId}
+                                            className="rounded-lg p-2 cursor-pointer transition-all duration-200 hover:translate-x-1"
+                                            style={{
+                                              backgroundColor: hexToRgba(
+                                                theme.primary,
+                                                0.05,
+                                              ),
+                                              border: `1px solid ${hexToRgba(theme.primary, 0.1)}`,
+                                            }}
+                                            onClick={() =>
+                                              handleActivityClick(
+                                                activity.activityId,
+                                              )
+                                            }
+                                          >
+                                            <div className="flex items-start justify-between flex-wrap gap-2">
+                                              <div className="flex-1">
+                                                <h5
+                                                  className="text-sm font-medium hover:underline"
+                                                  style={{
+                                                    color: theme.primary,
+                                                  }}
+                                                >
+                                                  {activity.activityName}
+                                                </h5>
+                                                {activity.activityDescription && (
+                                                  <p
+                                                    className="text-xs mt-1"
                                                     style={{
-                                                      backgroundColor: hexToRgba(theme.primary, 0.1),
-                                                      color: theme.primary,
+                                                      color:
+                                                        theme.textSecondary,
                                                     }}
                                                   >
-                                                    {cat.name}
-                                                    {cat.is_primary && " ★"}
-                                                  </span>
-                                                ))}
-                                              </>
-                                            )}
+                                                    {activity
+                                                      .activityDescription
+                                                      .length > 100
+                                                      ? activity.activityDescription.slice(
+                                                          0,
+                                                          100,
+                                                        ) + "..."
+                                                      : activity.activityDescription}
+                                                  </p>
+                                                )}
+                                              </div>
+                                              <div className="flex flex-col items-end gap-1">
+                                                {activity.durationHours > 0 && (
+                                                  <div className="flex items-center gap-1">
+                                                    <Clock
+                                                      className="w-3 h-3"
+                                                      style={{
+                                                        color:
+                                                          theme.textSecondary,
+                                                      }}
+                                                    />
+                                                    <span
+                                                      className="text-xs"
+                                                      style={{
+                                                        color:
+                                                          theme.textSecondary,
+                                                      }}
+                                                    >
+                                                      {activity.durationHours}h
+                                                    </span>
+                                                  </div>
+                                                )}
+                                                {activity.minParticipate > 0 &&
+                                                  activity.maxParticipate >
+                                                    0 && (
+                                                    <div className="flex items-center gap-1">
+                                                      <Users
+                                                        className="w-3 h-3"
+                                                        style={{
+                                                          color:
+                                                            theme.textSecondary,
+                                                        }}
+                                                      />
+                                                      <span
+                                                        className="text-xs"
+                                                        style={{
+                                                          color:
+                                                            theme.textSecondary,
+                                                        }}
+                                                      >
+                                                        {
+                                                          activity.minParticipate
+                                                        }
+                                                        -
+                                                        {
+                                                          activity.maxParticipate
+                                                        }
+                                                      </span>
+                                                    </div>
+                                                  )}
+                                              </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                              {activity.season && (
+                                                <span
+                                                  className="text-[10px] px-1.5 py-0.5 rounded-full"
+                                                  style={{
+                                                    backgroundColor: hexToRgba(
+                                                      theme.warning,
+                                                      0.1,
+                                                    ),
+                                                    color: theme.warning,
+                                                  }}
+                                                >
+                                                  {activity.season}
+                                                </span>
+                                              )}
+                                              {activity.activitiesCategory &&
+                                                activity.activitiesCategory
+                                                  .length > 0 && (
+                                                  <>
+                                                    {activity.activitiesCategory.map(
+                                                      (cat) => (
+                                                        <span
+                                                          key={cat.id}
+                                                          className="text-[10px] px-1.5 py-0.5 rounded-full"
+                                                          style={{
+                                                            backgroundColor:
+                                                              hexToRgba(
+                                                                theme.primary,
+                                                                0.1,
+                                                              ),
+                                                            color:
+                                                              theme.primary,
+                                                          }}
+                                                        >
+                                                          {cat.name}
+                                                          {cat.is_primary &&
+                                                            " ★"}
+                                                        </span>
+                                                      ),
+                                                    )}
+                                                  </>
+                                                )}
+                                            </div>
                                           </div>
-                                        </div>
-                                      ))}
+                                        ),
+                                      )}
                                     </div>
                                   </div>
                                 )}
@@ -437,7 +592,9 @@ export const TourDayByDay: React.FC<TourDayByDayProps> = ({
                             <div className="flex justify-center py-1">
                               <div
                                 className="w-px h-4"
-                                style={{ backgroundColor: hexToRgba(theme.border, 0.5) }}
+                                style={{
+                                  backgroundColor: hexToRgba(theme.border, 0.5),
+                                }}
                               />
                             </div>
                           )}

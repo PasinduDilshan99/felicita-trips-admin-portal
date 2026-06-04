@@ -1,7 +1,6 @@
-// components/activities-components/update-activity-components/ImagesManagement.tsx
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   ImageIcon,
   Plus,
@@ -13,7 +12,7 @@ import {
   AlertCircle,
   Edit2,
 } from "lucide-react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ActivityImage } from "@/types/activity-types";
 import {
   ActivityImageRequest,
@@ -21,6 +20,7 @@ import {
 } from "@/types/activity-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import ImageModal from "@/components/common-components/ImageModal";
+import { cardVariants, formVariants, imageCardVariants } from "@/app/animations/variants";
 
 interface ImagesManagementProps {
   images: ActivityImage[];
@@ -36,30 +36,6 @@ interface ImagesManagementProps {
   onUpdateImage: (image: UpdateImageRequest) => void;
   error?: string;
 }
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
-};
-
-const imageCardVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.92 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.28, ease: EASE_OUT },
-  },
-  exit: { opacity: 0, scale: 0.92, transition: { duration: 0.2 } },
-  hover: { y: -4, transition: { duration: 0.2 } },
-};
-
-const formVariants: Variants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE_OUT } },
-  exit: { opacity: 0, y: -20, transition: { duration: 0.24 } },
-};
 
 export const ImagesManagement: React.FC<ImagesManagementProps> = ({
   images,

@@ -1,4 +1,3 @@
-// components/tour-types-components/tour-type-details-view-components/TourTypeToursList.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -14,22 +13,9 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { TourReference } from "@/types/tour-type-types";
-import { TOURS_VIEW_PAGE_URL } from "@/utils/urls";
-
-interface TourTypeToursListProps {
-  tours: TourReference[];
-  tourTypeColor: string;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { TourTypeToursListProps } from "@/types/tour-type-types";
+import { TOUR_DETAILS_VIEW_PAGE_URL } from "@/utils/urls";
+import { hexToRgba } from "@/utils/functions";
 
 export const TourTypeToursList: React.FC<TourTypeToursListProps> = ({
   tours,
@@ -43,8 +29,8 @@ export const TourTypeToursList: React.FC<TourTypeToursListProps> = ({
   const visibleTours = showAllTours ? tours : tours.slice(0, 5);
   const hasMoreTours = tours.length > 5;
 
-  const handleTourClick = (tourId: number) => {
-    router.push(`${TOURS_VIEW_PAGE_URL}/${tourId}`);
+  const handleTourClick = (tourId: number, tourName: string) => {
+    router.push(`${TOUR_DETAILS_VIEW_PAGE_URL}/${tourId}?name=${tourName}`);
   };
 
   const toggleExpandTour = (tourId: number, e: React.MouseEvent) => {
@@ -78,8 +64,14 @@ export const TourTypeToursList: React.FC<TourTypeToursListProps> = ({
           style={{ borderBottom: `1px solid ${theme.border}` }}
         >
           <div className="flex items-center gap-2">
-            <Package className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: tourTypeColor }} />
-            <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+            <Package
+              className="w-4 h-4 sm:w-5 sm:h-5"
+              style={{ color: tourTypeColor }}
+            />
+            <h2
+              className="text-base sm:text-lg font-semibold"
+              style={{ color: theme.text }}
+            >
               Associated Tours
             </h2>
           </div>
@@ -107,8 +99,14 @@ export const TourTypeToursList: React.FC<TourTypeToursListProps> = ({
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
         <div className="flex items-center gap-2">
-          <Package className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: tourTypeColor }} />
-          <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+          <Package
+            className="w-4 h-4 sm:w-5 sm:h-5"
+            style={{ color: tourTypeColor }}
+          />
+          <h2
+            className="text-base sm:text-lg font-semibold"
+            style={{ color: theme.text }}
+          >
             Associated Tours
           </h2>
           <span
@@ -136,7 +134,7 @@ export const TourTypeToursList: React.FC<TourTypeToursListProps> = ({
                 backgroundColor: hexToRgba(tourTypeColor, 0.03),
                 border: `1px solid ${hexToRgba(tourTypeColor, 0.15)}`,
               }}
-              onClick={() => handleTourClick(tour.tourId)}
+              onClick={() => handleTourClick(tour.tourId, tour.tourName)}
             >
               {/* Tour Header */}
               <div className="p-3 sm:p-4">
@@ -162,22 +160,35 @@ export const TourTypeToursList: React.FC<TourTypeToursListProps> = ({
                         {tour.status}
                       </span>
                     </div>
-                    <h3 className="font-semibold text-sm sm:text-base mt-1 hover:underline" style={{ color: theme.text }}>
+                    <h3
+                      className="font-semibold text-sm sm:text-base mt-1 hover:underline"
+                      style={{ color: theme.text }}
+                    >
                       {tour.tourName}
                     </h3>
                   </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: tourTypeColor }} />
+                  <ChevronRight
+                    className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: tourTypeColor }}
+                  />
                 </div>
 
                 {/* Basic Info */}
-                <div className="flex flex-wrap gap-3 mt-2 text-xs" style={{ color: theme.textSecondary }}>
+                <div
+                  className="flex flex-wrap gap-3 mt-2 text-xs"
+                  style={{ color: theme.textSecondary }}
+                >
                   <div className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    <span>{tour.duration} {tour.duration === 1 ? "day" : "days"}</span>
+                    <span>
+                      {tour.duration} {tour.duration === 1 ? "day" : "days"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
-                    <span>{tour.startLocation} → {tour.endLocation}</span>
+                    <span>
+                      {tour.startLocation} → {tour.endLocation}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
@@ -215,7 +226,9 @@ export const TourTypeToursList: React.FC<TourTypeToursListProps> = ({
                       borderLeft: `2px solid ${tourTypeColor}`,
                     }}
                   >
-                    <p style={{ color: theme.textSecondary }}>{tour.description}</p>
+                    <p style={{ color: theme.textSecondary }}>
+                      {tour.description}
+                    </p>
                   </div>
                 )}
               </div>

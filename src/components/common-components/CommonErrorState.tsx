@@ -1,39 +1,10 @@
-// components/common-components/CommonErrorState.tsx
 "use client";
 
 import React from "react";
 import { XCircle, AlertTriangle, RefreshCw, ArrowLeft, Home } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-export type ErrorVariant = "error" | "warning" | "info" | "not-found";
-
-export interface CommonErrorStateProps {
-  error?: string | null;
-  title?: string;
-  message?: string;
-  variant?: ErrorVariant;
-  showIcon?: boolean;
-  showBackButton?: boolean;
-  showRetryButton?: boolean;
-  showHomeButton?: boolean;
-  onBack?: () => void;
-  onRetry?: () => void;
-  onHome?: () => void;
-  backButtonText?: string;
-  retryButtonText?: string;
-  homeButtonText?: string;
-  fullScreen?: boolean;
-  className?: string;
-}
+import { CommonErrorStateProps } from "@/types/common-components-types";
+import { hexToRgba } from "@/utils/functions";
 
 const CommonErrorState: React.FC<CommonErrorStateProps> = ({
   error,
@@ -55,7 +26,6 @@ const CommonErrorState: React.FC<CommonErrorStateProps> = ({
 }) => {
   const { theme } = useTheme();
 
-  // Get variant-specific configurations
   const getVariantConfig = () => {
     switch (variant) {
       case "warning":
@@ -120,7 +90,6 @@ const CommonErrorState: React.FC<CommonErrorStateProps> = ({
           border: `1px solid ${config.borderColor}`,
         }}
       >
-        {/* Icon */}
         {showIcon && (
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
@@ -136,7 +105,6 @@ const CommonErrorState: React.FC<CommonErrorStateProps> = ({
           </div>
         )}
 
-        {/* Title */}
         <h2
           className="text-xl md:text-2xl font-bold mb-2"
           style={{ color: theme.text }}
@@ -144,7 +112,6 @@ const CommonErrorState: React.FC<CommonErrorStateProps> = ({
           {finalTitle}
         </h2>
 
-        {/* Message */}
         <p
           className="text-sm md:text-base mb-6"
           style={{ color: theme.textSecondary }}
@@ -152,7 +119,6 @@ const CommonErrorState: React.FC<CommonErrorStateProps> = ({
           {finalMessage}
         </p>
 
-        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           {showBackButton && onBack && (
             <button

@@ -1,4 +1,3 @@
-// components/package-schedules-components/package-schedule-details-view-components/PackageScheduleRelatedInfo.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -9,43 +8,10 @@ import {
   Calendar,
   ExternalLink,
   Users,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface PackageScheduleRelatedInfoProps {
-  packageId: number;
-  packageName: string;
-  packageDescription: string | null;
-  packageStatus: string;
-  packageTypeName: string;
-  packageTypeDescription: string;
-  minPersonCount: number;
-  maxPersonCount: number;
-  tourId: number;
-  tourName: string;
-  tourDescription: string;
-  tourDuration: number;
-  startLocation: string;
-  endLocation: string;
-  season: string;
-  tourStatus: string;
-  tourScheduleId: number;
-  tourScheduleName: string | null;
-  onViewPackage: () => void;
-  onViewTour: () => void;
-  onViewTourSchedule: () => void;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { PackageScheduleRelatedInfoProps } from "@/types/package-schedule-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const PackageScheduleRelatedInfo: React.FC<
   PackageScheduleRelatedInfoProps

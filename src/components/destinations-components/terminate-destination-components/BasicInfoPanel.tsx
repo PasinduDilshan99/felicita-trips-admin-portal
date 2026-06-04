@@ -7,79 +7,18 @@ import Link from "next/link";
 import { SingleDestinationResponse } from "@/types/destination-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { DESTINATION_CATEGORY_VIEW_DETAILS_URL } from "@/utils/urls";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.3 } },
-};
-
-const contentVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const infoRowVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const categoryVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.2, ease: EASE_OUT },
-  },
-  hover: {
-    y: -2,
-    scale: 1.05,
-    transition: { duration: 0.15, ease: "easeOut" },
-  },
-  tap: {
-    scale: 0.95,
-    transition: { duration: 0.1 },
-  },
-};
-
-const valueVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.25, ease: EASE_OUT },
-  },
-};
+import {
+  cardVariants,
+  categoryVariants,
+  contentVariants,
+  headerVariants,
+  infoRowVariants,
+  valueVariants,
+} from "@/app/animations/variants";
+import { hexToRgba } from "@/utils/functions";
+import { DESTINATION_CATEGORY_VIEW_PAGE_URL } from "@/utils/urls";
+import PrivilegedTag from "@/components/common-components/secure/PrivilegedTag";
+import { DESTINATION_CATEGORY_VIEW_PRIVILEGE } from "@/utils/privileges";
 
 interface BasicInfoPanelProps {
   destinationDetails: SingleDestinationResponse;
@@ -209,9 +148,16 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({
               {destinationDetails.destinationCategoryDetailsDtos?.length > 0 ? (
                 destinationDetails.destinationCategoryDetailsDtos.map(
                   (cat, index) => (
-                    <Link
+                    <PrivilegedTag
                       key={cat.id || cat.name}
-                      href={`${DESTINATION_CATEGORY_VIEW_DETAILS_URL}/${cat.id}`}
+                      id={cat.id}
+                      name={cat.name}
+                      requiredPrivilege={DESTINATION_CATEGORY_VIEW_PRIVILEGE}
+                      navigateTo={DESTINATION_CATEGORY_VIEW_PAGE_URL}
+                      showTooltip={true}
+                      tooltipText="You need permission to view this category"
+                      asDiv={true}
+                      className="inline-block"
                     >
                       <motion.span
                         variants={categoryVariants}
@@ -234,7 +180,7 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({
                           className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                         />
                       </motion.span>
-                    </Link>
+                    </PrivilegedTag>
                   ),
                 )
               ) : (
@@ -250,7 +196,6 @@ export const BasicInfoPanel: React.FC<BasicInfoPanelProps> = ({
           </div>
         </motion.div>
 
-        {/* Extra Price - Now formatted directly using useCurrency since it's in USD */}
         {destinationDetails.extraPrice && destinationDetails.extraPrice > 0 && (
           <motion.div variants={infoRowVariants}>
             <p

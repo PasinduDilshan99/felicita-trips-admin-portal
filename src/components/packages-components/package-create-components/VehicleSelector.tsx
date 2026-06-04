@@ -3,16 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Bus, ChevronDown, Search, AlertCircle } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { VehicleNumberIdType } from "@/types/package-types";
-
-interface VehicleSelectorProps {
-  value: number;
-  onChange: (vehicleId: number) => void;
-  vehicles: VehicleNumberIdType[];
-  error?: string;
-  required?: boolean;
-  placeholder?: string;
-}
+import { VehicleSelectorProps } from "@/types/package-types";
 
 export const VehicleSelector: React.FC<VehicleSelectorProps> = ({
   value,
@@ -30,7 +21,10 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -40,14 +34,21 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({
 
   const selectedVehicle = vehicles.find((v) => v.vehicleId === value);
 
-  const filteredVehicles = vehicles.filter((vehicle) =>
-    vehicle.vehicleType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (vehicle.vehicleNumber && vehicle.vehicleNumber.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredVehicles = vehicles.filter(
+    (vehicle) =>
+      vehicle.vehicleType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (vehicle.vehicleNumber &&
+        vehicle.vehicleNumber
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())),
   );
 
   return (
     <div className="relative" ref={wrapperRef}>
-      <label className="block text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+      <label
+        className="block text-xs font-medium mb-1"
+        style={{ color: theme.textSecondary }}
+      >
         Vehicle {required && <span style={{ color: theme.error }}>*</span>}
       </label>
 
@@ -58,7 +59,11 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({
         className="w-full px-3 py-2 rounded-lg border focus:outline-none text-left flex items-center justify-between transition-all duration-200 text-sm"
         style={{
           backgroundColor: theme.background,
-          borderColor: error ? theme.error : isOpen ? theme.primary : theme.border,
+          borderColor: error
+            ? theme.error
+            : isOpen
+              ? theme.primary
+              : theme.border,
           color: theme.text,
         }}
       >
@@ -66,7 +71,7 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({
           <Bus className="w-3.5 h-3.5" style={{ color: theme.textSecondary }} />
           <span className="text-xs">
             {selectedVehicle
-              ? `${selectedVehicle.vehicleType}${selectedVehicle.vehicleNumber ? ` (${selectedVehicle.vehicleNumber})` : ''}`
+              ? `${selectedVehicle.vehicleType}${selectedVehicle.vehicleNumber ? ` (${selectedVehicle.vehicleNumber})` : ""}`
               : placeholder}
           </span>
         </div>
@@ -89,7 +94,10 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({
         >
           <div className="p-2 border-b" style={{ borderColor: theme.border }}>
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: theme.textSecondary }} />
+              <Search
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none"
+                style={{ color: theme.textSecondary }}
+              />
               <input
                 type="text"
                 placeholder="Search vehicles..."
@@ -107,7 +115,10 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({
 
           <div className="max-h-48 overflow-y-auto">
             {filteredVehicles.length === 0 ? (
-              <div className="p-3 text-center text-xs" style={{ color: theme.textSecondary }}>
+              <div
+                className="p-3 text-center text-xs"
+                style={{ color: theme.textSecondary }}
+              >
                 No vehicles found
               </div>
             ) : (
@@ -122,22 +133,34 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({
                   }}
                   className="w-full px-3 py-2 text-left hover:bg-opacity-10 transition-colors"
                   style={{
-                    backgroundColor: value === vehicle.vehicleId ? `${theme.primary}10` : "transparent",
+                    backgroundColor:
+                      value === vehicle.vehicleId
+                        ? `${theme.primary}10`
+                        : "transparent",
                   }}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium" style={{ color: theme.text }}>
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: theme.text }}
+                      >
                         {vehicle.vehicleType}
                       </p>
                       {vehicle.vehicleNumber && (
-                        <p className="text-xs opacity-70" style={{ color: theme.textSecondary }}>
+                        <p
+                          className="text-xs opacity-70"
+                          style={{ color: theme.textSecondary }}
+                        >
                           #{vehicle.vehicleNumber}
                         </p>
                       )}
                     </div>
                     {value === vehicle.vehicleId && (
-                      <Check className="w-3.5 h-3.5" style={{ color: theme.primary }} />
+                      <Check
+                        className="w-3.5 h-3.5"
+                        style={{ color: theme.primary }}
+                      />
                     )}
                   </div>
                 </button>
@@ -148,7 +171,10 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({
       )}
 
       {error && (
-        <p className="mt-1 text-xs flex items-center gap-1" style={{ color: theme.error }}>
+        <p
+          className="mt-1 text-xs flex items-center gap-1"
+          style={{ color: theme.error }}
+        >
           <AlertCircle className="w-3 h-3" />
           {error}
         </p>

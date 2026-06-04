@@ -1,20 +1,13 @@
-// components/destinations-components/terminate-destination-components/DestinationSearch.tsx
 "use client";
 
 import React, { useState } from "react";
 import { DestinationForTerminate } from "@/types/destination-types";
 import { MapPin } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import ReusableSearch, { SearchItem } from "@/components/common-components/ReusableSearch";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  hex = hex.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
+import ReusableSearch, {
+  SearchItem,
+} from "@/components/common-components/ReusableSearch";
+import { hexToRgba } from "@/utils/functions";
 interface DestinationSearchProps {
   destinations: DestinationForTerminate[];
   loading: boolean;
@@ -43,7 +36,11 @@ export const DestinationSearch: React.FC<DestinationSearchProps> = ({
     onSelectDestination(item.id as number, item.name);
   };
 
-  const renderDestinationItem = (item: SearchItem, searchTerm: string, isActive: boolean) => {
+  const renderDestinationItem = (
+    item: SearchItem,
+    searchTerm: string,
+    isActive: boolean,
+  ) => {
     const highlightMatch = (text: string, query: string) => {
       if (!query.trim()) return text;
       const parts = text.split(new RegExp(`(${query})`, "gi"));
@@ -63,7 +60,7 @@ export const DestinationSearch: React.FC<DestinationSearchProps> = ({
           </mark>
         ) : (
           part
-        )
+        ),
       );
     };
 
@@ -77,20 +74,28 @@ export const DestinationSearch: React.FC<DestinationSearchProps> = ({
               : hexToRgba(theme.error, 0.1),
           }}
         >
-          <MapPin size={14} style={{ color: isActive ? "#fff" : theme.error }} />
+          <MapPin
+            size={14}
+            style={{ color: isActive ? "#fff" : theme.error }}
+          />
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-medium text-sm" style={{ color: theme.text }}>
             {highlightMatch(item.name, searchTerm)}
           </div>
-          <div className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+          <div
+            className="text-xs mt-0.5"
+            style={{ color: theme.textSecondary }}
+          >
             ID · {item.id}
           </div>
         </div>
         <span
           className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
           style={{
-            background: isActive ? hexToRgba(theme.error, 0.2) : hexToRgba(theme.error, 0.1),
+            background: isActive
+              ? hexToRgba(theme.error, 0.2)
+              : hexToRgba(theme.error, 0.1),
             color: theme.error,
             border: `1px solid ${hexToRgba(theme.error, 0.2)}`,
           }}
@@ -105,10 +110,14 @@ export const DestinationSearch: React.FC<DestinationSearchProps> = ({
     <ReusableSearch
       items={searchItems}
       loading={loading}
-      selectedItem={selectedDestination ? {
-        id: selectedDestination.destinationId,
-        name: selectedDestination.destinationName,
-      } : null}
+      selectedItem={
+        selectedDestination
+          ? {
+              id: selectedDestination.destinationId,
+              name: selectedDestination.destinationName,
+            }
+          : null
+      }
       onSelectItem={handleSelectItem}
       onClearSelection={onClearSelection}
       initialSearchTerm={initialSearchTerm}

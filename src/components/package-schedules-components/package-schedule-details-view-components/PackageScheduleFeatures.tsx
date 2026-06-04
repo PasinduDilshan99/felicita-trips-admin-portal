@@ -1,27 +1,14 @@
-// components/package-schedules-components/package-schedule-details-view-components/PackageScheduleFeatures.tsx
 "use client";
 
 import React, { useState } from "react";
-import { Star, ChevronDown, ChevronUp, Info, DollarSign } from "lucide-react";
+import { Star, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { PackageScheduleFeature } from "@/types/package-schedule-types";
+import { PackageScheduleFeaturesProps } from "@/types/package-schedule-types";
+import { hexToRgba } from "@/utils/functions";
 
-interface PackageScheduleFeaturesProps {
-  features: PackageScheduleFeature[];
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-export const PackageScheduleFeatures: React.FC<PackageScheduleFeaturesProps> = ({
-  features,
-}) => {
+export const PackageScheduleFeatures: React.FC<
+  PackageScheduleFeaturesProps
+> = ({ features }) => {
   const { theme } = useTheme();
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null);
 
@@ -43,8 +30,14 @@ export const PackageScheduleFeatures: React.FC<PackageScheduleFeaturesProps> = (
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
         <div className="flex items-center gap-2">
-          <Star className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: theme.warning }} />
-          <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+          <Star
+            className="w-4 h-4 sm:w-5 sm:h-5"
+            style={{ color: theme.warning }}
+          />
+          <h2
+            className="text-base sm:text-lg font-semibold"
+            style={{ color: theme.text }}
+          >
             Package Features
           </h2>
           <span
@@ -74,7 +67,9 @@ export const PackageScheduleFeatures: React.FC<PackageScheduleFeaturesProps> = (
               }}
             >
               <button
-                onClick={() => setExpandedFeature(isExpanded ? null : feature.featureId)}
+                onClick={() =>
+                  setExpandedFeature(isExpanded ? null : feature.featureId)
+                }
                 className="w-full flex items-center justify-between p-3 text-left cursor-pointer transition-colors duration-200"
               >
                 <div className="flex items-center gap-2">
@@ -83,20 +78,32 @@ export const PackageScheduleFeatures: React.FC<PackageScheduleFeaturesProps> = (
                     style={{ backgroundColor: featureColor }}
                   />
                   <div>
-                    <h3 className="font-semibold text-sm" style={{ color: theme.text }}>
+                    <h3
+                      className="font-semibold text-sm"
+                      style={{ color: theme.text }}
+                    >
                       {feature.name}
                     </h3>
                     {feature.value && (
-                      <p className="text-xs font-medium" style={{ color: featureColor }}>
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: featureColor }}
+                      >
                         {feature.value}
                       </p>
                     )}
                   </div>
                 </div>
                 {isExpanded ? (
-                  <ChevronUp className="w-4 h-4" style={{ color: theme.textSecondary }} />
+                  <ChevronUp
+                    className="w-4 h-4"
+                    style={{ color: theme.textSecondary }}
+                  />
                 ) : (
-                  <ChevronDown className="w-4 h-4" style={{ color: theme.textSecondary }} />
+                  <ChevronDown
+                    className="w-4 h-4"
+                    style={{ color: theme.textSecondary }}
+                  />
                 )}
               </button>
 
@@ -104,8 +111,14 @@ export const PackageScheduleFeatures: React.FC<PackageScheduleFeaturesProps> = (
                 <div className="px-3 pb-3 space-y-2">
                   {feature.description && (
                     <div className="flex gap-2">
-                      <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: featureColor }} />
-                      <p className="text-xs" style={{ color: theme.textSecondary }}>
+                      <Info
+                        className="w-3.5 h-3.5 mt-0.5 flex-shrink-0"
+                        style={{ color: featureColor }}
+                      />
+                      <p
+                        className="text-xs"
+                        style={{ color: theme.textSecondary }}
+                      >
                         {feature.description}
                       </p>
                     </div>

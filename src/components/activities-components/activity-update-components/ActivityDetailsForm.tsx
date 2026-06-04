@@ -1,13 +1,7 @@
-// components/activities-components/update-activity-components/ActivityDetailsForm.tsx
 "use client";
 
 import React from "react";
-import {
-  Activity,
-  ActivityCategoryDetail,
-  ActivityImage,
-  Requirement,
-} from "@/types/activity-types";
+import { Activity } from "@/types/activity-types";
 import {
   AddCategoryRequest,
   ActivityImageRequest,
@@ -37,7 +31,11 @@ interface ActivityDetailsFormProps {
   onRemoveCategory: (categoryId: number) => void;
   onAddNewCategory: (categoryId: number, isPrimary: boolean) => void;
   onRemoveImage: (imageId: number) => void;
-  onAddNewImage: (file: File, name: string, description: string) => Promise<void>;
+  onAddNewImage: (
+    file: File,
+    name: string,
+    description: string,
+  ) => Promise<void>;
   onUpdateImage: (image: UpdateImageRequest) => void;
   onRemoveRequirement: (requirementId: number) => void;
   onAddNewRequirement: (requirement: ActivityRequirementRequest) => void;
@@ -68,7 +66,6 @@ const ActivityDetailsForm: React.FC<ActivityDetailsFormProps> = ({
   onUpdateRequirement,
   uploadingImages,
 }) => {
-  // Helper to check if a field has changed
   const hasChanged = (field: string): boolean => {
     if (!originalActivity) return false;
     return (
@@ -77,7 +74,6 @@ const ActivityDetailsForm: React.FC<ActivityDetailsFormProps> = ({
     );
   };
 
-  // Get original categories for comparison
   const getOriginalCategoryIds = (): number[] => {
     if (!originalActivity) return [];
     return originalActivity.activities_category.map((cat) => cat.id);
