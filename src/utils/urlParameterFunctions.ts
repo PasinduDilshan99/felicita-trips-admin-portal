@@ -6,6 +6,7 @@ import { DestinationFilterParams } from "@/types/destination-types";
 import { PackageScheduleFilterParams } from "@/types/package-schedule-types";
 import { PackageTypeFilterParams } from "@/types/package-type-types";
 import { PackageFilterParams } from "@/types/package-types";
+import { SeasonFilterParams } from "@/types/season-types";
 import { TourCategoryFilterParams } from "@/types/tour-category-types";
 import { TourScheduleFilterParams } from "@/types/tour-schedule-types";
 import { TourTypeFilterParams } from "@/types/tour-type-types";
@@ -524,5 +525,40 @@ export const packageScheduleViewUrlParamsToFilters = (
       : 1,
     sortBy: params.get("sortBy") || "",
     sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
+  };
+};
+
+export const seasonsViewFiltersToUrlParams = (
+  filters: SeasonFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.isPeak !== null) params.set("isPeak", filters.isPeak.toString());
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
+
+  return params;
+};
+
+export const seasonsViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): SeasonFilterParams => {
+  const sortDirection = params.get("sortDirection");
+  const isPeak = params.get("isPeak");
+  return {
+    name: params.get("name") || null,
+    isPeak: isPeak !== null ? isPeak === "true" : null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 6,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") || "displayOrder",
+    sortDirection: (sortDirection === "DESC" ? "DESC" : "ASC") as
+      | "ASC"
+      | "DESC",
   };
 };

@@ -475,3 +475,38 @@ export const PACKAGE_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
     { label: "Package Schedule", href: URLS.PACKAGE_SCHEDULE_PAGE_URL },
     { label: "Terminate", href: URLS.PACKAGE_SCHEDULE_TERMINATE_URL },
   ];
+
+export const SEASON_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+];
+
+export const SEASON_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+  { label: "View", href: URLS.SEASONS_VIEW_PAGE_URL },
+];
+
+export const SEASON_VIEW_DETAILS_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+  { label: "View", href: URLS.SEASONS_VIEW_PAGE_URL },
+];
+
+export const SEASON_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+  { label: "Create", href: URLS.SEASON_ADD_PAGE_URL },
+];
+
+export const SEASON_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+  { label: "Update", href: URLS.SEASON_UPDATE_PAGE_URL },
+];
+
+export const SEASON_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+  { label: "Terminate", href: URLS.SEASON_TERMINATE_PAGE_URL },
+];

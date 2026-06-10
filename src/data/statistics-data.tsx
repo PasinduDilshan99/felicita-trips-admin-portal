@@ -508,8 +508,9 @@ export const getActivityScheduleStatisticsData = (
   ];
 };
 
-
-export const getPackageScheduleStatisticsData = (statistics: any): StatCardType[] => {
+export const getPackageScheduleStatisticsData = (
+  statistics: any,
+): StatCardType[] => {
   if (!statistics) return [];
 
   return [
@@ -611,8 +612,9 @@ export const getPackageScheduleStatisticsData = (statistics: any): StatCardType[
   ];
 };
 
-
-export const getTourScheduleStatisticsData = (statistics: any): StatCardType[] => {
+export const getTourScheduleStatisticsData = (
+  statistics: any,
+): StatCardType[] => {
   if (!statistics) return [];
 
   return [
@@ -693,14 +695,16 @@ export const getTourScheduleStatisticsData = (statistics: any): StatCardType[] =
   ];
 };
 
-
-export const getDestinationCategoriesStatisticsData = (statistics: any): StatCardType[] => {
+export const getDestinationCategoriesStatisticsData = (
+  statistics: any,
+): StatCardType[] => {
   if (!statistics) return [];
 
   return [
     {
       title: "Total Categories",
-      value: statistics.destinationCategoriesDetails.totalDestinationCategoriesCount,
+      value:
+        statistics.destinationCategoriesDetails.totalDestinationCategoriesCount,
       accent: "blue",
       icon: (
         <svg
@@ -718,7 +722,8 @@ export const getDestinationCategoriesStatisticsData = (statistics: any): StatCar
     },
     {
       title: "Active",
-      value: statistics.destinationCategoriesDetails.activeDestinationsCategories,
+      value:
+        statistics.destinationCategoriesDetails.activeDestinationsCategories,
       accent: "emerald",
       icon: (
         <svg
@@ -735,7 +740,8 @@ export const getDestinationCategoriesStatisticsData = (statistics: any): StatCar
     },
     {
       title: "Inactive",
-      value: statistics.destinationCategoriesDetails.inActiveDestinationsCategories,
+      value:
+        statistics.destinationCategoriesDetails.inActiveDestinationsCategories,
       accent: "rose",
       icon: (
         <svg
@@ -753,7 +759,8 @@ export const getDestinationCategoriesStatisticsData = (statistics: any): StatCar
     },
     {
       title: "Terminated",
-      value: statistics.destinationCategoriesDetails.terminateDestinationsCategories,
+      value:
+        statistics.destinationCategoriesDetails.terminateDestinationsCategories,
       accent: "violet",
       icon: (
         <svg
@@ -772,7 +779,9 @@ export const getDestinationCategoriesStatisticsData = (statistics: any): StatCar
     },
     {
       title: "Recently Updated",
-      value: statistics.destinationCategoriesDetails.recentlyUpdateDestinationsCategories,
+      value:
+        statistics.destinationCategoriesDetails
+          .recentlyUpdateDestinationsCategories,
       accent: "amber",
       icon: (
         <svg
@@ -790,7 +799,9 @@ export const getDestinationCategoriesStatisticsData = (statistics: any): StatCar
     },
     {
       title: "Recently Added",
-      value: statistics.destinationCategoriesDetails.recentlyAddedDestinationsCategories,
+      value:
+        statistics.destinationCategoriesDetails
+          .recentlyAddedDestinationsCategories,
       accent: "teal",
       icon: (
         <svg
@@ -810,8 +821,9 @@ export const getDestinationCategoriesStatisticsData = (statistics: any): StatCar
   ];
 };
 
-
-export const getActivityCategoriesStatisticsData = (statistics: any): StatCardType[] => {
+export const getActivityCategoriesStatisticsData = (
+  statistics: any,
+): StatCardType[] => {
   if (!statistics) return [];
 
   return [
@@ -873,8 +885,9 @@ export const getActivityCategoriesStatisticsData = (statistics: any): StatCardTy
   ];
 };
 
-
-export const getPackageTypeStatisticsData = (statistics: any): StatCardType[] => {
+export const getPackageTypeStatisticsData = (
+  statistics: any,
+): StatCardType[] => {
   if (!statistics) return [];
 
   return [
@@ -958,7 +971,6 @@ export const getPackageTypeStatisticsData = (statistics: any): StatCardType[] =>
   ];
 };
 
-
 export const getTourTypeStatisticsData = (statistics: any): StatCardType[] => {
   if (!statistics) return [];
 
@@ -1041,8 +1053,9 @@ export const getTourTypeStatisticsData = (statistics: any): StatCardType[] => {
   ];
 };
 
-
-export const getTourCategoryStatisticsData = (statistics: any): StatCardType[] => {
+export const getTourCategoryStatisticsData = (
+  statistics: any,
+): StatCardType[] => {
   if (!statistics) return [];
 
   return [
@@ -1118,6 +1131,105 @@ export const getTourCategoryStatisticsData = (statistics: any): StatCardType[] =
           strokeLinejoin="round"
         >
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      ),
+    },
+  ];
+};
+
+// In statistics-data.ts, add this function:
+
+export const getSeasonStatisticsData = (statistics: any): StatCardType[] => {
+  if (!statistics) return [];
+
+  return [
+    {
+      title: "Total Seasons",
+      value: statistics.summary.totalSeasons,
+      accent: "blue",
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 2v4M12 22v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M22 12h-4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+        </svg>
+      ),
+    },
+    {
+      title: "Total Activities",
+      value: statistics.summary.totalActivities,
+      accent: "emerald",
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      ),
+    },
+    {
+      title: "Total Tours",
+      value: statistics.summary.totalTours,
+      accent: "amber",
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      ),
+    },
+    {
+      title: "Most Used Season",
+      value: 0,
+      valueText: statistics.summary.mostUsedSeason || "N/A",
+      accent: "violet",
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4-3-9s1.34-9 3-9" />
+        </svg>
+      ),
+    },
+    {
+      title: "Peak Season",
+      value: 0,
+      valueText: statistics.summary.peakSeason || "N/A",
+      accent: "rose",
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 2v4M12 22v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M22 12h-4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+          <circle cx="12" cy="12" r="3" />
         </svg>
       ),
     },

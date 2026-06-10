@@ -102,3 +102,13 @@ export const PACKAGE_SCHEDULE_VIEW_SORTING_OPTIONS = [
   { value: "durationEnd", label: "Duration End" },
   { value: "tourScheduleName", label: "Tour Schedule Name" },
 ];
+
+export const SEASONS_VIEW_SORTING_OPTIONS = [
+  { value: "name", label: "Season Name" },
+  { value: "standardName", label: "Standard Name" },
+  { value: "localName", label: "Local Name" },
+  { value: "startMonth", label: "Start Month" },
+  { value: "endMonth", label: "End Month" },
+  { value: "displayOrder", label: "Display Order" },
+  { value: "isPeak", label: "Peak Season" },
+];

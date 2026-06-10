@@ -356,7 +356,12 @@ export const GET_VEHICLE_DETAILS_BY_ID_DATA_FE = `${API}${VEHICLES}/vehicle-deta
 
 // Seasons
 export const GET_ACTIVE_SEASONS_BASIC_DETAILS_DATA_FE = `${API}${SEASONS}/basic-details`;
-export const GET_SEASONS_DETAILS_BY_SEASON_ID_DATA_FE = `${API}${SEASONS}`;
+export const GET_SEASONS_DETAILS_BY_SEASON_ID_DATA_FE = `${API}${SEASONS}/details-by-id`;
+export const GET_SEASONS_STATISTICS_DATA_FE = `${API}${SEASONS}/season-statistics`;
+export const GET_SEASONS_IDS_AND_NAMES_DATA_FE = `${API}${SEASONS}/seasonId-and-seasonName`;
+export const CREATE_SEASON_DATA_FE = `${API}${SEASONS}/add-season`;
+export const UPDATE_SEASON_DATA_FE = `${API}${SEASONS}/update-season`;
+export const TERMINATE_SEASON_DATA_FE = `${API}${SEASONS}/terminate-season`;
 
 export const GET_TOUR_DETAILS_BY_ID_FE = `${API}${TOUR}/details-by-id`;
 

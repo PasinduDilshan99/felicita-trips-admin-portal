@@ -37,7 +37,9 @@ export const TourCategoryPieTooltip = ({ active, payload }: any) => {
   return (
     <div className="stats-tooltip">
       <p className="stats-tooltip__label">{payload[0].name}</p>
-      <p className="stats-tooltip__value">{payload[0].value.toLocaleString()} tours</p>
+      <p className="stats-tooltip__value">
+        {payload[0].value.toLocaleString()} tours
+      </p>
     </div>
   );
 };
@@ -47,7 +49,9 @@ export const TourCategoryBarTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="stats-tooltip">
       <p className="stats-tooltip__label">{label}</p>
-      <p className="stats-tooltip__value">{payload[0].value.toLocaleString()} bookings</p>
+      <p className="stats-tooltip__value">
+        {payload[0].value.toLocaleString()} bookings
+      </p>
     </div>
   );
 };
@@ -76,12 +80,8 @@ export const TourCategoryStackedTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="stats-tooltip">
       <p className="stats-tooltip__label">{label}</p>
-      <p className="stats-tooltip__value">
-        Primary Usage: {primaryValue}
-      </p>
-      <p className="stats-tooltip__value">
-        Secondary Usage: {secondaryValue}
-      </p>
+      <p className="stats-tooltip__value">Primary Usage: {primaryValue}</p>
+      <p className="stats-tooltip__value">Secondary Usage: {secondaryValue}</p>
       <p className="stats-tooltip__total">
         Total: {primaryValue + secondaryValue}
       </p>
@@ -99,9 +99,7 @@ export const TourCategoryBubbleTooltip = ({ active, payload }: any) => {
       <p className="stats-tooltip__value">
         Participants: {data.totalParticipants.toLocaleString()}
       </p>
-      <p className="stats-tooltip__sub">
-        Tours: {data.totalTours}
-      </p>
+      <p className="stats-tooltip__sub">Tours: {data.totalTours}</p>
       <p className="stats-tooltip__sub">
         Rating: {data.averageRating.toFixed(1)} / 5.0
       </p>
@@ -115,7 +113,9 @@ export const TourTypePieTooltip = ({ active, payload }: any) => {
   return (
     <div className="stats-tooltip">
       <p className="stats-tooltip__label">{payload[0].name}</p>
-      <p className="stats-tooltip__value">{payload[0].value.toLocaleString()} tours</p>
+      <p className="stats-tooltip__value">
+        {payload[0].value.toLocaleString()} tours
+      </p>
     </div>
   );
 };
@@ -125,7 +125,9 @@ export const TourTypeBarTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="stats-tooltip">
       <p className="stats-tooltip__label">{label}</p>
-      <p className="stats-tooltip__value">{payload[0].value.toLocaleString()} bookings</p>
+      <p className="stats-tooltip__value">
+        {payload[0].value.toLocaleString()} bookings
+      </p>
     </div>
   );
 };
@@ -154,12 +156,8 @@ export const TourTypeStackedTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="stats-tooltip">
       <p className="stats-tooltip__label">{label}</p>
-      <p className="stats-tooltip__value">
-        Primary Usage: {primaryValue}
-      </p>
-      <p className="stats-tooltip__value">
-        Secondary Usage: {secondaryValue}
-      </p>
+      <p className="stats-tooltip__value">Primary Usage: {primaryValue}</p>
+      <p className="stats-tooltip__value">Secondary Usage: {secondaryValue}</p>
       <p className="stats-tooltip__total">
         Total: {primaryValue + secondaryValue}
       </p>
@@ -177,9 +175,7 @@ export const TourTypeBubbleTooltip = ({ active, payload }: any) => {
       <p className="stats-tooltip__value">
         Participants: {data.totalParticipants.toLocaleString()}
       </p>
-      <p className="stats-tooltip__sub">
-        Tours: {data.totalTours}
-      </p>
+      <p className="stats-tooltip__sub">Tours: {data.totalTours}</p>
       <p className="stats-tooltip__sub">
         Rating: {data.averageRating.toFixed(1)} / 5.0
       </p>
@@ -245,9 +241,7 @@ export const PackageTypeLineTooltip = ({ active, payload, label }: any) => {
         {payload[0].value?.toLocaleString()} participants
       </p>
       {data?.typeName && (
-        <p className="stats-tooltip__sub">
-          Type: {data.typeName}
-        </p>
+        <p className="stats-tooltip__sub">Type: {data.typeName}</p>
       )}
     </div>
   );
@@ -260,12 +254,8 @@ export const PackageTypeStackedTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="stats-tooltip">
       <p className="stats-tooltip__label">{label}</p>
-      <p className="stats-tooltip__value">
-        Primary: {primaryValue}
-      </p>
-      <p className="stats-tooltip__value">
-        Secondary: {secondaryValue}
-      </p>
+      <p className="stats-tooltip__value">Primary: {primaryValue}</p>
+      <p className="stats-tooltip__value">Secondary: {secondaryValue}</p>
       <p className="stats-tooltip__total">
         Total: {primaryValue + secondaryValue}
       </p>
@@ -301,19 +291,19 @@ export const ActivityCategoryRadarTooltip = ({ active, payload }: any) => {
   );
 };
 
-export const ActivityCategoryStackedTooltip = ({ active, payload, label }: any) => {
+export const ActivityCategoryStackedTooltip = ({
+  active,
+  payload,
+  label,
+}: any) => {
   if (!active || !payload?.length) return null;
   const primaryValue = payload[0]?.value || 0;
   const secondaryValue = payload[1]?.value || 0;
   return (
     <div className="stats-tooltip">
       <p className="stats-tooltip__label">{label}</p>
-      <p className="stats-tooltip__value">
-        Primary: {primaryValue}
-      </p>
-      <p className="stats-tooltip__value">
-        Secondary: {secondaryValue}
-      </p>
+      <p className="stats-tooltip__value">Primary: {primaryValue}</p>
+      <p className="stats-tooltip__value">Secondary: {secondaryValue}</p>
       <p className="stats-tooltip__total">
         Total: {primaryValue + secondaryValue}
       </p>
@@ -321,7 +311,11 @@ export const ActivityCategoryStackedTooltip = ({ active, payload, label }: any) 
   );
 };
 
-export const ActivityCategoryParticipationTooltip = ({ active, payload, label }: any) => {
+export const ActivityCategoryParticipationTooltip = ({
+  active,
+  payload,
+  label,
+}: any) => {
   if (!active || !payload?.length) return null;
   const value = payload[0]?.value;
   if (value === undefined) return null;
@@ -346,7 +340,13 @@ export const DestCategoryBarTooltip = ({ active, payload, label }: any) => {
       {data.color && (
         <div
           className="stats-tooltip__color"
-          style={{ background: data.color, width: 20, height: 4, borderRadius: 2, marginTop: 6 }}
+          style={{
+            background: data.color,
+            width: 20,
+            height: 4,
+            borderRadius: 2,
+            marginTop: 6,
+          }}
         />
       )}
     </div>
@@ -363,7 +363,13 @@ export const DestCategoryLineTooltip = ({ active, payload, label }: any) => {
       {data.color && (
         <div
           className="stats-tooltip__color"
-          style={{ background: data.color, width: 20, height: 4, borderRadius: 2, marginTop: 6 }}
+          style={{
+            background: data.color,
+            width: 20,
+            height: 4,
+            borderRadius: 2,
+            marginTop: 6,
+          }}
         />
       )}
     </div>
@@ -383,7 +389,11 @@ export const TourScheduleLineTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export const TourScheduleDurationTooltip = ({ active, payload, label }: any) => {
+export const TourScheduleDurationTooltip = ({
+  active,
+  payload,
+  label,
+}: any) => {
   if (!active || !payload?.length) return null;
   const data = payload[0]?.payload;
   if (!data) return null;
@@ -400,7 +410,11 @@ export const TourScheduleDurationTooltip = ({ active, payload, label }: any) => 
   );
 };
 
-export const TourScheduleExecutionTooltip = ({ active, payload, label }: any) => {
+export const TourScheduleExecutionTooltip = ({
+  active,
+  payload,
+  label,
+}: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="stats-tooltip">
@@ -429,7 +443,11 @@ export const TourScheduleRatingTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export const TourScheduleParticipationTooltip = ({ active, payload, label }: any) => {
+export const TourScheduleParticipationTooltip = ({
+  active,
+  payload,
+  label,
+}: any) => {
   if (!active || !payload?.length) return null;
   const barValue = payload[0]?.value || 0;
   return (
@@ -522,7 +540,11 @@ export const TourCategoryTooltip = ({ active, payload, label }: any) => {
 };
 
 // Activity Schedule-specific tooltips
-export const ActivityScheduleLineTooltip = ({ active, payload, label }: any) => {
+export const ActivityScheduleLineTooltip = ({
+  active,
+  payload,
+  label,
+}: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="stats-tooltip">
@@ -582,12 +604,18 @@ export const PackageSchedulePieTooltip = ({ active, payload }: any) => {
   return (
     <div className="stats-tooltip">
       <p className="stats-tooltip__label">{statusName}</p>
-      <p className="stats-tooltip__value">{payload[0].value.toLocaleString()} schedules</p>
+      <p className="stats-tooltip__value">
+        {payload[0].value.toLocaleString()} schedules
+      </p>
     </div>
   );
 };
 
-export const PackageScheduleDurationTooltip = ({ active, payload, label }: any) => {
+export const PackageScheduleDurationTooltip = ({
+  active,
+  payload,
+  label,
+}: any) => {
   if (!active || !payload?.length) return null;
   const data = payload[0]?.payload;
   if (!data) return null;
@@ -604,7 +632,11 @@ export const PackageScheduleDurationTooltip = ({ active, payload, label }: any) 
   );
 };
 
-export const PackageScheduleParticipationTooltip = ({ active, payload, label }: any) => {
+export const PackageScheduleParticipationTooltip = ({
+  active,
+  payload,
+  label,
+}: any) => {
   if (!active || !payload?.length) return null;
   const data = payload[0]?.payload;
   return (
@@ -622,7 +654,11 @@ export const PackageScheduleParticipationTooltip = ({ active, payload, label }: 
   );
 };
 
-export const PackageScheduleRatingTooltip = ({ active, payload, label }: any) => {
+export const PackageScheduleRatingTooltip = ({
+  active,
+  payload,
+  label,
+}: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="stats-tooltip">
@@ -635,6 +671,89 @@ export const PackageScheduleRatingTooltip = ({ active, payload, label }: any) =>
           Reviews: {payload[1]?.value?.toLocaleString() || 0}
         </p>
       )}
+    </div>
+  );
+};
+
+export const SeasonBarTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  const data = payload[0]?.payload;
+  return (
+    <div className="sn-tooltip">
+      <p className="sn-tooltip__label">{label}</p>
+      <p className="sn-tooltip__value">
+        {payload[0].value.toLocaleString()} activities
+      </p>
+      {data?.totalTours && (
+        <p className="sn-tooltip__sub">
+          Tours: {data.totalTours.toLocaleString()}
+        </p>
+      )}
+    </div>
+  );
+};
+
+export const SeasonTourTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="sn-tooltip">
+      <p className="sn-tooltip__label">{label}</p>
+      <p className="sn-tooltip__value">
+        {payload[0].value.toLocaleString()} tours
+      </p>
+    </div>
+  );
+};
+
+export const SeasonPopularityTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  const data = payload[0]?.payload;
+  return (
+    <div className="sn-tooltip">
+      <p className="sn-tooltip__label">{label}</p>
+      <p className="sn-tooltip__value">
+        Total Usage: {data.totalUsage.toLocaleString()}
+      </p>
+      <p className="sn-tooltip__sub">
+        Activities: {data.totalActivities.toLocaleString()}
+      </p>
+      <p className="sn-tooltip__sub">
+        Tours: {data.totalTours.toLocaleString()}
+      </p>
+    </div>
+  );
+};
+
+export const SeasonWeatherTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  const data = payload[0]?.payload;
+  return (
+    <div className="sn-tooltip sn-tooltip--weather">
+      <p className="sn-tooltip__label">{label}</p>
+      <p className="sn-tooltip__value">
+        Temperature: {data.temperatureMin}° - {data.temperatureMax}°
+      </p>
+      <p className="sn-tooltip__sub">Rainfall: {data.rainfallPattern}</p>
+      <p className="sn-tooltip__sub">{data.weatherSummary}</p>
+    </div>
+  );
+};
+
+export const PeakSeasonTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null;
+  const data = payload[0]?.payload;
+  return (
+    <div className="sn-tooltip">
+      <p className="sn-tooltip__label">{data.seasonName}</p>
+      <p className="sn-tooltip__value">
+        Activities: {data.activityCount.toLocaleString()}
+      </p>
+      <p className="sn-tooltip__sub">
+        Tours: {data.tourCount.toLocaleString()}
+      </p>
+      <p className="sn-tooltip__sub">
+        {data.isPeak ? "🔥 Peak Season" : "Off-Peak Season"}
+      </p>
     </div>
   );
 };

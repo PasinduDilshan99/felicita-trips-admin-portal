@@ -1,8 +1,8 @@
 // components/statistics-components/index.ts
 export { AnimatedCount } from "./AnimatedCount";
 export { StatCardSkeleton } from "./StatCardSkeleton";
-export { 
-  CustomBarTooltip, 
+export {
+  CustomBarTooltip,
   CustomPieTooltip,
   // Tour Category tooltips
   TourCategoryPieTooltip,
@@ -53,6 +53,12 @@ export {
   PackageScheduleDurationTooltip,
   PackageScheduleParticipationTooltip,
   PackageScheduleRatingTooltip,
+  // Seasons
+  SeasonBarTooltip,
+  SeasonTourTooltip,
+  SeasonPopularityTooltip,
+  SeasonWeatherTooltip,
+  PeakSeasonTooltip,
 } from "./CustomTooltips";
 export { SectionHeader } from "./SectionHeader";
 export { Reveal } from "./Reveal";
