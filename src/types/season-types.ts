@@ -19,7 +19,7 @@ export interface SeasonImageInsertRequest {
   name: string;
   description: string;
   imageUrl: string;
-  status: number;
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface SeasonImageUpdateRequest {
@@ -27,7 +27,7 @@ export interface SeasonImageUpdateRequest {
   name: string;
   description: string;
   imageUrl: string;
-  status: number;
+  status: "ACTIVE" | "INACTIVE";
 }
 
 // Season Basic Details (List Item)
@@ -205,8 +205,8 @@ export interface UpdateSeasonRequest {
 }
 
 export interface UpdateSeasonResponse {
-  message: string | null;
-  id: number | null;
+  message: string ;
+  id: number;
 }
 
 export type UpdateSeasonApiResponse = ApiResponse<UpdateSeasonResponse>;
@@ -244,4 +244,33 @@ export interface SeasonCardProps {
 export interface SeasonListCardProps {
   season: SeasonBasicDetail;
   onImageClick?: (imageIndex: number) => void;
+}
+
+export interface SeasonActivitiesListProps {
+  activities: SeasonActivity[];
+  onViewActivity: (activityId: number) => void;
+}
+
+export interface SeasonOverviewProps {
+  name: string;
+  standardName: string;
+  localName: string;
+  description: string;
+  startMonth: number;
+  endMonth: number;
+  isPeak: boolean;
+  displayOrder: number;
+}
+
+export interface SeasonToursListProps {
+  tours: SeasonTour[];
+  onViewTour: (tourId: number) => void;
+}
+
+export interface SeasonWeatherInfoProps {
+  temperatureMin: number;
+  temperatureMax: number;
+  weatherSummary: string;
+  rainfallPattern: string;
+  monsoonType: string;
 }

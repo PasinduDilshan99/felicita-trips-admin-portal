@@ -10,24 +10,17 @@ import ImageModal from "@/components/common-components/ImageModal";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-
 import {
   Calendar,
   Clock,
   CloudRain,
   Thermometer,
-  Wind,
   Image,
-  CheckCircle,
-  AlertCircle,
   Activity,
   MapPin,
   Star,
 } from "lucide-react";
-
-// Constants for routing
 import {
-  SEASONS_PAGE_URL,
   SEASONS_VIEW_PAGE_URL,
   SEASON_UPDATE_PAGE_URL,
   SEASON_TERMINATE_PAGE_URL,
@@ -45,15 +38,9 @@ import { CommonQuickStats } from "@/components/common-components/details-view/Co
 import { CommonMetadata } from "@/components/common-components/details-view/CommonMetadata";
 import { CommonGalleryMini } from "@/components/common-components/details-view/CommonGalleryMini";
 import { CommonExpandedGallery } from "@/components/common-components/details-view/CommonExpandedGallery";
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { SEASON_VIEW_DETAILS_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { getMonthName } from "@/utils/commonFunctions";
+import { hexToRgba } from "@/utils/functions";
 
 const SeasonDetailsViewPage = () => {
   const params = useParams();
@@ -81,9 +68,7 @@ const SeasonDetailsViewPage = () => {
   } = useImageGallery({ initialIndex: 0 });
 
   const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Seasons", href: SEASONS_PAGE_URL },
-    { label: "View", href: SEASONS_VIEW_PAGE_URL },
+    ...SEASON_VIEW_DETAILS_PAGE_BREADCRUMB_DATA,
     {
       label: season?.name || "Details",
       href: `${SEASONS_VIEW_PAGE_URL}/${seasonId}`,
@@ -132,8 +117,13 @@ const SeasonDetailsViewPage = () => {
     }));
   };
 
-  const handleBack = () => router.push(SEASONS_VIEW_PAGE_URL);
-
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(SEASONS_VIEW_PAGE_URL);
+    }
+  };
   const handleEdit = () =>
     router.push(`${SEASON_UPDATE_PAGE_URL}/${seasonId}?name=${season?.name}`);
 
@@ -192,25 +182,6 @@ const SeasonDetailsViewPage = () => {
     );
   };
 
-  // Get month name from number
-  const getMonthName = (month: number): string => {
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    return months[month - 1] || "Unknown";
-  };
-
   // Get monsoon type color
   const getMonsoonTypeColor = (type: string): string => {
     switch (type?.toLowerCase()) {
@@ -255,7 +226,7 @@ const SeasonDetailsViewPage = () => {
       label: "Tours",
       value: season?.tours?.length || 0,
       icon: MapPin,
-      color: theme.info || theme.primary,
+      color: theme.primary,
     },
     {
       label: "Images",
@@ -271,7 +242,7 @@ const SeasonDetailsViewPage = () => {
       label: "Display Order",
       value: season?.displayOrder?.toString() || "0",
       icon: Clock,
-      color: theme.info || theme.primary,
+      color: theme.primary,
     },
     {
       label: "Created At",
@@ -285,7 +256,7 @@ const SeasonDetailsViewPage = () => {
       value: new Date(season?.updatedAt || "").toLocaleDateString(),
       icon: Clock,
       date: season?.updatedAt,
-      color: theme.info || theme.primary,
+      color: theme.primary,
     },
   ];
 

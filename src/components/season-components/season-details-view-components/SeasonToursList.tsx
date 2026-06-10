@@ -1,24 +1,10 @@
-// components/seasons-components/season-details-view-components/SeasonToursList.tsx
 "use client";
 
 import React, { useState } from "react";
 import { MapPin, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { SeasonTour } from "@/types/season-types";
-
-interface SeasonToursListProps {
-  tours: SeasonTour[];
-  onViewTour: (tourId: number) => void;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { SeasonToursListProps } from "@/types/season-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const SeasonToursList: React.FC<SeasonToursListProps> = ({
   tours,
@@ -61,14 +47,23 @@ export const SeasonToursList: React.FC<SeasonToursListProps> = ({
           style={{ borderBottom: `1px solid ${theme.border}` }}
         >
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: theme.primary }} />
-            <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+            <MapPin
+              className="w-4 h-4 sm:w-5 sm:h-5"
+              style={{ color: theme.primary }}
+            />
+            <h2
+              className="text-base sm:text-lg font-semibold"
+              style={{ color: theme.text }}
+            >
               Seasonal Tours
             </h2>
           </div>
         </div>
         <div className="px-4 sm:px-6 py-6 sm:py-8 text-center">
-          <MapPin className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: theme.textSecondary }} />
+          <MapPin
+            className="w-12 h-12 mx-auto mb-3 opacity-30"
+            style={{ color: theme.textSecondary }}
+          />
           <p className="text-sm" style={{ color: theme.textSecondary }}>
             No tours available during this season.
           </p>
@@ -92,8 +87,14 @@ export const SeasonToursList: React.FC<SeasonToursListProps> = ({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: theme.primary }} />
-            <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+            <MapPin
+              className="w-4 h-4 sm:w-5 sm:h-5"
+              style={{ color: theme.primary }}
+            />
+            <h2
+              className="text-base sm:text-lg font-semibold"
+              style={{ color: theme.text }}
+            >
               Seasonal Tours
             </h2>
             <span
@@ -138,11 +139,17 @@ export const SeasonToursList: React.FC<SeasonToursListProps> = ({
                         {tour.tourStatus}
                       </span>
                     </div>
-                    <h3 className="font-semibold text-sm sm:text-base mt-1 hover:underline" style={{ color: theme.text }}>
+                    <h3
+                      className="font-semibold text-sm sm:text-base mt-1 hover:underline"
+                      style={{ color: theme.text }}
+                    >
                       {tour.tourName}
                     </h3>
                   </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: theme.success }} />
+                  <ChevronRight
+                    className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: theme.success }}
+                  />
                 </div>
 
                 {/* Expand/Collapse Button for Description */}
@@ -175,7 +182,9 @@ export const SeasonToursList: React.FC<SeasonToursListProps> = ({
                       borderLeft: `2px solid ${theme.success}`,
                     }}
                   >
-                    <p style={{ color: theme.textSecondary }}>{tour.tourDescription}</p>
+                    <p style={{ color: theme.textSecondary }}>
+                      {tour.tourDescription}
+                    </p>
                   </div>
                 )}
               </div>

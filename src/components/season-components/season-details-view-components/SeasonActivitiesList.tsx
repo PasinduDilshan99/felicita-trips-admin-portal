@@ -1,24 +1,10 @@
-// components/seasons-components/season-details-view-components/SeasonActivitiesList.tsx
 "use client";
 
 import React, { useState } from "react";
 import { Activity, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { SeasonActivity } from "@/types/season-types";
-
-interface SeasonActivitiesListProps {
-  activities: SeasonActivity[];
-  onViewActivity: (activityId: number) => void;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { SeasonActivitiesListProps } from "@/types/season-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const SeasonActivitiesList: React.FC<SeasonActivitiesListProps> = ({
   activities,
@@ -28,7 +14,9 @@ export const SeasonActivitiesList: React.FC<SeasonActivitiesListProps> = ({
   const [showAllActivities, setShowAllActivities] = useState(false);
   const [expandedActivity, setExpandedActivity] = useState<number | null>(null);
 
-  const visibleActivities = showAllActivities ? activities : activities.slice(0, 5);
+  const visibleActivities = showAllActivities
+    ? activities
+    : activities.slice(0, 5);
   const hasMoreActivities = activities.length > 5;
 
   const toggleExpandActivity = (activityId: number, e: React.MouseEvent) => {
@@ -61,14 +49,23 @@ export const SeasonActivitiesList: React.FC<SeasonActivitiesListProps> = ({
           style={{ borderBottom: `1px solid ${theme.border}` }}
         >
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: theme.primary }} />
-            <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+            <Activity
+              className="w-4 h-4 sm:w-5 sm:h-5"
+              style={{ color: theme.primary }}
+            />
+            <h2
+              className="text-base sm:text-lg font-semibold"
+              style={{ color: theme.text }}
+            >
               Seasonal Activities
             </h2>
           </div>
         </div>
         <div className="px-4 sm:px-6 py-6 sm:py-8 text-center">
-          <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: theme.textSecondary }} />
+          <Activity
+            className="w-12 h-12 mx-auto mb-3 opacity-30"
+            style={{ color: theme.textSecondary }}
+          />
           <p className="text-sm" style={{ color: theme.textSecondary }}>
             No activities available during this season.
           </p>
@@ -92,8 +89,14 @@ export const SeasonActivitiesList: React.FC<SeasonActivitiesListProps> = ({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: theme.primary }} />
-            <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+            <Activity
+              className="w-4 h-4 sm:w-5 sm:h-5"
+              style={{ color: theme.primary }}
+            />
+            <h2
+              className="text-base sm:text-lg font-semibold"
+              style={{ color: theme.text }}
+            >
               Seasonal Activities
             </h2>
             <span
@@ -138,17 +141,25 @@ export const SeasonActivitiesList: React.FC<SeasonActivitiesListProps> = ({
                         {activity.activityStatus}
                       </span>
                     </div>
-                    <h3 className="font-semibold text-sm sm:text-base mt-1 hover:underline" style={{ color: theme.text }}>
+                    <h3
+                      className="font-semibold text-sm sm:text-base mt-1 hover:underline"
+                      style={{ color: theme.text }}
+                    >
                       {activity.activityName}
                     </h3>
                   </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: theme.primary }} />
+                  <ChevronRight
+                    className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: theme.primary }}
+                  />
                 </div>
 
                 {/* Expand/Collapse Button for Description */}
                 {activity.activityDescription && (
                   <button
-                    onClick={(e) => toggleExpandActivity(activity.activityId, e)}
+                    onClick={(e) =>
+                      toggleExpandActivity(activity.activityId, e)
+                    }
                     className="flex items-center gap-1 text-xs mt-2 transition-colors hover:opacity-80"
                     style={{ color: theme.primary }}
                   >
@@ -175,7 +186,9 @@ export const SeasonActivitiesList: React.FC<SeasonActivitiesListProps> = ({
                       borderLeft: `2px solid ${theme.primary}`,
                     }}
                   >
-                    <p style={{ color: theme.textSecondary }}>{activity.activityDescription}</p>
+                    <p style={{ color: theme.textSecondary }}>
+                      {activity.activityDescription}
+                    </p>
                   </div>
                 )}
               </div>

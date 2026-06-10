@@ -1,29 +1,11 @@
-// components/seasons-components/season-details-view-components/SeasonOverview.tsx
 "use client";
 
 import React, { useState } from "react";
 import { Calendar, ChevronDown, ChevronUp, FileText, Star } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface SeasonOverviewProps {
-  name: string;
-  standardName: string;
-  localName: string;
-  description: string;
-  startMonth: number;
-  endMonth: number;
-  isPeak: boolean;
-  displayOrder: number;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { SeasonOverviewProps } from "@/types/season-types";
+import { getMonthName } from "@/utils/commonFunctions";
+import { hexToRgba } from "@/utils/functions";
 
 export const SeasonOverview: React.FC<SeasonOverviewProps> = ({
   name,
@@ -37,14 +19,6 @@ export const SeasonOverview: React.FC<SeasonOverviewProps> = ({
 }) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const getMonthName = (month: number): string => {
-    const months = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    return months[month - 1] || "Unknown";
-  };
 
   const truncatedDescription =
     description?.length > 500 && !isExpanded
@@ -64,7 +38,10 @@ export const SeasonOverview: React.FC<SeasonOverviewProps> = ({
         className="px-4 sm:px-6 py-3 sm:py-4"
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
-        <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+        <h2
+          className="text-base sm:text-lg font-semibold"
+          style={{ color: theme.text }}
+        >
           Season Overview
         </h2>
       </div>
@@ -72,10 +49,16 @@ export const SeasonOverview: React.FC<SeasonOverviewProps> = ({
       <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4">
         {/* Season Name */}
         <div>
-          <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Season Name
           </p>
-          <h3 className="text-lg sm:text-xl font-bold" style={{ color: theme.text }}>
+          <h3
+            className="text-lg sm:text-xl font-bold"
+            style={{ color: theme.text }}
+          >
             {name}
           </h3>
         </div>
@@ -83,18 +66,30 @@ export const SeasonOverview: React.FC<SeasonOverviewProps> = ({
         {/* Standard & Local Names */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <p className="text-[10px] sm:text-xs font-medium" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium"
+              style={{ color: theme.textSecondary }}
+            >
               Standard Name
             </p>
-            <p className="text-sm sm:text-base font-medium mt-0.5" style={{ color: theme.text }}>
+            <p
+              className="text-sm sm:text-base font-medium mt-0.5"
+              style={{ color: theme.text }}
+            >
               {standardName}
             </p>
           </div>
           <div>
-            <p className="text-[10px] sm:text-xs font-medium" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium"
+              style={{ color: theme.textSecondary }}
+            >
               Local Name
             </p>
-            <p className="text-sm sm:text-base font-medium mt-0.5" style={{ color: theme.text }}>
+            <p
+              className="text-sm sm:text-base font-medium mt-0.5"
+              style={{ color: theme.text }}
+            >
               {localName || "N/A"}
             </p>
           </div>
@@ -102,12 +97,21 @@ export const SeasonOverview: React.FC<SeasonOverviewProps> = ({
 
         {/* Season Period */}
         <div className="flex items-start gap-2">
-          <Calendar className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: theme.primary }} />
+          <Calendar
+            className="w-4 h-4 mt-0.5 flex-shrink-0"
+            style={{ color: theme.primary }}
+          />
           <div>
-            <p className="text-[10px] sm:text-xs font-medium" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium"
+              style={{ color: theme.textSecondary }}
+            >
               Season Period
             </p>
-            <p className="text-sm sm:text-base font-medium" style={{ color: theme.text }}>
+            <p
+              className="text-sm sm:text-base font-medium"
+              style={{ color: theme.text }}
+            >
               {getMonthName(startMonth)} - {getMonthName(endMonth)}
             </p>
           </div>
@@ -123,7 +127,10 @@ export const SeasonOverview: React.FC<SeasonOverviewProps> = ({
             }}
           >
             <Star className="w-4 h-4" style={{ color: theme.warning }} />
-            <span className="text-sm font-medium" style={{ color: theme.warning }}>
+            <span
+              className="text-sm font-medium"
+              style={{ color: theme.warning }}
+            >
               Peak Season
             </span>
             <span className="text-xs" style={{ color: theme.textSecondary }}>
@@ -134,10 +141,16 @@ export const SeasonOverview: React.FC<SeasonOverviewProps> = ({
 
         {/* Display Order */}
         <div>
-          <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1" style={{ color: theme.textSecondary }}>
+          <p
+            className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-1"
+            style={{ color: theme.textSecondary }}
+          >
             Display Order
           </p>
-          <p className="text-sm sm:text-base font-medium" style={{ color: theme.text }}>
+          <p
+            className="text-sm sm:text-base font-medium"
+            style={{ color: theme.text }}
+          >
             {displayOrder}
           </p>
         </div>
@@ -145,7 +158,10 @@ export const SeasonOverview: React.FC<SeasonOverviewProps> = ({
         {/* Description */}
         {description && (
           <div>
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-[10px] sm:text-xs font-medium uppercase tracking-wide mb-2"
+              style={{ color: theme.textSecondary }}
+            >
               Description
             </p>
             <div
@@ -156,9 +172,14 @@ export const SeasonOverview: React.FC<SeasonOverviewProps> = ({
               }}
             >
               <div className="flex gap-2">
-                <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" style={{ color: theme.primary }} />
+                <FileText
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5"
+                  style={{ color: theme.primary }}
+                />
                 <div className="flex-1">
-                  <p style={{ color: theme.textSecondary }}>{truncatedDescription}</p>
+                  <p style={{ color: theme.textSecondary }}>
+                    {truncatedDescription}
+                  </p>
                   {description.length > 500 && (
                     <button
                       onClick={() => setIsExpanded(!isExpanded)}

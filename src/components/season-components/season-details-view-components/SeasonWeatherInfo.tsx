@@ -1,26 +1,10 @@
-// components/seasons-components/season-details-view-components/SeasonWeatherInfo.tsx
 "use client";
 
 import React from "react";
 import { Thermometer, CloudRain, Wind, Sun, Droplets } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-interface SeasonWeatherInfoProps {
-  temperatureMin: number;
-  temperatureMax: number;
-  weatherSummary: string;
-  rainfallPattern: string;
-  monsoonType: string;
-}
-
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0,0,0,${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import { SeasonWeatherInfoProps } from "@/types/season-types";
+import { hexToRgba } from "@/utils/functions";
 
 export const SeasonWeatherInfo: React.FC<SeasonWeatherInfoProps> = ({
   temperatureMin,
@@ -73,7 +57,10 @@ export const SeasonWeatherInfo: React.FC<SeasonWeatherInfoProps> = ({
         className="px-4 sm:px-6 py-3 sm:py-4"
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
-        <h2 className="text-base sm:text-lg font-semibold" style={{ color: theme.text }}>
+        <h2
+          className="text-base sm:text-lg font-semibold"
+          style={{ color: theme.text }}
+        >
           Weather Information
         </h2>
       </div>
@@ -89,12 +76,18 @@ export const SeasonWeatherInfo: React.FC<SeasonWeatherInfoProps> = ({
         >
           <div className="flex items-center gap-2 mb-2">
             <Thermometer className="w-4 h-4" style={{ color: theme.warning }} />
-            <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+            <p
+              className="text-xs font-medium uppercase tracking-wide"
+              style={{ color: theme.textSecondary }}
+            >
               Temperature
             </p>
           </div>
           <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="text-2xl sm:text-3xl font-bold" style={{ color: theme.warning }}>
+            <span
+              className="text-2xl sm:text-3xl font-bold"
+              style={{ color: theme.warning }}
+            >
               {avgTemperature}°C
             </span>
             <span className="text-sm" style={{ color: theme.textSecondary }}>
@@ -114,11 +107,17 @@ export const SeasonWeatherInfo: React.FC<SeasonWeatherInfoProps> = ({
           >
             <div className="flex items-center gap-2 mb-2">
               {getMonsoonTypeIcon(monsoonType)}
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs font-medium uppercase tracking-wide"
+                style={{ color: theme.textSecondary }}
+              >
                 Monsoon Type
               </p>
             </div>
-            <p className="text-base sm:text-lg font-semibold" style={{ color: monsoonColor }}>
+            <p
+              className="text-base sm:text-lg font-semibold"
+              style={{ color: monsoonColor }}
+            >
               {monsoonType}
             </p>
           </div>
@@ -129,13 +128,16 @@ export const SeasonWeatherInfo: React.FC<SeasonWeatherInfoProps> = ({
           <div
             className="rounded-xl p-3"
             style={{
-              backgroundColor: hexToRgba(theme.info || theme.primary, 0.04),
-              border: `1px solid ${hexToRgba(theme.info || theme.primary, 0.1)}`,
+              backgroundColor: hexToRgba(theme.primary, 0.04),
+              border: `1px solid ${hexToRgba(theme.primary, 0.1)}`,
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Sun className="w-4 h-4" style={{ color: theme.info || theme.primary }} />
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <Sun className="w-4 h-4" style={{ color: theme.primary }} />
+              <p
+                className="text-xs font-medium uppercase tracking-wide"
+                style={{ color: theme.textSecondary }}
+              >
                 Weather Summary
               </p>
             </div>
@@ -156,7 +158,10 @@ export const SeasonWeatherInfo: React.FC<SeasonWeatherInfoProps> = ({
           >
             <div className="flex items-center gap-2 mb-2">
               <Droplets className="w-4 h-4" style={{ color: theme.primary }} />
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              <p
+                className="text-xs font-medium uppercase tracking-wide"
+                style={{ color: theme.textSecondary }}
+              >
                 Rainfall Pattern
               </p>
             </div>
