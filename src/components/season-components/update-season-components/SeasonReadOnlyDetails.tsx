@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
   MapPin,
@@ -14,57 +14,12 @@ import {
   Trash2,
   Edit2,
   Camera,
+  Search as SearchIcon,
 } from "lucide-react";
-import {
-  SeasonDetails,
-  SeasonActivity,
-  SeasonTour,
-} from "@/types/season-types";
-import { ActivityIdName } from "@/types/activity-types";
-import { TourNameId } from "@/types/tour-types";
 import ImageModal from "@/components/common-components/ImageModal";
 import { ImageModalImage } from "@/types/common-components-types";
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
-  },
-};
-
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const },
-  },
-};
-
-interface SeasonReadOnlyDetailsProps {
-  season: SeasonDetails;
-  allActivities: ActivityIdName[];
-  allTours: TourNameId[];
-  loadingActivities: boolean;
-  loadingTours: boolean;
-  expandedSections: Set<string>;
-  onToggleSection: (section: string) => void;
-  onAddActivity: (activityId: number) => void;
-  onRemoveActivity: (activityId: number) => void;
-  onAddTour: (tourId: number) => void;
-  onRemoveTour: (tourId: number) => void;
-  onRemoveImage: (imageId: number) => void;
-  onAddNewImage: (
-    file: File,
-    name: string,
-    description: string,
-  ) => Promise<void>;
-  onUpdateImage: (imageId: number, name: string, description: string) => void;
-  uploadingImages: boolean;
-  theme: any;
-}
+import { SeasonReadOnlyDetailsProps } from "@/types/season-types";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
 
 export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
   season,
@@ -95,6 +50,11 @@ export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
   const [showNewImageForm, setShowNewImageForm] = useState(false);
   const [editingImage, setEditingImage] = useState<any>(null);
   const [uploadingLocalImage, setUploadingLocalImage] = useState(false);
+
+  // Search states
+  const [activitySearchQuery, setActivitySearchQuery] = useState("");
+  const [tourSearchQuery, setTourSearchQuery] = useState("");
+
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const formRef = React.useRef<HTMLDivElement>(null);
 
@@ -108,6 +68,8 @@ export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
     name: "",
     description: "",
   });
+
+  // Filter available activities based on search query
 
   // Get activities and tours not already in the season
   const availableActivities = allActivities.filter(
@@ -147,6 +109,27 @@ export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
       setNewImageData({ ...newImageData, file });
     }
   };
+
+  const filteredAvailableActivities = useMemo(() => {
+    if (!activitySearchQuery.trim()) {
+      return availableActivities;
+    }
+    const query = activitySearchQuery.toLowerCase();
+    return availableActivities.filter((activity) =>
+      activity.activityName.toLowerCase().includes(query),
+    );
+  }, [availableActivities, activitySearchQuery]);
+
+  // Filter available tours based on search query
+  const filteredAvailableTours = useMemo(() => {
+    if (!tourSearchQuery.trim()) {
+      return availableTours;
+    }
+    const query = tourSearchQuery.toLowerCase();
+    return availableTours.filter((tour) =>
+      tour.tourName.toLowerCase().includes(query),
+    );
+  }, [availableTours, tourSearchQuery]);
 
   const handleAddImage = async () => {
     if (!newImageData.name.trim()) {
@@ -198,6 +181,7 @@ export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
       onAddActivity(selectedActivityId);
       setSelectedActivityId(null);
       setShowAddActivityForm(false);
+      setActivitySearchQuery(""); // Reset search query after adding
     }
   };
 
@@ -206,6 +190,7 @@ export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
       onAddTour(selectedTourId);
       setSelectedTourId(null);
       setShowAddTourForm(false);
+      setTourSearchQuery(""); // Reset search query after adding
     }
   };
 
@@ -299,43 +284,64 @@ export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
               className="p-6"
             >
               <div className="space-y-2 mb-4">
-                {season.activities.map((activity) => (
+                {season.activities.length === 0 ? (
                   <div
-                    key={activity.activityId}
-                    className="flex items-center justify-between p-3 rounded-lg"
+                    className="text-center py-6 rounded-lg"
                     style={{
                       backgroundColor: `${theme.border}10`,
-                      border: `1px solid ${theme.border}`,
+                      border: `1px dashed ${theme.border}`,
                     }}
                   >
-                    <div>
-                      <p
-                        className="text-sm font-medium"
-                        style={{ color: theme.text }}
-                      >
-                        {activity.activityName}
-                      </p>
-                      {activity.activityDescription && (
-                        <p
-                          className="text-xs mt-1"
-                          style={{ color: theme.textSecondary }}
-                        >
-                          {activity.activityDescription.length > 100
-                            ? `${activity.activityDescription.substring(0, 100)}...`
-                            : activity.activityDescription}
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => onRemoveActivity(activity.activityId)}
-                      className="p-1.5 rounded-lg transition-all hover:scale-110"
-                      style={{ color: theme.error }}
-                      title="Remove Activity"
+                    <Users
+                      className="w-8 h-8 mx-auto mb-2 opacity-40"
+                      style={{ color: theme.textSecondary }}
+                    />
+                    <p
+                      className="text-sm"
+                      style={{ color: theme.textSecondary }}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                      No activities associated
+                    </p>
                   </div>
-                ))}
+                ) : (
+                  season.activities.map((activity) => (
+                    <div
+                      key={activity.activityId}
+                      className="flex items-center justify-between p-3 rounded-lg"
+                      style={{
+                        backgroundColor: `${theme.border}10`,
+                        border: `1px solid ${theme.border}`,
+                      }}
+                    >
+                      <div>
+                        <p
+                          className="text-sm font-medium"
+                          style={{ color: theme.text }}
+                        >
+                          {activity.activityName}
+                        </p>
+                        {activity.activityDescription && (
+                          <p
+                            className="text-xs mt-1"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            {activity.activityDescription.length > 100
+                              ? `${activity.activityDescription.substring(0, 100)}...`
+                              : activity.activityDescription}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => onRemoveActivity(activity.activityId)}
+                        className="p-1.5 rounded-lg transition-all hover:scale-110"
+                        style={{ color: theme.error }}
+                        title="Remove Activity"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Add Activity Form */}
@@ -351,49 +357,123 @@ export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
                       border: `1px solid ${theme.primary}30`,
                     }}
                   >
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={selectedActivityId || ""}
-                        onChange={(e) =>
-                          setSelectedActivityId(parseInt(e.target.value))
-                        }
-                        className="flex-1 px-3 py-1.5 rounded-lg border text-sm"
+                    <div className="space-y-3">
+                      {/* Search Input */}
+                      <div className="relative">
+                        <SearchIcon
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                          style={{ color: theme.textSecondary }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Search activities..."
+                          value={activitySearchQuery}
+                          onChange={(e) => {
+                            setActivitySearchQuery(e.target.value);
+                            setSelectedActivityId(null);
+                          }}
+                          className="w-full pl-9 pr-3 py-2 rounded-lg border text-sm"
+                          style={{
+                            backgroundColor: theme.background,
+                            borderColor: theme.border,
+                            color: theme.text,
+                          }}
+                        />
+                      </div>
+
+                      {/* Activities List with Search Results */}
+                      <div
+                        className="max-h-48 overflow-y-auto space-y-1 rounded-lg"
                         style={{
-                          backgroundColor: theme.background,
-                          borderColor: theme.border,
-                          color: theme.text,
-                        }}
-                        disabled={loadingActivities}
-                      >
-                        <option value="">Select an activity...</option>
-                        {availableActivities.map((activity) => (
-                          <option
-                            key={activity.activityId}
-                            value={activity.activityId}
-                          >
-                            {activity.activityName}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        onClick={handleAddActivity}
-                        disabled={!selectedActivityId}
-                        className="px-3 py-1.5 rounded-lg text-sm font-medium text-white disabled:opacity-50"
-                        style={{ backgroundColor: theme.success }}
-                      >
-                        Add
-                      </button>
-                      <button
-                        onClick={() => setShowAddActivityForm(false)}
-                        className="px-3 py-1.5 rounded-lg text-sm"
-                        style={{
-                          backgroundColor: theme.background,
                           border: `1px solid ${theme.border}`,
-                          color: theme.textSecondary,
+                          backgroundColor: `${theme.border}05`,
                         }}
                       >
-                        Cancel
-                      </button>
+                        {loadingActivities ? (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader2
+                              className="w-4 h-4 animate-spin"
+                              style={{ color: theme.primary }}
+                            />
+                            <span
+                              className="text-xs ml-2"
+                              style={{ color: theme.textSecondary }}
+                            >
+                              Loading activities...
+                            </span>
+                          </div>
+                        ) : filteredAvailableActivities.length === 0 ? (
+                          <div className="text-center py-4">
+                            <p
+                              className="text-xs"
+                              style={{ color: theme.textSecondary }}
+                            >
+                              {activitySearchQuery
+                                ? "No matching activities found"
+                                : "No activities available"}
+                            </p>
+                          </div>
+                        ) : (
+                          filteredAvailableActivities.map((activity) => {
+                            const isSelected =
+                              selectedActivityId === activity.activityId;
+                            return (
+                              <button
+                                key={activity.activityId}
+                                onClick={() =>
+                                  setSelectedActivityId(activity.activityId)
+                                }
+                                className={`w-full text-left px-3 py-2 transition-colors ${
+                                  isSelected ? "bg-opacity-20" : ""
+                                }`}
+                                style={{
+                                  backgroundColor: isSelected
+                                    ? `${theme.primary}15`
+                                    : "transparent",
+                                  borderBottom: `1px solid ${theme.border}30`,
+                                }}
+                              >
+                                <p
+                                  className="text-sm font-medium"
+                                  style={{
+                                    color: isSelected
+                                      ? theme.primary
+                                      : theme.text,
+                                  }}
+                                >
+                                  {activity.activityName}
+                                </p>
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleAddActivity}
+                          disabled={!selectedActivityId}
+                          className="flex-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white disabled:opacity-50"
+                          style={{ backgroundColor: theme.success }}
+                        >
+                          Add Selected Activity
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowAddActivityForm(false);
+                            setSelectedActivityId(null);
+                            setActivitySearchQuery("");
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-sm"
+                          style={{
+                            backgroundColor: theme.background,
+                            border: `1px solid ${theme.border}`,
+                            color: theme.textSecondary,
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -485,43 +565,64 @@ export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
               className="p-6"
             >
               <div className="space-y-2 mb-4">
-                {season.tours.map((tour) => (
+                {season.tours.length === 0 ? (
                   <div
-                    key={tour.tourId}
-                    className="flex items-center justify-between p-3 rounded-lg"
+                    className="text-center py-6 rounded-lg"
                     style={{
                       backgroundColor: `${theme.border}10`,
-                      border: `1px solid ${theme.border}`,
+                      border: `1px dashed ${theme.border}`,
                     }}
                   >
-                    <div>
-                      <p
-                        className="text-sm font-medium"
-                        style={{ color: theme.text }}
-                      >
-                        {tour.tourName}
-                      </p>
-                      {tour.tourDescription && (
-                        <p
-                          className="text-xs mt-1"
-                          style={{ color: theme.textSecondary }}
-                        >
-                          {tour.tourDescription.length > 100
-                            ? `${tour.tourDescription.substring(0, 100)}...`
-                            : tour.tourDescription}
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => onRemoveTour(tour.tourId)}
-                      className="p-1.5 rounded-lg transition-all hover:scale-110"
-                      style={{ color: theme.error }}
-                      title="Remove Tour"
+                    <MapPin
+                      className="w-8 h-8 mx-auto mb-2 opacity-40"
+                      style={{ color: theme.textSecondary }}
+                    />
+                    <p
+                      className="text-sm"
+                      style={{ color: theme.textSecondary }}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                      No tours associated
+                    </p>
                   </div>
-                ))}
+                ) : (
+                  season.tours.map((tour) => (
+                    <div
+                      key={tour.tourId}
+                      className="flex items-center justify-between p-3 rounded-lg"
+                      style={{
+                        backgroundColor: `${theme.border}10`,
+                        border: `1px solid ${theme.border}`,
+                      }}
+                    >
+                      <div>
+                        <p
+                          className="text-sm font-medium"
+                          style={{ color: theme.text }}
+                        >
+                          {tour.tourName}
+                        </p>
+                        {tour.tourDescription && (
+                          <p
+                            className="text-xs mt-1"
+                            style={{ color: theme.textSecondary }}
+                          >
+                            {tour.tourDescription.length > 100
+                              ? `${tour.tourDescription.substring(0, 100)}...`
+                              : tour.tourDescription}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => onRemoveTour(tour.tourId)}
+                        className="p-1.5 rounded-lg transition-all hover:scale-110"
+                        style={{ color: theme.error }}
+                        title="Remove Tour"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Add Tour Form */}
@@ -537,46 +638,120 @@ export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
                       border: `1px solid ${theme.accent}30`,
                     }}
                   >
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={selectedTourId || ""}
-                        onChange={(e) =>
-                          setSelectedTourId(parseInt(e.target.value))
-                        }
-                        className="flex-1 px-3 py-1.5 rounded-lg border text-sm"
+                    <div className="space-y-3">
+                      {/* Search Input */}
+                      <div className="relative">
+                        <SearchIcon
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                          style={{ color: theme.textSecondary }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Search tours..."
+                          value={tourSearchQuery}
+                          onChange={(e) => {
+                            setTourSearchQuery(e.target.value);
+                            setSelectedTourId(null);
+                          }}
+                          className="w-full pl-9 pr-3 py-2 rounded-lg border text-sm"
+                          style={{
+                            backgroundColor: theme.background,
+                            borderColor: theme.border,
+                            color: theme.text,
+                          }}
+                        />
+                      </div>
+
+                      {/* Tours List with Search Results */}
+                      <div
+                        className="max-h-48 overflow-y-auto space-y-1 rounded-lg"
                         style={{
-                          backgroundColor: theme.background,
-                          borderColor: theme.border,
-                          color: theme.text,
-                        }}
-                        disabled={loadingTours}
-                      >
-                        <option value="">Select a tour...</option>
-                        {availableTours.map((tour) => (
-                          <option key={tour.tourId} value={tour.tourId}>
-                            {tour.tourName}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        onClick={handleAddTour}
-                        disabled={!selectedTourId}
-                        className="px-3 py-1.5 rounded-lg text-sm font-medium text-white disabled:opacity-50"
-                        style={{ backgroundColor: theme.success }}
-                      >
-                        Add
-                      </button>
-                      <button
-                        onClick={() => setShowAddTourForm(false)}
-                        className="px-3 py-1.5 rounded-lg text-sm"
-                        style={{
-                          backgroundColor: theme.background,
                           border: `1px solid ${theme.border}`,
-                          color: theme.textSecondary,
+                          backgroundColor: `${theme.border}05`,
                         }}
                       >
-                        Cancel
-                      </button>
+                        {loadingTours ? (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader2
+                              className="w-4 h-4 animate-spin"
+                              style={{ color: theme.accent }}
+                            />
+                            <span
+                              className="text-xs ml-2"
+                              style={{ color: theme.textSecondary }}
+                            >
+                              Loading tours...
+                            </span>
+                          </div>
+                        ) : filteredAvailableTours.length === 0 ? (
+                          <div className="text-center py-4">
+                            <p
+                              className="text-xs"
+                              style={{ color: theme.textSecondary }}
+                            >
+                              {tourSearchQuery
+                                ? "No matching tours found"
+                                : "No tours available"}
+                            </p>
+                          </div>
+                        ) : (
+                          filteredAvailableTours.map((tour) => {
+                            const isSelected = selectedTourId === tour.tourId;
+                            return (
+                              <button
+                                key={tour.tourId}
+                                onClick={() => setSelectedTourId(tour.tourId)}
+                                className={`w-full text-left px-3 py-2 transition-colors ${
+                                  isSelected ? "bg-opacity-20" : ""
+                                }`}
+                                style={{
+                                  backgroundColor: isSelected
+                                    ? `${theme.accent}15`
+                                    : "transparent",
+                                  borderBottom: `1px solid ${theme.border}30`,
+                                }}
+                              >
+                                <p
+                                  className="text-sm font-medium"
+                                  style={{
+                                    color: isSelected
+                                      ? theme.accent
+                                      : theme.text,
+                                  }}
+                                >
+                                  {tour.tourName}
+                                </p>
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleAddTour}
+                          disabled={!selectedTourId}
+                          className="flex-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white disabled:opacity-50"
+                          style={{ backgroundColor: theme.success }}
+                        >
+                          Add Selected Tour
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowAddTourForm(false);
+                            setSelectedTourId(null);
+                            setTourSearchQuery("");
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-sm"
+                          style={{
+                            backgroundColor: theme.background,
+                            border: `1px solid ${theme.border}`,
+                            color: theme.textSecondary,
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -598,7 +773,7 @@ export const SeasonReadOnlyDetails: React.FC<SeasonReadOnlyDetailsProps> = ({
         </AnimatePresence>
       </motion.div>
 
-      {/* Images Section */}
+      {/* Images Section (unchanged) */}
       <motion.div
         variants={cardVariants}
         initial="hidden"

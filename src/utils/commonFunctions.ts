@@ -90,3 +90,21 @@ export const getMonthName = (monthNumber: number): string => {
   ];
   return months[monthNumber - 1] || "Unknown";
 };
+
+export   const formatMonth = (month: number): string => {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    return months[month - 1] || "N/A";
+  };

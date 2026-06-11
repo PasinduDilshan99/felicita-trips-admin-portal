@@ -1,6 +1,8 @@
 // types/season-types.ts
 
+import { ActivityIdName } from "./activity-types";
 import { ApiResponse } from "./common-types";
+import { TourNameId } from "./tour-types";
 
 // Season Image Types
 export interface SeasonImage {
@@ -205,7 +207,7 @@ export interface UpdateSeasonRequest {
 }
 
 export interface UpdateSeasonResponse {
-  message: string ;
+  message: string;
   id: number;
 }
 
@@ -273,4 +275,92 @@ export interface SeasonWeatherInfoProps {
   weatherSummary: string;
   rainfallPattern: string;
   monsoonType: string;
+}
+
+export interface SeasonSearchItem {
+  id: number;
+  name: string;
+}
+
+export interface ActivitiesListProps {
+  activities: SeasonActivity[];
+}
+
+export interface BasicInfoPanelProps {
+  seasonDetails: SeasonDetails;
+}
+
+export interface ClimateInfoPanelProps {
+  seasonDetails: SeasonDetails;
+}
+
+export interface SeasonStatsProps {
+  seasonDetails: SeasonDetails;
+}
+
+export interface StatItem {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  color: string;
+  formatter?: (value: number | string) => string | number;
+}
+
+export interface ToursListProps {
+  tours: SeasonTour[];
+}
+
+export interface SeasonReadOnlyDetailsProps {
+  season: SeasonDetails;
+  allActivities: ActivityIdName[];
+  allTours: TourNameId[];
+  loadingActivities: boolean;
+  loadingTours: boolean;
+  expandedSections: Set<string>;
+  onToggleSection: (section: string) => void;
+  onAddActivity: (activityId: number) => void;
+  onRemoveActivity: (activityId: number) => void;
+  onAddTour: (tourId: number) => void;
+  onRemoveTour: (tourId: number) => void;
+  onRemoveImage: (imageId: number) => void;
+  onAddNewImage: (
+    file: File,
+    name: string,
+    description: string,
+  ) => Promise<void>;
+  onUpdateImage: (imageId: number, name: string, description: string) => void;
+  uploadingImages: boolean;
+  theme: any;
+}
+
+export interface ActivityTourSelectorProps {
+  selectedActivityIds: number[];
+  selectedTourIds: number[];
+  onActivityChange: (activityIds: number[]) => void;
+  onTourChange: (tourIds: number[]) => void;
+  errors?: {
+    activities?: string;
+    tours?: string;
+  };
+}
+export interface SeasonBasicInfoProps {
+  formData: any;
+  errors: Record<string, string>;
+  onInputChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => void;
+}
+
+export interface SeasonSettingsProps {
+  formData: any;
+  errors: Record<string, string>;
+  onInputChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => void;
+  onStatusChange: (value: "ACTIVE" | "INACTIVE") => void;
+  onPeakChange: (checked: boolean) => void;
 }

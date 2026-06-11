@@ -32,7 +32,6 @@ import {
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import CommonErrorState from "@/components/common-components/CommonErrorState";
 import CommonSearch, {
   SearchItem,
 } from "@/components/common-components/CommonSearch";
@@ -42,80 +41,14 @@ import {
   ChangedField,
 } from "@/components/common-components/UpdateConfirmationModal";
 import { hexToRgba } from "@/utils/functions";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { SEASONS_PAGE_URL } from "@/utils/urls";
 import PageHeader from "@/components/common-components/static-components/PageHeader";
 import { SEASON_UPDATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 import { SeasonReadOnlyDetails } from "@/components/season-components/update-season-components/SeasonReadOnlyDetails";
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-};
-
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    transition: { duration: 0.32, ease: EASE_OUT },
-  },
-};
-
-const STATUS_OPTIONS = [
-  {
-    value: "1",
-    label: "Active",
-    description: "Season is active",
-    color: "#059669",
-  },
-  {
-    value: "0",
-    label: "Inactive",
-    description: "Season is inactive",
-    color: "#6b7280",
-  },
-];
-
-const MONSOON_TYPES = [
-  {
-    value: "NORTHEAST",
-    label: "Northeast Monsoon",
-    description: "Northeast monsoon season",
-  },
-  {
-    value: "SOUTHWEST",
-    label: "Southwest Monsoon",
-    description: "Southwest monsoon season",
-  },
-  {
-    value: "INTER_MONSOON",
-    label: "Inter Monsoon",
-    description: "Inter monsoon period",
-  },
-  { value: "NONE", label: "None", description: "No specific monsoon pattern" },
-];
-
-const MONTHS = [
-  { value: 1, label: "January" },
-  { value: 2, label: "February" },
-  { value: 3, label: "March" },
-  { value: 4, label: "April" },
-  { value: 5, label: "May" },
-  { value: 6, label: "June" },
-  { value: 7, label: "July" },
-  { value: 8, label: "August" },
-  { value: 9, label: "September" },
-  { value: 10, label: "October" },
-  { value: 11, label: "November" },
-  { value: 12, label: "December" },
-];
+import { MONSOON_TYPES, MONTHS } from "@/data/static-data";
+import { SEASON_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
+import { cardVariants, sectionVariants } from "@/app/animations/variants";
 
 const UpdateSeasonPage = () => {
   const searchParams = useSearchParams();
@@ -124,19 +57,14 @@ const UpdateSeasonPage = () => {
 
   const initialSeasonName = searchParams?.get("season-name") || "";
   const initialSeasonId = searchParams?.get("season-id") || "";
-
-  // State for seasons list
   const [seasons, setSeasons] = useState<Array<{ id: number; name: string }>>(
     [],
   );
-
-  // State for activities and tours
   const [allActivities, setAllActivities] = useState<ActivityIdName[]>([]);
   const [allTours, setAllTours] = useState<TourNameId[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(false);
   const [loadingTours, setLoadingTours] = useState(false);
 
-  // State for selected season
   const [selectedSeason, setSelectedSeason] = useState<{
     id: number;
     name: string;
@@ -149,26 +77,15 @@ const UpdateSeasonPage = () => {
       : null,
   );
 
-  // State for original season details
   const [originalSeason, setOriginalSeason] = useState<SeasonDetails | null>(
     null,
   );
-
-  // State for edited season
   const [editedSeason, setEditedSeason] = useState<SeasonDetails | null>(null);
-
-  // State for basic details changes
   const [basicDetailsChanged, setBasicDetailsChanged] = useState(false);
-
-  // State for activities changes
   const [removedActivityIds, setRemovedActivityIds] = useState<number[]>([]);
   const [addedActivityIds, setAddedActivityIds] = useState<number[]>([]);
-
-  // State for tours changes
   const [removedTourIds, setRemovedTourIds] = useState<number[]>([]);
   const [addedTourIds, setAddedTourIds] = useState<number[]>([]);
-
-  // State for images changes
   const [removedImageIds, setRemovedImageIds] = useState<number[]>([]);
   const [newImages, setNewImages] = useState<SeasonImageInsertRequest[]>([]);
   const [updatedImages, setUpdatedImages] = useState<
@@ -220,7 +137,6 @@ const UpdateSeasonPage = () => {
     [router],
   );
 
-  // Fetch seasons list
   // Fetch seasons list
   const fetchSeasons = async () => {
     setLoading(true);
@@ -562,7 +478,7 @@ const UpdateSeasonPage = () => {
         type: "success",
         title: "Update Successful!",
         message: `${editedSeason?.name} has been updated successfully.`,
-        actionLink: `${SEASONS_PAGE_URL}/view?id=${selectedSeason?.id}`,
+        actionLink: `${SEASONS_PAGE_URL}/${selectedSeason?.id}?name=${selectedSeason?.name}`,
       });
 
       setShowConfirmModal(false);
@@ -695,11 +611,13 @@ const UpdateSeasonPage = () => {
     }
     if (originalSeason.status !== editedSeason.status) {
       const oldStatus =
-        STATUS_OPTIONS.find((s) => s.value === originalSeason.status.toString())
-          ?.label || originalSeason.status;
+        SEASON_UPDATE_STATUS_OPTIONS.find(
+          (s) => s.value === originalSeason.status.toString(),
+        )?.label || originalSeason.status;
       const newStatus =
-        STATUS_OPTIONS.find((s) => s.value === editedSeason.status.toString())
-          ?.label || editedSeason.status;
+        SEASON_UPDATE_STATUS_OPTIONS.find(
+          (s) => s.value === editedSeason.status.toString(),
+        )?.label || editedSeason.status;
       changes.push({
         field: "Status",
         oldValue: oldStatus,
@@ -1323,7 +1241,7 @@ const UpdateSeasonPage = () => {
                         Status
                       </label>
                       <div className="grid grid-cols-2 gap-3">
-                        {STATUS_OPTIONS.map((opt) => {
+                        {SEASON_UPDATE_STATUS_OPTIONS.map((opt) => {
                           const isSelected =
                             editedSeason.status.toString() === opt.value;
                           return (

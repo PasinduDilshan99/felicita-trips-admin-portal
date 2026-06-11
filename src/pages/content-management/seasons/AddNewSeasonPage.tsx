@@ -17,6 +17,7 @@ import { SEASON_CREATE_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 import { SeasonBasicInfo } from "@/components/season-components/create-season-components/SeasonBasicInfo";
 import { SeasonSettings } from "@/components/season-components/create-season-components/SeasonSettings";
 import { ActivityTourSelector } from "@/components/season-components/create-season-components/ActivityTourSelector";
+import { CREATE_SEASON_TIPS } from "@/data/tips-data";
 
 const AddNewSeasonPage = () => {
   const { theme } = useTheme();
@@ -312,12 +313,7 @@ const AddNewSeasonPage = () => {
           itemName: formData.name || "Untitled Season",
           type: "create",
           estimatedTime: "~2-3 seconds",
-          tips: [
-            "Verify that months are correctly selected",
-            "Ensure temperature ranges are accurate",
-            "Check that activities and tours are properly assigned",
-            "You can edit this season anytime after creation",
-          ],
+          tips: CREATE_SEASON_TIPS,
         }}
         confirmText="Create Season"
         cancelText="Cancel"

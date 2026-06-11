@@ -1,32 +1,13 @@
-// components/season-components/ActivityTourSelector.tsx
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Activity, Compass, Search, ChevronDown, Check, AlertCircle, Loader, RefreshCw } from "lucide-react";
+import { Activity, Search, ChevronDown, Check, Loader } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ActivityService } from "@/services/activityService";
 import { TourService } from "@/services/tourService";
-
-interface ActivityTourSelectorProps {
-  selectedActivityIds: number[];
-  selectedTourIds: number[];
-  onActivityChange: (activityIds: number[]) => void;
-  onTourChange: (tourIds: number[]) => void;
-  errors?: {
-    activities?: string;
-    tours?: string;
-  };
-}
-
-interface ActivityItem {
-  activityId: number;
-  activityName: string;
-}
-
-interface TourItem {
-  tourId: number;
-  tourName: string;
-}
+import { TourNameId } from "@/types/tour-types";
+import { ActivityTourSelectorProps } from "@/types/season-types";
+import { ActivityIdName } from "@/types/activity-types";
 
 export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
   selectedActivityIds,
@@ -36,8 +17,8 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
   errors,
 }) => {
   const { theme } = useTheme();
-  const [activities, setActivities] = useState<ActivityItem[]>([]);
-  const [tours, setTours] = useState<TourItem[]>([]);
+  const [activities, setActivities] = useState<ActivityIdName[]>([]);
+  const [tours, setTours] = useState<TourNameId[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(false);
   const [loadingTours, setLoadingTours] = useState(false);
   const [activitySearch, setActivitySearch] = useState("");
@@ -45,7 +26,7 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
   const [isActivityDropdownOpen, setIsActivityDropdownOpen] = useState(false);
   const [isTourDropdownOpen, setIsTourDropdownOpen] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  
+
   const activityDropdownRef = useRef<HTMLDivElement>(null);
   const tourDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -87,11 +68,17 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
   // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (activityDropdownRef.current && !activityDropdownRef.current.contains(event.target as Node)) {
+      if (
+        activityDropdownRef.current &&
+        !activityDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsActivityDropdownOpen(false);
         setActivitySearch("");
       }
-      if (tourDropdownRef.current && !tourDropdownRef.current.contains(event.target as Node)) {
+      if (
+        tourDropdownRef.current &&
+        !tourDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsTourDropdownOpen(false);
         setTourSearch("");
       }
@@ -101,11 +88,11 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
   }, []);
 
   const filteredActivities = activities.filter((a) =>
-    a.activityName.toLowerCase().includes(activitySearch.toLowerCase())
+    a.activityName.toLowerCase().includes(activitySearch.toLowerCase()),
   );
 
   const filteredTours = tours.filter((t) =>
-    t.tourName.toLowerCase().includes(tourSearch.toLowerCase())
+    t.tourName.toLowerCase().includes(tourSearch.toLowerCase()),
   );
 
   const handleToggleActivity = (activityId: number) => {
@@ -127,7 +114,10 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
   const ActivityDropdown = () => (
     <div className="relative" ref={activityDropdownRef}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: theme.textSecondary }} />
+        <Search
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+          style={{ color: theme.textSecondary }}
+        />
         <input
           type="text"
           placeholder="Search activities..."
@@ -146,7 +136,12 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
         />
         <ChevronDown
           className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-transform duration-200 cursor-pointer"
-          style={{ color: theme.textSecondary, transform: isActivityDropdownOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+          style={{
+            color: theme.textSecondary,
+            transform: isActivityDropdownOpen
+              ? "rotate(180deg)"
+              : "rotate(0deg)",
+          }}
           onClick={() => setIsActivityDropdownOpen(!isActivityDropdownOpen)}
         />
       </div>
@@ -162,22 +157,45 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
           }}
         >
           {loadingActivities ? (
-            <div className="p-4 text-center"><Loader className="w-5 h-5 animate-spin mx-auto" style={{ color: theme.primary }} /></div>
+            <div className="p-4 text-center">
+              <Loader
+                className="w-5 h-5 animate-spin mx-auto"
+                style={{ color: theme.primary }}
+              />
+            </div>
           ) : filteredActivities.length === 0 ? (
-            <div className="p-4 text-center text-sm" style={{ color: theme.textSecondary }}>No activities found</div>
+            <div
+              className="p-4 text-center text-sm"
+              style={{ color: theme.textSecondary }}
+            >
+              No activities found
+            </div>
           ) : (
             filteredActivities.map((activity) => {
-              const isSelected = selectedActivityIds.includes(activity.activityId);
+              const isSelected = selectedActivityIds.includes(
+                activity.activityId,
+              );
               return (
                 <button
                   key={activity.activityId}
                   type="button"
                   onClick={() => handleToggleActivity(activity.activityId)}
                   className="w-full px-4 py-2 text-left flex items-center justify-between hover:bg-opacity-10"
-                  style={{ backgroundColor: isSelected ? `${theme.primary}10` : "transparent" }}
+                  style={{
+                    backgroundColor: isSelected
+                      ? `${theme.primary}10`
+                      : "transparent",
+                  }}
                 >
-                  <span className="text-sm" style={{ color: theme.text }}>{activity.activityName}</span>
-                  {isSelected && <Check className="w-4 h-4" style={{ color: theme.primary }} />}
+                  <span className="text-sm" style={{ color: theme.text }}>
+                    {activity.activityName}
+                  </span>
+                  {isSelected && (
+                    <Check
+                      className="w-4 h-4"
+                      style={{ color: theme.primary }}
+                    />
+                  )}
                 </button>
               );
             })
@@ -190,7 +208,10 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
   const TourDropdown = () => (
     <div className="relative" ref={tourDropdownRef}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: theme.textSecondary }} />
+        <Search
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+          style={{ color: theme.textSecondary }}
+        />
         <input
           type="text"
           placeholder="Search tours..."
@@ -209,7 +230,10 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
         />
         <ChevronDown
           className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-transform duration-200 cursor-pointer"
-          style={{ color: theme.textSecondary, transform: isTourDropdownOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+          style={{
+            color: theme.textSecondary,
+            transform: isTourDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+          }}
           onClick={() => setIsTourDropdownOpen(!isTourDropdownOpen)}
         />
       </div>
@@ -225,9 +249,19 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
           }}
         >
           {loadingTours ? (
-            <div className="p-4 text-center"><Loader className="w-5 h-5 animate-spin mx-auto" style={{ color: theme.primary }} /></div>
+            <div className="p-4 text-center">
+              <Loader
+                className="w-5 h-5 animate-spin mx-auto"
+                style={{ color: theme.primary }}
+              />
+            </div>
           ) : filteredTours.length === 0 ? (
-            <div className="p-4 text-center text-sm" style={{ color: theme.textSecondary }}>No tours found</div>
+            <div
+              className="p-4 text-center text-sm"
+              style={{ color: theme.textSecondary }}
+            >
+              No tours found
+            </div>
           ) : (
             filteredTours.map((tour) => {
               const isSelected = selectedTourIds.includes(tour.tourId);
@@ -237,10 +271,21 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
                   type="button"
                   onClick={() => handleToggleTour(tour.tourId)}
                   className="w-full px-4 py-2 text-left flex items-center justify-between hover:bg-opacity-10"
-                  style={{ backgroundColor: isSelected ? `${theme.primary}10` : "transparent" }}
+                  style={{
+                    backgroundColor: isSelected
+                      ? `${theme.primary}10`
+                      : "transparent",
+                  }}
                 >
-                  <span className="text-sm" style={{ color: theme.text }}>{tour.tourName}</span>
-                  {isSelected && <Check className="w-4 h-4" style={{ color: theme.primary }} />}
+                  <span className="text-sm" style={{ color: theme.text }}>
+                    {tour.tourName}
+                  </span>
+                  {isSelected && (
+                    <Check
+                      className="w-4 h-4"
+                      style={{ color: theme.primary }}
+                    />
+                  )}
                 </button>
               );
             })
@@ -259,63 +304,116 @@ export const ActivityTourSelector: React.FC<ActivityTourSelectorProps> = ({
         boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
       }}
     >
-      <div className="flex items-center gap-3 px-6 py-4 border-b" style={{ borderColor: theme.border }}>
-        <span className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ backgroundColor: `${theme.primary}18`, color: theme.primary }}>
+      <div
+        className="flex items-center gap-3 px-6 py-4 border-b"
+        style={{ borderColor: theme.border }}
+      >
+        <span
+          className="flex items-center justify-center w-8 h-8 rounded-lg"
+          style={{
+            backgroundColor: `${theme.primary}18`,
+            color: theme.primary,
+          }}
+        >
           <Activity className="w-4 h-4" />
         </span>
         <div>
-          <h2 className="text-base font-semibold" style={{ color: theme.text }}>Activities & Tours</h2>
-          <p className="text-xs" style={{ color: theme.textSecondary }}>Select activities and tours that are available during this season</p>
+          <h2 className="text-base font-semibold" style={{ color: theme.text }}>
+            Activities & Tours
+          </h2>
+          <p className="text-xs" style={{ color: theme.textSecondary }}>
+            Select activities and tours that are available during this season
+          </p>
         </div>
       </div>
 
       <div className="px-6 py-6 space-y-6">
         {/* Activities Section */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>
+          <label
+            className="block text-sm font-medium mb-2"
+            style={{ color: theme.textSecondary }}
+          >
             Activities <span style={{ color: theme.error }}>*</span>
           </label>
           <ActivityDropdown />
-          
+
           {/* Selected Activities Tags */}
           {selectedActivityIds.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {selectedActivityIds.map((id) => {
                 const activity = activities.find((a) => a.activityId === id);
                 return (
-                  <span key={id} className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs" style={{ backgroundColor: `${theme.primary}15`, color: theme.primary }}>
+                  <span
+                    key={id}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                    style={{
+                      backgroundColor: `${theme.primary}15`,
+                      color: theme.primary,
+                    }}
+                  >
                     {activity?.activityName || `Activity ${id}`}
-                    <button type="button" onClick={() => handleToggleActivity(id)} className="hover:scale-110">×</button>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleActivity(id)}
+                      className="hover:scale-110"
+                    >
+                      ×
+                    </button>
                   </span>
                 );
               })}
             </div>
           )}
-          {errors?.activities && <p className="mt-1 text-xs" style={{ color: theme.error }}>{errors.activities}</p>}
+          {errors?.activities && (
+            <p className="mt-1 text-xs" style={{ color: theme.error }}>
+              {errors.activities}
+            </p>
+          )}
         </div>
 
         {/* Tours Section */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>
+          <label
+            className="block text-sm font-medium mb-2"
+            style={{ color: theme.textSecondary }}
+          >
             Tours <span style={{ color: theme.error }}>*</span>
           </label>
           <TourDropdown />
-          
+
           {/* Selected Tours Tags */}
           {selectedTourIds.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {selectedTourIds.map((id) => {
                 const tour = tours.find((t) => t.tourId === id);
                 return (
-                  <span key={id} className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs" style={{ backgroundColor: `${theme.primary}15`, color: theme.primary }}>
+                  <span
+                    key={id}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                    style={{
+                      backgroundColor: `${theme.primary}15`,
+                      color: theme.primary,
+                    }}
+                  >
                     {tour?.tourName || `Tour ${id}`}
-                    <button type="button" onClick={() => handleToggleTour(id)} className="hover:scale-110">×</button>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleTour(id)}
+                      className="hover:scale-110"
+                    >
+                      ×
+                    </button>
                   </span>
                 );
               })}
             </div>
           )}
-          {errors?.tours && <p className="mt-1 text-xs" style={{ color: theme.error }}>{errors.tours}</p>}
+          {errors?.tours && (
+            <p className="mt-1 text-xs" style={{ color: theme.error }}>
+              {errors.tours}
+            </p>
+          )}
         </div>
       </div>
     </div>

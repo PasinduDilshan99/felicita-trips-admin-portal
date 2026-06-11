@@ -1,40 +1,12 @@
-// components/season-components/create-season-components/SeasonBasicInfo.tsx
 "use client";
 
 import React from "react";
-import { Calendar, Sun, CloudRain, Thermometer, Info } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { InputField } from "@/components/common-components/create-components/InputField";
 import { FormHeader } from "@/components/common-components/create-components/FormHeader";
-
-interface SeasonBasicInfoProps {
-  formData: any;
-  errors: Record<string, string>;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-}
-
-// Fix: Convert to string values to match InputField expected type
-const MONTHS = [
-  { value: "1", label: "January" },
-  { value: "2", label: "February" },
-  { value: "3", label: "March" },
-  { value: "4", label: "April" },
-  { value: "5", label: "May" },
-  { value: "6", label: "June" },
-  { value: "7", label: "July" },
-  { value: "8", label: "August" },
-  { value: "9", label: "September" },
-  { value: "10", label: "October" },
-  { value: "11", label: "November" },
-  { value: "12", label: "December" },
-];
-
-const MONSOON_TYPES = [
-  { value: "NORTHEAST", label: "North East Monsoon" },
-  { value: "SOUTHWEST", label: "South West Monsoon" },
-  { value: "INTER_MONSOON", label: "Inter Monsoon" },
-  { value: "DRY", label: "Dry Season" },
-];
+import { SeasonBasicInfoProps } from "@/types/season-types";
+import { MONSOON_TYPES, MONTHS_IN_STRING } from "@/data/static-data";
 
 export const SeasonBasicInfo: React.FC<SeasonBasicInfoProps> = ({
   formData,
@@ -107,7 +79,7 @@ export const SeasonBasicInfo: React.FC<SeasonBasicInfoProps> = ({
             onChange={onInputChange}
             type="select"
             required
-            options={MONTHS}
+            options={MONTHS_IN_STRING}
             error={errors.startMonth}
             helperText="When does the season begin?"
           />
@@ -119,7 +91,7 @@ export const SeasonBasicInfo: React.FC<SeasonBasicInfoProps> = ({
             onChange={onInputChange}
             type="select"
             required
-            options={MONTHS}
+            options={MONTHS_IN_STRING}
             error={errors.endMonth}
             helperText="When does the season end?"
           />

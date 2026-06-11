@@ -1,20 +1,12 @@
-// components/season-components/SeasonSettings.tsx
 "use client";
 
 import React from "react";
-import { Settings, TrendingUp, Hash } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { InputField } from "@/components/common-components/create-components/InputField";
 import { StatusSelector } from "@/components/common-components/StatusSelector";
 import { FormHeader } from "@/components/common-components/create-components/FormHeader";
-
-interface SeasonSettingsProps {
-  formData: any;
-  errors: Record<string, string>;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onStatusChange: (value: "ACTIVE" | "INACTIVE") => void;
-  onPeakChange: (checked: boolean) => void;
-}
+import { SeasonSettingsProps } from "@/types/season-types";
 
 export const SeasonSettings: React.FC<SeasonSettingsProps> = ({
   formData,
@@ -65,11 +57,18 @@ export const SeasonSettings: React.FC<SeasonSettingsProps> = ({
               style={{ accentColor: theme.primary }}
             />
             <div>
-              <span className="text-sm font-medium" style={{ color: theme.text }}>
+              <span
+                className="text-sm font-medium"
+                style={{ color: theme.text }}
+              >
                 Peak Season
               </span>
-              <p className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-                Mark this as a peak travel season (higher demand, premium pricing)
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
+                Mark this as a peak travel season (higher demand, premium
+                pricing)
               </p>
             </div>
           </label>

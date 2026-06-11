@@ -91,3 +91,10 @@ export const CREATE_PACKAGE_SCHEDULE_TIPS = [
   "You can edit this schedule anytime after creation",
   "The schedule will be available for booking based on dates",
 ];
+
+export const CREATE_SEASON_TIPS = [
+  "Verify that months are correctly selected",
+  "Ensure temperature ranges are accurate",
+  "Check that activities and tours are properly assigned",
+  "You can edit this season anytime after creation",
+];
