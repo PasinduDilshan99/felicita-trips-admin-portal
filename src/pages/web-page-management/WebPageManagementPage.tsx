@@ -7,9 +7,9 @@ import { LoadingSkeleton } from "@/components/common-components/management-compo
 import { EmptyState } from "@/components/common-components/management-components/EmptyState";
 import { CategoryCard } from "@/components/common-components/management-components/CategoryCard";
 import { TipBar } from "@/components/common-components/management-components/TipBar";
-import { WEBSITE_CONTENT_MANAGEMENT_URL } from "@/utils/urls";
 import PageHeader from "@/components/common-components/static-components/PageHeader";
 import { webSiteContentManagementSideBarData } from "@/data/side-bar-data";
+import { WEBSITE_CONTENT_MANAGEMENT_HOME_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const WebPageManagementPage = () => {
   const { hasPrivilege, loading } = useAuth();
@@ -19,12 +19,6 @@ const WebPageManagementPage = () => {
   useEffect(() => {
     if (!loading) setTimeout(() => setHeaderVisible(true), 60);
   }, [loading]);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: "/web-management" },
-    { label: "Page Management", href: WEBSITE_CONTENT_MANAGEMENT_URL },
-  ];
 
   const filteredCategories = React.useMemo(
     () =>
@@ -72,7 +66,7 @@ const WebPageManagementPage = () => {
           <PageHeader
             title="Page Management"
             description="Manage your website pages and their sections"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={WEBSITE_CONTENT_MANAGEMENT_HOME_BREADCRUMB_DATA}
           />
         </div>
 

@@ -11,7 +11,6 @@ import {
   ResponsiveContainer,
   Legend,
   ComposedChart,
-  Line,
   Cell,
   PieChart,
   Pie,

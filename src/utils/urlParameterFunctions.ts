@@ -3,9 +3,12 @@ import { ActivityScheduleFilterParams } from "@/types/activity-schedule-types";
 import { ActivityFilterParams } from "@/types/activity-types";
 import { CategoryFilterParams } from "@/types/destination-category-types";
 import { DestinationFilterParams } from "@/types/destination-types";
+import { EmployeeFilterParams } from "@/types/employee-types";
 import { PackageScheduleFilterParams } from "@/types/package-schedule-types";
 import { PackageTypeFilterParams } from "@/types/package-type-types";
 import { PackageFilterParams } from "@/types/package-types";
+import { PrivilegeFilterParams } from "@/types/privilege-types";
+import { RoleFilterParams } from "@/types/role-types";
 import { SeasonFilterParams } from "@/types/season-types";
 import { TourCategoryFilterParams } from "@/types/tour-category-types";
 import { TourScheduleFilterParams } from "@/types/tour-schedule-types";
@@ -560,5 +563,137 @@ export const seasonsViewUrlParamsToFilters = (
     sortDirection: (sortDirection === "DESC" ? "DESC" : "ASC") as
       | "ASC"
       | "DESC",
+  };
+};
+
+export const employeeViewFiltersToUrlParams = (
+  filters: EmployeeFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.employeeTypeId)
+    params.set("employeeTypeId", filters.employeeTypeId.toString());
+  if (filters.departmentId)
+    params.set("departmentId", filters.departmentId.toString());
+  if (filters.employmentType)
+    params.set("employmentType", filters.employmentType);
+  if (filters.workLocation) params.set("workLocation", filters.workLocation);
+  if (filters.employeeGrade) params.set("employeeGrade", filters.employeeGrade);
+  if (filters.supervisorId)
+    params.set("supervisorId", filters.supervisorId.toString());
+  if (filters.reportingManagerId)
+    params.set("reportingManagerId", filters.reportingManagerId.toString());
+  if (filters.status) params.set("status", filters.status);
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
+
+  return params;
+};
+
+export const employeeViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): EmployeeFilterParams => {
+  return {
+    name: params.get("name") || null,
+    employeeTypeId: params.get("employeeTypeId")
+      ? parseInt(params.get("employeeTypeId")!)
+      : null,
+    status: params.get("status") || null,
+    departmentId: params.get("departmentId")
+      ? parseInt(params.get("departmentId")!)
+      : null,
+    employmentType: params.get("employmentType") || null,
+    workLocation: params.get("workLocation") || null,
+    employeeGrade: params.get("employeeGrade") || null,
+    supervisorId: params.get("supervisorId")
+      ? parseInt(params.get("supervisorId")!)
+      : null,
+    reportingManagerId: params.get("reportingManagerId")
+      ? parseInt(params.get("reportingManagerId")!)
+      : null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 12,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") || undefined,
+    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
+  };
+};
+
+export const privilegeViewFiltersToUrlParams = (
+  filters: PrivilegeFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
+
+  return params;
+};
+
+export const privilegeViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): PrivilegeFilterParams => {
+  return {
+    name: params.get("name") || null,
+    status: params.get("status") || null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 12,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") as
+      | "name"
+      | "privilegeId"
+      | "privilegeStatus"
+      | "createdAt"
+      | "updatedAt"
+      | undefined,
+    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
+  };
+};
+
+export const rolesViewFiltersToUrlParams = (
+  filters: RoleFilterParams,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.name) params.set("name", filters.name);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
+  if (filters.pageNumber && filters.pageNumber !== 1)
+    params.set("pageNumber", filters.pageNumber.toString());
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
+
+  return params;
+};
+
+export const rolesViewUrlParamsToFilters = (
+  params: URLSearchParams,
+): RoleFilterParams => {
+  return {
+    name: params.get("name") || null,
+    status: params.get("status") || null,
+    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 12,
+    pageNumber: params.get("pageNumber")
+      ? parseInt(params.get("pageNumber")!)
+      : 1,
+    sortBy: params.get("sortBy") as
+      | "name"
+      | "roleId"
+      | "roleStatus"
+      | "createdAt"
+      | "updatedAt"
+      | undefined,
+    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
   };
 };

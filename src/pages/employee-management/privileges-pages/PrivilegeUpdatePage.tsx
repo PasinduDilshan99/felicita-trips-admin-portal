@@ -1,9 +1,7 @@
-// app/privileges/update/page.tsx (Updated with getPrivilegeDetailsById)
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { PrivilegeService } from "@/services/privilegeService";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -13,8 +11,6 @@ import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import {
   Shield,
-  FileText,
-  AlertCircle,
   Save,
   RefreshCw,
   CheckCircle2,
@@ -29,32 +25,14 @@ import {
   RoleInPrivilege,
 } from "@/types/privilege-types";
 import { UpdateConfirmationModal } from "@/components/common-components/UpdateConfirmationModal";
-
-// Status options for privileges
-const PRIVILEGE_STATUS_OPTIONS = [
-  {
-    value: "ACTIVE" as const,
-    label: "Active",
-    description: "Privilege is available for use",
-    color: "#10b981",
-  },
-  {
-    value: "INACTIVE" as const,
-    label: "Inactive",
-    description: "Privilege is temporarily disabled",
-    color: "#6b7280",
-  },
-];
-
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PRIVILEGE_UPDATE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import {
+  PRIVILEGE_UPDATE_DESCRIPTION_MAX_CHARACTERS,
+  PRIVILEGE_UPDATE_NAME_MAX_CHARACTERS,
+} from "@/data/constnat-data";
+import { PRIVILEGE_UPDATE_STATUS_OPTIONS } from "@/data/status-options-data";
+import { hexToRgba } from "@/utils/functions";
 
 const PrivilegeUpdatePage = () => {
   const searchParams = useSearchParams();
@@ -63,11 +41,7 @@ const PrivilegeUpdatePage = () => {
 
   const initialPrivilegeId = searchParams?.get("id") || "";
   const initialPrivilegeName = searchParams?.get("name") || "";
-
-  // State for privileges list
   const [privileges, setPrivileges] = useState<PrivilegeNameAndId[]>([]);
-
-  // State for selected privilege
   const [selectedPrivilege, setSelectedPrivilege] =
     useState<PrivilegeNameAndId | null>(
       initialPrivilegeId && initialPrivilegeName
@@ -78,17 +52,12 @@ const PrivilegeUpdatePage = () => {
         : null,
     );
 
-  // State for original and edited privilege details
   const [originalPrivilege, setOriginalPrivilege] =
     useState<PrivilegeDetails | null>(null);
   const [editedPrivilege, setEditedPrivilege] =
     useState<PrivilegeDetails | null>(null);
-
-  // State for associated roles (read-only display)
   const [associatedRoles, setAssociatedRoles] = useState<RoleInPrivilege[]>([]);
   const [expandedRoles, setExpandedRoles] = useState(false);
-
-  // UI state
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -97,7 +66,6 @@ const PrivilegeUpdatePage = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
@@ -105,24 +73,12 @@ const PrivilegeUpdatePage = () => {
     actionLink?: string;
   } | null>(null);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Privileges", href: "/privileges" },
-    { label: "Update", href: "/privileges/update" },
-  ];
-
-  // Character limits
-  const NAME_MAX = 100;
-  const DESCRIPTION_MAX = 500;
-
-  // Fetch privileges list on initial load
   useEffect(() => {
     if (!selectedPrivilege) {
       fetchPrivileges();
     }
   }, []);
 
-  // If initialPrivilegeId is provided, fetch details
   useEffect(() => {
     if (initialPrivilegeId && !originalPrivilege) {
       handleSelectPrivilege(parseInt(initialPrivilegeId), initialPrivilegeName);
@@ -171,7 +127,7 @@ const PrivilegeUpdatePage = () => {
       const response = await PrivilegeService.getPrivilegeDetailsById(id);
       if (response.code === 200 && response.data) {
         const privilegeData = response.data;
-        
+
         // Map the response to our PrivilegeDetails interface
         const details: PrivilegeDetails = {
           privilegeId: privilegeData.privilegeId,
@@ -180,7 +136,7 @@ const PrivilegeUpdatePage = () => {
           privilegeStatus: privilegeData.privilegeStatus,
           roles: privilegeData.roles || [],
         };
-        
+
         setOriginalPrivilege(details);
         setEditedPrivilege(details);
         setAssociatedRoles(details.roles || []);
@@ -214,7 +170,7 @@ const PrivilegeUpdatePage = () => {
   };
 
   // Handle status selection
-  const handleStatusChange = (status: "ACTIVE" | "INACTIVE") => {
+  const handleStatusChange = (status: string) => {
     if (!editedPrivilege) return;
     setEditedPrivilege({
       ...editedPrivilege,
@@ -228,7 +184,8 @@ const PrivilegeUpdatePage = () => {
 
     return (
       originalPrivilege.privilegeName !== editedPrivilege.privilegeName ||
-      originalPrivilege.privilegeDescription !== editedPrivilege.privilegeDescription ||
+      originalPrivilege.privilegeDescription !==
+        editedPrivilege.privilegeDescription ||
       originalPrivilege.privilegeStatus !== editedPrivilege.privilegeStatus
     );
   }, [originalPrivilege, editedPrivilege]);
@@ -337,7 +294,10 @@ const PrivilegeUpdatePage = () => {
       });
     }
 
-    if (originalPrivilege.privilegeDescription !== editedPrivilege.privilegeDescription) {
+    if (
+      originalPrivilege.privilegeDescription !==
+      editedPrivilege.privilegeDescription
+    ) {
       changes.push({
         field: "Description",
         oldValue: originalPrivilege.privilegeDescription || "(empty)",
@@ -432,7 +392,7 @@ const PrivilegeUpdatePage = () => {
           <PageHeader
             title="Update Privilege"
             description="Edit and update existing privilege information"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PRIVILEGE_UPDATE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -570,12 +530,14 @@ const PrivilegeUpdatePage = () => {
                       className="text-xs tabular-nums"
                       style={{
                         color:
-                          editedPrivilege.privilegeName.length > NAME_MAX * 0.9
+                          editedPrivilege.privilegeName.length >
+                          PRIVILEGE_UPDATE_NAME_MAX_CHARACTERS * 0.9
                             ? theme.error
                             : theme.textSecondary,
                       }}
                     >
-                      {editedPrivilege.privilegeName.length}/{NAME_MAX}
+                      {editedPrivilege.privilegeName.length}/
+                      {PRIVILEGE_UPDATE_NAME_MAX_CHARACTERS}
                     </span>
                   </div>
                   <input
@@ -585,7 +547,7 @@ const PrivilegeUpdatePage = () => {
                     value={editedPrivilege.privilegeName}
                     onChange={handleFieldChange}
                     placeholder="e.g. Manage Users, View Reports, Edit Settings"
-                    maxLength={NAME_MAX}
+                    maxLength={PRIVILEGE_UPDATE_NAME_MAX_CHARACTERS}
                     className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
                     style={{
                       ...fieldBase,
@@ -611,12 +573,13 @@ const PrivilegeUpdatePage = () => {
                       style={{
                         color:
                           (editedPrivilege.privilegeDescription?.length || 0) >
-                          DESCRIPTION_MAX * 0.9
+                          PRIVILEGE_UPDATE_DESCRIPTION_MAX_CHARACTERS * 0.9
                             ? theme.error
                             : theme.textSecondary,
                       }}
                     >
-                      {editedPrivilege.privilegeDescription?.length || 0}/{DESCRIPTION_MAX}
+                      {editedPrivilege.privilegeDescription?.length || 0}/
+                      {PRIVILEGE_UPDATE_DESCRIPTION_MAX_CHARACTERS}
                     </span>
                   </div>
                   <textarea
@@ -626,7 +589,7 @@ const PrivilegeUpdatePage = () => {
                     onChange={handleFieldChange}
                     rows={5}
                     placeholder="Describe what this privilege allows users to do..."
-                    maxLength={DESCRIPTION_MAX}
+                    maxLength={PRIVILEGE_UPDATE_DESCRIPTION_MAX_CHARACTERS}
                     className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none"
                     style={{
                       ...fieldBase,
@@ -647,8 +610,9 @@ const PrivilegeUpdatePage = () => {
                   </label>
 
                   <div className="flex gap-3">
-                    {PRIVILEGE_STATUS_OPTIONS.map((opt) => {
-                      const isSelected = editedPrivilege.privilegeStatus === opt.value;
+                    {PRIVILEGE_UPDATE_STATUS_OPTIONS.map((opt) => {
+                      const isSelected =
+                        editedPrivilege.privilegeStatus === opt.value;
                       return (
                         <button
                           key={opt.value}
@@ -725,7 +689,9 @@ const PrivilegeUpdatePage = () => {
                   onClick={() => setExpandedRoles(!expandedRoles)}
                   className="w-full flex items-center justify-between px-6 py-4 cursor-pointer transition-colors duration-200"
                   style={{
-                    borderBottom: expandedRoles ? `1px solid ${theme.border}` : "none",
+                    borderBottom: expandedRoles
+                      ? `1px solid ${theme.border}`
+                      : "none",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = `${theme.border}20`;
@@ -767,13 +733,16 @@ const PrivilegeUpdatePage = () => {
                         color: theme.primary,
                       }}
                     >
-                      {associatedRoles.length} role{associatedRoles.length !== 1 ? "s" : ""}
+                      {associatedRoles.length} role
+                      {associatedRoles.length !== 1 ? "s" : ""}
                     </span>
                     <ChevronRight
                       className="w-5 h-5 transition-transform duration-200"
                       style={{
                         color: theme.textSecondary,
-                        transform: expandedRoles ? "rotate(90deg)" : "rotate(0deg)",
+                        transform: expandedRoles
+                          ? "rotate(90deg)"
+                          : "rotate(0deg)",
                       }}
                     />
                   </div>
@@ -792,8 +761,14 @@ const PrivilegeUpdatePage = () => {
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4" style={{ color: theme.primary }} />
-                            <span className="font-medium text-sm" style={{ color: theme.text }}>
+                            <Users
+                              className="w-4 h-4"
+                              style={{ color: theme.primary }}
+                            />
+                            <span
+                              className="font-medium text-sm"
+                              style={{ color: theme.text }}
+                            >
                               {role.roleName}
                             </span>
                           </div>
@@ -809,7 +784,10 @@ const PrivilegeUpdatePage = () => {
                           </span>
                         </div>
                         {role.roleDescription && (
-                          <p className="text-xs ml-6" style={{ color: theme.textSecondary }}>
+                          <p
+                            className="text-xs ml-6"
+                            style={{ color: theme.textSecondary }}
+                          >
                             {role.roleDescription}
                           </p>
                         )}

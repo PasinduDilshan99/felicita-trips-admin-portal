@@ -1,4 +1,3 @@
-// app/user-management/employees/view/[employeeId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,9 +7,11 @@ import { EmployeeService } from "@/services/employeeService";
 import { EmployeeFullDetails } from "@/types/employee-types";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
-import { EMPLOYEES_VIEW_PAGE_URL } from "@/utils/urls";
-
-// Sub-components
+import {
+  EMPLOYEE_TERMINATE_PAGE_URL,
+  EMPLOYEE_UPDATE_PAGE_URL,
+  EMPLOYEES_VIEW_PAGE_URL,
+} from "@/utils/urls";
 import {
   BasicInfoCard,
   EmploymentInfoCard,
@@ -68,18 +69,21 @@ const EmployeeDetailsViewPage = () => {
     }
   };
 
-  const handleBack = () => router.push(EMPLOYEES_VIEW_PAGE_URL);
-  const handleEdit = () =>
-    router.push(`${EMPLOYEES_VIEW_PAGE_URL}/edit/${employeeId}`);
-  const handleDelete = () => {
-    if (
-      confirm(
-        `Are you sure you want to delete employee "${employee?.fullName}"?`,
-      )
-    ) {
-      console.log("Delete employee:", employeeId);
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
       router.push(EMPLOYEES_VIEW_PAGE_URL);
     }
+  };
+  const handleEdit = () =>
+    router.push(
+      `${EMPLOYEE_UPDATE_PAGE_URL}/${employeeId}?name${employee?.username}`,
+    );
+  const handleDelete = () => {
+    router.push(
+      `${EMPLOYEE_TERMINATE_PAGE_URL}/${employeeId}?name${employee?.username}`,
+    );
   };
 
   if (loading) {
@@ -115,21 +119,13 @@ const EmployeeDetailsViewPage = () => {
       className="min-h-screen transition-colors duration-300"
       style={{ backgroundColor: theme.background }}
     >
-      {/* Hero header (sticky breadcrumb + profile banner) */}
       <EmployeeHeroHeader
         employee={employee}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
 
-      {/* Main content grid */}
-      <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-8">
-        {/*
-          Layout:
-          - Mobile (< sm): single column, all cards stacked
-          - Tablet (sm–lg): two-column grid
-          - Desktop (lg+): 1/3 left sidebar + 2/3 main content
-        */}
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* ── Left column (sidebar) ── */}
           <div className="lg:col-span-1 flex flex-col gap-5">

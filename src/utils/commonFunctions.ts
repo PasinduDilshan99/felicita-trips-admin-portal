@@ -91,20 +91,28 @@ export const getMonthName = (monthNumber: number): string => {
   return months[monthNumber - 1] || "Unknown";
 };
 
-export   const formatMonth = (month: number): string => {
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    return months[month - 1] || "N/A";
-  };
+export const formatMonth = (month: number): string => {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  return months[month - 1] || "N/A";
+};
+
+export const getInitials = (name: string): string =>
+  name
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();

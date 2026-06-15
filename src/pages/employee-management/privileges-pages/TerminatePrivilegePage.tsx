@@ -1,9 +1,7 @@
-// app/privileges/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { PrivilegeService } from "@/services/privilegeService";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -18,29 +16,18 @@ import {
   Users,
   CheckCircle,
   XCircle,
-  Calendar,
-  Hash,
   AlertCircle,
   Trash2,
 } from "lucide-react";
-import { PrivilegeDetails, PrivilegeNameAndId } from "@/types/privilege-types";
+import {
+  PrivilegeDetails,
+  PrivilegeNameAndId,
+  PrivilegeSearchItem,
+} from "@/types/privilege-types";
 import { TerminateConfirmModal } from "@/components/common-components/TerminateConfirmModal";
-
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface PrivilegeSearchItem {
-  id: number;
-  name: string;
-}
+import { hexToRgba } from "@/utils/functions";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PRIVILEGE_TERMINATE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const TerminatePrivilegePage = () => {
   const { theme } = useTheme();
@@ -51,15 +38,17 @@ const TerminatePrivilegePage = () => {
   const initialPrivilegeId = searchParams?.get("privilege-id") || "";
 
   const [privileges, setPrivileges] = useState<PrivilegeNameAndId[]>([]);
-  const [selectedPrivilege, setSelectedPrivilege] = useState<PrivilegeNameAndId | null>(
-    initialPrivilegeId && initialPrivilegeName
-      ? {
-          id: parseInt(initialPrivilegeId),
-          name: initialPrivilegeName,
-        }
-      : null,
-  );
-  const [privilegeDetails, setPrivilegeDetails] = useState<PrivilegeDetails | null>(null);
+  const [selectedPrivilege, setSelectedPrivilege] =
+    useState<PrivilegeNameAndId | null>(
+      initialPrivilegeId && initialPrivilegeName
+        ? {
+            id: parseInt(initialPrivilegeId),
+            name: initialPrivilegeName,
+          }
+        : null,
+    );
+  const [privilegeDetails, setPrivilegeDetails] =
+    useState<PrivilegeDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingTerminate, setLoadingTerminate] = useState(false);
@@ -74,12 +63,6 @@ const TerminatePrivilegePage = () => {
     message: string;
     actionLink?: string;
   } | null>(null);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Privileges", href: "/privileges" },
-    { label: "Terminate", href: "/privileges/terminate" },
-  ];
 
   const fetchPrivileges = async () => {
     setLoading(true);
@@ -185,7 +168,8 @@ const TerminatePrivilegePage = () => {
       setToast({
         type: "error",
         title: "Termination Failed",
-        message: err.message || "Failed to terminate privilege. Please try again.",
+        message:
+          err.message || "Failed to terminate privilege. Please try again.",
       });
     } finally {
       setLoadingTerminate(false);
@@ -231,10 +215,7 @@ const TerminatePrivilegePage = () => {
 
   useEffect(() => {
     if (initialPrivilegeId && !privilegeDetails) {
-      handleSelectPrivilege(
-        parseInt(initialPrivilegeId),
-        initialPrivilegeName,
-      );
+      handleSelectPrivilege(parseInt(initialPrivilegeId), initialPrivilegeName);
     }
   }, [initialPrivilegeId, initialPrivilegeName]);
 
@@ -278,7 +259,7 @@ const TerminatePrivilegePage = () => {
           <PageHeader
             title="Terminate Privilege"
             description="Permanently remove a privilege from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PRIVILEGE_TERMINATE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -318,7 +299,8 @@ const TerminatePrivilegePage = () => {
                   className="text-xs mt-0.5"
                   style={{ color: theme.textSecondary }}
                 >
-                  Search and select a privilege to review its data before termination
+                  Search and select a privilege to review its data before
+                  termination
                 </p>
               </div>
             </div>
@@ -396,7 +378,8 @@ const TerminatePrivilegePage = () => {
                   Privilege Termination Review
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: theme.error }}>
-                  Review all data carefully. This action is permanent and cannot be undone.
+                  Review all data carefully. This action is permanent and cannot
+                  be undone.
                 </p>
               </div>
               <div
@@ -442,18 +425,29 @@ const TerminatePrivilegePage = () => {
                     }}
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      <Shield className="w-5 h-5" style={{ color: theme.primary }} />
-                      <span className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+                      <Shield
+                        className="w-5 h-5"
+                        style={{ color: theme.primary }}
+                      />
+                      <span
+                        className="text-xs font-medium uppercase tracking-wide"
+                        style={{ color: theme.textSecondary }}
+                      >
                         Status
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       {(() => {
-                        const config = getStatusConfig(privilegeDetails.privilegeStatus);
+                        const config = getStatusConfig(
+                          privilegeDetails.privilegeStatus,
+                        );
                         const IconComponent = config.icon;
                         return (
                           <>
-                            <IconComponent className="w-5 h-5" style={{ color: config.color }} />
+                            <IconComponent
+                              className="w-5 h-5"
+                              style={{ color: config.color }}
+                            />
                             <span
                               className="text-sm font-semibold"
                               style={{ color: config.color }}
@@ -475,16 +469,30 @@ const TerminatePrivilegePage = () => {
                     }}
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      <Users className="w-5 h-5" style={{ color: theme.warning }} />
-                      <span className="text-xs font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+                      <Users
+                        className="w-5 h-5"
+                        style={{ color: theme.warning }}
+                      />
+                      <span
+                        className="text-xs font-medium uppercase tracking-wide"
+                        style={{ color: theme.textSecondary }}
+                      >
                         Associated Roles
                       </span>
                     </div>
-                    <p className="text-2xl font-bold" style={{ color: theme.warning }}>
+                    <p
+                      className="text-2xl font-bold"
+                      style={{ color: theme.warning }}
+                    >
                       {privilegeDetails.roles.length}
                     </p>
-                    <p className="text-xs mt-1" style={{ color: theme.textSecondary }}>
-                      {privilegeDetails.roles.length === 1 ? "role uses this privilege" : "roles use this privilege"}
+                    <p
+                      className="text-xs mt-1"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      {privilegeDetails.roles.length === 1
+                        ? "role uses this privilege"
+                        : "roles use this privilege"}
                     </p>
                   </div>
                 </div>
@@ -505,25 +513,41 @@ const TerminatePrivilegePage = () => {
                     }}
                   >
                     <Key className="w-4 h-4" style={{ color: theme.primary }} />
-                    <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                    <h3
+                      className="text-sm font-semibold"
+                      style={{ color: theme.text }}
+                    >
                       Privilege Information
                     </h3>
                   </div>
                   <div className="px-4 py-4 space-y-3">
                     <div>
-                      <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+                      <p
+                        className="text-xs font-medium mb-1"
+                        style={{ color: theme.textSecondary }}
+                      >
                         Privilege Name
                       </p>
-                      <p className="text-base font-semibold" style={{ color: theme.text }}>
+                      <p
+                        className="text-base font-semibold"
+                        style={{ color: theme.text }}
+                      >
                         {privilegeDetails.privilegeName}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs font-medium mb-1" style={{ color: theme.textSecondary }}>
+                      <p
+                        className="text-xs font-medium mb-1"
+                        style={{ color: theme.textSecondary }}
+                      >
                         Description
                       </p>
-                      <p className="text-sm" style={{ color: theme.textSecondary }}>
-                        {privilegeDetails.privilegeDescription || "No description provided"}
+                      <p
+                        className="text-sm"
+                        style={{ color: theme.textSecondary }}
+                      >
+                        {privilegeDetails.privilegeDescription ||
+                          "No description provided"}
                       </p>
                     </div>
                   </div>
@@ -545,8 +569,14 @@ const TerminatePrivilegePage = () => {
                     }}
                   >
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" style={{ color: theme.warning }} />
-                      <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                      <Users
+                        className="w-4 h-4"
+                        style={{ color: theme.warning }}
+                      />
+                      <h3
+                        className="text-sm font-semibold"
+                        style={{ color: theme.text }}
+                      >
                         Associated Roles ({privilegeDetails.roles.length})
                       </h3>
                     </div>
@@ -578,13 +608,22 @@ const TerminatePrivilegePage = () => {
                             >
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
-                                  <Shield className="w-4 h-4" style={{ color: theme.primary }} />
-                                  <span className="font-medium text-sm" style={{ color: theme.text }}>
+                                  <Shield
+                                    className="w-4 h-4"
+                                    style={{ color: theme.primary }}
+                                  />
+                                  <span
+                                    className="font-medium text-sm"
+                                    style={{ color: theme.text }}
+                                  >
                                     {role.roleName}
                                   </span>
                                 </div>
                                 {role.roleDescription && (
-                                  <p className="text-xs mt-1 ml-6" style={{ color: theme.textSecondary }}>
+                                  <p
+                                    className="text-xs mt-1 ml-6"
+                                    style={{ color: theme.textSecondary }}
+                                  >
                                     {role.roleDescription}
                                   </p>
                                 )}
@@ -607,8 +646,14 @@ const TerminatePrivilegePage = () => {
                       </div>
                     ) : (
                       <div className="text-center py-6">
-                        <Users className="w-8 h-8 mx-auto mb-2 opacity-30" style={{ color: theme.textSecondary }} />
-                        <p className="text-sm" style={{ color: theme.textSecondary }}>
+                        <Users
+                          className="w-8 h-8 mx-auto mb-2 opacity-30"
+                          style={{ color: theme.textSecondary }}
+                        />
+                        <p
+                          className="text-sm"
+                          style={{ color: theme.textSecondary }}
+                        >
                           No roles are currently using this privilege
                         </p>
                       </div>
@@ -625,15 +670,32 @@ const TerminatePrivilegePage = () => {
                   }}
                 >
                   <div className="flex gap-3">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: theme.error }} />
+                    <AlertCircle
+                      className="w-5 h-5 flex-shrink-0"
+                      style={{ color: theme.error }}
+                    />
                     <div>
-                      <p className="text-sm font-semibold mb-1" style={{ color: theme.error }}>
+                      <p
+                        className="text-sm font-semibold mb-1"
+                        style={{ color: theme.error }}
+                      >
                         Termination Impact
                       </p>
-                      <ul className="text-xs space-y-1" style={{ color: theme.textSecondary }}>
-                        <li>• This privilege will be permanently removed from the system</li>
-                        <li>• Any roles using this privilege will have it revoked</li>
-                        <li>• Users with roles containing this privilege will lose access</li>
+                      <ul
+                        className="text-xs space-y-1"
+                        style={{ color: theme.textSecondary }}
+                      >
+                        <li>
+                          • This privilege will be permanently removed from the
+                          system
+                        </li>
+                        <li>
+                          • Any roles using this privilege will have it revoked
+                        </li>
+                        <li>
+                          • Users with roles containing this privilege will lose
+                          access
+                        </li>
                         <li>• This action cannot be undone</li>
                       </ul>
                     </div>
@@ -714,7 +776,10 @@ const TerminatePrivilegePage = () => {
           privilegeDetails
             ? [
                 { label: "Status", value: privilegeDetails.privilegeStatus },
-                { label: "Associated Roles", value: privilegeDetails.roles.length },
+                {
+                  label: "Associated Roles",
+                  value: privilegeDetails.roles.length,
+                },
               ]
             : []
         }

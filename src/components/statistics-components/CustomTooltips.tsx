@@ -31,6 +31,24 @@ export const CustomPieTooltip = ({ active, payload }: any) => {
   );
 };
 
+export const CustomAreaTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="dp-tooltip">
+      <p className="dp-tooltip__label">{label}</p>
+      {payload.map((entry: any, index: number) => (
+        <p
+          key={index}
+          className="dp-tooltip__value"
+          style={{ color: entry.color }}
+        >
+          {entry.name}: {entry.value} privileges
+        </p>
+      ))}
+    </div>
+  );
+};
+
 // Tour Category-specific tooltips
 export const TourCategoryPieTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -754,6 +772,28 @@ export const PeakSeasonTooltip = ({ active, payload }: any) => {
       <p className="sn-tooltip__sub">
         {data.isPeak ? "🔥 Peak Season" : "Off-Peak Season"}
       </p>
+    </div>
+  );
+};
+
+export const CustomSalaryTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="dp-tooltip">
+      <p className="dp-tooltip__label">{label}</p>
+      <p className="dp-tooltip__value">
+        Avg Salary: ${payload[0]?.value?.toLocaleString()}
+      </p>
+    </div>
+  );
+};
+
+export const CustomLineTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="dp-tooltip">
+      <p className="dp-tooltip__label">{label}</p>
+      <p className="dp-tooltip__value">{payload[0].value} employees hired</p>
     </div>
   );
 };

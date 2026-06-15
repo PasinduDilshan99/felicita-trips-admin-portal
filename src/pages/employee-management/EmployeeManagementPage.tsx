@@ -1,8 +1,6 @@
-// app/employee-management/page.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { LoadingSkeleton } from "@/components/common-components/management-components/LoadingSkeleton";
@@ -10,6 +8,8 @@ import { EmptyState } from "@/components/common-components/management-components
 import { CategoryCard } from "@/components/common-components/management-components/CategoryCard";
 import { TipBar } from "@/components/common-components/management-components/TipBar";
 import { employeeManagementSideBarData } from "@/data/side-bar-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { EMPLOYEE_MANAGEMENT_HOME_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const EmployeeManagementPage = () => {
   const { hasPrivilege, loading } = useAuth();
@@ -19,11 +19,6 @@ const EmployeeManagementPage = () => {
   useEffect(() => {
     if (!loading) setTimeout(() => setHeaderVisible(true), 60);
   }, [loading]);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Employee Management", href: "/employee-management" },
-  ];
 
   const filteredCategories = React.useMemo(
     () =>
@@ -70,7 +65,7 @@ const EmployeeManagementPage = () => {
           <PageHeader
             title="Employee Management"
             description="Manage employees, attendance, leaves, payroll, and HR operations"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={EMPLOYEE_MANAGEMENT_HOME_BREADCRUMB_DATA}
           />
         </div>
       </div>

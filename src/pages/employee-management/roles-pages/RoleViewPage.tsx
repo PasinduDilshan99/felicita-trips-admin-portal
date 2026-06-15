@@ -1,11 +1,7 @@
-// app/user-management/roles/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
+import FilterPanel from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
@@ -17,80 +13,26 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
-import {
-  EMPLOYEE_MANAGEMENT_URL,
-  ROLES_MANAGEMENT_PAGE_URL,
-  ROLES_VIEW_PAGE_URL,
-} from "@/utils/urls";
+import { ROLES_VIEW_PAGE_URL } from "@/utils/urls";
 import RoleCard from "@/components/employee-management-components/roles-components/role-view-components/RoleCard";
 import RoleListCard from "@/components/employee-management-components/roles-components/role-view-components/RoleListCard";
-
-// Sort options
-const SORT_OPTIONS = [
-  { value: "name", label: "Role Name" },
-  { value: "roleId", label: "Role ID" },
-  { value: "roleStatus", label: "Status" },
-  { value: "createdAt", label: "Created Date" },
-  { value: "updatedAt", label: "Updated Date" },
-];
-
-// Status options
-const STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-];
-
-// Utility functions for URL params management
-const filtersToUrlParams = (
-  filters: RoleFilterParams,
-): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.status) params.set("status", filters.status);
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
-
-  return params;
-};
-
-const urlParamsToFilters = (params: URLSearchParams): RoleFilterParams => {
-  return {
-    name: params.get("name") || null,
-    status: params.get("status") || null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 12,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-    sortBy: params.get("sortBy") as
-      | "name"
-      | "roleId"
-      | "roleStatus"
-      | "createdAt"
-      | "updatedAt"
-      | undefined,
-    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
-  };
-};
-
-const breadcrumbItems = [
-  { label: "Dashboard", href: "/" },
-  { label: "Employee Management", href: EMPLOYEE_MANAGEMENT_URL },
-  { label: "Roles", href: ROLES_MANAGEMENT_PAGE_URL },
-];
+import {
+  rolesViewFiltersToUrlParams,
+  rolesViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { FilterField } from "@/types/filter-types";
+import { ROLE_VIEW_STATUS_OPTIONS } from "@/data/status-options-data";
+import { ROLE_VIEW_SORTING_OPTIONS } from "@/data/sorting-options";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ROLE_VIEW_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const RoleViewContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { theme } = useTheme();
-
   const [filters, setFilters] = useState<RoleFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    rolesViewUrlParamsToFilters(searchParams || new URLSearchParams()),
   );
-
   const [roles, setRoles] = useState<Role[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -116,21 +58,23 @@ const RoleViewContent = () => {
       key: "status",
       label: "Status",
       type: "select",
-      options: STATUS_OPTIONS,
+      options: ROLE_VIEW_STATUS_OPTIONS,
       width: "third",
     },
   ];
 
   // Get sort label for display
   const getSortLabel = (sortBy: string): string => {
-    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
+    const option = ROLE_VIEW_SORTING_OPTIONS.find(
+      (opt) => opt.value === sortBy,
+    );
     return option ? option.label : sortBy;
   };
 
   // Update URL with current filters
   const updateURL = useCallback(
     (newFilters: RoleFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = rolesViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
         ? `${ROLES_VIEW_PAGE_URL}?${queryString}`
@@ -141,39 +85,35 @@ const RoleViewContent = () => {
     [router],
   );
 
-  const fetchRoles = useCallback(
-    async (currentFilters: RoleFilterParams) => {
-      setLoading(true);
-      setError(null);
-      try {
-        // IMPORTANT: Convert page number from 1-based (UI) to 0-based (API)
-        const apiFilters = {
-          ...currentFilters,
-          pageNumber: Math.max(0, (currentFilters.pageNumber || 1) - 1),
-        };
+  const fetchRoles = useCallback(async (currentFilters: RoleFilterParams) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const apiFilters = {
+        ...currentFilters,
+        pageNumber: Math.max(0, (currentFilters.pageNumber || 1) - 1),
+      };
 
-        const response = await RoleService.getAllRoles(apiFilters);
-        setRoles(response.data.roleResponses);
-        setTotalItems(response.data.totalResponse);
-      } catch (err: any) {
-        console.error("Error fetching roles:", err);
-        setError(err.message || "Failed to load roles");
-        setToast({
-          type: "error",
-          title: "Error",
-          message: err.message || "Failed to load roles",
-        });
-      } finally {
-        setLoading(false);
-        setIsInitialLoad(false);
-      }
-    },
-    [],
-  );
+      const response = await RoleService.getAllRoles(apiFilters);
+      setRoles(response.data.roleResponses);
+      setTotalItems(response.data.totalResponse);
+    } catch (err: any) {
+      console.error("Error fetching roles:", err);
+      setError(err.message || "Failed to load roles");
+      setToast({
+        type: "error",
+        title: "Error",
+        message: err.message || "Failed to load roles",
+      });
+    } finally {
+      setLoading(false);
+      setIsInitialLoad(false);
+    }
+  }, []);
 
   // Initial load from URL params
   useEffect(() => {
-    const initialFilters = urlParamsToFilters(
+    const initialFilters = rolesViewUrlParamsToFilters(
       searchParams || new URLSearchParams(),
     );
     setFilters(initialFilters);
@@ -183,7 +123,7 @@ const RoleViewContent = () => {
   // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = rolesViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -357,7 +297,7 @@ const RoleViewContent = () => {
           <PageHeader
             title="Roles"
             description="Manage user roles and permissions"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ROLE_VIEW_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -377,7 +317,7 @@ const RoleViewContent = () => {
             pageSizeOptions={[12, 15, 20, 30, 50]}
             showPageSize={true}
             showSorting={true}
-            sortOptions={SORT_OPTIONS}
+            sortOptions={ROLE_VIEW_SORTING_OPTIONS}
             sortBy={filters.sortBy || ""}
             sortDirection={filters.sortDirection || "ASC"}
             title="Filter Roles"
@@ -429,10 +369,7 @@ const RoleViewContent = () => {
             {viewMode === "grid" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {roles.map((role) => (
-                  <RoleCard
-                    key={role.roleId}
-                    role={role}
-                  />
+                  <RoleCard key={role.roleId} role={role} />
                 ))}
               </div>
             )}
@@ -441,10 +378,7 @@ const RoleViewContent = () => {
             {viewMode === "list" && (
               <div className="space-y-4 mb-8">
                 {roles.map((role) => (
-                  <RoleListCard
-                    key={role.roleId}
-                    role={role}
-                  />
+                  <RoleListCard key={role.roleId} role={role} />
                 ))}
               </div>
             )}

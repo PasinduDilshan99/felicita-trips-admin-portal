@@ -1,18 +1,17 @@
-// components/employee-details/AssetsCard.tsx
 "use client";
 
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { EmployeeAsset } from "@/types/employee-types";
+import { AssetsCardProps, TimestampsCardProps } from "@/types/employee-types";
 import { hexToRgba } from "@/utils/functions";
 import { InfoCard } from "./InfoCard";
+import { InfoRow } from "./InfoCard";
+import { formatDate, formatDateTime, getAssetIcon } from "@/utils/utils";
 
-interface AssetsCardProps {
-  assets?: EmployeeAsset[];
-  animationDelay?: number;
-}
-
-export const AssetsCard: React.FC<AssetsCardProps> = ({ assets, animationDelay = 0 }) => {
+export const AssetsCard: React.FC<AssetsCardProps> = ({
+  assets,
+  animationDelay = 0,
+}) => {
   const { theme } = useTheme();
 
   return (
@@ -45,11 +44,18 @@ export const AssetsCard: React.FC<AssetsCardProps> = ({ assets, animationDelay =
                   {getAssetIcon(asset.assetType)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold truncate" style={{ color: theme.text }}>
+                  <div
+                    className="text-sm font-semibold truncate"
+                    style={{ color: theme.text }}
+                  >
                     {asset.assetName}
                   </div>
-                  <div className="text-xs" style={{ color: theme.textSecondary }}>
-                    {asset.assetType}{asset.model ? ` · ${asset.model}` : ""}
+                  <div
+                    className="text-xs"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    {asset.assetType}
+                    {asset.model ? ` · ${asset.model}` : ""}
                   </div>
                 </div>
                 <div
@@ -68,20 +74,37 @@ export const AssetsCard: React.FC<AssetsCardProps> = ({ assets, animationDelay =
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                   <div>
                     <span style={{ color: theme.textSecondary }}>Assigned</span>
-                    <div className="font-medium mt-0.5" style={{ color: theme.text }}>
+                    <div
+                      className="font-medium mt-0.5"
+                      style={{ color: theme.text }}
+                    >
                       {formatDate(asset.assignedDate)}
                     </div>
                   </div>
                   <div>
-                    <span style={{ color: theme.textSecondary }}>Return date</span>
-                    <div className="font-medium mt-0.5" style={{ color: asset.returnDate ? theme.text : theme.success }}>
-                      {asset.returnDate ? formatDate(asset.returnDate) : "In use"}
+                    <span style={{ color: theme.textSecondary }}>
+                      Return date
+                    </span>
+                    <div
+                      className="font-medium mt-0.5"
+                      style={{
+                        color: asset.returnDate ? theme.text : theme.success,
+                      }}
+                    >
+                      {asset.returnDate
+                        ? formatDate(asset.returnDate)
+                        : "In use"}
                     </div>
                   </div>
                   {asset.conditionOnAssignment && (
                     <div>
-                      <span style={{ color: theme.textSecondary }}>Condition</span>
-                      <div className="font-medium mt-0.5" style={{ color: theme.text }}>
+                      <span style={{ color: theme.textSecondary }}>
+                        Condition
+                      </span>
+                      <div
+                        className="font-medium mt-0.5"
+                        style={{ color: theme.text }}
+                      >
                         {asset.conditionOnAssignment}
                       </div>
                     </div>
@@ -106,17 +129,6 @@ export const AssetsCard: React.FC<AssetsCardProps> = ({ assets, animationDelay =
     </InfoCard>
   );
 };
-
-
-// components/employee-details/TimestampsCard.tsx
-import { InfoRow } from "./InfoCard";
-import { formatDate, formatDateTime, getAssetIcon } from "@/utils/utils";
-
-interface TimestampsCardProps {
-  createdAt?: string;
-  updatedAt?: string;
-  animationDelay?: number;
-}
 
 export const TimestampsCard: React.FC<TimestampsCardProps> = ({
   createdAt,

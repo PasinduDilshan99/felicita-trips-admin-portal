@@ -1,103 +1,34 @@
-// app/user-management/employees/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
+import FilterPanel from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import { EmployeeService } from "@/services/employeeService";
-import { EmployeeFilterParams, EmployeeBasic, EmployeeFilterOptions, FilterOption } from "@/types/employee-types";
+import {
+  EmployeeFilterParams,
+  EmployeeBasic,
+  EmployeeFilterOptions,
+  FilterOption,
+} from "@/types/employee-types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
-import { EMPLOYEE_MANAGEMENT_URL, EMPLOYEES_VIEW_PAGE_URL } from "@/utils/urls";
+import { EMPLOYEE_ADD_PAGE_URL, EMPLOYEES_VIEW_PAGE_URL } from "@/utils/urls";
 import EmployeeCard from "@/components/employee-management-components/employee-components/employee-view-components/EmployeeCard";
 import EmployeeListCard from "@/components/employee-management-components/employee-components/employee-view-components/EmployeeListCard";
-
-// Sort options
-const SORT_OPTIONS = [
-  { value: "employeeType", label: "Employee Type" },
-  { value: "department", label: "Department" },
-  { value: "employmentType", label: "Employment Type" },
-  { value: "workLocation", label: "Work Location" },
-  { value: "employeeGrade", label: "Employee Grade" },
-  { value: "supervisor", label: "Supervisor" },
-  { value: "reportingManager", label: "Reporting Manager" },
-  { value: "fullName", label: "Full Name" },
-  { value: "employeeCode", label: "Employee Code" },
-  { value: "employeeId", label: "Employee ID" },
-  { value: "status", label: "Status" },
-  { value: "createdAt", label: "Created Date" },
-  { value: "updatedAt", label: "Updated Date" },
-];
-
-// Utility functions for URL params management
-const filtersToUrlParams = (filters: EmployeeFilterParams): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.employeeTypeId)
-    params.set("employeeTypeId", filters.employeeTypeId.toString());
-  if (filters.departmentId)
-    params.set("departmentId", filters.departmentId.toString());
-  if (filters.employmentType)
-    params.set("employmentType", filters.employmentType);
-  if (filters.workLocation) params.set("workLocation", filters.workLocation);
-  if (filters.employeeGrade) params.set("employeeGrade", filters.employeeGrade);
-  if (filters.supervisorId)
-    params.set("supervisorId", filters.supervisorId.toString());
-  if (filters.reportingManagerId)
-    params.set("reportingManagerId", filters.reportingManagerId.toString());
-  if (filters.status) params.set("status", filters.status);
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
-
-  return params;
-};
-
-const urlParamsToFilters = (params: URLSearchParams): EmployeeFilterParams => {
-  return {
-    name: params.get("name") || null,
-    employeeTypeId: params.get("employeeTypeId")
-      ? parseInt(params.get("employeeTypeId")!)
-      : null,
-    status: params.get("status") || null,
-    departmentId: params.get("departmentId")
-      ? parseInt(params.get("departmentId")!)
-      : null,
-    employmentType: params.get("employmentType") || null,
-    workLocation: params.get("workLocation") || null,
-    employeeGrade: params.get("employeeGrade") || null,
-    supervisorId: params.get("supervisorId")
-      ? parseInt(params.get("supervisorId")!)
-      : null,
-    reportingManagerId: params.get("reportingManagerId")
-      ? parseInt(params.get("reportingManagerId")!)
-      : null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 12,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-    sortBy: params.get("sortBy") || undefined,
-    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
-  };
-};
-
-const breadcrumbItems = [
-  { label: "Dashboard", href: "/" },
-  { label: "Employee Management", href: EMPLOYEE_MANAGEMENT_URL },
-  { label: "Employees", href: EMPLOYEES_VIEW_PAGE_URL },
-];
+import { FilterField } from "@/types/filter-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import {
+  employeeViewFiltersToUrlParams,
+  employeeViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { EMPLOYEE_VIEW_SORTING_OPTIONS } from "@/data/sorting-options";
+import { EMPLOYEE_MANAGEMENT_VIEW_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const EmployeeViewContent = () => {
   const router = useRouter();
@@ -105,7 +36,7 @@ const EmployeeViewContent = () => {
   const { theme } = useTheme();
 
   const [filters, setFilters] = useState<EmployeeFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    employeeViewUrlParamsToFilters(searchParams || new URLSearchParams()),
   );
 
   const [employees, setEmployees] = useState<EmployeeBasic[]>([]);
@@ -172,7 +103,10 @@ const EmployeeViewContent = () => {
         key: "employeeTypeId",
         label: "Employee Type",
         type: "select",
-        options: filterOptions.employeeTypes.map(opt => ({ value: opt.id, label: opt.label })),
+        options: filterOptions.employeeTypes.map((opt) => ({
+          value: opt.id,
+          label: opt.label,
+        })),
         width: "third",
       });
     }
@@ -182,7 +116,10 @@ const EmployeeViewContent = () => {
         key: "departmentId",
         label: "Department",
         type: "select",
-        options: filterOptions.departments.map(opt => ({ value: opt.id, label: opt.label })),
+        options: filterOptions.departments.map((opt) => ({
+          value: opt.id,
+          label: opt.label,
+        })),
         width: "third",
       });
     }
@@ -192,7 +129,10 @@ const EmployeeViewContent = () => {
         key: "employmentType",
         label: "Employment Type",
         type: "select",
-        options: filterOptions.employmentTypes.map(opt => ({ value: opt.label, label: opt.label })),
+        options: filterOptions.employmentTypes.map((opt) => ({
+          value: opt.label,
+          label: opt.label,
+        })),
         width: "third",
       });
     }
@@ -202,7 +142,10 @@ const EmployeeViewContent = () => {
         key: "workLocation",
         label: "Work Location",
         type: "select",
-        options: filterOptions.workLocations.map(opt => ({ value: opt.label, label: opt.label })),
+        options: filterOptions.workLocations.map((opt) => ({
+          value: opt.label,
+          label: opt.label,
+        })),
         width: "third",
       });
     }
@@ -212,7 +155,10 @@ const EmployeeViewContent = () => {
         key: "employeeGrade",
         label: "Employee Grade",
         type: "select",
-        options: filterOptions.employeeGrades.map(opt => ({ value: opt.label, label: opt.label })),
+        options: filterOptions.employeeGrades.map((opt) => ({
+          value: opt.label,
+          label: opt.label,
+        })),
         width: "third",
       });
     }
@@ -222,7 +168,10 @@ const EmployeeViewContent = () => {
         key: "supervisorId",
         label: "Supervisor",
         type: "select",
-        options: filterOptions.supervisors.map(opt => ({ value: opt.id, label: opt.label })),
+        options: filterOptions.supervisors.map((opt) => ({
+          value: opt.id,
+          label: opt.label,
+        })),
         width: "third",
       });
     }
@@ -232,7 +181,10 @@ const EmployeeViewContent = () => {
         key: "reportingManagerId",
         label: "Reporting Manager",
         type: "select",
-        options: filterOptions.reportingManagers.map(opt => ({ value: opt.id, label: opt.label })),
+        options: filterOptions.reportingManagers.map((opt) => ({
+          value: opt.id,
+          label: opt.label,
+        })),
         width: "third",
       });
     }
@@ -242,7 +194,10 @@ const EmployeeViewContent = () => {
         key: "status",
         label: "Status",
         type: "select",
-        options: filterOptions.statuses.map(opt => ({ value: opt.label, label: opt.label })),
+        options: filterOptions.statuses.map((opt) => ({
+          value: opt.label,
+          label: opt.label,
+        })),
         width: "third",
       });
     }
@@ -252,14 +207,16 @@ const EmployeeViewContent = () => {
 
   // Get sort label for display
   const getSortLabel = (sortBy: string): string => {
-    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
+    const option = EMPLOYEE_VIEW_SORTING_OPTIONS.find(
+      (opt) => opt.value === sortBy,
+    );
     return option ? option.label : sortBy;
   };
 
   // Update URL with current filters
   const updateURL = useCallback(
     (newFilters: EmployeeFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = employeeViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
         ? `${EMPLOYEES_VIEW_PAGE_URL}?${queryString}`
@@ -275,13 +232,13 @@ const EmployeeViewContent = () => {
       setLoading(true);
       setError(null);
       try {
-        // IMPORTANT: Convert page number from 1-based (UI) to 0-based (API)
         const apiFilters = {
           ...currentFilters,
           pageNumber: Math.max(0, (currentFilters.pageNumber || 1) - 1),
         };
 
-        const response = await EmployeeService.getEmployeeBasicDetails(apiFilters);
+        const response =
+          await EmployeeService.getEmployeeBasicDetails(apiFilters);
         setEmployees(response.data);
         setTotalItems(response.data?.length || 0);
       } catch (err: any) {
@@ -300,19 +257,17 @@ const EmployeeViewContent = () => {
     [],
   );
 
-  // Initial load from URL params
   useEffect(() => {
-    const initialFilters = urlParamsToFilters(
+    const initialFilters = employeeViewUrlParamsToFilters(
       searchParams || new URLSearchParams(),
     );
     setFilters(initialFilters);
     fetchEmployees(initialFilters);
   }, []);
 
-  // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = employeeViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -405,73 +360,116 @@ const EmployeeViewContent = () => {
   };
 
   // Helper function to get option label by value
-  const getOptionLabel = (options: FilterOption[], value: number | string | null, defaultValue: string): string => {
+  const getOptionLabel = (
+    options: FilterOption[],
+    value: number | string | null,
+    defaultValue: string,
+  ): string => {
     if (!value) return defaultValue;
-    const option = options.find(opt => opt.id === value || opt.label === value);
+    const option = options.find(
+      (opt) => opt.id === value || opt.label === value,
+    );
     return option?.label || String(value);
   };
 
   // Prepare active filters for display
   const getActiveFilters = () => {
-    const activeFilters: Array<{ key: string; label: string; value: string }> = [];
+    const activeFilters: Array<{ key: string; label: string; value: string }> =
+      [];
 
     if (filters.name) {
-      activeFilters.push({ key: "name", label: "Employee Name", value: filters.name });
+      activeFilters.push({
+        key: "name",
+        label: "Employee Name",
+        value: filters.name,
+      });
     }
     if (filters.employeeTypeId) {
       activeFilters.push({
         key: "employeeTypeId",
         label: "Employee Type",
-        value: getOptionLabel(filterOptions.employeeTypes, filters.employeeTypeId, String(filters.employeeTypeId)),
+        value: getOptionLabel(
+          filterOptions.employeeTypes,
+          filters.employeeTypeId,
+          String(filters.employeeTypeId),
+        ),
       });
     }
     if (filters.departmentId) {
       activeFilters.push({
         key: "departmentId",
         label: "Department",
-        value: getOptionLabel(filterOptions.departments, filters.departmentId, String(filters.departmentId)),
+        value: getOptionLabel(
+          filterOptions.departments,
+          filters.departmentId,
+          String(filters.departmentId),
+        ),
       });
     }
     if (filters.employmentType) {
       activeFilters.push({
         key: "employmentType",
         label: "Employment Type",
-        value: getOptionLabel(filterOptions.employmentTypes, filters.employmentType, filters.employmentType),
+        value: getOptionLabel(
+          filterOptions.employmentTypes,
+          filters.employmentType,
+          filters.employmentType,
+        ),
       });
     }
     if (filters.workLocation) {
       activeFilters.push({
         key: "workLocation",
         label: "Work Location",
-        value: getOptionLabel(filterOptions.workLocations, filters.workLocation, filters.workLocation),
+        value: getOptionLabel(
+          filterOptions.workLocations,
+          filters.workLocation,
+          filters.workLocation,
+        ),
       });
     }
     if (filters.employeeGrade) {
       activeFilters.push({
         key: "employeeGrade",
         label: "Employee Grade",
-        value: getOptionLabel(filterOptions.employeeGrades, filters.employeeGrade, filters.employeeGrade),
+        value: getOptionLabel(
+          filterOptions.employeeGrades,
+          filters.employeeGrade,
+          filters.employeeGrade,
+        ),
       });
     }
     if (filters.supervisorId) {
       activeFilters.push({
         key: "supervisorId",
         label: "Supervisor",
-        value: getOptionLabel(filterOptions.supervisors, filters.supervisorId, String(filters.supervisorId)),
+        value: getOptionLabel(
+          filterOptions.supervisors,
+          filters.supervisorId,
+          String(filters.supervisorId),
+        ),
       });
     }
     if (filters.reportingManagerId) {
       activeFilters.push({
         key: "reportingManagerId",
         label: "Reporting Manager",
-        value: getOptionLabel(filterOptions.reportingManagers, filters.reportingManagerId, String(filters.reportingManagerId)),
+        value: getOptionLabel(
+          filterOptions.reportingManagers,
+          filters.reportingManagerId,
+          String(filters.reportingManagerId),
+        ),
       });
     }
     if (filters.status) {
       activeFilters.push({
         key: "status",
         label: "Status",
-        value: getOptionLabel(filterOptions.statuses, filters.status, filters.status),
+        value: getOptionLabel(
+          filterOptions.statuses,
+          filters.status,
+          filters.status,
+        ),
       });
     }
 
@@ -489,8 +487,12 @@ const EmployeeViewContent = () => {
   };
 
   // Pagination calculations
-  const currentStart = employees.length > 0 ? (filters.pageNumber - 1) * filters.pageSize + 1 : 0;
-  const currentEnd = Math.min(filters.pageNumber * filters.pageSize, totalItems);
+  const currentStart =
+    employees.length > 0 ? (filters.pageNumber - 1) * filters.pageSize + 1 : 0;
+  const currentEnd = Math.min(
+    filters.pageNumber * filters.pageSize,
+    totalItems,
+  );
   const totalPages = Math.ceil(totalItems / filters.pageSize);
 
   // Convert filters object for FilterPanel
@@ -557,7 +559,7 @@ const EmployeeViewContent = () => {
           <PageHeader
             title="Employees"
             description="Manage employee information and details"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={EMPLOYEE_MANAGEMENT_VIEW_PAGE_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -577,7 +579,7 @@ const EmployeeViewContent = () => {
             pageSizeOptions={[12, 15, 20, 30, 50]}
             showPageSize={true}
             showSorting={true}
-            sortOptions={SORT_OPTIONS}
+            sortOptions={EMPLOYEE_VIEW_SORTING_OPTIONS}
             sortBy={filters.sortBy || ""}
             sortDirection={filters.sortDirection || "ASC"}
             title="Filter Employees"
@@ -616,7 +618,7 @@ const EmployeeViewContent = () => {
               variant="primary"
               size="sm"
               icon="➕"
-              onClick={() => router.push(`${EMPLOYEES_VIEW_PAGE_URL}/add`)}
+              onClick={() => router.push(EMPLOYEE_ADD_PAGE_URL)}
             >
               Add Employee
             </CommonButton>
@@ -707,10 +709,7 @@ const EmployeeViewContent = () => {
   );
 };
 
-// Wrap with Suspense for useSearchParams
 const EmployeeViewPage = () => {
-  const { theme } = useTheme();
-
   return (
     <Suspense
       fallback={

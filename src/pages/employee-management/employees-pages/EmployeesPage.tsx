@@ -1,11 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef, JSX } from "react";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
+import React, { useState, useEffect } from "react";
 import { employeeManagementSideBarData } from "@/data/side-bar-data";
 import {
-  AreaChart,
-  Area,
   BarChart,
   Bar,
   XAxis,
@@ -13,7 +10,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
   PieChart,
   Pie,
   Cell,
@@ -24,315 +20,20 @@ import { EmployeeStatisticsData } from "@/types/employee-types";
 import { EmployeeService } from "@/services/employeeService";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
-import { ActionCardSkeleton } from "@/components/common-components/management-components/ActionCardSkeleton";
 import { ActionCard } from "@/components/common-components/management-components/ActionCard";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { EMPLOYEE_MANAGEMENT_PAGE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 import {
-  EMPLOYEES_MANAGEMENT_PAGE_URL,
-  WEB_MANAGEMENT_URL,
-} from "@/utils/urls";
+  AnimatedCount,
+  CustomBarTooltip,
+  CustomLineTooltip,
+  CustomPieTooltip,
+  CustomSalaryTooltip,
+  getActionConfig,
+  Reveal,
+  SectionHeader,
+} from "@/components/statistics-components";
 
-/* ─────────────────────────────────────────────
-   Animated Counter — eases out, starts from 0
-───────────────────────────────────────────── */
-const AnimatedCount = ({
-  value,
-  duration = 1100,
-  decimals = 0,
-  prefix = "",
-  suffix = "",
-}: {
-  value: number;
-  duration?: number;
-  decimals?: number;
-  prefix?: string;
-  suffix?: string;
-}) => {
-  const [display, setDisplay] = useState(0);
-  const rafRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    startRef.current = null;
-    const animate = (ts: number) => {
-      if (!startRef.current) startRef.current = ts;
-      const elapsed = ts - startRef.current;
-      const t = Math.min(elapsed / duration, 1);
-      const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-      const current = eased * value;
-      setDisplay(
-        decimals ? parseFloat(current.toFixed(decimals)) : Math.round(current),
-      );
-      if (t < 1) rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [value, duration, decimals]);
-
-  return (
-    <>
-      {prefix}
-      {display.toLocaleString()}
-      {suffix}
-    </>
-  );
-};
-
-/* ─────────────────────────────────────────────
-   Skeleton Card
-───────────────────────────────────────────── */
-const StatCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
-  <div
-    className="dp-stat-card dp-skeleton-card"
-    style={{ animationDelay: `${delay}s` }}
-  >
-    <div className="dp-skel dp-skel--icon" />
-    <div className="dp-skel dp-skel--val" />
-    <div className="dp-skel dp-skel--label" />
-  </div>
-);
-
-/* ─────────────────────────────────────────────
-   Custom Tooltips
-───────────────────────────────────────────── */
-const CustomBarTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="dp-tooltip">
-      <p className="dp-tooltip__label">{label}</p>
-      <p className="dp-tooltip__value">
-        {payload[0].value.toLocaleString()} employees
-      </p>
-    </div>
-  );
-};
-
-const CustomSalaryTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="dp-tooltip">
-      <p className="dp-tooltip__label">{label}</p>
-      <p className="dp-tooltip__value">
-        Avg Salary: ${payload[0]?.value?.toLocaleString()}
-      </p>
-    </div>
-  );
-};
-
-const CustomPieTooltip = ({ active, payload }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="dp-tooltip">
-      <p className="dp-tooltip__label">{payload[0].name}</p>
-      <p className="dp-tooltip__value">
-        {payload[0].value.toLocaleString()} employees
-      </p>
-    </div>
-  );
-};
-
-const CustomLineTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="dp-tooltip">
-      <p className="dp-tooltip__label">{label}</p>
-      <p className="dp-tooltip__value">
-        {payload[0].value} employees hired
-      </p>
-    </div>
-  );
-};
-
-/* ─────────────────────────────────────────────
-   Section Header
-───────────────────────────────────────────── */
-const SectionHeader = ({
-  title,
-  subtitle,
-  badge,
-  live,
-}: {
-  title: string;
-  subtitle?: string;
-  badge?: string;
-  live?: boolean;
-}) => (
-  <div className="dp-section-header">
-    <div className="dp-section-header__left">
-      <div className="dp-section-header__bar" />
-      <div>
-        <div className="dp-section-header__title-row">
-          <h2 className="dp-section-header__title">{title}</h2>
-          {badge && (
-            <span
-              className={`dp-section-badge${live ? " dp-section-badge--live" : ""}`}
-            >
-              {live && <span className="dp-live-dot" />}
-              {badge}
-            </span>
-          )}
-        </div>
-        {subtitle && <p className="dp-section-header__subtitle">{subtitle}</p>}
-      </div>
-    </div>
-  </div>
-);
-
-/* ─────────────────────────────────────────────
-   Staggered Reveal Wrapper
-───────────────────────────────────────────── */
-const Reveal = ({
-  children,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-}) => {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setVisible(true), delay);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.06 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div
-      ref={ref}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(20px)",
-        transition:
-          "opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1)",
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
-/* ─────────────────────────────────────────────
-   Action config for getting icon and pill label
-───────────────────────────────────────────── */
-const ACTION_CONFIG: Record<
-  string,
-  { accent: string; icon: JSX.Element; pillLabel: string }
-> = {
-  view: {
-    accent: "blue",
-    pillLabel: "Browse",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-      </svg>
-    ),
-  },
-  add: {
-    accent: "emerald",
-    pillLabel: "Create",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 8v8M8 12h8" />
-      </svg>
-    ),
-  },
-  update: {
-    accent: "amber",
-    pillLabel: "Edit",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
-        <path d="M17.586 3.586a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-      </svg>
-    ),
-  },
-  remove: {
-    accent: "rose",
-    pillLabel: "Remove",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-        <path d="M10 11v6M14 11v6" />
-      </svg>
-    ),
-  },
-  default: {
-    accent: "violet",
-    pillLabel: "Manage",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="5" y="2" width="14" height="20" rx="2" />
-        <path d="M9 7h6M9 11h6M9 15h4" />
-      </svg>
-    ),
-  },
-};
-
-const getActionConfig = (name: string) => {
-  const lower = name.toLowerCase();
-  if (lower.includes("view") || lower.includes("all"))
-    return ACTION_CONFIG.view;
-  if (lower.includes("add") || lower.includes("create"))
-    return ACTION_CONFIG.add;
-  if (lower.includes("update") || lower.includes("edit"))
-    return ACTION_CONFIG.update;
-  if (lower.includes("remove") || lower.includes("delete"))
-    return ACTION_CONFIG.remove;
-  return ACTION_CONFIG.default;
-};
-
-/* ─────────────────────────────────────────────
-   Main Page
-───────────────────────────────────────────── */
 const EmployeesPage = () => {
   const { theme, isDarkMode } = useTheme();
   const [statistics, setStatistics] = useState<EmployeeStatisticsData | null>(
@@ -344,15 +45,6 @@ const EmployeesPage = () => {
   const employeesData = employeeManagementSideBarData.find(
     (item) => item.name === "Employee Management",
   );
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    {
-      label: "Employees",
-      href: EMPLOYEES_MANAGEMENT_PAGE_URL,
-    },
-  ];
 
   useEffect(() => {
     fetchStatistics();
@@ -376,7 +68,8 @@ const EmployeesPage = () => {
   const departmentData = statistics?.departmentWiseEmployees || [];
   const employeeTypeData = statistics?.employeeTypeDistribution || [];
   const workLocationData = statistics?.workLocationDistribution || [];
-  const gradeData = statistics?.employeeGradeDistribution.filter(g => g.employeeGrade) || [];
+  const gradeData =
+    statistics?.employeeGradeDistribution.filter((g) => g.employeeGrade) || [];
   const hiringTrendData = statistics?.monthlyHiringTrend || [];
   const salaryData = statistics?.salaryByDepartment || [];
   const performanceData = statistics?.performanceRatingDistribution || [];
@@ -385,8 +78,17 @@ const EmployeesPage = () => {
   const shiftData = statistics?.shiftDistribution || [];
 
   // Colors for charts
-  const PIE_COLORS = [theme.primary ?? "#0D4E4A", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#6366f1"];
-  
+  const PIE_COLORS = [
+    theme.primary ?? "#0D4E4A",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#8b5cf6",
+    "#ec4899",
+    "#06b6d4",
+    "#6366f1",
+  ];
+
   const p = theme.primary ?? "#0D4E4A";
   const acc = theme.accent ?? "#1a7a74";
   const surf = theme.surface ?? "#ffffff";
@@ -908,7 +610,7 @@ const EmployeesPage = () => {
                 <PageHeader
                   title="Employees"
                   description="Manage and monitor employee data, performance, and analytics"
-                  breadcrumbItems={breadcrumbItems}
+                  breadcrumbItems={EMPLOYEE_MANAGEMENT_PAGE_BREADCRUMB_DATA}
                 />
               </div>
             </div>
@@ -937,7 +639,9 @@ const EmployeesPage = () => {
                   />
                   <div className="dp-actions-grid">
                     {employeesData?.subData.map((action, idx) => {
-                      const { accent, icon, pillLabel } = getActionConfig(action.name);
+                      const { accent, icon, pillLabel } = getActionConfig(
+                        action.name,
+                      );
                       return (
                         <ActionCard
                           key={action.id}
@@ -964,14 +668,24 @@ const EmployeesPage = () => {
                   <div className="dp-mt-6">
                     <div className="dp-error-banner">
                       <div className="dp-error-banner__left">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
                           <circle cx="12" cy="12" r="10" />
                           <line x1="12" y1="8" x2="12" y2="12" />
                           <line x1="12" y1="16" x2="12.01" y2="16" />
                         </svg>
                         {error}
                       </div>
-                      <button className="dp-retry-btn" onClick={fetchStatistics}>Retry</button>
+                      <button
+                        className="dp-retry-btn"
+                        onClick={fetchStatistics}
+                      >
+                        Retry
+                      </button>
                     </div>
                   </div>
                 </Reveal>
@@ -981,53 +695,97 @@ const EmployeesPage = () => {
               {!error && statistics && (
                 <Reveal delay={120}>
                   <section className="dp-mt-8">
-                    <SectionHeader title="KPI Summary" subtitle="Key performance indicators across workforce" badge="Live" live />
+                    <SectionHeader
+                      title="KPI Summary"
+                      subtitle="Key performance indicators across workforce"
+                      badge="Live"
+                      live
+                    />
                     <div className="dp-kpi-grid">
                       <div className="dp-kpi-card">
                         <div className="dp-kpi-icon dp-kpi-icon--blue">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.75}
+                          >
                             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                             <circle cx="12" cy="9" r="2.5" />
                           </svg>
                         </div>
                         <div className="dp-kpi-content">
-                          <div className="dp-kpi-value"><AnimatedCount value={statistics.kpiSummary.totalEmployees} /></div>
+                          <div className="dp-kpi-value">
+                            <AnimatedCount
+                              value={statistics.kpiSummary.totalEmployees}
+                            />
+                          </div>
                           <div className="dp-kpi-label">Total Employees</div>
                         </div>
                       </div>
                       <div className="dp-kpi-card">
                         <div className="dp-kpi-icon dp-kpi-icon--emerald">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.75}
+                          >
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
                         <div className="dp-kpi-content">
-                          <div className="dp-kpi-value"><AnimatedCount value={statistics.kpiSummary.activeEmployees} /></div>
+                          <div className="dp-kpi-value">
+                            <AnimatedCount
+                              value={statistics.kpiSummary.activeEmployees}
+                            />
+                          </div>
                           <div className="dp-kpi-label">Active Employees</div>
                         </div>
                       </div>
                       <div className="dp-kpi-card">
                         <div className="dp-kpi-icon dp-kpi-icon--amber">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.75}
+                          >
                             <circle cx="12" cy="12" r="10" />
                             <path d="M12 8v4l3 3" />
                           </svg>
                         </div>
                         <div className="dp-kpi-content">
-                          <div className="dp-kpi-value"><AnimatedCount value={statistics.kpiSummary.employeesJoinedThisMonth} /></div>
-                          <div className="dp-kpi-label">New Hires (This Month)</div>
+                          <div className="dp-kpi-value">
+                            <AnimatedCount
+                              value={
+                                statistics.kpiSummary.employeesJoinedThisMonth
+                              }
+                            />
+                          </div>
+                          <div className="dp-kpi-label">
+                            New Hires (This Month)
+                          </div>
                         </div>
                       </div>
                       <div className="dp-kpi-card">
                         <div className="dp-kpi-icon dp-kpi-icon--violet">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.75}
+                          >
                             <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                             <circle cx="12" cy="12" r="3" />
                           </svg>
                         </div>
                         <div className="dp-kpi-content">
                           <div className="dp-kpi-value">
-                            <AnimatedCount value={statistics.kpiSummary.averageRating} decimals={1} />
+                            <AnimatedCount
+                              value={statistics.kpiSummary.averageRating}
+                              decimals={1}
+                            />
                             <span style={{ fontSize: "1rem" }}> / 5</span>
                           </div>
                           <div className="dp-kpi-label">Average Rating</div>
@@ -1045,32 +803,61 @@ const EmployeesPage = () => {
                     <div className="dp-stats-grid">
                       <div className="dp-stat-card dp-stat-card--rose">
                         <div className="dp-stat-icon dp-stat-icon--rose">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.75}
+                          >
                             <circle cx="12" cy="12" r="9" />
                             <path d="M15 9l-6 6M9 9l6 6" />
                           </svg>
                         </div>
-                        <div className="dp-stat-value"><AnimatedCount value={statistics.kpiSummary.inactiveEmployees} /></div>
+                        <div className="dp-stat-value">
+                          <AnimatedCount
+                            value={statistics.kpiSummary.inactiveEmployees}
+                          />
+                        </div>
                         <div className="dp-stat-label">Inactive Employees</div>
                       </div>
                       <div className="dp-stat-card dp-stat-card--amber">
                         <div className="dp-stat-icon dp-stat-icon--amber">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.75}
+                          >
                             <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                             <path d="M12 8v4l3 3" />
                           </svg>
                         </div>
-                        <div className="dp-stat-value"><AnimatedCount value={statistics.kpiSummary.employeesWithoutSupervisor} /></div>
+                        <div className="dp-stat-value">
+                          <AnimatedCount
+                            value={
+                              statistics.kpiSummary.employeesWithoutSupervisor
+                            }
+                          />
+                        </div>
                         <div className="dp-stat-label">Without Supervisor</div>
                       </div>
                       <div className="dp-stat-card dp-stat-card--teal">
                         <div className="dp-stat-icon dp-stat-icon--teal">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.75}
+                          >
                             <rect x="2" y="7" width="20" height="14" rx="2" />
                             <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
                           </svg>
                         </div>
-                        <div className="dp-stat-value"><AnimatedCount value={statistics.kpiSummary.totalAssets} /></div>
+                        <div className="dp-stat-value">
+                          <AnimatedCount
+                            value={statistics.kpiSummary.totalAssets}
+                          />
+                        </div>
                         <div className="dp-stat-label">Total Assets</div>
                       </div>
                     </div>
@@ -1082,24 +869,53 @@ const EmployeesPage = () => {
               {!error && statistics && (
                 <Reveal delay={180}>
                   <section className="dp-mt-8">
-                    <SectionHeader title="Analytics Dashboard" subtitle="Comprehensive employee analytics across all dimensions" />
+                    <SectionHeader
+                      title="Analytics Dashboard"
+                      subtitle="Comprehensive employee analytics across all dimensions"
+                    />
 
                     <div className="dp-charts-grid">
                       {/* Department Wise Employees - Bar Chart */}
                       {departmentData.length > 0 && (
                         <div className="dp-chart-card">
                           <div className="dp-chart-header">
-                            <div className="dp-chart-title"><span className="dp-chart-dot dp-chart-dot--p" />Department Wise Employees</div>
-                            <span className="dp-chart-sub">{departmentData.length} departments</span>
+                            <div className="dp-chart-title">
+                              <span className="dp-chart-dot dp-chart-dot--p" />
+                              Department Wise Employees
+                            </div>
+                            <span className="dp-chart-sub">
+                              {departmentData.length} departments
+                            </span>
                           </div>
                           <div style={{ height: 300 }}>
                             <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={departmentData} layout="vertical" margin={{ left: 20, right: 10 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke={hexToRgba(border, 0.6)} horizontal={false} />
-                                <XAxis type="number" tick={{ fontSize: 11, fill: textSecondary }} />
-                                <YAxis type="category" dataKey="departmentName" tick={{ fontSize: 11, fill: textSecondary }} width={100} />
+                              <BarChart
+                                data={departmentData}
+                                layout="vertical"
+                                margin={{ left: 20, right: 10 }}
+                              >
+                                <CartesianGrid
+                                  strokeDasharray="3 3"
+                                  stroke={hexToRgba(border, 0.6)}
+                                  horizontal={false}
+                                />
+                                <XAxis
+                                  type="number"
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                />
+                                <YAxis
+                                  type="category"
+                                  dataKey="departmentName"
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                  width={100}
+                                />
                                 <Tooltip content={<CustomBarTooltip />} />
-                                <Bar dataKey="employeeCount" name="Employees" fill={p} radius={[0, 8, 8, 0]} />
+                                <Bar
+                                  dataKey="employeeCount"
+                                  name="Employees"
+                                  fill={p}
+                                  radius={[0, 8, 8, 0]}
+                                />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -1110,13 +926,30 @@ const EmployeesPage = () => {
                       {employeeTypeData.length > 0 && (
                         <div className="dp-chart-card">
                           <div className="dp-chart-header">
-                            <div className="dp-chart-title"><span className="dp-chart-dot dp-chart-dot--ok" />Employee Type Distribution</div>
+                            <div className="dp-chart-title">
+                              <span className="dp-chart-dot dp-chart-dot--ok" />
+                              Employee Type Distribution
+                            </div>
                           </div>
                           <div style={{ height: 280 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <PieChart>
-                                <Pie data={employeeTypeData} cx="50%" cy="50%" innerRadius={50} outerRadius={90} dataKey="employeeCount" nameKey="employeeType" paddingAngle={3}>
-                                  {employeeTypeData.map((_, idx) => (<Cell key={`cell-${idx}`} fill={PIE_COLORS[idx % PIE_COLORS.length]} />))}
+                                <Pie
+                                  data={employeeTypeData}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={50}
+                                  outerRadius={90}
+                                  dataKey="employeeCount"
+                                  nameKey="employeeType"
+                                  paddingAngle={3}
+                                >
+                                  {employeeTypeData.map((_, idx) => (
+                                    <Cell
+                                      key={`cell-${idx}`}
+                                      fill={PIE_COLORS[idx % PIE_COLORS.length]}
+                                    />
+                                  ))}
                                 </Pie>
                                 <Tooltip content={<CustomPieTooltip />} />
                               </PieChart>
@@ -1124,7 +957,16 @@ const EmployeesPage = () => {
                           </div>
                           <div className="dp-legend">
                             {employeeTypeData.map((item, idx) => (
-                              <div key={idx} className="dp-legend-item"><span className="dp-legend-dot" style={{ background: PIE_COLORS[idx % PIE_COLORS.length] }} />{item.employeeType} ({item.employeeCount})</div>
+                              <div key={idx} className="dp-legend-item">
+                                <span
+                                  className="dp-legend-dot"
+                                  style={{
+                                    background:
+                                      PIE_COLORS[idx % PIE_COLORS.length],
+                                  }}
+                                />
+                                {item.employeeType} ({item.employeeCount})
+                              </div>
                             ))}
                           </div>
                         </div>
@@ -1134,13 +976,30 @@ const EmployeesPage = () => {
                       {workLocationData.length > 0 && (
                         <div className="dp-chart-card">
                           <div className="dp-chart-header">
-                            <div className="dp-chart-title"><span className="dp-chart-dot dp-chart-dot--p" />Work Location Distribution</div>
+                            <div className="dp-chart-title">
+                              <span className="dp-chart-dot dp-chart-dot--p" />
+                              Work Location Distribution
+                            </div>
                           </div>
                           <div style={{ height: 280 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <PieChart>
-                                <Pie data={workLocationData} cx="50%" cy="50%" innerRadius={0} outerRadius={100} dataKey="employeeCount" nameKey="workLocation" paddingAngle={3}>
-                                  {workLocationData.map((_, idx) => (<Cell key={`cell-${idx}`} fill={PIE_COLORS[idx % PIE_COLORS.length]} />))}
+                                <Pie
+                                  data={workLocationData}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={0}
+                                  outerRadius={100}
+                                  dataKey="employeeCount"
+                                  nameKey="workLocation"
+                                  paddingAngle={3}
+                                >
+                                  {workLocationData.map((_, idx) => (
+                                    <Cell
+                                      key={`cell-${idx}`}
+                                      fill={PIE_COLORS[idx % PIE_COLORS.length]}
+                                    />
+                                  ))}
                                 </Pie>
                                 <Tooltip content={<CustomPieTooltip />} />
                               </PieChart>
@@ -1148,7 +1007,16 @@ const EmployeesPage = () => {
                           </div>
                           <div className="dp-legend">
                             {workLocationData.map((item, idx) => (
-                              <div key={idx} className="dp-legend-item"><span className="dp-legend-dot" style={{ background: PIE_COLORS[idx % PIE_COLORS.length] }} />{item.workLocation} ({item.employeeCount})</div>
+                              <div key={idx} className="dp-legend-item">
+                                <span
+                                  className="dp-legend-dot"
+                                  style={{
+                                    background:
+                                      PIE_COLORS[idx % PIE_COLORS.length],
+                                  }}
+                                />
+                                {item.workLocation} ({item.employeeCount})
+                              </div>
                             ))}
                           </div>
                         </div>
@@ -1158,16 +1026,33 @@ const EmployeesPage = () => {
                       {gradeData.length > 0 && (
                         <div className="dp-chart-card">
                           <div className="dp-chart-header">
-                            <div className="dp-chart-title"><span className="dp-chart-dot dp-chart-dot--ok" />Employee Grade Distribution</div>
+                            <div className="dp-chart-title">
+                              <span className="dp-chart-dot dp-chart-dot--ok" />
+                              Employee Grade Distribution
+                            </div>
                           </div>
                           <div style={{ height: 300 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart data={gradeData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke={hexToRgba(border, 0.6)} vertical={false} />
-                                <XAxis dataKey="employeeGrade" tick={{ fontSize: 11, fill: textSecondary }} />
-                                <YAxis tick={{ fontSize: 11, fill: textSecondary }} />
+                                <CartesianGrid
+                                  strokeDasharray="3 3"
+                                  stroke={hexToRgba(border, 0.6)}
+                                  vertical={false}
+                                />
+                                <XAxis
+                                  dataKey="employeeGrade"
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                />
+                                <YAxis
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                />
                                 <Tooltip content={<CustomBarTooltip />} />
-                                <Bar dataKey="employeeCount" name="Employees" fill={p} radius={[8, 8, 0, 0]} />
+                                <Bar
+                                  dataKey="employeeCount"
+                                  name="Employees"
+                                  fill={p}
+                                  radius={[8, 8, 0, 0]}
+                                />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -1178,16 +1063,38 @@ const EmployeesPage = () => {
                       {hiringTrendData.length > 0 && (
                         <div className="dp-chart-card">
                           <div className="dp-chart-header">
-                            <div className="dp-chart-title"><span className="dp-chart-dot dp-chart-dot--p" />Monthly Hiring Trend</div>
+                            <div className="dp-chart-title">
+                              <span className="dp-chart-dot dp-chart-dot--p" />
+                              Monthly Hiring Trend
+                            </div>
                           </div>
                           <div style={{ height: 280 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <LineChart data={hiringTrendData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke={hexToRgba(border, 0.6)} />
-                                <XAxis dataKey="month" tick={{ fontSize: 11, fill: textSecondary }} angle={-30} textAnchor="end" height={60} />
-                                <YAxis tick={{ fontSize: 11, fill: textSecondary }} />
+                                <CartesianGrid
+                                  strokeDasharray="3 3"
+                                  stroke={hexToRgba(border, 0.6)}
+                                />
+                                <XAxis
+                                  dataKey="month"
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                  angle={-30}
+                                  textAnchor="end"
+                                  height={60}
+                                />
+                                <YAxis
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                />
                                 <Tooltip content={<CustomLineTooltip />} />
-                                <Line type="monotone" dataKey="hiredCount" name="Hired" stroke={p} strokeWidth={3} dot={{ r: 4, fill: p }} activeDot={{ r: 6 }} />
+                                <Line
+                                  type="monotone"
+                                  dataKey="hiredCount"
+                                  name="Hired"
+                                  stroke={p}
+                                  strokeWidth={3}
+                                  dot={{ r: 4, fill: p }}
+                                  activeDot={{ r: 6 }}
+                                />
                               </LineChart>
                             </ResponsiveContainer>
                           </div>
@@ -1198,16 +1105,42 @@ const EmployeesPage = () => {
                       {salaryData.length > 0 && (
                         <div className="dp-chart-card">
                           <div className="dp-chart-header">
-                            <div className="dp-chart-title"><span className="dp-chart-dot dp-chart-dot--ok" />Salary by Department</div>
+                            <div className="dp-chart-title">
+                              <span className="dp-chart-dot dp-chart-dot--ok" />
+                              Salary by Department
+                            </div>
                           </div>
                           <div style={{ height: 300 }}>
                             <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={salaryData} margin={{ bottom: 40 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke={hexToRgba(border, 0.6)} vertical={false} />
-                                <XAxis dataKey="departmentName" tick={{ fontSize: 11, fill: textSecondary }} angle={-30} textAnchor="end" height={60} />
-                                <YAxis tick={{ fontSize: 11, fill: textSecondary }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                              <BarChart
+                                data={salaryData}
+                                margin={{ bottom: 40 }}
+                              >
+                                <CartesianGrid
+                                  strokeDasharray="3 3"
+                                  stroke={hexToRgba(border, 0.6)}
+                                  vertical={false}
+                                />
+                                <XAxis
+                                  dataKey="departmentName"
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                  angle={-30}
+                                  textAnchor="end"
+                                  height={60}
+                                />
+                                <YAxis
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                  tickFormatter={(v) =>
+                                    `$${(v / 1000).toFixed(0)}k`
+                                  }
+                                />
                                 <Tooltip content={<CustomSalaryTooltip />} />
-                                <Bar dataKey="averageSalary" name="Avg Salary" fill={p} radius={[8, 8, 0, 0]} />
+                                <Bar
+                                  dataKey="averageSalary"
+                                  name="Avg Salary"
+                                  fill={p}
+                                  radius={[8, 8, 0, 0]}
+                                />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -1218,26 +1151,63 @@ const EmployeesPage = () => {
                       {performanceData.length > 0 && (
                         <div className="dp-chart-card">
                           <div className="dp-chart-header">
-                            <div className="dp-chart-title"><span className="dp-chart-dot dp-chart-dot--p" />Performance Rating Distribution</div>
+                            <div className="dp-chart-title">
+                              <span className="dp-chart-dot dp-chart-dot--p" />
+                              Performance Rating Distribution
+                            </div>
                           </div>
                           <div style={{ height: 280 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <PieChart>
-                                <Pie data={performanceData} cx="50%" cy="50%" innerRadius={0} outerRadius={100} dataKey="totalReviews" nameKey="ratingGroup" paddingAngle={3}>
-                                  {performanceData.map((_, idx) => (<Cell key={`cell-${idx}`} fill={PIE_COLORS[idx % PIE_COLORS.length]} />))}
+                                <Pie
+                                  data={performanceData}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={0}
+                                  outerRadius={100}
+                                  dataKey="totalReviews"
+                                  nameKey="ratingGroup"
+                                  paddingAngle={3}
+                                >
+                                  {performanceData.map((_, idx) => (
+                                    <Cell
+                                      key={`cell-${idx}`}
+                                      fill={PIE_COLORS[idx % PIE_COLORS.length]}
+                                    />
+                                  ))}
                                 </Pie>
-                                <Tooltip content={({ active, payload }: any) => {
-                                  if (active && payload?.length) {
-                                    return (<div className="dp-tooltip"><p className="dp-tooltip__label">Rating {payload[0].name}</p><p className="dp-tooltip__value">{payload[0].value} reviews</p></div>);
-                                  }
-                                  return null;
-                                }} />
+                                <Tooltip
+                                  content={({ active, payload }: any) => {
+                                    if (active && payload?.length) {
+                                      return (
+                                        <div className="dp-tooltip">
+                                          <p className="dp-tooltip__label">
+                                            Rating {payload[0].name}
+                                          </p>
+                                          <p className="dp-tooltip__value">
+                                            {payload[0].value} reviews
+                                          </p>
+                                        </div>
+                                      );
+                                    }
+                                    return null;
+                                  }}
+                                />
                               </PieChart>
                             </ResponsiveContainer>
                           </div>
                           <div className="dp-legend">
                             {performanceData.map((item, idx) => (
-                              <div key={idx} className="dp-legend-item"><span className="dp-legend-dot" style={{ background: PIE_COLORS[idx % PIE_COLORS.length] }} />Rating {item.ratingGroup} ({item.totalReviews})</div>
+                              <div key={idx} className="dp-legend-item">
+                                <span
+                                  className="dp-legend-dot"
+                                  style={{
+                                    background:
+                                      PIE_COLORS[idx % PIE_COLORS.length],
+                                  }}
+                                />
+                                Rating {item.ratingGroup} ({item.totalReviews})
+                              </div>
                             ))}
                           </div>
                         </div>
@@ -1247,17 +1217,41 @@ const EmployeesPage = () => {
                       {skillData.length > 0 && (
                         <div className="dp-chart-card">
                           <div className="dp-chart-header">
-                            <div className="dp-chart-title"><span className="dp-chart-dot dp-chart-dot--ok" />Skill Distribution</div>
+                            <div className="dp-chart-title">
+                              <span className="dp-chart-dot dp-chart-dot--ok" />
+                              Skill Distribution
+                            </div>
                             <span className="dp-chart-sub">Top 10 skills</span>
                           </div>
                           <div style={{ height: 350 }}>
                             <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={skillData} layout="vertical" margin={{ left: 80 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke={hexToRgba(border, 0.6)} horizontal={false} />
-                                <XAxis type="number" tick={{ fontSize: 11, fill: textSecondary }} />
-                                <YAxis type="category" dataKey="skillName" tick={{ fontSize: 10, fill: textSecondary }} width={80} />
+                              <BarChart
+                                data={skillData}
+                                layout="vertical"
+                                margin={{ left: 80 }}
+                              >
+                                <CartesianGrid
+                                  strokeDasharray="3 3"
+                                  stroke={hexToRgba(border, 0.6)}
+                                  horizontal={false}
+                                />
+                                <XAxis
+                                  type="number"
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                />
+                                <YAxis
+                                  type="category"
+                                  dataKey="skillName"
+                                  tick={{ fontSize: 10, fill: textSecondary }}
+                                  width={80}
+                                />
                                 <Tooltip content={<CustomBarTooltip />} />
-                                <Bar dataKey="employeeCount" name="Employees" fill={p} radius={[0, 8, 8, 0]} />
+                                <Bar
+                                  dataKey="employeeCount"
+                                  name="Employees"
+                                  fill={p}
+                                  radius={[0, 8, 8, 0]}
+                                />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -1268,21 +1262,56 @@ const EmployeesPage = () => {
                       {assetData.length > 0 && (
                         <div className="dp-chart-card">
                           <div className="dp-chart-header">
-                            <div className="dp-chart-title"><span className="dp-chart-dot dp-chart-dot--p" />Asset Distribution</div>
+                            <div className="dp-chart-title">
+                              <span className="dp-chart-dot dp-chart-dot--p" />
+                              Asset Distribution
+                            </div>
                           </div>
                           <div style={{ height: 300 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart data={assetData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke={hexToRgba(border, 0.6)} vertical={false} />
-                                <XAxis dataKey="assetType" tick={{ fontSize: 11, fill: textSecondary }} angle={-30} textAnchor="end" height={60} />
-                                <YAxis tick={{ fontSize: 11, fill: textSecondary }} />
-                                <Tooltip content={({ active, payload, label }: any) => {
-                                  if (active && payload?.length) {
-                                    return (<div className="dp-tooltip"><p className="dp-tooltip__label">{label}</p><p className="dp-tooltip__value">{payload[0].value} assets</p></div>);
-                                  }
-                                  return null;
-                                }} />
-                                <Bar dataKey="totalAssets" name="Assets" fill={p} radius={[8, 8, 0, 0]} />
+                                <CartesianGrid
+                                  strokeDasharray="3 3"
+                                  stroke={hexToRgba(border, 0.6)}
+                                  vertical={false}
+                                />
+                                <XAxis
+                                  dataKey="assetType"
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                  angle={-30}
+                                  textAnchor="end"
+                                  height={60}
+                                />
+                                <YAxis
+                                  tick={{ fontSize: 11, fill: textSecondary }}
+                                />
+                                <Tooltip
+                                  content={({
+                                    active,
+                                    payload,
+                                    label,
+                                  }: any) => {
+                                    if (active && payload?.length) {
+                                      return (
+                                        <div className="dp-tooltip">
+                                          <p className="dp-tooltip__label">
+                                            {label}
+                                          </p>
+                                          <p className="dp-tooltip__value">
+                                            {payload[0].value} assets
+                                          </p>
+                                        </div>
+                                      );
+                                    }
+                                    return null;
+                                  }}
+                                />
+                                <Bar
+                                  dataKey="totalAssets"
+                                  name="Assets"
+                                  fill={p}
+                                  radius={[8, 8, 0, 0]}
+                                />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -1293,13 +1322,30 @@ const EmployeesPage = () => {
                       {shiftData.length > 0 && (
                         <div className="dp-chart-card">
                           <div className="dp-chart-header">
-                            <div className="dp-chart-title"><span className="dp-chart-dot dp-chart-dot--ok" />Shift Distribution</div>
+                            <div className="dp-chart-title">
+                              <span className="dp-chart-dot dp-chart-dot--ok" />
+                              Shift Distribution
+                            </div>
                           </div>
                           <div style={{ height: 280 }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <PieChart>
-                                <Pie data={shiftData} cx="50%" cy="50%" innerRadius={0} outerRadius={100} dataKey="employeeCount" nameKey="shiftName" paddingAngle={3}>
-                                  {shiftData.map((_, idx) => (<Cell key={`cell-${idx}`} fill={PIE_COLORS[idx % PIE_COLORS.length]} />))}
+                                <Pie
+                                  data={shiftData}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={0}
+                                  outerRadius={100}
+                                  dataKey="employeeCount"
+                                  nameKey="shiftName"
+                                  paddingAngle={3}
+                                >
+                                  {shiftData.map((_, idx) => (
+                                    <Cell
+                                      key={`cell-${idx}`}
+                                      fill={PIE_COLORS[idx % PIE_COLORS.length]}
+                                    />
+                                  ))}
                                 </Pie>
                                 <Tooltip content={<CustomPieTooltip />} />
                               </PieChart>
@@ -1307,7 +1353,16 @@ const EmployeesPage = () => {
                           </div>
                           <div className="dp-legend">
                             {shiftData.map((item, idx) => (
-                              <div key={idx} className="dp-legend-item"><span className="dp-legend-dot" style={{ background: PIE_COLORS[idx % PIE_COLORS.length] }} />{item.shiftName} ({item.employeeCount})</div>
+                              <div key={idx} className="dp-legend-item">
+                                <span
+                                  className="dp-legend-dot"
+                                  style={{
+                                    background:
+                                      PIE_COLORS[idx % PIE_COLORS.length],
+                                  }}
+                                />
+                                {item.shiftName} ({item.employeeCount})
+                              </div>
                             ))}
                           </div>
                         </div>
@@ -1322,7 +1377,12 @@ const EmployeesPage = () => {
                 <section className="dp-mt-7">
                   <div className="dp-info-banner">
                     <div className="dp-info-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.75}
+                      >
                         <circle cx="12" cy="12" r="10" />
                         <line x1="12" y1="16" x2="12" y2="12" />
                         <line x1="12" y1="8" x2="12.01" y2="8" />
@@ -1331,10 +1391,13 @@ const EmployeesPage = () => {
                     <div>
                       <p className="dp-info-title">Employee Management</p>
                       <p className="dp-info-text">
-                        Use the quick-action cards above to browse, create, edit, or remove employees.
-                        The analytics dashboard provides comprehensive insights including department distribution,
-                        hiring trends, salary analysis, performance ratings, skills, assets, and shift patterns.
-                        All statistics reflect the latest data from your backend.
+                        Use the quick-action cards above to browse, create,
+                        edit, or remove employees. The analytics dashboard
+                        provides comprehensive insights including department
+                        distribution, hiring trends, salary analysis,
+                        performance ratings, skills, assets, and shift patterns.
+                        All statistics reflect the latest data from your
+                        backend.
                       </p>
                     </div>
                   </div>

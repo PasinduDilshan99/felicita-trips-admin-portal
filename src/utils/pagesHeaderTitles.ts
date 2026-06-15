@@ -99,7 +99,7 @@ export const PACKAGE_SCHEDULE_CREATE_PAGE_TITLE = "Activity Categories";
 export const PACKAGE_SCHEDULE_UPDATE_PAGE_TITLE = "Activity Categories";
 export const PACKAGE_SCHEDULE_TERMINATE_PAGE_TITLE = "Activity Categories";
 
-export const WEB_PAGE_MANAGEMENT_PAGE_TITLE = "Web Page Management";
+export const WEBSITE_PAGE_MANAGEMENT_PAGE_TITLE = "Web Page Management";
 export const HOME_PAGE_MANAGEMENT_PAGE_TITLE = "Home Page Management";
 export const HOME_PAGE_TRENDING_DESTINATION_MANAGEMENT_PAGE_TITLE =
   "Trending Destination Management";

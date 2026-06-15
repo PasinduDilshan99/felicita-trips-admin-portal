@@ -1,99 +1,23 @@
-// /app/web-management/page-management/home-page/page.tsx
-
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import { webPageManagementSideBarData } from "@/data/side-bar-data";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { hexToRgba } from "@/utils/functions";
-import { WEB_MANAGEMENT_URL, WEB_PAGE_MANAGEMENT_URL } from "@/utils/urls";
 import { ActionCardSkeleton } from "@/components/common-components/management-components/ActionCardSkeleton";
 import { ActionCard } from "@/components/common-components/management-components/ActionCard";
-
-// Icon Components
-const HomeIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.75}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-  </svg>
-);
-
-const ServicesIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.75}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-    <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
-  </svg>
-);
-
-const DestinationsIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.75}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-    <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-);
-
-const ToursIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.75}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-  </svg>
-);
-
-const GalleryIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.75}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="2" y="3" width="20" height="16" rx="2" />
-    <circle cx="9" cy="9" r="3" />
-    <path d="M22 14l-5-3-5 3-5-3-5 3" />
-  </svg>
-);
-
-const ContactIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.75}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-  </svg>
-);
+import {
+  HomeIcon,
+  ServicesIcon,
+  DestinationsIcon,
+  ToursIcon,
+  ContactIcon,
+  GalleryIcon,
+} from "@/data/icons-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { WEBSITE_CONTENT_MANAGEMENT_HOME_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { webSiteContentManagementSideBarData } from "@/data/side-bar-data";
+import { Reveal } from "@/components/statistics-components";
 
 const getSectionIcon = (name: string) => {
   const lower = name.toLowerCase();
@@ -213,55 +137,13 @@ const SectionHeader = ({
   );
 };
 
-// Reveal Animation Wrapper
-const Reveal = ({
-  children,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-}) => {
-  const [visible, setVisible] = useState(false);
-  const ref = React.useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setVisible(true), delay);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.06 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div
-      ref={ref}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(20px)",
-        transition:
-          "opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1)",
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
 // Main Component
 const HomePage = () => {
   const { theme, isDarkMode } = useTheme();
   const { hasPrivilege, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  const homePageData = webPageManagementSideBarData.find(
+  const homePageData = webSiteContentManagementSideBarData.find(
     (item) => item.name === "Home Page",
   );
 
@@ -278,13 +160,6 @@ const HomePage = () => {
     }
   }, [authLoading]);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Web Management", href: WEB_MANAGEMENT_URL },
-    { label: "Page Management", href: WEB_PAGE_MANAGEMENT_URL },
-    { label: "Home Page", href: "#" },
-  ];
-
   if (!loading && accessibleSections.length === 0) {
     return (
       <div style={{ background: theme.background, minHeight: "100vh" }}>
@@ -292,7 +167,7 @@ const HomePage = () => {
           <PageHeader
             title="Home Page"
             description="Manage homepage sections and content"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={WEBSITE_CONTENT_MANAGEMENT_HOME_BREADCRUMB_DATA}
           />
           <div
             style={{
@@ -385,7 +260,7 @@ const HomePage = () => {
             <PageHeader
               title="Home Page"
               description="Manage homepage sections and content"
-              breadcrumbItems={breadcrumbItems}
+              breadcrumbItems={WEBSITE_CONTENT_MANAGEMENT_HOME_BREADCRUMB_DATA}
             />
           </div>
         </div>

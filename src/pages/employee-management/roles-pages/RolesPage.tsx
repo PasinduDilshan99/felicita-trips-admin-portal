@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, JSX } from "react";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
+import React, { useState, useEffect, JSX } from "react";
 import {
   AreaChart,
   Area,
@@ -17,306 +16,27 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import {
-  RoleStatisticsData,
-  UserActivityStats,
-  RoleUsage,
-} from "@/types/role-types";
+import { RoleStatisticsData } from "@/types/role-types";
 import { RoleService } from "@/services/roleService";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
 import { ActionCardSkeleton } from "@/components/common-components/management-components/ActionCardSkeleton";
 import { ActionCard } from "@/components/common-components/management-components/ActionCard";
-import {
-  EMPLOYEE_MANAGEMENT_URL,
-  ROLES_MANAGEMENT_PAGE_URL,
-} from "@/utils/urls";
+
 import { employeeManagementSideBarData } from "@/data/side-bar-data";
+import {
+  AnimatedCount,
+  CustomAreaTooltip,
+  CustomBarTooltip,
+  CustomPieTooltip,
+  getActionConfig,
+  Reveal,
+  SectionHeader,
+  StatCardSkeleton,
+} from "@/components/statistics-components";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ROLE_MANAGEMENT_HOME_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
-/* ─────────────────────────────────────────────
-   Animated Counter — eases out, starts from 0
-───────────────────────────────────────────── */
-const AnimatedCount = ({
-  value,
-  duration = 1100,
-  decimals = 0,
-}: {
-  value: number;
-  duration?: number;
-  decimals?: number;
-}) => {
-  const [display, setDisplay] = useState(0);
-  const rafRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    startRef.current = null;
-    const animate = (ts: number) => {
-      if (!startRef.current) startRef.current = ts;
-      const elapsed = ts - startRef.current;
-      const t = Math.min(elapsed / duration, 1);
-      const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-      const current = eased * value;
-      setDisplay(
-        decimals ? parseFloat(current.toFixed(decimals)) : Math.round(current),
-      );
-      if (t < 1) rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [value, duration, decimals]);
-
-  return <>{display.toLocaleString()}</>;
-};
-
-/* ─────────────────────────────────────────────
-   Skeleton Card
-───────────────────────────────────────────── */
-const StatCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
-  <div
-    className="dp-stat-card dp-skeleton-card"
-    style={{ animationDelay: `${delay}s` }}
-  >
-    <div className="dp-skel dp-skel--icon" />
-    <div className="dp-skel dp-skel--val" />
-    <div className="dp-skel dp-skel--label" />
-  </div>
-);
-
-/* ─────────────────────────────────────────────
-   Custom Tooltips
-───────────────────────────────────────────── */
-const CustomAreaTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="dp-tooltip">
-      <p className="dp-tooltip__label">{label}</p>
-      {payload.map((entry: any, index: number) => (
-        <p
-          key={index}
-          className="dp-tooltip__value"
-          style={{ color: entry.color }}
-        >
-          {entry.name}: {entry.value} roles
-        </p>
-      ))}
-    </div>
-  );
-};
-
-const CustomBarTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="dp-tooltip">
-      <p className="dp-tooltip__label">{label}</p>
-      <p className="dp-tooltip__value">{payload[0].value} users assigned</p>
-    </div>
-  );
-};
-
-const CustomPieTooltip = ({ active, payload }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="dp-tooltip">
-      <p className="dp-tooltip__label">{payload[0].name}</p>
-      <p className="dp-tooltip__value">
-        {payload[0].value.toLocaleString()} roles
-      </p>
-    </div>
-  );
-};
-
-/* ─────────────────────────────────────────────
-   Section Header
-───────────────────────────────────────────── */
-const SectionHeader = ({
-  title,
-  subtitle,
-  badge,
-  live,
-}: {
-  title: string;
-  subtitle?: string;
-  badge?: string;
-  live?: boolean;
-}) => (
-  <div className="dp-section-header">
-    <div className="dp-section-header__left">
-      <div className="dp-section-header__bar" />
-      <div>
-        <div className="dp-section-header__title-row">
-          <h2 className="dp-section-header__title">{title}</h2>
-          {badge && (
-            <span
-              className={`dp-section-badge${live ? " dp-section-badge--live" : ""}`}
-            >
-              {live && <span className="dp-live-dot" />}
-              {badge}
-            </span>
-          )}
-        </div>
-        {subtitle && <p className="dp-section-header__subtitle">{subtitle}</p>}
-      </div>
-    </div>
-  </div>
-);
-
-/* ─────────────────────────────────────────────
-   Staggered Reveal Wrapper
-───────────────────────────────────────────── */
-const Reveal = ({
-  children,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-}) => {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setVisible(true), delay);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.06 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div
-      ref={ref}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(20px)",
-        transition:
-          "opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1)",
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
-/* ─────────────────────────────────────────────
-   Action config for getting icon and pill label
-───────────────────────────────────────────── */
-const ACTION_CONFIG: Record<
-  string,
-  { accent: string; icon: JSX.Element; pillLabel: string }
-> = {
-  view: {
-    accent: "blue",
-    pillLabel: "Browse",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-      </svg>
-    ),
-  },
-  add: {
-    accent: "emerald",
-    pillLabel: "Create",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 8v8M8 12h8" />
-      </svg>
-    ),
-  },
-  update: {
-    accent: "amber",
-    pillLabel: "Edit",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
-        <path d="M17.586 3.586a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-      </svg>
-    ),
-  },
-  remove: {
-    accent: "rose",
-    pillLabel: "Remove",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-        <path d="M10 11v6M14 11v6" />
-      </svg>
-    ),
-  },
-  default: {
-    accent: "violet",
-    pillLabel: "Manage",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="5" y="2" width="14" height="20" rx="2" />
-        <path d="M9 7h6M9 11h6M9 15h4" />
-      </svg>
-    ),
-  },
-};
-
-const getActionConfig = (name: string) => {
-  const lower = name.toLowerCase();
-  if (lower.includes("view") || lower.includes("all"))
-    return ACTION_CONFIG.view;
-  if (lower.includes("add") || lower.includes("create"))
-    return ACTION_CONFIG.add;
-  if (lower.includes("update") || lower.includes("edit"))
-    return ACTION_CONFIG.update;
-  if (lower.includes("remove") || lower.includes("delete"))
-    return ACTION_CONFIG.remove;
-  return ACTION_CONFIG.default;
-};
-
-/* ─────────────────────────────────────────────
-   Main Page
-───────────────────────────────────────────── */
 const RolesPage = () => {
   const { theme, isDarkMode } = useTheme();
   const [statistics, setStatistics] = useState<RoleStatisticsData | null>(null);
@@ -326,15 +46,6 @@ const RolesPage = () => {
   const rolesData = employeeManagementSideBarData.find(
     (item) => item.name === "Role Management",
   );
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Employee Management", href: EMPLOYEE_MANAGEMENT_URL },
-    {
-      label: "Roles",
-      href: ROLES_MANAGEMENT_PAGE_URL,
-    },
-  ];
 
   useEffect(() => {
     fetchStatistics();
@@ -1150,7 +861,7 @@ const RolesPage = () => {
                 <PageHeader
                   title="Roles"
                   description="Manage and monitor user role settings and assignments"
-                  breadcrumbItems={breadcrumbItems}
+                  breadcrumbItems={ROLE_MANAGEMENT_HOME_BREADCRUMB_DATA}
                 />
               </div>
             </div>

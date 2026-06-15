@@ -4,6 +4,8 @@ export { StatCardSkeleton } from "./StatCardSkeleton";
 export {
   CustomBarTooltip,
   CustomPieTooltip,
+  CustomLineTooltip,
+  CustomAreaTooltip,
   // Tour Category tooltips
   TourCategoryPieTooltip,
   TourCategoryBarTooltip,
@@ -59,6 +61,8 @@ export {
   SeasonPopularityTooltip,
   SeasonWeatherTooltip,
   PeakSeasonTooltip,
+  // Employee
+  CustomSalaryTooltip,
 } from "./CustomTooltips";
 export { SectionHeader } from "./SectionHeader";
 export { Reveal } from "./Reveal";

@@ -1,20 +1,13 @@
-// AddNewRolePage.tsx (Fixed dropdown visibility)
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { CreateConfirmModal } from "@/components/common-components/CreateConfirmModal";
 import { RoleService } from "@/services/roleService";
 import { PrivilegeService } from "@/services/privilegeService";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   Shield,
-  FileText,
   AlertCircle,
   CheckCircle2,
   Key,
@@ -25,43 +18,18 @@ import {
 } from "lucide-react";
 import { PrivilegeNameAndId } from "@/types/privilege-types";
 import { CreateRoleRequest } from "@/types/role-types";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-}
-
-// Status options for roles
-const ROLE_STATUS_OPTIONS = [
-  {
-    value: "ACTIVE" as const,
-    label: "Active",
-    description: "Role is available for assignment",
-    color: "#10b981",
-  },
-  {
-    value: "INACTIVE" as const,
-    label: "Inactive",
-    description: "Role is temporarily disabled",
-    color: "#6b7280",
-  },
-];
+import { ToastState } from "@/types/common-components-types";
+import {
+  ROLE_CREATE_DESCRIPTION_MAX_CHARACTERS,
+  ROLE_CREATE_NAME_MAX_CHARACTERS,
+} from "@/data/constnat-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ROLE_CREATE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { ROLE_CREATE_STATUS_OPTIONS } from "@/data/status-options-data";
 
 const AddNewRolePage = () => {
-  const router = useRouter();
   const { theme } = useTheme();
   const privilegesDropdownRef = useRef<HTMLDivElement>(null);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Roles", href: "/roles" },
-    { label: "Add New", href: "/roles/add" },
-  ];
-
-  // Form state
   const [formData, setFormData] = useState<CreateRoleRequest>({
     name: "",
     description: "",
@@ -69,14 +37,11 @@ const AddNewRolePage = () => {
     privilegesIds: [],
   });
 
-  // Privileges state
   const [privileges, setPrivileges] = useState<PrivilegeNameAndId[]>([]);
   const [loadingPrivileges, setLoadingPrivileges] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isPrivilegesDropdownOpen, setIsPrivilegesDropdownOpen] =
     useState(false);
-
-  // UI state
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -87,11 +52,6 @@ const AddNewRolePage = () => {
     message: "",
   });
 
-  // Character limits
-  const NAME_MAX = 100;
-  const DESCRIPTION_MAX = 500;
-
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -166,7 +126,7 @@ const AddNewRolePage = () => {
   };
 
   // Handle status selection
-  const handleStatusChange = (status: "ACTIVE" | "INACTIVE") => {
+  const handleStatusChange = (status: string) => {
     setFormData((prev) => ({ ...prev, status }));
     if (errors.status) {
       setErrors((prev) => ({ ...prev, status: "" }));
@@ -252,14 +212,16 @@ const AddNewRolePage = () => {
 
     if (!formData.name.trim()) {
       newErrors.name = "Role name is required";
-    } else if (formData.name.length > NAME_MAX) {
-      newErrors.name = `Name must be less than ${NAME_MAX} characters`;
+    } else if (formData.name.length > ROLE_CREATE_NAME_MAX_CHARACTERS) {
+      newErrors.name = `Name must be less than ${ROLE_CREATE_NAME_MAX_CHARACTERS} characters`;
     }
 
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
-    } else if (formData.description.length > DESCRIPTION_MAX) {
-      newErrors.description = `Description must be less than ${DESCRIPTION_MAX} characters`;
+    } else if (
+      formData.description.length > ROLE_CREATE_DESCRIPTION_MAX_CHARACTERS
+    ) {
+      newErrors.description = `Description must be less than ${ROLE_CREATE_DESCRIPTION_MAX_CHARACTERS} characters`;
     }
 
     if (formData.privilegesIds.length === 0) {
@@ -412,14 +374,14 @@ const AddNewRolePage = () => {
           <PageHeader
             title="Add New Role"
             description="Create a new role with specific privileges"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ROLE_CREATE_BREADCRUMB_DATA}
           />
         </div>
       </div>
 
       {/* Main Content */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto">
           <form onSubmit={handleSubmitWithConfirmation} className="space-y-8">
             {/* Main Form Card */}
             <div
@@ -477,12 +439,13 @@ const AddNewRolePage = () => {
                       className="text-xs tabular-nums"
                       style={{
                         color:
-                          formData.name.length > NAME_MAX * 0.9
+                          formData.name.length >
+                          ROLE_CREATE_NAME_MAX_CHARACTERS * 0.9
                             ? theme.error
                             : theme.textSecondary,
                       }}
                     >
-                      {formData.name.length}/{NAME_MAX}
+                      {formData.name.length}/{ROLE_CREATE_NAME_MAX_CHARACTERS}
                     </span>
                   </div>
                   <input
@@ -492,7 +455,7 @@ const AddNewRolePage = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="e.g. Administrator, Content Manager, Viewer"
-                    maxLength={NAME_MAX}
+                    maxLength={ROLE_CREATE_NAME_MAX_CHARACTERS}
                     className={`w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm ${
                       errors.name ? "field-error" : ""
                     }`}
@@ -528,12 +491,14 @@ const AddNewRolePage = () => {
                       className="text-xs tabular-nums"
                       style={{
                         color:
-                          formData.description.length > DESCRIPTION_MAX * 0.9
+                          formData.description.length >
+                          ROLE_CREATE_DESCRIPTION_MAX_CHARACTERS * 0.9
                             ? theme.error
                             : theme.textSecondary,
                       }}
                     >
-                      {formData.description.length}/{DESCRIPTION_MAX}
+                      {formData.description.length}/
+                      {ROLE_CREATE_DESCRIPTION_MAX_CHARACTERS}
                     </span>
                   </div>
                   <textarea
@@ -543,7 +508,7 @@ const AddNewRolePage = () => {
                     onChange={handleInputChange}
                     rows={4}
                     placeholder="Describe what this role can do and its responsibilities..."
-                    maxLength={DESCRIPTION_MAX}
+                    maxLength={ROLE_CREATE_DESCRIPTION_MAX_CHARACTERS}
                     className={`w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none ${
                       errors.description ? "field-error" : ""
                     }`}
@@ -577,7 +542,7 @@ const AddNewRolePage = () => {
                   </label>
 
                   <div className="flex gap-3">
-                    {ROLE_STATUS_OPTIONS.map((opt) => {
+                    {ROLE_CREATE_STATUS_OPTIONS.map((opt) => {
                       const isSelected = formData.status === opt.value;
                       return (
                         <button

@@ -1,18 +1,19 @@
-// components/employee-details/ShiftsCard.tsx
 "use client";
 
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { EmployeeShift } from "@/types/employee-types";
+import {
+  EmergencyContactsCardProps,
+  ShiftsCardProps,
+} from "@/types/employee-types";
 import { hexToRgba } from "@/utils/functions";
 import { InfoCard } from "./InfoCard";
+import { formatDate } from "@/utils/utils";
 
-interface ShiftsCardProps {
-  shifts?: EmployeeShift[];
-  animationDelay?: number;
-}
-
-export const ShiftsCard: React.FC<ShiftsCardProps> = ({ shifts, animationDelay = 0 }) => {
+export const ShiftsCard: React.FC<ShiftsCardProps> = ({
+  shifts,
+  animationDelay = 0,
+}) => {
   const { theme } = useTheme();
 
   return (
@@ -32,7 +33,10 @@ export const ShiftsCard: React.FC<ShiftsCardProps> = ({ shifts, animationDelay =
               }}
             >
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="font-semibold text-sm" style={{ color: theme.text }}>
+                <span
+                  className="font-semibold text-sm"
+                  style={{ color: theme.text }}
+                >
                   {shift.shiftName}
                 </span>
                 <span
@@ -45,7 +49,10 @@ export const ShiftsCard: React.FC<ShiftsCardProps> = ({ shifts, animationDelay =
                   {shift.startTime} – {shift.endTime}
                 </span>
               </div>
-              <div className="mt-2 text-xs flex items-center gap-1" style={{ color: theme.textSecondary }}>
+              <div
+                className="mt-2 text-xs flex items-center gap-1"
+                style={{ color: theme.textSecondary }}
+              >
                 <span>📅</span>
                 {formatDate(shift.effectiveFrom)} —{" "}
                 {shift.effectiveTo ? formatDate(shift.effectiveTo) : "Present"}
@@ -58,16 +65,6 @@ export const ShiftsCard: React.FC<ShiftsCardProps> = ({ shifts, animationDelay =
   );
 };
 
-
-// components/employee-details/EmergencyContactsCard.tsx
-import { EmployeeEmergencyContact } from "@/types/employee-types";
-import { formatDate } from "@/utils/utils";
-
-interface EmergencyContactsCardProps {
-  contacts?: EmployeeEmergencyContact[];
-  animationDelay?: number;
-}
-
 export const EmergencyContactsCard: React.FC<EmergencyContactsCardProps> = ({
   contacts,
   animationDelay = 0,
@@ -75,7 +72,11 @@ export const EmergencyContactsCard: React.FC<EmergencyContactsCardProps> = ({
   const { theme } = useTheme();
 
   return (
-    <InfoCard title="Emergency Contacts" icon="🚨" animationDelay={animationDelay}>
+    <InfoCard
+      title="Emergency Contacts"
+      icon="🚨"
+      animationDelay={animationDelay}
+    >
       {!contacts?.length ? (
         <EmptyState message="No emergency contacts added" />
       ) : (
@@ -92,10 +93,16 @@ export const EmergencyContactsCard: React.FC<EmergencyContactsCardProps> = ({
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <div className="font-semibold text-sm" style={{ color: theme.text }}>
+                  <div
+                    className="font-semibold text-sm"
+                    style={{ color: theme.text }}
+                  >
                     {contact.contactName}
                   </div>
-                  <div className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+                  <div
+                    className="text-xs mt-0.5"
+                    style={{ color: theme.textSecondary }}
+                  >
                     {contact.relationship}
                   </div>
                 </div>
@@ -111,7 +118,10 @@ export const EmergencyContactsCard: React.FC<EmergencyContactsCardProps> = ({
                   </span>
                 )}
               </div>
-              <div className="mt-3 space-y-1 text-xs" style={{ color: theme.textSecondary }}>
+              <div
+                className="mt-3 space-y-1 text-xs"
+                style={{ color: theme.textSecondary }}
+              >
                 <div className="flex items-center gap-1.5">
                   <span>📞</span> {contact.primaryPhone}
                 </div>
@@ -137,8 +147,6 @@ export const EmergencyContactsCard: React.FC<EmergencyContactsCardProps> = ({
   );
 };
 
-
-// Shared empty state helper
 const EmptyState: React.FC<{ message: string }> = ({ message }) => {
   const { theme } = useTheme();
   return (

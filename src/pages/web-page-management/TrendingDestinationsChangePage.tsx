@@ -1,13 +1,6 @@
-// app/destinations/trending/page.tsx
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  WEB_MANAGEMENT_PATH,
-  WEB_MANAGEMENT_DESTINATION_PATH,
-} from "@/utils/constant";
+import React, { useState, useEffect } from "react";
 import { DestinationService } from "@/services/destinationService";
 import {
   TrendingDestination,
@@ -18,29 +11,17 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
-import CommonSearch, {
-  SearchItem,
-} from "@/components/common-components/CommonSearch";
+import { SearchItem } from "@/components/common-components/CommonSearch";
 import TrendingDestinationsList from "@/components/web-page-management-components/trending-destinations-components/TrendingDestinationsList";
 import AddTrendingDestinationForm from "@/components/web-page-management-components/trending-destinations-components/AddTrendingDestinationForm";
-import {
-  TRENDING_DESTINATIONS_MANAGE_URL,
-  WEB_HOME_PAGE_URL,
-  WEB_PAGE_MANAGEMENT_URL,
-} from "@/utils/urls";
 import { hexToRgba } from "@/utils/functions";
+import { WEBSITE_CONTENT_MANAGEMENT_TRENDING_DESTINATION_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
 
 interface DestinationSearchItem extends SearchItem {
   id: number;
   name: string;
 }
-
-const breadcrumbItems = [
-  { label: "Dashboard", href: "/" },
-  { label: "Web Page Management", href: WEB_PAGE_MANAGEMENT_URL },
-  { label: "Home Page", href: WEB_HOME_PAGE_URL },
-  { label: "Trending Destinations", href: TRENDING_DESTINATIONS_MANAGE_URL },
-];
 
 const TrendingDestinationsChangePage = () => {
   const { theme } = useTheme();
@@ -340,7 +321,7 @@ const TrendingDestinationsChangePage = () => {
           <PageHeader
             title="Trending Destinations"
             description="Manage destinations that appear on the trending section"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={WEBSITE_CONTENT_MANAGEMENT_TRENDING_DESTINATION_BREADCRUMB_DATA}
           />
         </div>
       </div>

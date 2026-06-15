@@ -1,17 +1,9 @@
-// components/employee-details/InfoCard.tsx
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
-
-interface InfoCardProps {
-  title: string;
-  icon: string;
-  children: React.ReactNode;
-  className?: string;
-  animationDelay?: number;
-}
+import { InfoCardProps, InfoRowProps } from "@/types/employee-types";
 
 export const InfoCard: React.FC<InfoCardProps> = ({
   title,
@@ -34,7 +26,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({
           observer.disconnect();
         }
       },
-      { threshold: 0.08 }
+      { threshold: 0.08 },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -83,15 +75,11 @@ export const InfoCard: React.FC<InfoCardProps> = ({
   );
 };
 
-
-// components/employee-details/InfoRow.tsx
-interface InfoRowProps {
-  label: string;
-  value?: React.ReactNode;
-  fullWidth?: boolean;
-}
-
-export const InfoRow: React.FC<InfoRowProps> = ({ label, value, fullWidth }) => {
+export const InfoRow: React.FC<InfoRowProps> = ({
+  label,
+  value,
+  fullWidth,
+}) => {
   const { theme } = useTheme();
   return (
     <div className={fullWidth ? "col-span-2" : ""}>

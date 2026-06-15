@@ -1,28 +1,30 @@
-// components/employee-management-components/employee-components/employee-view-components/EmployeeCard.tsx
 "use client";
 
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
-import { EmployeeBasic } from "@/types/employee-types";
-import { EMPLOYEES_DETAILS_VIEW_PAGE_URL, EMPLOYEES_VIEW_PAGE_URL } from "@/utils/urls";
+import { EmployeeCardProps } from "@/types/employee-types";
+import {
+  EMPLOYEE_UPDATE_PAGE_URL,
+  EMPLOYEES_DETAILS_VIEW_PAGE_URL,
+} from "@/utils/urls";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
-
-interface EmployeeCardProps {
-  employee: EmployeeBasic;
-}
 
 const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
   const router = useRouter();
   const { theme } = useTheme();
 
   const handleViewDetails = () => {
-    router.push(`${EMPLOYEES_DETAILS_VIEW_PAGE_URL}/${employee.employeeId}?name=${employee.username}`);
+    router.push(
+      `${EMPLOYEES_DETAILS_VIEW_PAGE_URL}/${employee.employeeId}?name=${employee.username}`,
+    );
   };
 
   const handleEdit = () => {
-    router.push(`${EMPLOYEES_VIEW_PAGE_URL}/edit/${employee.employeeId}`);
+    router.push(
+      `${EMPLOYEE_UPDATE_PAGE_URL}/${employee.employeeId}?name=${employee.username}`,
+    );
   };
 
   const getStatusColor = (status: string) => {
@@ -71,12 +73,23 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center"
+              className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"
               style={{
                 background: `linear-gradient(135deg, ${hexToRgba(theme.primary, 0.1)}, ${hexToRgba(theme.accent, 0.1)})`,
               }}
             >
-              <span className="text-lg">👤</span>
+              {employee.imageUrl ? (
+                <img
+                  src={employee.imageUrl}
+                  alt={employee.fullName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : (
+                <span className="text-lg">👤</span>
+              )}
             </div>
             <div>
               <h3
@@ -92,7 +105,10 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
               >
                 {employee.fullName}
               </h3>
-              <div className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+              <div
+                className="text-xs mt-0.5"
+                style={{ color: theme.textSecondary }}
+              >
                 {employee.employeeCode}
               </div>
             </div>
@@ -100,14 +116,18 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusStyle.bg}`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot} animate-pulse`} />
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot} animate-pulse`}
+            />
             {employee.status}
           </span>
         </div>
 
         {/* Email */}
         <div className="mb-2">
-          <div className="text-xs" style={{ color: theme.textSecondary }}>Email</div>
+          <div className="text-xs" style={{ color: theme.textSecondary }}>
+            Email
+          </div>
           <div className="text-sm truncate" style={{ color: theme.text }}>
             {employee.email}
           </div>
@@ -116,14 +136,24 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
         {/* Department & Designation */}
         <div className="grid grid-cols-2 gap-2 mb-2">
           <div>
-            <div className="text-xs" style={{ color: theme.textSecondary }}>Department</div>
-            <div className="text-sm font-medium truncate" style={{ color: theme.text }}>
+            <div className="text-xs" style={{ color: theme.textSecondary }}>
+              Department
+            </div>
+            <div
+              className="text-sm font-medium truncate"
+              style={{ color: theme.text }}
+            >
               {employee.departmentName}
             </div>
           </div>
           <div>
-            <div className="text-xs" style={{ color: theme.textSecondary }}>Designation</div>
-            <div className="text-sm font-medium truncate" style={{ color: theme.text }}>
+            <div className="text-xs" style={{ color: theme.textSecondary }}>
+              Designation
+            </div>
+            <div
+              className="text-sm font-medium truncate"
+              style={{ color: theme.text }}
+            >
               {employee.designationName}
             </div>
           </div>
@@ -132,13 +162,17 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
         {/* Employee Type & Work Location */}
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div>
-            <div className="text-xs" style={{ color: theme.textSecondary }}>Employee Type</div>
+            <div className="text-xs" style={{ color: theme.textSecondary }}>
+              Employee Type
+            </div>
             <div className="text-sm truncate" style={{ color: theme.text }}>
               {employee.employeeType}
             </div>
           </div>
           <div>
-            <div className="text-xs" style={{ color: theme.textSecondary }}>Work Location</div>
+            <div className="text-xs" style={{ color: theme.textSecondary }}>
+              Work Location
+            </div>
             <div className="text-sm truncate" style={{ color: theme.text }}>
               {employee.workLocation}
             </div>
@@ -146,11 +180,24 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee }) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 mt-auto pt-4 border-t" style={{ borderColor: theme.border }}>
-          <CommonButton variant="outline" size="sm" fullWidth onClick={handleViewDetails}>
+        <div
+          className="flex gap-2 mt-auto pt-4 border-t"
+          style={{ borderColor: theme.border }}
+        >
+          <CommonButton
+            variant="outline"
+            size="sm"
+            fullWidth
+            onClick={handleViewDetails}
+          >
             View Details
           </CommonButton>
-          <CommonButton variant="primary" size="sm" fullWidth onClick={handleEdit}>
+          <CommonButton
+            variant="primary"
+            size="sm"
+            fullWidth
+            onClick={handleEdit}
+          >
             Edit
           </CommonButton>
         </div>

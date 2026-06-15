@@ -1,24 +1,31 @@
-// app/user-management/privileges/view/[privilegeId]/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { PrivilegeService } from "@/services/privilegeService";
-import { PrivilegeDetails, RoleInPrivilege } from "@/types/privilege-types";
+import { PrivilegeDetails } from "@/types/privilege-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
 import { hexToRgba } from "@/utils/functions";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
+import { PRIVILEGE_DETAILS_VIEW_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import {
+  PRIVILEGES_DETAILS_VIEW_URL,
+  PRIVILEGES_TERMINATE_PAGE_URL,
+  PRIVILEGES_UPDATE_PAGE_URL,
+  PRIVILEGES_VIEW_PAGE_URL,
+  ROLES_DETAILS_VIEW_URL,
+} from "@/utils/urls";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
 
 const breadcrumbItems = (privilegeName?: string, privilegeId?: number) => [
-  { label: "Dashboard", href: "/" },
-  { label: "User Management", href: `${WEB_MANAGEMENT_PATH}/user-management` },
-  { label: "Privileges", href: `${WEB_MANAGEMENT_PATH}/user-management/privileges` },
-  { label: privilegeName || "Details", href: `${WEB_MANAGEMENT_PATH}/user-management/privileges/view/${privilegeId}` },
+  ...PRIVILEGE_DETAILS_VIEW_BREADCRUMB_DATA,
+  {
+    label: privilegeName || "Details",
+    href: `${PRIVILEGES_DETAILS_VIEW_URL}/${privilegeId}`,
+  },
 ];
 
 const PrivilegeDetailsViewPage = () => {
@@ -44,35 +51,32 @@ const PrivilegeDetailsViewPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await PrivilegeService.getPrivilegeDetailsById(privilegeId);
+      const response =
+        await PrivilegeService.getPrivilegeDetailsById(privilegeId);
       setPrivilege(response.data);
     } catch (err: any) {
       console.error("Error fetching privilege details:", err);
-      setError(err.message || "Failed to load privilege details. Please try again.");
+      setError(
+        err.message || "Failed to load privilege details. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBack = () => router.push(`${WEB_MANAGEMENT_PATH}/user-management/privileges`);
-  const handleEdit = () => router.push(`${WEB_MANAGEMENT_PATH}/user-management/privileges/edit/${privilegeId}`);
-  const handleDelete = () => {
-    if (confirm(`Are you sure you want to delete privilege "${privilege?.privilegeName}"?`)) {
-      // TODO: Implement delete API call
-      console.log("Delete privilege:", privilegeId);
-      router.push(`${WEB_MANAGEMENT_PATH}/user-management/privileges`);
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(PRIVILEGES_VIEW_PAGE_URL);
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "—";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const handleEdit = () =>
+    router.push(`${PRIVILEGES_UPDATE_PAGE_URL}/${privilegeId}`);
+
+  const handleDelete = () => {
+    router.push(`${PRIVILEGES_TERMINATE_PAGE_URL}/${privilegeId}`);
   };
 
   if (loading) {
@@ -120,7 +124,10 @@ const PrivilegeDetailsViewPage = () => {
           <PageHeader
             title={privilege.privilegeName}
             description={`Privilege ID: ${privilege.privilegeId}`}
-            breadcrumbItems={breadcrumbItems(privilege.privilegeName, privilege.privilegeId)}
+            breadcrumbItems={breadcrumbItems(
+              privilege.privilegeName,
+              privilege.privilegeId,
+            )}
           />
         </div>
       </div>
@@ -139,9 +146,7 @@ const PrivilegeDetailsViewPage = () => {
           {/* Left Column - Basic Information */}
           <div className="space-y-6">
             {/* Basic Information Card */}
-            <div
-              className="rounded-2xl shadow-lg overflow-hidden"
-            >
+            <div className="rounded-2xl shadow-lg overflow-hidden">
               <div
                 className="flex items-center gap-3 px-6 py-4"
                 style={{
@@ -181,7 +186,10 @@ const PrivilegeDetailsViewPage = () => {
                       border: `1px solid ${hexToRgba(theme.primary, 0.15)}`,
                     }}
                   >
-                    <span className="text-base font-medium" style={{ color: theme.text }}>
+                    <span
+                      className="text-base font-medium"
+                      style={{ color: theme.text }}
+                    >
                       {privilege.privilegeName}
                     </span>
                   </div>
@@ -203,10 +211,14 @@ const PrivilegeDetailsViewPage = () => {
                   >
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
-                        privilege.privilegeStatus === "ACTIVE" ? "bg-green-500 animate-pulse" : "bg-red-500"
+                        privilege.privilegeStatus === "ACTIVE"
+                          ? "bg-green-500 animate-pulse"
+                          : "bg-red-500"
                       }`}
                     />
-                    {privilege.privilegeStatus === "ACTIVE" ? "Active" : "Inactive"}
+                    {privilege.privilegeStatus === "ACTIVE"
+                      ? "Active"
+                      : "Inactive"}
                   </span>
                 </div>
 
@@ -224,8 +236,12 @@ const PrivilegeDetailsViewPage = () => {
                       border: `1px solid ${theme.border}`,
                     }}
                   >
-                    <p className="text-sm leading-relaxed" style={{ color: theme.textSecondary }}>
-                      {privilege.privilegeDescription || "No description provided."}
+                    <p
+                      className="text-sm leading-relaxed"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      {privilege.privilegeDescription ||
+                        "No description provided."}
                     </p>
                   </div>
                 </div>
@@ -236,9 +252,7 @@ const PrivilegeDetailsViewPage = () => {
           {/* Right Column - Roles Associated */}
           <div className="space-y-6">
             {/* Roles Card */}
-            <div
-              className="rounded-2xl shadow-lg overflow-hidden"
-            >
+            <div className="rounded-2xl shadow-lg overflow-hidden">
               <div
                 className="flex items-center gap-3 px-6 py-4"
                 style={{
@@ -268,7 +282,8 @@ const PrivilegeDetailsViewPage = () => {
                     color: theme.accent,
                   }}
                 >
-                  {privilege.roles.length} role{privilege.roles.length !== 1 ? "s" : ""}
+                  {privilege.roles.length} role
+                  {privilege.roles.length !== 1 ? "s" : ""}
                 </span>
               </div>
 
@@ -282,7 +297,10 @@ const PrivilegeDetailsViewPage = () => {
                     }}
                   >
                     <span className="text-4xl mb-2 block">👥</span>
-                    <p className="text-sm" style={{ color: theme.textSecondary }}>
+                    <p
+                      className="text-sm"
+                      style={{ color: theme.textSecondary }}
+                    >
                       No roles associated with this privilege
                     </p>
                   </div>
@@ -309,7 +327,11 @@ const PrivilegeDetailsViewPage = () => {
                                 onMouseLeave={(e) => {
                                   e.currentTarget.style.color = theme.text;
                                 }}
-                                onClick={() => router.push(`${WEB_MANAGEMENT_PATH}/user-management/roles/view/${role.roleId}`)}
+                                onClick={() =>
+                                  router.push(
+                                    `${ROLES_DETAILS_VIEW_URL}/${role.roleId}?name${role.roleName}`,
+                                  )
+                                }
                               >
                                 {role.roleName}
                               </h3>
@@ -322,14 +344,21 @@ const PrivilegeDetailsViewPage = () => {
                               >
                                 <span
                                   className={`w-1 h-1 rounded-full ${
-                                    role.roleStatus === "ACTIVE" ? "bg-green-500" : "bg-red-500"
+                                    role.roleStatus === "ACTIVE"
+                                      ? "bg-green-500"
+                                      : "bg-red-500"
                                   }`}
                                 />
-                                {role.roleStatus === "ACTIVE" ? "Active" : "Inactive"}
+                                {role.roleStatus === "ACTIVE"
+                                  ? "Active"
+                                  : "Inactive"}
                               </span>
                             </div>
                             {role.roleDescription && (
-                              <p className="text-sm mt-1" style={{ color: theme.textSecondary }}>
+                              <p
+                                className="text-sm mt-1"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 {role.roleDescription}
                               </p>
                             )}
@@ -337,7 +366,11 @@ const PrivilegeDetailsViewPage = () => {
                           <CommonButton
                             variant="outline"
                             size="xs"
-                            onClick={() => router.push(`${WEB_MANAGEMENT_PATH}/user-management/roles/view/${role.roleId}`)}
+                            onClick={() =>
+                              router.push(
+                                `${ROLES_DETAILS_VIEW_URL}/${role.roleId}?name${role.roleName}`,
+                              )
+                            }
                           >
                             View Role →
                           </CommonButton>
@@ -353,9 +386,7 @@ const PrivilegeDetailsViewPage = () => {
 
         {/* Additional Information Card */}
         <div className="mt-6">
-          <div
-            className="rounded-2xl shadow-lg overflow-hidden"
-          >
+          <div className="rounded-2xl shadow-lg overflow-hidden">
             <div
               className="flex items-center gap-3 px-6 py-4"
               style={{
@@ -390,10 +421,16 @@ const PrivilegeDetailsViewPage = () => {
                 >
                   <span className="text-2xl">🆔</span>
                   <div>
-                    <div className="text-xs" style={{ color: theme.textSecondary }}>
+                    <div
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Privilege ID
                     </div>
-                    <div className="text-sm font-semibold font-mono" style={{ color: theme.text }}>
+                    <div
+                      className="text-sm font-semibold font-mono"
+                      style={{ color: theme.text }}
+                    >
                       #{privilege.privilegeId}
                     </div>
                   </div>
@@ -407,11 +444,18 @@ const PrivilegeDetailsViewPage = () => {
                 >
                   <span className="text-2xl">🔢</span>
                   <div>
-                    <div className="text-xs" style={{ color: theme.textSecondary }}>
+                    <div
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
                       Total Associated Roles
                     </div>
-                    <div className="text-sm font-semibold" style={{ color: theme.text }}>
-                      {privilege.roles.length} role{privilege.roles.length !== 1 ? "s" : ""}
+                    <div
+                      className="text-sm font-semibold"
+                      style={{ color: theme.text }}
+                    >
+                      {privilege.roles.length} role
+                      {privilege.roles.length !== 1 ? "s" : ""}
                     </div>
                   </div>
                 </div>

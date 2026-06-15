@@ -1,54 +1,24 @@
-// AddNewPrivilegePage.tsx (Updated with CreateConfirmModal)
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
-import {
-  ToastNotification,
-  ToastType,
-} from "@/components/common-components/ToastNotification";
+import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { CreateConfirmModal } from "@/components/common-components/CreateConfirmModal";
 import { PrivilegeService } from "@/services/privilegeService";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Shield, FileText, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Shield, AlertCircle, CheckCircle2 } from "lucide-react";
 import { CreatePrivilegeRequest } from "@/types/privilege-types";
-
-// Toast state interface
-interface ToastState {
-  show: boolean;
-  type: ToastType;
-  title: string;
-  message: string;
-}
-
-// Status options for privileges
-const PRIVILEGE_STATUS_OPTIONS = [
-  {
-    value: "ACTIVE" as const,
-    label: "Active",
-    description: "Privilege is available for use",
-    color: "#10b981",
-  },
-  {
-    value: "INACTIVE" as const,
-    label: "Inactive",
-    description: "Privilege is temporarily disabled",
-    color: "#6b7280",
-  },
-];
+import { ToastState } from "@/types/common-components-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { PRIVILEGE_CREATE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import { PRIVILEGE_CREATE_STATUS_OPTIONS } from "@/data/status-options-data";
+import {
+  PRIVILEGE_CREATE_NAME_MAX_CHARACTERS,
+  PRIVILEGE_CREATE_DESCRIPTION_MAX_CHARACTERS,
+} from "@/data/constnat-data";
 
 const AddNewPrivilegePage = () => {
-  const router = useRouter();
   const { theme } = useTheme();
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Privileges", href: "/privileges" },
-    { label: "Add New", href: "/privileges/add" },
-  ];
-
-  // Form state
   const [formData, setFormData] = useState<CreatePrivilegeRequest>({
     name: "",
     description: "",
@@ -65,10 +35,6 @@ const AddNewPrivilegePage = () => {
     title: "",
     message: "",
   });
-
-  // Character limits
-  const NAME_MAX = 100;
-  const DESCRIPTION_MAX = 500;
 
   // Handle form input changes
   const handleInputChange = (
@@ -87,7 +53,7 @@ const AddNewPrivilegePage = () => {
   };
 
   // Handle status selection
-  const handleStatusChange = (status: "ACTIVE" | "INACTIVE") => {
+  const handleStatusChange = (status: string) => {
     setFormData((prev) => ({ ...prev, status }));
     if (errors.status) {
       setErrors((prev) => ({ ...prev, status: "" }));
@@ -100,14 +66,16 @@ const AddNewPrivilegePage = () => {
 
     if (!formData.name.trim()) {
       newErrors.name = "Privilege name is required";
-    } else if (formData.name.length > NAME_MAX) {
-      newErrors.name = `Name must be less than ${NAME_MAX} characters`;
+    } else if (formData.name.length > PRIVILEGE_CREATE_NAME_MAX_CHARACTERS) {
+      newErrors.name = `Name must be less than ${PRIVILEGE_CREATE_NAME_MAX_CHARACTERS} characters`;
     }
 
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
-    } else if (formData.description.length > DESCRIPTION_MAX) {
-      newErrors.description = `Description must be less than ${DESCRIPTION_MAX} characters`;
+    } else if (
+      formData.description.length > PRIVILEGE_CREATE_DESCRIPTION_MAX_CHARACTERS
+    ) {
+      newErrors.description = `Description must be less than ${PRIVILEGE_CREATE_DESCRIPTION_MAX_CHARACTERS} characters`;
     }
 
     setErrors(newErrors);
@@ -253,14 +221,14 @@ const AddNewPrivilegePage = () => {
           <PageHeader
             title="Add New Privilege"
             description="Create a new privilege with access controls"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PRIVILEGE_CREATE_BREADCRUMB_DATA}
           />
         </div>
       </div>
 
       {/* Main Content */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-3xl mx-auto">
+        <div className=" mx-auto">
           <form onSubmit={handleSubmitWithConfirmation} className="space-y-8">
             {/* Main Form Card */}
             <div
@@ -318,12 +286,14 @@ const AddNewPrivilegePage = () => {
                       className="text-xs tabular-nums"
                       style={{
                         color:
-                          formData.name.length > NAME_MAX * 0.9
+                          formData.name.length >
+                          PRIVILEGE_CREATE_NAME_MAX_CHARACTERS * 0.9
                             ? theme.error
                             : theme.textSecondary,
                       }}
                     >
-                      {formData.name.length}/{NAME_MAX}
+                      {formData.name.length}/
+                      {PRIVILEGE_CREATE_NAME_MAX_CHARACTERS}
                     </span>
                   </div>
                   <input
@@ -333,7 +303,7 @@ const AddNewPrivilegePage = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="e.g. Manage Users, View Reports, Edit Settings"
-                    maxLength={NAME_MAX}
+                    maxLength={PRIVILEGE_CREATE_NAME_MAX_CHARACTERS}
                     className={`w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm ${
                       errors.name ? "field-error" : ""
                     }`}
@@ -369,12 +339,14 @@ const AddNewPrivilegePage = () => {
                       className="text-xs tabular-nums"
                       style={{
                         color:
-                          formData.description.length > DESCRIPTION_MAX * 0.9
+                          formData.description.length >
+                          PRIVILEGE_CREATE_DESCRIPTION_MAX_CHARACTERS * 0.9
                             ? theme.error
                             : theme.textSecondary,
                       }}
                     >
-                      {formData.description.length}/{DESCRIPTION_MAX}
+                      {formData.description.length}/
+                      {PRIVILEGE_CREATE_DESCRIPTION_MAX_CHARACTERS}
                     </span>
                   </div>
                   <textarea
@@ -384,7 +356,7 @@ const AddNewPrivilegePage = () => {
                     onChange={handleInputChange}
                     rows={5}
                     placeholder="Describe what this privilege allows users to do..."
-                    maxLength={DESCRIPTION_MAX}
+                    maxLength={PRIVILEGE_CREATE_DESCRIPTION_MAX_CHARACTERS}
                     className={`w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none ${
                       errors.description ? "field-error" : ""
                     }`}
@@ -418,7 +390,7 @@ const AddNewPrivilegePage = () => {
                   </label>
 
                   <div className="flex gap-3">
-                    {PRIVILEGE_STATUS_OPTIONS.map((opt) => {
+                    {PRIVILEGE_CREATE_STATUS_OPTIONS.map((opt) => {
                       const isSelected = formData.status === opt.value;
                       return (
                         <button

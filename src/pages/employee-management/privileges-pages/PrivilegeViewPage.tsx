@@ -1,11 +1,7 @@
-// app/user-management/privileges/page.tsx
 "use client";
 
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
-import FilterPanel, {
-  FilterField,
-} from "@/components/common-components/FilterPanel";
+import FilterPanel from "@/components/common-components/FilterPanel";
 import Pagination from "@/components/common-components/Pagination";
 import ActiveFilters from "@/components/common-components/ActiveFilters";
 import { ResultsHeader } from "@/components/common-components/ResultsHeader";
@@ -19,68 +15,16 @@ import { ToastNotification } from "@/components/common-components/ToastNotificat
 import CommonButton from "@/components/common-components/buttons/CommonButton";
 import PrivilegeCard from "@/components/employee-management-components/privilege-components/privilege-view-components/PrivilegeCard";
 import PrivilegeListCard from "@/components/employee-management-components/privilege-components/privilege-view-components/PrivilegeListCard";
+import { PRIVILEGES_VIEW_PAGE_URL } from "@/utils/urls";
+import { FilterField } from "@/types/filter-types";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
 import {
-  EMPLOYEE_MANAGEMENT_URL,
-  PRIVILEGES_MANAGEMENT_PAGE_URL,
-  PRIVILEGES_VIEW_PAGE_URL,
-} from "@/utils/urls";
-
-// Sort options
-const SORT_OPTIONS = [
-  { value: "name", label: "Privilege Name" },
-  { value: "privilegeId", label: "Privilege ID" },
-  { value: "privilegeStatus", label: "Status" },
-  { value: "createdAt", label: "Created Date" },
-  { value: "updatedAt", label: "Updated Date" },
-];
-
-// Status options
-const STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-];
-
-// Utility functions for URL params management
-const filtersToUrlParams = (
-  filters: PrivilegeFilterParams,
-): URLSearchParams => {
-  const params = new URLSearchParams();
-
-  if (filters.name) params.set("name", filters.name);
-  if (filters.status) params.set("status", filters.status);
-  if (filters.pageSize) params.set("pageSize", filters.pageSize.toString());
-  if (filters.pageNumber && filters.pageNumber !== 1)
-    params.set("pageNumber", filters.pageNumber.toString());
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
-
-  return params;
-};
-
-const urlParamsToFilters = (params: URLSearchParams): PrivilegeFilterParams => {
-  return {
-    name: params.get("name") || null,
-    status: params.get("status") || null,
-    pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")!) : 12,
-    pageNumber: params.get("pageNumber")
-      ? parseInt(params.get("pageNumber")!)
-      : 1,
-    sortBy: params.get("sortBy") as
-      | "name"
-      | "privilegeId"
-      | "privilegeStatus"
-      | "createdAt"
-      | "updatedAt"
-      | undefined,
-    sortDirection: (params.get("sortDirection") as "ASC" | "DESC") || "ASC",
-  };
-};
-
-const breadcrumbItems = [
-  { label: "Dashboard", href: "/" },
-  { label: "Employee Management", href: EMPLOYEE_MANAGEMENT_URL },
-  { label: "Privileges", href: PRIVILEGES_MANAGEMENT_PAGE_URL },
-];
+  privilegeViewFiltersToUrlParams,
+  privilegeViewUrlParamsToFilters,
+} from "@/utils/urlParameterFunctions";
+import { PRIVILEGE_STATUS_OPTIONS } from "@/data/status-options-data";
+import { PRIVILEGE_VIEW_SORTING_OPTIONS } from "@/data/sorting-options";
+import { PRIVILEGE_VIEW_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const PrivilegeViewContent = () => {
   const router = useRouter();
@@ -88,7 +32,7 @@ const PrivilegeViewContent = () => {
   const { theme } = useTheme();
 
   const [filters, setFilters] = useState<PrivilegeFilterParams>(() =>
-    urlParamsToFilters(searchParams || new URLSearchParams()),
+    privilegeViewUrlParamsToFilters(searchParams || new URLSearchParams()),
   );
 
   const [privileges, setPrivileges] = useState<Privilege[]>([]);
@@ -116,21 +60,23 @@ const PrivilegeViewContent = () => {
       key: "status",
       label: "Status",
       type: "select",
-      options: STATUS_OPTIONS,
+      options: PRIVILEGE_STATUS_OPTIONS,
       width: "third",
     },
   ];
 
   // Get sort label for display
   const getSortLabel = (sortBy: string): string => {
-    const option = SORT_OPTIONS.find((opt) => opt.value === sortBy);
+    const option = PRIVILEGE_VIEW_SORTING_OPTIONS.find(
+      (opt) => opt.value === sortBy,
+    );
     return option ? option.label : sortBy;
   };
 
   // Update URL with current filters
   const updateURL = useCallback(
     (newFilters: PrivilegeFilterParams) => {
-      const params = filtersToUrlParams(newFilters);
+      const params = privilegeViewFiltersToUrlParams(newFilters);
       const queryString = params.toString();
       const newURL = queryString
         ? `${PRIVILEGES_VIEW_PAGE_URL}?${queryString}`
@@ -146,10 +92,9 @@ const PrivilegeViewContent = () => {
       setLoading(true);
       setError(null);
       try {
-        // IMPORTANT: Convert page number from 1-based (UI) to 0-based (API)
         const apiFilters = {
           ...currentFilters,
-          pageNumber: Math.max(0, (currentFilters.pageNumber || 1) - 1), // Convert to 0-based for API
+          pageNumber: Math.max(0, (currentFilters.pageNumber || 1) - 1),
         };
 
         const response = await PrivilegeService.getAllPrivileges(apiFilters);
@@ -173,7 +118,7 @@ const PrivilegeViewContent = () => {
 
   // Initial load from URL params
   useEffect(() => {
-    const initialFilters = urlParamsToFilters(
+    const initialFilters = privilegeViewUrlParamsToFilters(
       searchParams || new URLSearchParams(),
     );
     setFilters(initialFilters);
@@ -183,7 +128,7 @@ const PrivilegeViewContent = () => {
   // Watch for URL params changes and fetch data (for browser back/forward)
   useEffect(() => {
     if (!isInitialLoad) {
-      const urlFilters = urlParamsToFilters(
+      const urlFilters = privilegeViewUrlParamsToFilters(
         searchParams || new URLSearchParams(),
       );
       setFilters(urlFilters);
@@ -357,7 +302,7 @@ const PrivilegeViewContent = () => {
           <PageHeader
             title="Privileges"
             description="Manage user privileges and permissions"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={PRIVILEGE_VIEW_BREADCRUMB_DATA}
           />
         </div>
       </div>
@@ -377,7 +322,7 @@ const PrivilegeViewContent = () => {
             pageSizeOptions={[12, 15, 20, 30, 50]}
             showPageSize={true}
             showSorting={true}
-            sortOptions={SORT_OPTIONS}
+            sortOptions={PRIVILEGE_VIEW_SORTING_OPTIONS}
             sortBy={filters.sortBy || ""}
             sortDirection={filters.sortDirection || "ASC"}
             title="Filter Privileges"
@@ -500,10 +445,7 @@ const PrivilegeViewContent = () => {
   );
 };
 
-// Wrap with Suspense for useSearchParams
 const PrivilegeViewPage = () => {
-  const { theme } = useTheme();
-
   return (
     <Suspense
       fallback={

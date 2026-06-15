@@ -1,77 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, type Variants } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
-import { Privilege } from "@/types/privilege-types";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
 import {
   PRIVILEGES_TERMINATE_PAGE_URL,
   PRIVILEGES_UPDATE_PAGE_URL,
   PRIVILEGES_VIEW_PAGE_URL,
 } from "@/utils/urls";
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-  hover: {
-    y: -4,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-};
-
-const iconVariants: Variants = {
-  hidden: { scale: 0, rotate: -180 },
-  visible: {
-    scale: 1,
-    rotate: 0,
-    transition: {
-      type: "spring",
-      stiffness: 400,
-      damping: 15,
-      duration: 0.4,
-    },
-  },
-  hover: {
-    scale: 1.1,
-    rotate: 5,
-    transition: { duration: 0.2 },
-  },
-};
-
-const titleVariants: Variants = {
-  rest: { color: "#inherit" },
-  hover: { color: "#3b82f6", transition: { duration: 0.2 } },
-};
-
-const buttonVariants: Variants = {
-  rest: { scale: 1 },
-  hover: { scale: 1.02, transition: { duration: 0.15 } },
-  tap: { scale: 0.98, transition: { duration: 0.1 } },
-};
-
-const statusBadgeVariants: Variants = {
-  hidden: { opacity: 0, x: 10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-interface PrivilegeCardProps {
-  privilege: Privilege;
-}
+import { PrivilegeCardProps } from "@/types/privilege-types";
+import {
+  buttonVariants,
+  cardVariants,
+  EASE_OUT,
+  iconVariants,
+  statusBadgeVariants,
+  titleVariants,
+} from "@/app/animations/variants";
 
 const PrivilegeCard: React.FC<PrivilegeCardProps> = ({ privilege }) => {
   const router = useRouter();
@@ -92,7 +40,8 @@ const PrivilegeCard: React.FC<PrivilegeCardProps> = ({ privilege }) => {
   const handleTerminateClick = () => {
     router.push(
       `${PRIVILEGES_TERMINATE_PAGE_URL}?privilegeId=${privilege.privilegeId}&name=${encodeURIComponent(privilege.privilegeName)}`,
-    );  };
+    );
+  };
 
   const isActive = privilege.privilegeStatus === "ACTIVE";
 
@@ -154,7 +103,10 @@ const PrivilegeCard: React.FC<PrivilegeCardProps> = ({ privilege }) => {
                 >
                   {privilege.privilegeName}
                 </motion.h3>
-                <div className="text-xs mt-0.5 font-mono" style={{ color: theme.textSecondary }}>
+                <div
+                  className="text-xs mt-0.5 font-mono"
+                  style={{ color: theme.textSecondary }}
+                >
                   ID: {privilege.privilegeId}
                 </div>
               </div>
@@ -165,9 +117,7 @@ const PrivilegeCard: React.FC<PrivilegeCardProps> = ({ privilege }) => {
               initial="hidden"
               animate="visible"
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
-                isActive
-                  ? "shadow-sm"
-                  : ""
+                isActive ? "shadow-sm" : ""
               }`}
               style={{
                 backgroundColor: isActive
@@ -260,7 +210,6 @@ const PrivilegeCard: React.FC<PrivilegeCardProps> = ({ privilege }) => {
           </motion.div>
         </div>
       </motion.div>
-
     </>
   );
 };

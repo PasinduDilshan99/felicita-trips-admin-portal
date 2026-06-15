@@ -1,24 +1,21 @@
-// components/employee-management-components/role-components/role-view-components/RoleListCard.tsx
 "use client";
 
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
-import { Role } from "@/types/role-types";
-import { ROLES_UPDATE_PAGE_URL, ROLES_VIEW_PAGE_URL } from "@/utils/urls";
+import { ROLES_DETAILS_VIEW_URL, ROLES_UPDATE_PAGE_URL } from "@/utils/urls";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
-
-interface RoleListCardProps {
-  role: Role;
-}
+import { RoleListCardProps } from "@/types/role-types";
 
 const RoleListCard: React.FC<RoleListCardProps> = ({ role }) => {
   const router = useRouter();
   const { theme } = useTheme();
 
   const handleViewDetails = () => {
-    router.push(`${ROLES_VIEW_PAGE_URL}/${role.roleId}?name=${role.roleName}`);
+    router.push(
+      `${ROLES_DETAILS_VIEW_URL}/${role.roleId}?name=${role.roleName}`,
+    );
   };
 
   const handleEdit = () => {
@@ -26,6 +23,7 @@ const RoleListCard: React.FC<RoleListCardProps> = ({ role }) => {
       `${ROLES_UPDATE_PAGE_URL}?roleId=${role.roleId}&name${role.roleName}`,
     );
   };
+
   return (
     <div
       className="rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300"
