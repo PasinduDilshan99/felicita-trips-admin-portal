@@ -1,4 +1,3 @@
-// app/travel-management/layout.tsx
 "use client";
 
 import Sidebar from "@/components/common-components/static-components/SideBar";

@@ -1,90 +1,41 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { RoleService } from "@/services/roleService";
 import { RoleDetails, PrivilegeInRole } from "@/types/role-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import CommonLoading from "@/components/common-components/CommonLoading";
 import CommonErrorState from "@/components/common-components/CommonErrorState";
 import ActionButtons from "@/components/common-components/ActionButtons";
-import { WEB_MANAGEMENT_PATH } from "@/utils/constant";
 import { hexToRgba } from "@/utils/functions";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
 import { ChevronDown, ChevronUp, Lock } from "lucide-react";
-import { ConfirmDialog } from "@/components/destination-categories-components/destination-categories-update-components/ConfirmDialog";
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-  },
-};
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: EASE_OUT },
-  },
-  hover: {
-    y: -2,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-};
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0, y: -10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const privilegeCardVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-  hover: {
-    x: 4,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-};
-
-const statusBadgeVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const buttonVariants: Variants = {
-  rest: { scale: 1 },
-  hover: { scale: 1.02, transition: { duration: 0.15 } },
-  tap: { scale: 0.98, transition: { duration: 0.1 } },
-};
+import { ROLE_DETAILS_VIEW_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import {
+  PRIVILEGES_DETAILS_VIEW_URL,
+  ROLES_DETAILS_VIEW_URL,
+  ROLES_TERMINATE_PAGE_URL,
+  ROLES_UPDATE_PAGE_URL,
+  ROLES_VIEW_PAGE_URL,
+} from "@/utils/urls";
+import {
+  buttonVariants,
+  cardVariants,
+  containerVariants,
+  EASE_OUT,
+  headerVariants,
+  privilegeCardVariants,
+  statusBadgeVariants,
+} from "@/app/animations/variants";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
 
 const breadcrumbItems = (roleName?: string, roleId?: number) => [
-  { label: "Dashboard", href: "/" },
-  { label: "User Management", href: `${WEB_MANAGEMENT_PATH}/user-management` },
-  { label: "Roles", href: `${WEB_MANAGEMENT_PATH}/user-management/roles` },
+  ...ROLE_DETAILS_VIEW_BREADCRUMB_DATA,
   {
     label: roleName || "Details",
-    href: `${WEB_MANAGEMENT_PATH}/user-management/roles/view/${roleId}`,
+    href: `${ROLES_DETAILS_VIEW_URL}/${roleId}`,
   },
 ];
 
@@ -136,31 +87,27 @@ const RoleDetailsPage = () => {
     }
   };
 
-  const handleBack = () =>
-    router.push(`${WEB_MANAGEMENT_PATH}/user-management/roles`);
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(ROLES_VIEW_PAGE_URL);
+    }
+  };
   const handleEdit = () =>
-    router.push(`${WEB_MANAGEMENT_PATH}/user-management/roles/edit/${roleId}`);
+    router.push(
+      `${ROLES_UPDATE_PAGE_URL}/user-management/roles/edit/${roleId}`,
+    );
 
   const handleDeleteClick = () => {
-    setShowDeleteConfirm(true);
-  };
-
-  const handleConfirmDelete = () => {
-    setIsDeleting(true);
-    // TODO: Implement delete API call
-    console.log("Delete role:", roleId);
-    setTimeout(() => {
-      router.push(`${WEB_MANAGEMENT_PATH}/user-management/roles`);
-    }, 500);
-  };
-
-  const handleCancelDelete = () => {
-    setShowDeleteConfirm(false);
+    router.push(
+      `${ROLES_TERMINATE_PAGE_URL}/user-management/roles/edit/${roleId}`,
+    );
   };
 
   const handlePrivilegeClick = (privilegeId: number, privilegeName: string) => {
     router.push(
-      `${WEB_MANAGEMENT_PATH}/user-management/privileges/view/${privilegeId}?name=${encodeURIComponent(privilegeName)}`,
+      `${PRIVILEGES_DETAILS_VIEW_URL}/${privilegeId}?name=${encodeURIComponent(privilegeName)}`,
     );
   };
 
@@ -740,19 +687,6 @@ const RoleDetailsPage = () => {
           </div>
         </motion.div>
       </div>
-
-      {/* Confirm Delete Dialog */}
-      <ConfirmDialog
-        isOpen={showDeleteConfirm}
-        onClose={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
-        title="Delete Role"
-        message={`Are you sure you want to delete the role "${role.roleName}"? This action cannot be undone and will remove all associated privileges from this role.`}
-        confirmText="Delete"
-        cancelText="Cancel"
-        type="danger"
-        isLoading={isDeleting}
-      />
     </motion.div>
   );
 };

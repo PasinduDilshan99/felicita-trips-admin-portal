@@ -7,7 +7,7 @@ export interface Privilege {
   privilegeId: number;
   privilegeName: string;
   privilegeDescription: string | null;
-  privilegeStatus: "ACTIVE" | "INACTIVE";
+  privilegeStatus: string;
 }
 
 export interface PrivilegeNameAndId {
@@ -34,7 +34,12 @@ export interface PrivilegeFilterParams {
   status: string | null;
   pageSize: number;
   pageNumber: number;
-  sortBy?: "name" | "privilegeId" | "privilegeStatus" | "createdAt" | "updatedAt";
+  sortBy?:
+    | "name"
+    | "privilegeId"
+    | "privilegeStatus"
+    | "createdAt"
+    | "updatedAt";
   sortDirection?: "ASC" | "DESC";
 }
 
@@ -51,12 +56,13 @@ export type PrivilegeNamesAndIdsApiResponse = ApiResponse<PrivilegeNameAndId[]>;
 
 export type PrivilegeDetailsApiResponse = ApiResponse<PrivilegeDetails>;
 
-export type PrivilegeBasicDetailsApiResponse = ApiResponse<PrivilegeBasicDetails>;
+export type PrivilegeBasicDetailsApiResponse =
+  ApiResponse<PrivilegeBasicDetails>;
 
 // Create Privilege
 export interface CreatePrivilegeRequest {
   name: string;
-  status: "ACTIVE" | "INACTIVE";
+  status: string;
   description: string;
 }
 
@@ -70,7 +76,7 @@ export type CreatePrivilegeApiResponse = ApiResponse<CreatePrivilegeResponse>;
 export interface UpdatePrivilegeRequest {
   id: number;
   name: string;
-  status: "ACTIVE" | "INACTIVE";
+  status: string;
   description: string;
 }
 
@@ -90,7 +96,8 @@ export interface TerminatePrivilegeResponse {
   message: string;
 }
 
-export type TerminatePrivilegeApiResponse = ApiResponse<TerminatePrivilegeResponse>;
+export type TerminatePrivilegeApiResponse =
+  ApiResponse<TerminatePrivilegeResponse>;
 
 // Statistics Types
 export interface PrivilegeDetailsStats {
@@ -115,4 +122,18 @@ export interface PrivilegeStatisticsData {
   recentlyTerminate: UserActivityStats[];
 }
 
-export type PrivilegeStatisticsApiResponse = ApiResponse<PrivilegeStatisticsData>;
+export type PrivilegeStatisticsApiResponse =
+  ApiResponse<PrivilegeStatisticsData>;
+
+export interface PrivilegeCardProps {
+  privilege: Privilege;
+}
+
+export interface PrivilegeListCardProps {
+  privilege: Privilege;
+}
+
+export interface PrivilegeSearchItem {
+  id: number;
+  name: string;
+}

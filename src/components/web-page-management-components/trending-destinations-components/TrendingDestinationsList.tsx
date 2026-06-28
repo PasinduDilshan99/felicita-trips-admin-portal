@@ -7,16 +7,12 @@ import { TrendingDestination } from "@/types/destination-types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
 import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import NavigationButton from "@/components/common-components/NavigationButton";
-import { ConfirmDialog } from "@/components/destination-categories-components/destination-categories-update-components/ConfirmDialog";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
-import {
-  DESTINATION_CATEGORY_VIEW_DETAILS_URL,
-  DESTINATION_DETAILS_VIEW_PAGE_URL,
-} from "@/utils/urls";
+import { DESTINATION_DETAILS_VIEW_PAGE_URL } from "@/utils/urls";
+import { ImageModalImage } from "@/types/common-components-types";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface TrendingDestinationsListProps {
   destinations: TrendingDestination[];
@@ -232,7 +228,7 @@ const TrendingDestinationsList: React.FC<TrendingDestinationsListProps> = ({
 
   const handleViewCategory = (categoryId: number, categoryName: string) => {
     router.push(
-      `${DESTINATION_CATEGORY_VIEW_DETAILS_URL}/${categoryId}?name=${categoryName}`,
+      `${DESTINATION_DETAILS_VIEW_PAGE_URL}/${categoryId}?name=${categoryName}`,
     );
   };
 

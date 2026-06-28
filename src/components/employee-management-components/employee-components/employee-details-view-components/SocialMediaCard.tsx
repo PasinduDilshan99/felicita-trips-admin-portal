@@ -1,18 +1,20 @@
-// components/employee-details/SocialMediaCard.tsx
 "use client";
 
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { EmployeeSocialMedia } from "@/types/employee-types";
 import { hexToRgba } from "@/utils/functions";
 import { InfoCard } from "./InfoCard";
+import { SkillsCardProps, SocialMediaCardProps } from "@/types/employee-types";
+import {
+  formatDate,
+  getPlatformIcon,
+  getProficiencyStyle,
+} from "@/utils/utils";
 
-interface SocialMediaCardProps {
-  socialMedia?: EmployeeSocialMedia[];
-  animationDelay?: number;
-}
-
-export const SocialMediaCard: React.FC<SocialMediaCardProps> = ({ socialMedia, animationDelay = 0 }) => {
+export const SocialMediaCard: React.FC<SocialMediaCardProps> = ({
+  socialMedia,
+  animationDelay = 0,
+}) => {
   const { theme } = useTheme();
 
   return (
@@ -43,7 +45,10 @@ export const SocialMediaCard: React.FC<SocialMediaCardProps> = ({ socialMedia, a
                 {getPlatformIcon(social.platformName)}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold" style={{ color: theme.text }}>
+                <div
+                  className="text-sm font-semibold"
+                  style={{ color: theme.text }}
+                >
                   {social.platformName}
                 </div>
                 <div
@@ -52,7 +57,10 @@ export const SocialMediaCard: React.FC<SocialMediaCardProps> = ({ socialMedia, a
                 >
                   @{social.username}
                 </div>
-                <div className="text-xs mt-1 flex items-center gap-2" style={{ color: theme.textSecondary }}>
+                <div
+                  className="text-xs mt-1 flex items-center gap-2"
+                  style={{ color: theme.textSecondary }}
+                >
                   <span>👥 {social.followerCount?.toLocaleString()}</span>
                   {social.primary && <span>⭐ Primary</span>}
                   {social.verified && <span>✓ Verified</span>}
@@ -66,17 +74,10 @@ export const SocialMediaCard: React.FC<SocialMediaCardProps> = ({ socialMedia, a
   );
 };
 
-
-// components/employee-details/SkillsCard.tsx
-import { EmployeeSkill } from "@/types/employee-types";
-import { formatDate, getPlatformIcon, getProficiencyStyle } from "@/utils/utils";
-
-interface SkillsCardProps {
-  skills?: EmployeeSkill[];
-  animationDelay?: number;
-}
-
-export const SkillsCard: React.FC<SkillsCardProps> = ({ skills, animationDelay = 0 }) => {
+export const SkillsCard: React.FC<SkillsCardProps> = ({
+  skills,
+  animationDelay = 0,
+}) => {
   const { theme } = useTheme();
 
   return (
@@ -99,15 +100,23 @@ export const SkillsCard: React.FC<SkillsCardProps> = ({ skills, animationDelay =
               >
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div>
-                    <div className="font-semibold text-sm" style={{ color: theme.text }}>
+                    <div
+                      className="font-semibold text-sm"
+                      style={{ color: theme.text }}
+                    >
                       {skill.skillName}
                     </div>
-                    <div className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+                    <div
+                      className="text-xs mt-0.5"
+                      style={{ color: theme.textSecondary }}
+                    >
                       {skill.skillCategory}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${proficiency.className}`}>
+                    <span
+                      className={`text-xs px-2.5 py-1 rounded-full font-semibold ${proficiency.className}`}
+                    >
                       {proficiency.label}
                     </span>
                     {skill.verified && (
@@ -128,8 +137,10 @@ export const SkillsCard: React.FC<SkillsCardProps> = ({ skills, animationDelay =
                     <span>📜</span>
                     <span>
                       {skill.certification}
-                      {skill.certifiedDate && ` · Issued ${formatDate(skill.certifiedDate)}`}
-                      {skill.expiryDate && ` · Expires ${formatDate(skill.expiryDate)}`}
+                      {skill.certifiedDate &&
+                        ` · Issued ${formatDate(skill.certifiedDate)}`}
+                      {skill.expiryDate &&
+                        ` · Expires ${formatDate(skill.expiryDate)}`}
                     </span>
                   </div>
                 )}

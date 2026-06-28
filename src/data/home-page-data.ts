@@ -16,6 +16,7 @@ import {
   HOTEL_MANAGEMENT_URL,
   VEHICLE_MANAGEMENT_URL,
   ERP_SYSTEM_URL,
+  PAYMENT_MANAGEMENT_URL,
 } from "@/utils/urls";
 
 export const homeCardData: HomeCardType[] = [
@@ -107,6 +108,19 @@ export const homeCardData: HomeCardType[] = [
     hoverColor: "#7C3AED",
     bgColor: "bg-purple-50",
     linkTo: ERP_SYSTEM_URL,
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/1006/1006771.png",
+    privilege: ERP_SYSTEM_PRIVILEGE,
+  },
+  {
+    id: 8,
+    name: "Payment Management",
+    label: "Payments",
+    description:
+      "Integrated management of core business processes and enterprise resources.",
+    color: "#8B5CF6",
+    hoverColor: "#7C3AED",
+    bgColor: "bg-purple-50",
+    linkTo: PAYMENT_MANAGEMENT_URL,
     iconUrl: "https://cdn-icons-png.flaticon.com/512/1006/1006771.png",
     privilege: ERP_SYSTEM_PRIVILEGE,
   },

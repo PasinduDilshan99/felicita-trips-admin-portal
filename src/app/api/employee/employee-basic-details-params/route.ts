@@ -1,33 +1,21 @@
 import { GET_EMPLOYEE_BASIC_DETAILS_PARAMS_DATA } from "@/utils/backEndConstant";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    if (!GET_EMPLOYEE_BASIC_DETAILS_PARAMS_DATA) {
-      throw new Error("Backend URL is not defined");
-    }
-
-    const body = await request.json();
-
-    // Get cookies from the incoming request
-    const cookieHeader = request.headers.get("cookie") || "";
-
     const response = await fetch(GET_EMPLOYEE_BASIC_DETAILS_PARAMS_DATA, {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
-        // Forward cookies
-        Cookie: cookieHeader,
+        cookie: req.headers.get("cookie") || "",
       },
-      body: JSON.stringify(body),
-      // credentials is ignored in server-side fetch, headers already include cookies
+      credentials: "include",
     });
 
     if (!response.ok) {
       const text = await response.text();
-      console.error("Backend returned error:", text);
       return NextResponse.json(
-        { error: "Failed to fetch activities" },
+        { error: text || "Failed to fetch data from backend" },
         { status: response.status },
       );
     }
@@ -35,9 +23,9 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching activities:", error);
+    console.error("Error fetching backend data:", error);
     return NextResponse.json(
-      { error: "Something went wrong while fetching activities" },
+      { error: "Something went wrong" },
       { status: 500 },
     );
   }

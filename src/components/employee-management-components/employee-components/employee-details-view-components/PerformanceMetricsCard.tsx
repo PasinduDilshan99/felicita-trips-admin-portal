@@ -1,16 +1,14 @@
-// components/employee-details/PerformanceMetricsCard.tsx
 "use client";
 
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { EmployeePerformanceMetric } from "@/types/employee-types";
+import {
+  PerformanceMetricsCardProps,
+  PerformanceReviewsCardProps,
+} from "@/types/employee-types";
 import { hexToRgba } from "@/utils/functions";
 import { InfoCard } from "./InfoCard";
-
-interface PerformanceMetricsCardProps {
-  metrics?: EmployeePerformanceMetric[];
-  animationDelay?: number;
-}
+import { formatDate } from "@/utils/utils";
 
 export const PerformanceMetricsCard: React.FC<PerformanceMetricsCardProps> = ({
   metrics,
@@ -19,7 +17,11 @@ export const PerformanceMetricsCard: React.FC<PerformanceMetricsCardProps> = ({
   const { theme } = useTheme();
 
   return (
-    <InfoCard title="Performance Metrics" icon="📊" animationDelay={animationDelay}>
+    <InfoCard
+      title="Performance Metrics"
+      icon="📊"
+      animationDelay={animationDelay}
+    >
       {!metrics?.length ? (
         <EmptyState message="No performance metrics available" />
       ) : (
@@ -40,17 +42,29 @@ export const PerformanceMetricsCard: React.FC<PerformanceMetricsCardProps> = ({
               >
                 <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
                   <div>
-                    <div className="font-semibold text-sm" style={{ color: theme.text }}>
+                    <div
+                      className="font-semibold text-sm"
+                      style={{ color: theme.text }}
+                    >
                       {metric.metricType}
                     </div>
-                    <div className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
+                    <div
+                      className="text-xs mt-0.5"
+                      style={{ color: theme.textSecondary }}
+                    >
                       {formatDate(metric.metricDate)}
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <div className="text-sm font-bold" style={{ color: theme.text }}>
+                    <div
+                      className="text-sm font-bold"
+                      style={{ color: theme.text }}
+                    >
                       {metric.metricValue}
-                      <span className="font-normal text-xs ml-1" style={{ color: theme.textSecondary }}>
+                      <span
+                        className="font-normal text-xs ml-1"
+                        style={{ color: theme.textSecondary }}
+                      >
                         / {metric.targetValue}
                       </span>
                     </div>
@@ -66,7 +80,9 @@ export const PerformanceMetricsCard: React.FC<PerformanceMetricsCardProps> = ({
                 {/* Progress bar */}
                 <div
                   className="h-2 rounded-full overflow-hidden"
-                  style={{ backgroundColor: hexToRgba(theme.textSecondary, 0.12) }}
+                  style={{
+                    backgroundColor: hexToRgba(theme.textSecondary, 0.12),
+                  }}
                 >
                   <div
                     className="h-full rounded-full transition-all duration-700 ease-out"
@@ -100,16 +116,6 @@ export const PerformanceMetricsCard: React.FC<PerformanceMetricsCardProps> = ({
   );
 };
 
-
-// components/employee-details/PerformanceReviewsCard.tsx
-import { EmployeePerformanceReview } from "@/types/employee-types";
-import { formatDate } from "@/utils/utils";
-
-interface PerformanceReviewsCardProps {
-  reviews?: EmployeePerformanceReview[];
-  animationDelay?: number;
-}
-
 const RatingStars: React.FC<{ rating: number }> = ({ rating }) => {
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.5;
@@ -117,24 +123,36 @@ const RatingStars: React.FC<{ rating: number }> = ({ rating }) => {
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: full }).map((_, i) => (
-        <span key={`f-${i}`} className="text-amber-400 text-sm">★</span>
+        <span key={`f-${i}`} className="text-amber-400 text-sm">
+          ★
+        </span>
       ))}
       {half && <span className="text-amber-300 text-sm">★</span>}
       {Array.from({ length: empty }).map((_, i) => (
-        <span key={`e-${i}`} className="text-gray-300 text-sm">☆</span>
+        <span key={`e-${i}`} className="text-gray-300 text-sm">
+          ☆
+        </span>
       ))}
     </div>
   );
 };
 
-const RatingRow: React.FC<{ label: string; value?: number | null }> = ({ label, value }) => {
+const RatingRow: React.FC<{ label: string; value?: number | null }> = ({
+  label,
+  value,
+}) => {
   const { theme } = useTheme();
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-xs" style={{ color: theme.textSecondary }}>{label}</span>
+      <span className="text-xs" style={{ color: theme.textSecondary }}>
+        {label}
+      </span>
       <div className="flex items-center gap-1.5">
         {value ? <RatingStars rating={value} /> : null}
-        <span className="text-xs font-medium w-6 text-right" style={{ color: theme.text }}>
+        <span
+          className="text-xs font-medium w-6 text-right"
+          style={{ color: theme.text }}
+        >
           {value ?? "—"}
         </span>
       </div>
@@ -149,7 +167,11 @@ export const PerformanceReviewsCard: React.FC<PerformanceReviewsCardProps> = ({
   const { theme } = useTheme();
 
   return (
-    <InfoCard title="Performance Reviews" icon="⭐" animationDelay={animationDelay}>
+    <InfoCard
+      title="Performance Reviews"
+      icon="⭐"
+      animationDelay={animationDelay}
+    >
       {!reviews?.length ? (
         <EmptyState message="No performance reviews available" />
       ) : (
@@ -176,17 +198,30 @@ export const PerformanceReviewsCard: React.FC<PerformanceReviewsCardProps> = ({
                   }}
                 >
                   <div>
-                    <div className="text-sm font-semibold" style={{ color: theme.text }}>
-                      {formatDate(review.reviewPeriodStart)} – {formatDate(review.reviewPeriodEnd)}
+                    <div
+                      className="text-sm font-semibold"
+                      style={{ color: theme.text }}
+                    >
+                      {formatDate(review.reviewPeriodStart)} –{" "}
+                      {formatDate(review.reviewPeriodEnd)}
                     </div>
-                    <div className="text-xs mt-0.5" style={{ color: theme.textSecondary }}>
-                      Reviewed: {review.reviewDate ? formatDate(review.reviewDate) : "Pending"}
+                    <div
+                      className="text-xs mt-0.5"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Reviewed:{" "}
+                      {review.reviewDate
+                        ? formatDate(review.reviewDate)
+                        : "Pending"}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <div className="flex items-center gap-1.5">
                       <RatingStars rating={review.overallRating} />
-                      <span className="text-xs font-bold" style={{ color: theme.text }}>
+                      <span
+                        className="text-xs font-bold"
+                        style={{ color: theme.text }}
+                      >
                         {review.overallRating}/5
                       </span>
                     </div>
@@ -204,28 +239,52 @@ export const PerformanceReviewsCard: React.FC<PerformanceReviewsCardProps> = ({
 
                 {/* Rating breakdown */}
                 <div className="px-4 py-3 space-y-2">
-                  <RatingRow label="Attendance" value={review.attendanceRating} />
-                  <RatingRow label="Productivity" value={review.productivityRating} />
+                  <RatingRow
+                    label="Attendance"
+                    value={review.attendanceRating}
+                  />
+                  <RatingRow
+                    label="Productivity"
+                    value={review.productivityRating}
+                  />
                   <RatingRow label="Quality" value={review.qualityRating} />
                   <RatingRow label="Teamwork" value={review.teamworkRating} />
                 </div>
 
                 {/* Feedback section */}
-                {(review.strengths || review.areasForImprovement || review.comments) && (
+                {(review.strengths ||
+                  review.areasForImprovement ||
+                  review.comments) && (
                   <div
                     className="px-4 py-3 space-y-2"
-                    style={{ borderTop: `1px solid ${hexToRgba(theme.border, 0.5)}` }}
+                    style={{
+                      borderTop: `1px solid ${hexToRgba(theme.border, 0.5)}`,
+                    }}
                   >
                     {review.strengths && (
                       <div className="text-xs">
-                        <span className="font-semibold" style={{ color: theme.success }}>Strengths: </span>
-                        <span style={{ color: theme.textSecondary }}>{review.strengths}</span>
+                        <span
+                          className="font-semibold"
+                          style={{ color: theme.success }}
+                        >
+                          Strengths:{" "}
+                        </span>
+                        <span style={{ color: theme.textSecondary }}>
+                          {review.strengths}
+                        </span>
                       </div>
                     )}
                     {review.areasForImprovement && (
                       <div className="text-xs">
-                        <span className="font-semibold" style={{ color: theme.warning }}>Areas to improve: </span>
-                        <span style={{ color: theme.textSecondary }}>{review.areasForImprovement}</span>
+                        <span
+                          className="font-semibold"
+                          style={{ color: theme.warning }}
+                        >
+                          Areas to improve:{" "}
+                        </span>
+                        <span style={{ color: theme.textSecondary }}>
+                          {review.areasForImprovement}
+                        </span>
                       </div>
                     )}
                     {review.comments && (

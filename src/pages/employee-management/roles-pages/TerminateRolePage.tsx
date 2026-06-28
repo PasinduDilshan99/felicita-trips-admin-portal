@@ -1,9 +1,7 @@
-// app/roles/terminate/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import { TerminateConfirmModal } from "@/components/common-components/TerminateConfirmModal";
 import { RoleService } from "@/services/roleService";
@@ -16,41 +14,22 @@ import {
   AlertTriangle,
   Shield,
   Key,
-  Users,
   CheckCircle,
   XCircle,
-  Calendar,
-  Hash,
   AlertCircle,
   Trash2,
-  Layers,
 } from "lucide-react";
-import { RoleDetails, RoleNameAndId } from "@/types/role-types";
-
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// Type for search items
-interface RoleSearchItem {
-  id: number;
-  name: string;
-}
+import { RoleDetails, RoleNameAndId, RoleSearchItem } from "@/types/role-types";
+import { hexToRgba } from "@/utils/functions";
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ROLE_TERMINATE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
 
 const TerminateRolePage = () => {
   const { theme } = useTheme();
   const searchParams = useSearchParams();
   const router = useRouter();
-
   const initialRoleName = searchParams?.get("role-name") || "";
   const initialRoleId = searchParams?.get("role-id") || "";
-
   const [roles, setRoles] = useState<RoleNameAndId[]>([]);
   const [selectedRole, setSelectedRole] = useState<RoleNameAndId | null>(
     initialRoleId && initialRoleName
@@ -68,19 +47,12 @@ const TerminateRolePage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Toast notification state
   const [toast, setToast] = useState<{
     type: "success" | "error";
     title: string;
     message: string;
     actionLink?: string;
   } | null>(null);
-
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Roles", href: "/roles" },
-    { label: "Terminate", href: "/roles/terminate" },
-  ];
 
   const fetchRoles = async () => {
     setLoading(true);
@@ -131,7 +103,6 @@ const TerminateRolePage = () => {
     setSelectedRole({ id, name });
     await fetchRoleDetails(id);
 
-    // Update URL
     const url = new URL(window.location.href);
     url.searchParams.set("role-id", id.toString());
     url.searchParams.set("role-name", name);
@@ -290,7 +261,7 @@ const TerminateRolePage = () => {
           <PageHeader
             title="Terminate Role"
             description="Permanently remove a role from the system"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ROLE_TERMINATE_BREADCRUMB_DATA}
           />
         </div>
       </div>

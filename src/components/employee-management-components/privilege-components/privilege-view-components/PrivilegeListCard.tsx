@@ -1,86 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, type Variants } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
-import { Privilege } from "@/types/privilege-types";
+import { PrivilegeListCardProps } from "@/types/privilege-types";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
 import {
   PRIVILEGES_TERMINATE_PAGE_URL,
   PRIVILEGES_UPDATE_PAGE_URL,
   PRIVILEGES_VIEW_PAGE_URL,
 } from "@/utils/urls";
-
-/* ─── Animation Variants ─────────────────────────────────────────────────── */
-
-const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-  hover: {
-    x: 4,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-};
-
-const iconVariants: Variants = {
-  hidden: { scale: 0, rotate: -180 },
-  visible: {
-    scale: 1,
-    rotate: 0,
-    transition: {
-      type: "spring",
-      stiffness: 400,
-      damping: 15,
-      duration: 0.4,
-    },
-  },
-  hover: {
-    scale: 1.1,
-    rotate: 5,
-    transition: { duration: 0.2 },
-  },
-};
-
-const titleVariants: Variants = {
-  rest: { color: "#inherit" },
-  hover: { color: "#3b82f6", transition: { duration: 0.2 } },
-};
-
-const buttonVariants: Variants = {
-  rest: { scale: 1 },
-  hover: { scale: 1.02, transition: { duration: 0.15 } },
-  tap: { scale: 0.98, transition: { duration: 0.1 } },
-};
-
-const statusBadgeVariants: Variants = {
-  hidden: { opacity: 0, x: 10 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-const descriptionVariants: Variants = {
-  hidden: { opacity: 0, y: 5 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { delay: 0.1, duration: 0.3, ease: EASE_OUT },
-  },
-};
-
-interface PrivilegeListCardProps {
-  privilege: Privilege;
-}
+import {
+  buttonVariants,
+  cardVariants,
+  descriptionVariants,
+  EASE_OUT,
+  iconVariants,
+  statusBadgeVariants,
+  titleVariants,
+} from "@/app/animations/variants";
 
 const PrivilegeListCard: React.FC<PrivilegeListCardProps> = ({ privilege }) => {
   const router = useRouter();

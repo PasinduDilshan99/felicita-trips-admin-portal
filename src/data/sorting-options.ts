@@ -102,3 +102,45 @@ export const PACKAGE_SCHEDULE_VIEW_SORTING_OPTIONS = [
   { value: "durationEnd", label: "Duration End" },
   { value: "tourScheduleName", label: "Tour Schedule Name" },
 ];
+
+export const SEASONS_VIEW_SORTING_OPTIONS = [
+  { value: "name", label: "Season Name" },
+  { value: "standardName", label: "Standard Name" },
+  { value: "localName", label: "Local Name" },
+  { value: "startMonth", label: "Start Month" },
+  { value: "endMonth", label: "End Month" },
+  { value: "displayOrder", label: "Display Order" },
+  { value: "isPeak", label: "Peak Season" },
+];
+
+export const EMPLOYEE_VIEW_SORTING_OPTIONS = [
+  { value: "employeeType", label: "Employee Type" },
+  { value: "department", label: "Department" },
+  { value: "employmentType", label: "Employment Type" },
+  { value: "workLocation", label: "Work Location" },
+  { value: "employeeGrade", label: "Employee Grade" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "reportingManager", label: "Reporting Manager" },
+  { value: "fullName", label: "Full Name" },
+  { value: "employeeCode", label: "Employee Code" },
+  { value: "employeeId", label: "Employee ID" },
+  { value: "status", label: "Status" },
+  { value: "createdAt", label: "Created Date" },
+  { value: "updatedAt", label: "Updated Date" },
+];
+
+export const PRIVILEGE_VIEW_SORTING_OPTIONS = [
+  { value: "name", label: "Privilege Name" },
+  { value: "privilegeId", label: "Privilege ID" },
+  { value: "privilegeStatus", label: "Status" },
+  { value: "createdAt", label: "Created Date" },
+  { value: "updatedAt", label: "Updated Date" },
+];
+
+export const ROLE_VIEW_SORTING_OPTIONS = [
+  { value: "name", label: "Role Name" },
+  { value: "roleId", label: "Role ID" },
+  { value: "roleStatus", label: "Status" },
+  { value: "createdAt", label: "Created Date" },
+  { value: "updatedAt", label: "Updated Date" },
+];

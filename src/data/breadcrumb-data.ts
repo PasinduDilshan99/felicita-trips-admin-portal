@@ -475,3 +475,184 @@ export const PACKAGE_SCHEDULE_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
     { label: "Package Schedule", href: URLS.PACKAGE_SCHEDULE_PAGE_URL },
     { label: "Terminate", href: URLS.PACKAGE_SCHEDULE_TERMINATE_URL },
   ];
+
+export const SEASON_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+];
+
+export const SEASON_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+  { label: "View", href: URLS.SEASONS_VIEW_PAGE_URL },
+];
+
+export const SEASON_VIEW_DETAILS_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+  { label: "View", href: URLS.SEASONS_VIEW_PAGE_URL },
+];
+
+export const SEASON_CREATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+  { label: "Create", href: URLS.SEASON_ADD_PAGE_URL },
+];
+
+export const SEASON_UPDATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+  { label: "Update", href: URLS.SEASON_UPDATE_PAGE_URL },
+];
+
+export const SEASON_TERMINATE_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Content Management", href: URLS.CONTENT_MANAGEMENT_URL },
+  { label: "Seasons", href: URLS.SEASONS_PAGE_URL },
+  { label: "Terminate", href: URLS.SEASON_TERMINATE_PAGE_URL },
+];
+
+export const EMPLOYEE_MANAGEMENT_HOME_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Employee Management", href: URLS.EMPLOYEE_MANAGEMENT_URL },
+];
+
+export const EMPLOYEE_MANAGEMENT_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Employee Management", href: URLS.EMPLOYEE_MANAGEMENT_URL },
+  { label: "Employee", href: URLS.EMPLOYEES_MANAGEMENT_PAGE_URL },
+];
+
+export const EMPLOYEE_MANAGEMENT_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Employee Management", href: URLS.EMPLOYEE_MANAGEMENT_URL },
+  { label: "Employee", href: URLS.EMPLOYEES_MANAGEMENT_PAGE_URL },
+  { label: "View", href: URLS.EMPLOYEES_VIEW_PAGE_URL },
+];
+
+export const EMPLOYEE_MANAGEMENT_DETAILS_VIEW_PAGE_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    { label: "Employee Management", href: URLS.EMPLOYEE_MANAGEMENT_URL },
+    { label: "Employee", href: URLS.EMPLOYEES_MANAGEMENT_PAGE_URL },
+    { label: "View", href: URLS.EMPLOYEES_VIEW_PAGE_URL },
+  ];
+
+export const WEBSITE_CONTENT_MANAGEMENT_HOME_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    {
+      label: "Website Content Management",
+      href: URLS.WEBSITE_CONTENT_MANAGEMENT_URL,
+    },
+  ];
+
+export const WEBSITE_CONTENT_MANAGEMENT_TRENDING_DESTINATION_BREADCRUMB_DATA: breadcrumbType[] =
+  [
+    {
+      label: "Website Content Management",
+      href: URLS.WEBSITE_CONTENT_MANAGEMENT_URL,
+    },
+    {
+      label: "Trending Destinations",
+      href: URLS.HOME_TRENDING_DESTINATIONS_URL,
+    },
+  ];
+
+export const PRIVILEGE_MANAGEMENT_HOME_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Employee Management", href: URLS.EMPLOYEE_MANAGEMENT_URL },
+  {
+    label: "Privilege Management",
+    href: URLS.PRIVILEGES_MANAGEMENT_PAGE_URL,
+  },
+];
+
+export const PRIVILEGE_VIEW_BREADCRUMB_DATA: breadcrumbType[] = [
+  ...PRIVILEGE_MANAGEMENT_HOME_BREADCRUMB_DATA,
+  {
+    label: "View",
+    href: URLS.PRIVILEGES_VIEW_PAGE_URL,
+  },
+];
+
+export const PRIVILEGE_DETAILS_VIEW_BREADCRUMB_DATA: breadcrumbType[] = [
+  ...PRIVILEGE_VIEW_BREADCRUMB_DATA,
+];
+
+export const PRIVILEGE_CREATE_BREADCRUMB_DATA: breadcrumbType[] = [
+  ...PRIVILEGE_MANAGEMENT_HOME_BREADCRUMB_DATA,
+  {
+    label: "Create",
+    href: URLS.PRIVILEGES_ADD_PAGE_URL,
+  },
+];
+
+export const PRIVILEGE_UPDATE_BREADCRUMB_DATA: breadcrumbType[] = [
+  ...PRIVILEGE_MANAGEMENT_HOME_BREADCRUMB_DATA,
+  {
+    label: "Update",
+    href: URLS.PRIVILEGES_UPDATE_PAGE_URL,
+  },
+];
+
+export const PRIVILEGE_TERMINATE_BREADCRUMB_DATA: breadcrumbType[] = [
+  ...PRIVILEGE_MANAGEMENT_HOME_BREADCRUMB_DATA,
+  {
+    label: "Terminate",
+    href: URLS.PRIVILEGES_TERMINATE_PAGE_URL,
+  },
+];
+
+export const ROLE_MANAGEMENT_HOME_BREADCRUMB_DATA: breadcrumbType[] = [
+  { label: "Employee Management", href: URLS.EMPLOYEE_MANAGEMENT_URL },
+  {
+    label: "Role Management",
+    href: URLS.ROLES_MANAGEMENT_PAGE_URL,
+  },
+];
+
+export const ROLE_VIEW_BREADCRUMB_DATA: breadcrumbType[] = [
+  ...ROLE_MANAGEMENT_HOME_BREADCRUMB_DATA,
+  {
+    label: "View",
+    href: URLS.ROLES_VIEW_PAGE_URL,
+  },
+];
+
+export const ROLE_DETAILS_VIEW_BREADCRUMB_DATA: breadcrumbType[] = [
+  ...ROLE_VIEW_BREADCRUMB_DATA,
+];
+
+export const ROLE_CREATE_BREADCRUMB_DATA: breadcrumbType[] = [
+  ...ROLE_MANAGEMENT_HOME_BREADCRUMB_DATA,
+  {
+    label: "Create",
+    href: URLS.ROLES_ADD_PAGE_URL,
+  },
+];
+
+export const ROLE_UPDATE_BREADCRUMB_DATA: breadcrumbType[] = [
+  ...ROLE_MANAGEMENT_HOME_BREADCRUMB_DATA,
+  {
+    label: "Update",
+    href: URLS.ROLES_UPDATE_PAGE_URL,
+  },
+];
+
+export const ROLE_TERMINATE_BREADCRUMB_DATA: breadcrumbType[] = [
+  ...ROLE_MANAGEMENT_HOME_BREADCRUMB_DATA,
+  {
+    label: "Terminate",
+    href: URLS.ROLES_TERMINATE_PAGE_URL,
+  },
+];
+
+// billing
+export const BILLING_VIEW_BREADCRUMB_DATA: breadcrumbType[] = [
+  {
+    label: "Payment Management",
+    href: URLS.PAYMENT_MANAGEMENT_URL,
+  },
+  {
+    label: "Billing",
+    href: URLS.BILLING_PAGE_URL,
+  },
+  {
+    label: "View",
+    href: URLS.BILLING_VIEW_PAGE_URL,
+  },
+];

@@ -50,7 +50,12 @@ export const TOUR_SCHEDULE_CREATE_PAGE_TITLE = "Activity Categories";
 export const TOUR_SCHEDULE_UPDATE_PAGE_TITLE = "Activity Categories";
 export const TOUR_SCHEDULE_TERMINATE_PAGE_TITLE = "Activity Categories";
 
-
+export const SEASON_PAGE_TITLE = "Activities";
+export const SEASON_VIEW_PAGE_TITLE = "View Activities";
+export const SEASON_DETAILS_VIEW_PAGE_TITLE = "View Activity Details";
+export const SEASON_CREATE_PAGE_TITLE = "Add New Activity";
+export const SEASON_UPDATE_PAGE_TITLE = "Update Activity";
+export const SEASON_TERMINATE_PAGE_TITLE = "Terminate Activity";
 
 export const TOUR_PAGE_TITLE = "Tours";
 export const TOUR_VIEW_PAGE_TITLE = "View Tours";
@@ -94,7 +99,7 @@ export const PACKAGE_SCHEDULE_CREATE_PAGE_TITLE = "Activity Categories";
 export const PACKAGE_SCHEDULE_UPDATE_PAGE_TITLE = "Activity Categories";
 export const PACKAGE_SCHEDULE_TERMINATE_PAGE_TITLE = "Activity Categories";
 
-export const WEB_PAGE_MANAGEMENT_PAGE_TITLE = "Web Page Management";
+export const WEBSITE_PAGE_MANAGEMENT_PAGE_TITLE = "Web Page Management";
 export const HOME_PAGE_MANAGEMENT_PAGE_TITLE = "Home Page Management";
 export const HOME_PAGE_TRENDING_DESTINATION_MANAGEMENT_PAGE_TITLE =
   "Trending Destination Management";

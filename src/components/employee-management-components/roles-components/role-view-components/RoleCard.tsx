@@ -1,28 +1,27 @@
-// components/employee-management-components/role-components/role-view-components/RoleCard.tsx
 "use client";
 
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { hexToRgba } from "@/utils/functions";
-import { Role } from "@/types/role-types";
+import { RoleCardProps } from "@/types/role-types";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
-import { ROLES_UPDATE_PAGE_URL, ROLES_VIEW_PAGE_URL } from "@/utils/urls";
-
-interface RoleCardProps {
-  role: Role;
-}
+import { ROLES_DETAILS_VIEW_URL, ROLES_UPDATE_PAGE_URL } from "@/utils/urls";
 
 const RoleCard: React.FC<RoleCardProps> = ({ role }) => {
   const router = useRouter();
   const { theme } = useTheme();
 
   const handleViewDetails = () => {
-    router.push(`${ROLES_VIEW_PAGE_URL}/${role.roleId}?name=${role.roleName}`);
+    router.push(
+      `${ROLES_DETAILS_VIEW_URL}/${role.roleId}?name=${role.roleName}`,
+    );
   };
 
   const handleEdit = () => {
-    router.push(`${ROLES_UPDATE_PAGE_URL}?roleId=${role.roleId}&name${role.roleName}`);
+    router.push(
+      `${ROLES_UPDATE_PAGE_URL}?roleId=${role.roleId}&name${role.roleName}`,
+    );
   };
 
   return (

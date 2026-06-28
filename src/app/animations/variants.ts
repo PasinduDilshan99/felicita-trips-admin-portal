@@ -759,3 +759,43 @@ export const typeVariants: Variants = {
   },
 };
 
+export const iconVariants: Variants = {
+  hidden: { scale: 0, rotate: -180 },
+  visible: {
+    scale: 1,
+    rotate: 0,
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 15,
+      duration: 0.4,
+    },
+  },
+  hover: {
+    scale: 1.1,
+    rotate: 5,
+    transition: { duration: 0.2 },
+  },
+};
+
+export const statusBadgeVariants: Variants = {
+  hidden: { opacity: 0, x: 10 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.3, ease: EASE_OUT },
+  },
+};
+
+export const privilegeCardVariants: Variants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.3, ease: EASE_OUT },
+  },
+  hover: {
+    x: 4,
+    transition: { duration: 0.2, ease: "easeOut" },
+  },
+};

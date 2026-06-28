@@ -10,18 +10,16 @@ import CommonSearch, {
 } from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import CommonLoading from "@/components/common-components/CommonLoading";
-import ImageModal, {
-  ImageModalImage,
-} from "@/components/common-components/ImageModal";
+import ImageModal from "@/components/common-components/ImageModal";
 import { SingleDestinationResponse } from "@/types/destination-types";
 import { PLACE_HOLDER_IMAGE } from "@/utils/constant";
 import {
-  DESTINATION_CATEGORY_VIEW_DETAILS_URL,
   ACTIVITY_DETAILS_VIEW_PAGE_URL,
-  SEASON_DETAILS_VIEW_PAGE_URL,
+  DESTINATION_CATEGORY_VIEW_PAGE_URL,
   SEASONS_VIEW_PAGE_URL,
 } from "@/utils/urls";
 import CommonButton from "@/components/common-components/buttons/CommonButton";
+import { ImageModalImage } from "@/types/common-components-types";
 
 interface DestinationSearchItem extends SearchItem {
   id: number;
@@ -422,7 +420,7 @@ const AddTrendingDestinationForm: React.FC<AddTrendingDestinationFormProps> = ({
 
   const handleCategoryClick = (categoryId: number, categoryName: string) => {
     router.push(
-      `${DESTINATION_CATEGORY_VIEW_DETAILS_URL}/${categoryId}?name=${encodeURIComponent(categoryName)}`,
+      `${DESTINATION_CATEGORY_VIEW_PAGE_URL}/${categoryId}?name=${encodeURIComponent(categoryName)}`,
     );
   };
 

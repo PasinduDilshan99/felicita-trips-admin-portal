@@ -1,9 +1,7 @@
-// app/roles/update/page.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common-components/static-components/Breadcrumb";
 import { ToastNotification } from "@/components/common-components/ToastNotification";
 import {
   UpdateConfirmationModal,
@@ -25,78 +23,38 @@ import CommonSearch from "@/components/common-components/CommonSearch";
 import SelectedItemBar from "@/components/common-components/SelectedItemBar";
 import {
   Shield,
-  FileText,
-  AlertCircle,
   Save,
   RefreshCw,
   CheckCircle2,
   Edit,
   Key,
-  X,
   Search,
   ChevronDown,
-  Check,
   Plus,
   Trash2,
   Power,
   PowerOff,
 } from "lucide-react";
 import { PrivilegeNameAndId } from "@/types/privilege-types";
-
-// Status options for roles
-const ROLE_STATUS_OPTIONS = [
-  {
-    value: "ACTIVE" as const,
-    label: "Active",
-    description: "Role is available for assignment",
-    color: "#10b981",
-  },
-  {
-    value: "INACTIVE" as const,
-    label: "Inactive",
-    description: "Role is temporarily disabled",
-    color: "#6b7280",
-  },
-];
-
-// Privilege status options for within role
-const PRIVILEGE_STATUS_IN_ROLE_OPTIONS = [
-  {
-    value: "ACTIVE" as const,
-    label: "Active",
-    description: "Privilege is granted in this role",
-    color: "#10b981",
-  },
-  {
-    value: "INACTIVE" as const,
-    label: "Inactive",
-    description: "Privilege is revoked in this role",
-    color: "#ef4444",
-  },
-];
-
-// Helper function to convert hex to rgba
-const hexToRgba = (hex: string, opacity: number): string => {
-  if (!hex) return `rgba(0, 0, 0, ${opacity})`;
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+import PageHeader from "@/components/common-components/static-components/PageHeader";
+import { ROLE_UPDATE_BREADCRUMB_DATA } from "@/data/breadcrumb-data";
+import {
+  ROLE_UPDATE_DESCRIPTION_MAX_CHARACTERS,
+  ROLE_UPDATE_NAME_MAX_CHARACTERS,
+} from "@/data/constnat-data";
+import {
+  ROLE_UPDATE_PRIVILEGE_STATUS_OPTIONS,
+  ROLE_UPDATE_STATUS_OPTIONS,
+} from "@/data/status-options-data";
+import { hexToRgba } from "@/utils/functions";
 
 const RoleUpdatePage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
-
   const initialRoleId = searchParams?.get("id") || "";
   const initialRoleName = searchParams?.get("name") || "";
-
-  // State for roles list
   const [roles, setRoles] = useState<RoleNameAndId[]>([]);
-
-  // State for selected role
   const [selectedRole, setSelectedRole] = useState<RoleNameAndId | null>(
     initialRoleId && initialRoleName
       ? {
@@ -106,24 +64,17 @@ const RoleUpdatePage = () => {
       : null,
   );
 
-  // State for role details
   const [originalRole, setOriginalRole] = useState<RoleDetails | null>(null);
   const [editedRole, setEditedRole] = useState<RoleDetails | null>(null);
-
-  // State for available privileges
   const [availablePrivileges, setAvailablePrivileges] = useState<
     PrivilegeNameAndId[]
   >([]);
   const [loadingPrivileges, setLoadingPrivileges] = useState(false);
-
-  // State for privilege changes tracking
   const [addedPrivileges, setAddedPrivileges] = useState<number[]>([]);
   const [removedPrivileges, setRemovedPrivileges] = useState<number[]>([]);
   const [updatedPrivileges, setUpdatedPrivileges] = useState<
     UpdatePrivilegeInRole[]
   >([]);
-
-  // UI state
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -143,17 +94,6 @@ const RoleUpdatePage = () => {
     actionLink?: string;
   } | null>(null);
 
-  const breadcrumbItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Roles", href: "/roles" },
-    { label: "Update", href: "/roles/update" },
-  ];
-
-  // Character limits
-  const NAME_MAX = 100;
-  const DESCRIPTION_MAX = 500;
-
-  // Fetch roles list on initial load
   useEffect(() => {
     if (!selectedRole) {
       fetchRoles();
@@ -261,7 +201,7 @@ const RoleUpdatePage = () => {
   };
 
   // Handle status selection
-  const handleStatusChange = (status: "ACTIVE" | "INACTIVE") => {
+  const handleStatusChange = (status: string) => {
     if (!editedRole) return;
     setEditedRole({
       ...editedRole,
@@ -644,13 +584,16 @@ const RoleUpdatePage = () => {
           <PageHeader
             title="Update Role"
             description="Edit and update existing role information and privileges"
-            breadcrumbItems={breadcrumbItems}
+            breadcrumbItems={ROLE_UPDATE_BREADCRUMB_DATA}
           />
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 relative" style={{ overflow: "visible" }}>
+      <div
+        className="mx-auto px-4 sm:px-6 lg:px-8 py-8 relative"
+        style={{ overflow: "visible" }}
+      >
         {/* Search Section */}
         {!selectedRole && (
           <div
@@ -780,12 +723,14 @@ const RoleUpdatePage = () => {
                       className="text-xs tabular-nums"
                       style={{
                         color:
-                          editedRole.roleName.length > NAME_MAX * 0.9
+                          editedRole.roleName.length >
+                          ROLE_UPDATE_NAME_MAX_CHARACTERS * 0.9
                             ? theme.error
                             : theme.textSecondary,
                       }}
                     >
-                      {editedRole.roleName.length}/{NAME_MAX}
+                      {editedRole.roleName.length}/
+                      {ROLE_UPDATE_NAME_MAX_CHARACTERS}
                     </span>
                   </div>
                   <input
@@ -795,7 +740,7 @@ const RoleUpdatePage = () => {
                     value={editedRole.roleName}
                     onChange={handleFieldChange}
                     placeholder="e.g. Administrator, Content Manager, Viewer"
-                    maxLength={NAME_MAX}
+                    maxLength={ROLE_UPDATE_NAME_MAX_CHARACTERS}
                     className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm"
                     style={{
                       ...fieldBase,
@@ -821,13 +766,13 @@ const RoleUpdatePage = () => {
                       style={{
                         color:
                           (editedRole.roleDescription?.length || 0) >
-                          DESCRIPTION_MAX * 0.9
+                          ROLE_UPDATE_DESCRIPTION_MAX_CHARACTERS * 0.9
                             ? theme.error
                             : theme.textSecondary,
                       }}
                     >
                       {editedRole.roleDescription?.length || 0}/
-                      {DESCRIPTION_MAX}
+                      {ROLE_UPDATE_DESCRIPTION_MAX_CHARACTERS}
                     </span>
                   </div>
                   <textarea
@@ -837,7 +782,7 @@ const RoleUpdatePage = () => {
                     onChange={handleFieldChange}
                     rows={4}
                     placeholder="Describe what this role can do and its responsibilities..."
-                    maxLength={DESCRIPTION_MAX}
+                    maxLength={ROLE_UPDATE_DESCRIPTION_MAX_CHARACTERS}
                     className="w-full px-4 py-2.5 rounded-xl border-2 focus:outline-none text-sm resize-none"
                     style={{
                       ...fieldBase,
@@ -858,7 +803,7 @@ const RoleUpdatePage = () => {
                   </label>
 
                   <div className="flex gap-3">
-                    {ROLE_STATUS_OPTIONS.map((opt) => {
+                    {ROLE_UPDATE_STATUS_OPTIONS.map((opt) => {
                       const isSelected = editedRole.roleStatus === opt.value;
                       return (
                         <button
@@ -1034,11 +979,13 @@ const RoleUpdatePage = () => {
                                 color: theme.text,
                               }}
                             >
-                              {PRIVILEGE_STATUS_IN_ROLE_OPTIONS.map((opt) => (
-                                <option key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </option>
-                              ))}
+                              {ROLE_UPDATE_PRIVILEGE_STATUS_OPTIONS.map(
+                                (opt) => (
+                                  <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </option>
+                                ),
+                              )}
                             </select>
 
                             {/* Remove Button */}
@@ -1140,7 +1087,7 @@ const RoleUpdatePage = () => {
                         style={{ zIndex: 9999 }}
                         onClick={() => setIsPrivilegesDropdownOpen(false)}
                       />
-                      
+
                       {/* Dropdown Content */}
                       <div
                         className="absolute left-0 right-0 mt-2 rounded-xl border shadow-2xl overflow-hidden"
@@ -1151,13 +1098,17 @@ const RoleUpdatePage = () => {
                           display: "flex",
                           flexDirection: "column",
                           zIndex: 10000,
-                          boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
+                          boxShadow:
+                            "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
                         }}
                       >
                         {/* Header */}
                         <div
                           className="px-4 py-3 border-b flex-shrink-0"
-                          style={{ borderColor: theme.border, backgroundColor: theme.surface }}
+                          style={{
+                            borderColor: theme.border,
+                            backgroundColor: theme.surface,
+                          }}
                         >
                           <p
                             className="text-sm font-medium"
@@ -1169,12 +1120,16 @@ const RoleUpdatePage = () => {
                             className="text-xs mt-0.5"
                             style={{ color: theme.textSecondary }}
                           >
-                            {filteredAvailablePrivileges.length} privileges available to add
+                            {filteredAvailablePrivileges.length} privileges
+                            available to add
                           </p>
                         </div>
-                        
+
                         {/* Scrollable List */}
-                        <div className="overflow-y-auto flex-1" style={{ maxHeight: "250px" }}>
+                        <div
+                          className="overflow-y-auto flex-1"
+                          style={{ maxHeight: "250px" }}
+                        >
                           {loadingPrivileges ? (
                             <div className="p-8 text-center">
                               <div
@@ -1184,7 +1139,10 @@ const RoleUpdatePage = () => {
                                   borderTopColor: "transparent",
                                 }}
                               />
-                              <p className="text-sm mt-2" style={{ color: theme.textSecondary }}>
+                              <p
+                                className="text-sm mt-2"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 Loading privileges...
                               </p>
                             </div>
@@ -1194,74 +1152,85 @@ const RoleUpdatePage = () => {
                                 className="w-8 h-8 mx-auto mb-2 opacity-30"
                                 style={{ color: theme.textSecondary }}
                               />
-                              <p className="text-sm" style={{ color: theme.textSecondary }}>
+                              <p
+                                className="text-sm"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 {privilegeSearchQuery
                                   ? "No matching privileges found"
                                   : "All privileges are already assigned to this role"}
                               </p>
                             </div>
                           ) : (
-                            filteredAvailablePrivileges.map((privilege, index) => (
-                              <button
-                                key={privilege.id}
-                                type="button"
-                                onClick={() => {
-                                  handleAddPrivilege(privilege.id);
-                                  setIsPrivilegesDropdownOpen(false);
-                                  setPrivilegeSearchQuery("");
-                                }}
-                                className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-150 hover:bg-opacity-50 cursor-pointer group"
-                                style={{
-                                  borderBottom: index !== filteredAvailablePrivileges.length - 1 
-                                    ? `1px solid ${theme.border}` 
-                                    : "none",
-                                  backgroundColor: "transparent",
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = `${theme.primary}08`;
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = "transparent";
-                                }}
-                              >
-                                <div
-                                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200 group-hover:scale-110"
+                            filteredAvailablePrivileges.map(
+                              (privilege, index) => (
+                                <button
+                                  key={privilege.id}
+                                  type="button"
+                                  onClick={() => {
+                                    handleAddPrivilege(privilege.id);
+                                    setIsPrivilegesDropdownOpen(false);
+                                    setPrivilegeSearchQuery("");
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-150 hover:bg-opacity-50 cursor-pointer group"
                                   style={{
-                                    backgroundColor: `${theme.primary}15`,
+                                    borderBottom:
+                                      index !==
+                                      filteredAvailablePrivileges.length - 1
+                                        ? `1px solid ${theme.border}`
+                                        : "none",
+                                    backgroundColor: "transparent",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = `${theme.primary}08`;
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor =
+                                      "transparent";
                                   }}
                                 >
-                                  <Plus
-                                    className="w-4 h-4"
+                                  <div
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200 group-hover:scale-110"
+                                    style={{
+                                      backgroundColor: `${theme.primary}15`,
+                                    }}
+                                  >
+                                    <Plus
+                                      className="w-4 h-4"
+                                      style={{ color: theme.primary }}
+                                    />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p
+                                      className="text-sm font-medium truncate"
+                                      style={{ color: theme.text }}
+                                    >
+                                      {privilege.name}
+                                    </p>
+                                    <p
+                                      className="text-xs truncate"
+                                      style={{ color: theme.textSecondary }}
+                                    >
+                                      Click to add this privilege
+                                    </p>
+                                  </div>
+                                  <ChevronDown
+                                    className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0"
                                     style={{ color: theme.primary }}
                                   />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p
-                                    className="text-sm font-medium truncate"
-                                    style={{ color: theme.text }}
-                                  >
-                                    {privilege.name}
-                                  </p>
-                                  <p
-                                    className="text-xs truncate"
-                                    style={{ color: theme.textSecondary }}
-                                  >
-                                    Click to add this privilege
-                                  </p>
-                                </div>
-                                <ChevronDown
-                                  className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0"
-                                  style={{ color: theme.primary }}
-                                />
-                              </button>
-                            ))
+                                </button>
+                              ),
+                            )
                           )}
                         </div>
-                        
+
                         {/* Footer */}
                         <div
                           className="px-4 py-3 border-t flex-shrink-0"
-                          style={{ borderColor: theme.border, backgroundColor: theme.surface }}
+                          style={{
+                            borderColor: theme.border,
+                            backgroundColor: theme.surface,
+                          }}
                         >
                           <button
                             type="button"

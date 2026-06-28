@@ -23,6 +23,7 @@ export interface EmployeeBasic {
   email: string;
   mobileNumber: string;
   nic: string;
+  imageUrl: string;
   employeeTypeId: number;
   employeeType: string;
   departmentId: number;
@@ -43,7 +44,6 @@ export interface EmployeeBasic {
   updatedAt: string;
 }
 
-
 // Filter Options Types
 export interface FilterOption {
   id: number;
@@ -61,7 +61,8 @@ export interface EmployeeFilterOptions {
   statuses: FilterOption[];
 }
 
-export type EmployeeFilterOptionsApiResponse = ApiResponse<EmployeeFilterOptions>;
+export type EmployeeFilterOptionsApiResponse =
+  ApiResponse<EmployeeFilterOptions>;
 
 export type EmployeeBasicListApiResponse = ApiResponse<EmployeeBasic[]>;
 
@@ -470,4 +471,77 @@ export interface EmployeeAssignResponse {
   message: string;
   data: TourAssignmentEmployee[];
   timestamp: string;
+}
+export interface EmployeeCardProps {
+  employee: EmployeeBasic;
+}
+
+export interface EmployeeListCardProps {
+  employee: EmployeeBasic;
+}
+
+export interface EmployeeHeroHeaderProps {
+  employee: EmployeeFullDetails;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+export interface AssetsCardProps {
+  assets?: EmployeeAsset[];
+  animationDelay?: number;
+}
+
+export interface EmployeeBasicInfoProps {
+  employee: EmployeeFullDetails;
+  animationDelay?: number;
+}
+
+export interface InfoCardProps {
+  title: string;
+  icon: string;
+  children: React.ReactNode;
+  className?: string;
+  animationDelay?: number;
+}
+
+export interface InfoRowProps {
+  label: string;
+  value?: React.ReactNode;
+  fullWidth?: boolean;
+}
+
+export interface TimestampsCardProps {
+  createdAt?: string;
+  updatedAt?: string;
+  animationDelay?: number;
+}
+
+export interface PerformanceMetricsCardProps {
+  metrics?: EmployeePerformanceMetric[];
+  animationDelay?: number;
+}
+
+export interface PerformanceReviewsCardProps {
+  reviews?: EmployeePerformanceReview[];
+  animationDelay?: number;
+}
+
+export interface ShiftsCardProps {
+  shifts?: EmployeeShift[];
+  animationDelay?: number;
+}
+
+export interface EmergencyContactsCardProps {
+  contacts?: EmployeeEmergencyContact[];
+  animationDelay?: number;
+}
+
+export interface SocialMediaCardProps {
+  socialMedia?: EmployeeSocialMedia[];
+  animationDelay?: number;
+}
+
+export interface SkillsCardProps {
+  skills?: EmployeeSkill[];
+  animationDelay?: number;
 }

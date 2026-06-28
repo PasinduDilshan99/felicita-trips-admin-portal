@@ -1,24 +1,24 @@
-// components/employee-details/BasicInfoCard.tsx
 "use client";
 
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { EmployeeFullDetails } from "@/types/employee-types";
-import { hexToRgba } from "@/utils/functions";
+import { EmployeeBasicInfoProps } from "@/types/employee-types";
 import { InfoCard, InfoRow } from "./InfoCard";
 import { formatDate, getStatusStyle } from "@/utils/utils";
 
-interface Props {
-  employee: EmployeeFullDetails;
-  animationDelay?: number;
-}
-
-export const BasicInfoCard: React.FC<Props> = ({ employee, animationDelay = 0 }) => {
+export const BasicInfoCard: React.FC<EmployeeBasicInfoProps> = ({
+  employee,
+  animationDelay = 0,
+}) => {
   const { theme } = useTheme();
   const statusStyle = getStatusStyle(employee.status);
 
   return (
-    <InfoCard title="Basic Information" icon="👤" animationDelay={animationDelay}>
+    <InfoCard
+      title="Basic Information"
+      icon="👤"
+      animationDelay={animationDelay}
+    >
       <div className="grid grid-cols-2 gap-x-4 gap-y-5">
         <InfoRow label="Employee Code" value={employee.employeeCode} />
         <InfoRow label="Username" value={employee.username} />
@@ -41,9 +41,13 @@ export const BasicInfoCard: React.FC<Props> = ({ employee, animationDelay = 0 })
         <InfoRow
           label="Salary"
           value={
-            employee.salary
-              ? <span className="font-semibold" style={{ color: theme.primary }}>${employee.salary.toLocaleString()}</span>
-              : "—"
+            employee.salary ? (
+              <span className="font-semibold" style={{ color: theme.primary }}>
+                ${employee.salary.toLocaleString()}
+              </span>
+            ) : (
+              "—"
+            )
           }
         />
         <InfoRow
@@ -62,10 +66,15 @@ export const BasicInfoCard: React.FC<Props> = ({ employee, animationDelay = 0 })
   );
 };
 
-
-// components/employee-details/EmploymentInfoCard.tsx
-export const EmploymentInfoCard: React.FC<Props> = ({ employee, animationDelay = 0 }) => (
-  <InfoCard title="Employment Information" icon="💼" animationDelay={animationDelay}>
+export const EmploymentInfoCard: React.FC<EmployeeBasicInfoProps> = ({
+  employee,
+  animationDelay = 0,
+}) => (
+  <InfoCard
+    title="Employment Information"
+    icon="💼"
+    animationDelay={animationDelay}
+  >
     <div className="grid grid-cols-2 gap-x-4 gap-y-5">
       <InfoRow label="Employee Type" value={employee.employeeType} />
       <InfoRow label="Department" value={employee.departmentName} />
@@ -77,13 +86,17 @@ export const EmploymentInfoCard: React.FC<Props> = ({ employee, animationDelay =
   </InfoCard>
 );
 
-
-// components/employee-details/ManagementCard.tsx
-export const ManagementCard: React.FC<Props> = ({ employee, animationDelay = 0 }) => (
+export const ManagementCard: React.FC<EmployeeBasicInfoProps> = ({
+  employee,
+  animationDelay = 0,
+}) => (
   <InfoCard title="Management" icon="👔" animationDelay={animationDelay}>
     <div className="grid grid-cols-2 gap-x-4 gap-y-5">
       <InfoRow label="Supervisor" value={employee.supervisorName} />
-      <InfoRow label="Reporting Manager" value={employee.reportingManagerName} />
+      <InfoRow
+        label="Reporting Manager"
+        value={employee.reportingManagerName}
+      />
     </div>
   </InfoCard>
 );

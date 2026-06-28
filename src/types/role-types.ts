@@ -7,7 +7,7 @@ export interface Role {
   roleId: number;
   roleName: string;
   roleDescription: string | null;
-  roleStatus: "ACTIVE" | "INACTIVE";
+  roleStatus: string;
 }
 
 export interface RoleNameAndId {
@@ -56,7 +56,7 @@ export type RoleBasicDetailsApiResponse = ApiResponse<RoleBasicDetails>;
 // Create Role
 export interface CreateRoleRequest {
   name: string;
-  status: "ACTIVE" | "INACTIVE";
+  status: string;
   description: string;
   privilegesIds: number[];
 }
@@ -71,13 +71,13 @@ export type CreateRoleApiResponse = ApiResponse<CreateRoleResponse>;
 export interface UpdatePrivilegeInRole {
   roleId: number;
   privilegeId: number;
-  status: "ACTIVE" | "INACTIVE";
+  status: string;
 }
 
 export interface UpdateRoleRequest {
   id: number;
   name: string;
-  status: "ACTIVE" | "INACTIVE";
+  status:string;
   description: string;
   addPrivilegesIds: number[];
   removePrivilegesIds: number[];
@@ -133,3 +133,16 @@ export interface RoleStatisticsData {
 }
 
 export type RoleStatisticsApiResponse = ApiResponse<RoleStatisticsData>;
+
+export interface RoleCardProps {
+  role: Role;
+}
+
+export interface RoleListCardProps {
+  role: Role;
+}
+
+export interface RoleSearchItem {
+  id: number;
+  name: string;
+}

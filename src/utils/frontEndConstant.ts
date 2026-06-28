@@ -91,6 +91,7 @@ export const GET_CANCELLED_BOOKINGS_DETAILS_DATA_FE = `${API}${BOOKING}/cancelle
 export const GET_PENDING_BOOKINGS_DETAILS_DATA_FE = `${API}${BOOKING}/pending`;
 export const INSERT_BOOKINGS_INQUIRY_DETAILS_DATA_FE = `${API}${BOOKING}/insert-booking-inquiry`;
 export const CANCELLED_PENDING_BOOKINGS_DETAILS_DATA_FE = `${API}${BOOKING}/pending/cancelled`;
+export const GET_BOOKINGS_ID_AND_REFERENCES_DATA_FE = `${API}${BOOKING}/booking-id-and-references`;
 
 // User Benefits
 export const GET_ALL_ACTIVE_USER_BENEFITS_FE = `${API}${USER_BENEFITS}`;
@@ -356,7 +357,12 @@ export const GET_VEHICLE_DETAILS_BY_ID_DATA_FE = `${API}${VEHICLES}/vehicle-deta
 
 // Seasons
 export const GET_ACTIVE_SEASONS_BASIC_DETAILS_DATA_FE = `${API}${SEASONS}/basic-details`;
-export const GET_SEASONS_DETAILS_BY_SEASON_ID_DATA_FE = `${API}${SEASONS}`;
+export const GET_SEASONS_DETAILS_BY_SEASON_ID_DATA_FE = `${API}${SEASONS}/details-by-id`;
+export const GET_SEASONS_STATISTICS_DATA_FE = `${API}${SEASONS}/season-statistics`;
+export const GET_SEASONS_IDS_AND_NAMES_DATA_FE = `${API}${SEASONS}/seasonId-and-seasonName`;
+export const CREATE_SEASON_DATA_FE = `${API}${SEASONS}/add-season`;
+export const UPDATE_SEASON_DATA_FE = `${API}${SEASONS}/update-season`;
+export const TERMINATE_SEASON_DATA_FE = `${API}${SEASONS}/terminate-season`;
 
 export const GET_TOUR_DETAILS_BY_ID_FE = `${API}${TOUR}/details-by-id`;
 
@@ -407,3 +413,6 @@ export const GET_ROLES_STATISTICS_DATA_FE = `${API}${ROLES}/roles-statistics`;
 // Users
 export const GET_USER_NAMES_AND_IDS_WITHOUT_EMPLOYEES_DATA_FE = `${API}${USERS}/user-names-and-ids-without-employees`;
 export const GET_USER_BASIC_DETAILS_BY_USER_ID_DATA_FE = `${API}${USERS}/user-basic-details-by-user-id`;
+
+// Billings
+export const GET_BILLING_DETAILS_BY_BOOKING_ID_DATA_FE = `${API}${BOOKING}/booking-billing-details`;
