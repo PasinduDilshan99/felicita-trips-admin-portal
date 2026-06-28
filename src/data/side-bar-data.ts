@@ -2312,3 +2312,24 @@ export const webSiteContentManagementSideBarData: SideBarDataType[] = [
     ],
   },
 ];
+
+export const paymentManagementSideBarData: SideBarDataType[] = [
+  {
+    id: 1,
+    name: "Bills",
+    description: "Manage destination locations and related content",
+    color: "#3B82F6",
+    url: URLS.BILLING_PAGE_URL,
+    privilege: PRIVILEGES.DESTINATION_PRIVILEGE,
+    subData: [
+      {
+        id: 101,
+        name: "View Bills",
+        description: "View and browse all destination locations",
+        color: "#60A5FA",
+        url: URLS.BILLING_VIEW_PAGE_URL,
+        privilege: PRIVILEGES.DESTINATION_VIEW_PRIVILEGE,
+      },
+    ],
+  },
+];

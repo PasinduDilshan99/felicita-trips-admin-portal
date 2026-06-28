@@ -640,3 +640,19 @@ export const ROLE_TERMINATE_BREADCRUMB_DATA: breadcrumbType[] = [
     href: URLS.ROLES_TERMINATE_PAGE_URL,
   },
 ];
+
+// billing
+export const BILLING_VIEW_BREADCRUMB_DATA: breadcrumbType[] = [
+  {
+    label: "Payment Management",
+    href: URLS.PAYMENT_MANAGEMENT_URL,
+  },
+  {
+    label: "Billing",
+    href: URLS.BILLING_PAGE_URL,
+  },
+  {
+    label: "View",
+    href: URLS.BILLING_VIEW_PAGE_URL,
+  },
+];

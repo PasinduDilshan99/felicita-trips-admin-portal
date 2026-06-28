@@ -91,6 +91,7 @@ export const GET_CANCELLED_BOOKINGS_DETAILS_DATA_FE = `${API}${BOOKING}/cancelle
 export const GET_PENDING_BOOKINGS_DETAILS_DATA_FE = `${API}${BOOKING}/pending`;
 export const INSERT_BOOKINGS_INQUIRY_DETAILS_DATA_FE = `${API}${BOOKING}/insert-booking-inquiry`;
 export const CANCELLED_PENDING_BOOKINGS_DETAILS_DATA_FE = `${API}${BOOKING}/pending/cancelled`;
+export const GET_BOOKINGS_ID_AND_REFERENCES_DATA_FE = `${API}${BOOKING}/booking-id-and-references`;
 
 // User Benefits
 export const GET_ALL_ACTIVE_USER_BENEFITS_FE = `${API}${USER_BENEFITS}`;
@@ -412,3 +413,6 @@ export const GET_ROLES_STATISTICS_DATA_FE = `${API}${ROLES}/roles-statistics`;
 // Users
 export const GET_USER_NAMES_AND_IDS_WITHOUT_EMPLOYEES_DATA_FE = `${API}${USERS}/user-names-and-ids-without-employees`;
 export const GET_USER_BASIC_DETAILS_BY_USER_ID_DATA_FE = `${API}${USERS}/user-basic-details-by-user-id`;
+
+// Billings
+export const GET_BILLING_DETAILS_BY_BOOKING_ID_DATA_FE = `${API}${BOOKING}/booking-billing-details`;

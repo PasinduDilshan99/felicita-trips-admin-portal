@@ -15,6 +15,7 @@ export const EMPLOYEE_MANAGEMENT_URL = "/employee-management";
 export const HOTEL_MANAGEMENT_URL = "/hotel-management";
 export const VEHICLE_MANAGEMENT_URL = "/vehicle-management";
 export const ERP_SYSTEM_URL = "/erp-system";
+export const PAYMENT_MANAGEMENT_URL = "/payment-management";
 
 // ==================== DESTINATIONS ====================
 export const DESTINATION_PAGE_URL = `${CONTENT_MANAGEMENT_URL}/destinations`;
@@ -409,3 +410,6 @@ export const CONTACT_CALL_TO_ACTION_DETAILS_VIEW_URL = `${CONTACT_CALL_TO_ACTION
 export const CONTACT_CALL_TO_ACTION_ADD_URL = `${CONTACT_CALL_TO_ACTION_URL}/add`;
 export const CONTACT_CALL_TO_ACTION_UPDATE_URL = `${CONTACT_CALL_TO_ACTION_URL}/update`;
 export const CONTACT_CALL_TO_ACTION_TERMINATE_URL = `${CONTACT_CALL_TO_ACTION_URL}/terminate`;
+
+export const BILLING_PAGE_URL = `${PAYMENT_MANAGEMENT_URL}/billing`;
+export const BILLING_VIEW_PAGE_URL = `${BILLING_PAGE_URL}/view`;

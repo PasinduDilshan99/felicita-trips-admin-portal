@@ -116,6 +116,7 @@ export const GET_CANCELLED_BOOKINGS_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}
 export const GET_PENDING_BOOKINGS_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${BOOKING}/pending`;
 export const INSERT_BOOKINGS_INQUIRY_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${BOOKING}/tour-book-inquiry`;
 export const CANCELLED_PENDING_BOOKINGS_DETAILS_DATA = `${BASE_PATH}${API}${VERSION}${BOOKING}/cancelled-pending`;
+export const GET_BOOKINGS_ID_AND_REFERENCES_DATA = `${BASE_PATH}${API}${VERSION}${BOOKING}/booking-id-and-references`;
 
 // User Benefits
 export const GET_ALL_ACTIVE_USER_BENEFITS_BE = `${BASE_PATH}${API}${VERSION}${USER_BENEFITS}/active`;
@@ -444,3 +445,6 @@ export const GET_ROLES_STATISTICS_DATA = `${BASE_PATH}${API}${VERSION}${ROLES}/r
 // Users
 export const GET_USER_NAMES_AND_IDS_WITHOUT_EMPLOYEES_DATA = `${BASE_PATH}${API}${VERSION}${USERS}/user-names-and-ids-without-employees`;
 export const GET_USER_BASIC_DETAILS_BY_USER_ID_DATA = `${BASE_PATH}${API}${VERSION}${USERS}/user-basic-details-by-user-id`;
+
+// Billings
+export const GET_BILLING_DETAILS_BY_BOOKING_ID_DATA = `${BASE_PATH}${API}${VERSION}${BOOKING}/booking-billing-details`;
